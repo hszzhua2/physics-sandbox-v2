@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特斯拉线圈物理模拟 — 物理沙盒宇宙</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
+        #ui-panel {
+            position: absolute; top: 80px; left: 30px; width: 340px; max-height: 88vh;
+            background: rgba(15, 23, 42, 0.92); border: 1px solid #334155;
+            z-index: 10; padding: 16px; overflow-y: auto; border-radius: 8px;
+        }
+        .slider-container { margin-bottom: 12px; }
+        .slider-container label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; color: #94a3b8; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #3b82f6; }
+        .data-readout {
+            background: rgba(0, 0, 0, 0.5); padding: 6px 10px; border-radius: 4px;
+            margin-bottom: 6px; font-size: 0.85rem; display: flex; justify-content: space-between;
+        }
+        .data-value { font-weight: bold; color: #60a5fa; }
+        .alert-text {
+            color: #f87171; font-size: 0.75rem; margin-top: 10px;
+            border-top: 1px solid #334155; padding-top: 8px; line-height: 1.5;
+        }
+        .formula-box {
+            background: rgba(30, 41, 59, 0.7); border-radius: 6px;
+            padding: 10px; margin: 10px 0; font-size: 0.82rem; line-height: 1.5;
+        }
+        .formula-box .eq { font-family: 'Courier New', monospace; text-align: center; margin: 4px 0; font-size: 0.88rem; color: #94a3b8; }
+        #entrance-toast { transition: opacity 0.8s ease; }
+
+        /* Theme overrides */
+        [data-theme="academic"] #ui-panel { background: #ffffff; border-color: #e0e0e0; }
+        [data-theme="academic"] .slider-container label { color: #555; }
+        [data-theme="academic"] .data-readout { background: #f4f5f7; color: #333; }
+        [data-theme="academic"] .alert-text { color: #c0392b; border-color: #e0e0e0; }
+        [data-theme="academic"] .formula-box { background: #f4f5f7; }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div id="ui-panel">
+        <h2 class="text-lg font-bold mb-3 text-slate-200 border-b border-slate-600 pb-2">⚡ 特斯拉线圈参数控制</h2>
+
+        <div class="slider-container">
+            <label><span>初级电感 L₁</span> <span id="val-l1">10 µH</span></label>
+            <input type="range" id="input-l1" min="1" max="50" step="0.1" value="10">
+        </div>
+        <div class="slider-container">
+            <label><span>初级电容 C₁</span> <span id="val-c1">10 nF</span></label>
+            <input type="range" id="input-c1" min="1" max="50" step="0.1" value="10">
+        </div>
+
+        <div class="border-t border-slate-600 my-3"></div>
+
+        <div class="slider-container">
+            <label><span>次级电感 L₂</span> <span id="val-l2">10 mH</span></label>
+            <input type="range" id="input-l2" min="1" max="50" step="0.1" value="10">
+        </div>
+        <div class="slider-container">
+            <label><span>次级电容 C₂</span> <span id="val-c2">10 pF</span></label>
+            <input type="range" id="input-c2" min="1" max="50" step="0.1" value="10">
+        </div>
+
+        <div class="border-t border-slate-600 my-3"></div>
+
+        <div class="slider-container">
+            <label><span>输入电压 Vᵢₙ</span> <span id="val-vin">10 kV</span></label>
+            <input type="range" id="input-vin" min="1" max="50" step="1" value="10">
+        </div>
+
+        <div class="mt-3">
+            <h3 class="text-sm font-bold text-slate-300 mb-2">系统状态输出</h3>
+            <div class="data-readout">
+                <span>初级频率 f₁</span> <span id="out-f1" class="data-value">0</span> kHz
+            </div>
+            <div class="data-readout">
+                <span>次级频率 f₂</span> <span id="out-f2" class="data-value">0</span> kHz
+            </div>
+            <div class="data-readout">
+                <span>谐振匹配度</span> <span id="out-match" class="data-value text-green-400">0%</span>
+            </div>
+            <div class="data-readout">
+                <span>理论输出电压</span> <span id="out-vout" class="data-value text-purple-400">0 kV</span>
+            </div>
+        </div>
+
+        <div class="formula-box">
+            <strong class="text-slate-300">谐振频率公式</strong>
+            <div class="eq">f = 1 / (2π√(LC))</div>
+            <p style="margin:4px 0 0 0; color:#94a3b8; font-size:0.75rem;">
+                当初级与次级谐振频率相等时，能量传输效率最高，电弧最长最亮。
+            </p>
+        </div>
+
+        <div class="formula-box">
+            <strong class="text-slate-300">电压升压公式</strong>
+            <div class="eq">V₂ = V₁ · √(L₂ / L₁) · η</div>
+            <p style="margin:4px 0 0 0; color:#94a3b8; font-size:0.75rem;">
+                η 为谐振匹配系数，频率偏差在 ±5% 内才能获得有效升压。
+            </p>
+        </div>
+
+        <div class="alert-text">
+            <strong>局限性声明：</strong><br>
+            1. 基于理想无损耗集总参数电路模型。<br>
+            2. 电弧形貌采用随机游走算法生成，未计算等离子体流体力学与热对流分布。<br>
+            3. 频率容差区间设定为 ±5%。
+        </div>
+    </div>
+
+    <div id="entrance-toast" class="glass-panel" style="
+        position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+        z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
+        opacity:1; transition:opacity 0.8s ease;">
+        <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:#fff; text-shadow:0 0 10px rgba(255,255,255,0.3);">
+            ⚡ 特斯拉线圈
+        </div>
+        <div style="font-size:0.95rem; color:rgba(255,255,255,0.7); line-height:1.8;">
+            <strong style="color:#60a5fa;">调节 L/C 参数</strong> 匹配谐振频率<br>
+            <strong style="color:#a78bfa;">观察电弧</strong> 随匹配度实时变化<br>
+            鼠标拖拽旋转 · 滚轮缩放
+        </div>
+    </div>
+
+    <script src="shared-theme.js"></script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        /* ================================================================
+           特斯拉线圈物理模拟
+           - LC 谐振电路计算
+           - 三维线圈模型 + 随机游走电弧
+           - 实时参数调节
+           ================================================================ */
+
+        PSUTheme.createSwitcher();
+        PSUTheme.createBackButton('index.html');
+
+        // ---- Physics Model ----
+        class TeslaPhysics {
+            constructor() {
+                this.L1 = 10 * 1e-6;
+                this.C1 = 10 * 1e-9;
+                this.L2 = 10 * 1e-3;
+                this.C2 = 10 * 1e-12;
+                this.Vin = 10;
+                this.tolerance = 0.05;
+            }
+            update(L1_uH, C1_nF, L2_mH, C2_pF, Vin_kV) {
+                this.L1 = L1_uH * 1e-6;
+                this.C1 = C1_nF * 1e-9;
+                this.L2 = L2_mH * 1e-3;
+                this.C2 = C2_pF * 1e-12;
+                this.Vin = Vin_kV;
+            }
+            calculate() {
+                const f1 = 1 / (2 * Math.PI * Math.sqrt(this.L1 * this.C1));
+                const f2 = 1 / (2 * Math.PI * Math.sqrt(this.L2 * this.C2));
+                const maxF = Math.max(f1, f2);
+                const diffRatio = maxF > 0 ? Math.abs(f1 - f2) / maxF : 1;
+                let match = 0;
+                if (diffRatio <= this.tolerance) {
+                    match = 1 - (diffRatio / this.tolerance);
+                }
+                const Vout = this.Vin * Math.sqrt(this.L2 / this.L1) * match;
+                return {
+                    f1_kHz: f1 / 1000,
+                    f2_kHz: f2 / 1000,
+                    match_percent: match * 100,
+                    Vout_kV: Vout
+                };
+            }
+        }
+
+        const physics = new TeslaPhysics();
+        let currentPhysicsState = physics.calculate();
+
+        // ---- DOM refs ----
+        const inputs = {
+            l1: document.getElementById('input-l1'),
+            c1: document.getElementById('input-c1'),
+            l2: document.getElementById('input-l2'),
+            c2: document.getElementById('input-c2'),
+            vin: document.getElementById('input-vin')
+        };
+        const vals = {
+            l1: document.getElementById('val-l1'),
+            c1: document.getElementById('val-c1'),
+            l2: document.getElementById('val-l2'),
+            c2: document.getElementById('val-c2'),
+            vin: document.getElementById('val-vin')
+        };
+        const outs = {
+            f1: document.getElementById('out-f1'),
+            f2: document.getElementById('out-f2'),
+            match: document.getElementById('out-match'),
+            vout: document.getElementById('out-vout')
+        };
+
+        function updatePhysics() {
+            const l1 = parseFloat(inputs.l1.value);
+            const c1 = parseFloat(inputs.c1.value);
+            const l2 = parseFloat(inputs.l2.value);
+            const c2 = parseFloat(inputs.c2.value);
+            const vin = parseFloat(inputs.vin.value);
+
+            vals.l1.textContent = l1.toFixed(1) + ' µH';
+            vals.c1.textContent = c1.toFixed(1) + ' nF';
+            vals.l2.textContent = l2.toFixed(1) + ' mH';
+            vals.c2.textContent = c2.toFixed(1) + ' pF';
+            vals.vin.textContent = vin.toFixed(0) + ' kV';
+
+            physics.update(l1, c1, l2, c2, vin);
+            currentPhysicsState = physics.calculate();
+
+            outs.f1.textContent = currentPhysicsState.f1_kHz.toFixed(2);
+            outs.f2.textContent = currentPhysicsState.f2_kHz.toFixed(2);
+
+            const matchStr = currentPhysicsState.match_percent.toFixed(1) + '%';
+            outs.match.textContent = matchStr;
+            if (currentPhysicsState.match_percent > 80) outs.match.className = 'data-value text-green-400';
+            else if (currentPhysicsState.match_percent > 30) outs.match.className = 'data-value text-yellow-400';
+            else outs.match.className = 'data-value text-red-500';
+
+            outs.vout.textContent = currentPhysicsState.Vout_kV.toFixed(1) + ' kV';
+        }
+
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', updatePhysics);
+        });
+
+        // ---- Three.js ----
+        let scene, camera, renderer, controls;
+        const arcsPool = [];
+        const MAX_ARCS = 20;
+        const ARC_SEGMENTS = 25;
+        const TOROID_HEIGHT = 20;
+        let arcLight;
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.015);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.set(0, 20, 60);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+            const ambientLight = new THREE.AmbientLight(0x222222);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+
+            const gridHelper = new THREE.GridHelper(100, 100, 0x333333, 0x111111);
+            scene.add(gridHelper);
+
+            // Tesla coil model
+            const coilGroup = new THREE.Group();
+            const baseGeo = new THREE.CylinderGeometry(8, 8, 2, 32);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+            const base = new THREE.Mesh(baseGeo, baseMat);
+            base.position.y = 1;
+            coilGroup.add(base);
+
+            const primaryMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.8, roughness: 0.2 });
+            for (let i = 0; i < 4; i++) {
+                const pRingGeo = new THREE.TorusGeometry(6, 0.4, 8, 32);
+                const pRing = new THREE.Mesh(pRingGeo, primaryMat);
+                pRing.rotation.x = Math.PI / 2;
+                pRing.position.y = 3 + i * 1.5;
+                coilGroup.add(pRing);
+            }
+
+            const secondaryGeo = new THREE.CylinderGeometry(2, 2, TOROID_HEIGHT, 32);
+            const secondaryMat = new THREE.MeshStandardMaterial({ color: 0xcc5500, roughness: 0.9 });
+            const secondary = new THREE.Mesh(secondaryGeo, secondaryMat);
+            secondary.position.y = 1 + TOROID_HEIGHT / 2;
+            coilGroup.add(secondary);
+
+            const toroidGeo = new THREE.TorusGeometry(4, 1.5, 16, 64);
+            const toroidMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.1 });
+            const toroid = new THREE.Mesh(toroidGeo, toroidMat);
+            toroid.rotation.x = Math.PI / 2;
+            toroid.position.y = 1 + TOROID_HEIGHT;
+            coilGroup.add(toroid);
+
+            scene.add(coilGroup);
+
+            // Arc pool
+            const arcMat = new THREE.LineBasicMaterial({
+                color: 0xaaddff,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                opacity: 1.0,
+                depthWrite: false
+            });
+
+            for (let i = 0; i < MAX_ARCS; i++) {
+                const points = new Float32Array(ARC_SEGMENTS * 3);
+                const geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.BufferAttribute(points, 3));
+                const line = new THREE.Line(geo, arcMat);
+                line.visible = false;
+                scene.add(line);
+                arcsPool.push(line);
+            }
+
+            // Arc light
+            arcLight = new THREE.PointLight(0x88bbff, 0, 100);
+            arcLight.position.y = 1 + TOROID_HEIGHT;
+            scene.add(arcLight);
+
+            window.addEventListener('resize', onWindowResize, false);
+            updatePhysics();
+            animate();
+
+            setTimeout(() => {
+                const toast = document.getElementById('entrance-toast');
+                if (toast) toast.style.opacity = '0';
+            }, 4000);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function updateArcs() {
+            const match = currentPhysicsState.match_percent / 100;
+            const vout = currentPhysicsState.Vout_kV;
+            const activeArcCount = Math.min(MAX_ARCS, Math.floor((vout / 500) * MAX_ARCS * match * 0.5));
+            const arcLengthScaler = (vout / 300) * match * 2.0;
+
+            arcLight.intensity = match * (vout / 500) * 8 + Math.random() * 3;
+
+            for (let i = 0; i < MAX_ARCS; i++) {
+                const line = arcsPool[i];
+                if (i >= activeArcCount || match === 0) {
+                    line.visible = false;
+                    continue;
+                }
+
+                line.visible = true;
+                const positions = line.geometry.attributes.position.array;
+
+                const startAngle = Math.random() * Math.PI * 2;
+                let currentX = Math.cos(startAngle) * 5;
+                let currentY = 1 + TOROID_HEIGHT + (Math.random() - 0.5) * 1.5;
+                let currentZ = Math.sin(startAngle) * 5;
+
+                const dirX = Math.cos(startAngle);
+                const dirZ = Math.sin(startAngle);
+                const dirY = (Math.random() - 0.2);
+
+                positions[0] = currentX;
+                positions[1] = currentY;
+                positions[2] = currentZ;
+
+                const jitterScale = 3.5 + match * 3.0;
+
+                for (let j = 1; j < ARC_SEGMENTS; j++) {
+                    const stepSize = (1.5 - (j / ARC_SEGMENTS)) * arcLengthScaler;
+                    const jitterX = (Math.random() - 0.5) * jitterScale;
+                    const jitterY = (Math.random() - 0.5) * jitterScale;
+                    const jitterZ = (Math.random() - 0.5) * jitterScale;
+
+                    currentX += (dirX + jitterX) * stepSize;
+                    currentY += (dirY + jitterY) * stepSize;
+                    currentZ += (dirZ + jitterZ) * stepSize;
+
+                    positions[j * 3] = currentX;
+                    positions[j * 3 + 1] = currentY;
+                    positions[j * 3 + 2] = currentZ;
+                }
+
+                line.geometry.attributes.position.needsUpdate = true;
+                if (Math.random() > 0.7) line.visible = false;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            updateArcs();
+            renderer.render(scene, camera);
+        }
+
+        init3D();
+    </script>
+</body>
+</html>
