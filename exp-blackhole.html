@@ -210,6 +210,9 @@
     let particleSystem;
     let lensingPass;
     let container;
+    let gpuReady = false;
+    let fallbackMode = false;
+    let fallbackParticles = null;
 
     // ---- Shaders ----
     const computeVelocityShader = /* glsl */ `
@@ -362,13 +365,18 @@
     };
 
     // ---- Init ----
-    init();
-    animate();
+    try {
+      init();
+      animate();
+    } catch (e) {
+      console.error('Init error:', e);
+      infoText.textContent = '初始化失败: ' + e.message;
+      infoText.style.color = '#ef4444';
+    }
 
     function init() {
       container = document.getElementById('container');
       scene = new THREE.Scene();
-      // Dark space background
       scene.background = new THREE.Color(0x020204);
 
       camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
@@ -389,24 +397,41 @@
       controls.autoRotateSpeed = 0.5;
 
       // Check WebGL2 support
-      const gl = renderer.getContext();
-      if (!gl || gl.VERSION.indexOf('WebGL 2.0') === -1) {
-        infoText.textContent = '错误: 需要 WebGL 2.0 支持以运行 GPGPU 计算';
-        infoText.style.color = '#ef4444';
+      const isWebGL2 = renderer.capabilities.isWebGL2;
+      if (!isWebGL2) {
+        infoText.textContent = '提示: WebGL 2.0 不可用，已切换至降级渲染模式';
+        fallbackMode = true;
+        initFallbackParticles();
+        initPostProcessing();
+        initUI();
+        window.addEventListener('resize', onWindowResize);
+        setTimeout(() => {
+          const toast = document.getElementById('entrance-toast');
+          if (toast) toast.style.opacity = '0';
+        }, 4000);
         return;
       }
 
-      initGPGPU();
-      initParticles();
+      // Try GPGPU, fall back on failure
+      try {
+        initGPGPU();
+        initParticles();
+        gpuReady = true;
+      } catch (e) {
+        console.warn('GPGPU failed, using fallback:', e);
+        gpuReady = false;
+        fallbackMode = true;
+        infoText.textContent = 'GPGPU 计算失败，已切换至降级渲染模式';
+        initFallbackParticles();
+      }
+
       initPostProcessing();
       initUI();
-
       window.addEventListener('resize', onWindowResize);
 
-      const count = RES_OPTIONS[params.RES_INDEX] ** 2;
+      const count = gpuReady ? RES_OPTIONS[params.RES_INDEX] ** 2 : 2000;
       infoText.innerHTML = `粒子数: ${count.toLocaleString()} | 鼠标拖拽旋转 · 滚轮缩放`;
 
-      // Fade out entrance toast
       setTimeout(() => {
         const toast = document.getElementById('entrance-toast');
         if (toast) toast.style.opacity = '0';
@@ -438,9 +463,7 @@
 
       const error = gpuCompute.init();
       if (error !== null) {
-        console.error('GPGPU init error:', error);
-        infoText.textContent = 'GPGPU 初始化失败: ' + error;
-        infoText.style.color = '#ef4444';
+        throw new Error('GPGPU init failed: ' + error);
       }
     }
 
@@ -491,6 +514,77 @@
       particleSystem = new THREE.Points(geometry, material);
       particleSystem.frustumCulled = false;
       scene.add(particleSystem);
+    }
+
+    // ---- Fallback particles (CPU-based, no GPGPU) ----
+    function initFallbackParticles() {
+      const count = 2000;
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      fallbackData = [];
+
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = params.DISK_MIN + Math.pow(Math.random(), 1.5) * (params.DISK_MAX - params.DISK_MIN);
+        const y = (Math.random() - 0.5) * 0.3;
+        positions[i * 3] = Math.cos(angle) * radius;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = Math.sin(angle) * radius;
+
+        const speed = 0.3 + Math.random() * 0.5;
+        const heat = Math.max(0, 1 - (radius - params.DISK_MIN) / (params.DISK_MAX - params.DISK_MIN));
+        colors[i * 3] = 0.5 + heat * 0.4;
+        colors[i * 3 + 1] = 0.3 + heat * 0.5;
+        colors[i * 3 + 2] = 0.8 + heat * 0.2;
+
+        fallbackData.push({ angle, radius, y, speed, inward: Math.random() < 0.5 });
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.25,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      fallbackParticles = new THREE.Points(geometry, material);
+      fallbackParticles.frustumCulled = false;
+      scene.add(fallbackParticles);
+    }
+
+    function updateFallbackParticles() {
+      if (!fallbackParticles) return;
+      const positions = fallbackParticles.geometry.attributes.position.array;
+      const colors = fallbackParticles.geometry.attributes.color.array;
+      const { DISK_MIN, DISK_MAX, SPEED } = params;
+
+      for (let i = 0; i < fallbackData.length; i++) {
+        const pd = fallbackData[i];
+        pd.angle += pd.speed * 0.008 * SPEED;
+        if (pd.inward) {
+          pd.radius -= 0.008 * SPEED;
+          if (pd.radius < DISK_MIN + 0.2) pd.inward = false;
+        } else {
+          pd.radius += 0.008 * SPEED;
+          if (pd.radius > DISK_MAX - 0.2) pd.inward = true;
+        }
+        positions[i * 3] = Math.cos(pd.angle) * pd.radius;
+        positions[i * 3 + 1] = pd.y + Math.sin(pd.angle * 3 + performance.now() * 0.001) * 0.05;
+        positions[i * 3 + 2] = Math.sin(pd.angle) * pd.radius;
+
+        const heat = Math.max(0, 1 - (pd.radius - DISK_MIN) / (DISK_MAX - DISK_MIN));
+        colors[i * 3] = 0.5 + heat * 0.4;
+        colors[i * 3 + 1] = 0.3 + heat * 0.5;
+        colors[i * 3 + 2] = 0.8 + heat * 0.2;
+      }
+      fallbackParticles.geometry.attributes.position.needsUpdate = true;
+      fallbackParticles.geometry.attributes.color.needsUpdate = true;
     }
 
     function initPostProcessing() {
@@ -545,6 +639,16 @@
     }
 
     function rebuildSystem() {
+      if (fallbackMode) {
+        if (fallbackParticles) {
+          scene.remove(fallbackParticles);
+          fallbackParticles.geometry.dispose();
+          fallbackParticles.material.dispose();
+          fallbackParticles = null;
+        }
+        initFallbackParticles();
+        return;
+      }
       // Clean up old
       if (gpuCompute) {
         gpuCompute.dispose();
@@ -556,9 +660,17 @@
         particleSystem.material.dispose();
         particleSystem = null;
       }
-      initGPGPU();
-      initParticles();
-      const count = RES_OPTIONS[params.RES_INDEX] ** 2;
+      try {
+        initGPGPU();
+        initParticles();
+        gpuReady = true;
+      } catch (e) {
+        console.warn('Rebuild GPGPU failed:', e);
+        gpuReady = false;
+        fallbackMode = true;
+        initFallbackParticles();
+      }
+      const count = gpuReady ? RES_OPTIONS[params.RES_INDEX] ** 2 : 2000;
       document.getElementById('particle-count').textContent = count.toLocaleString();
     }
 
@@ -578,6 +690,12 @@
       document.getElementById('check-rotate').checked = params.AUTO_ROTATE;
       document.getElementById('check-lensing').checked = params.LENSING;
       if (controls) controls.autoRotate = params.AUTO_ROTATE;
+      if (lensingPass) lensingPass.uniforms.u_enabled.value = params.LENSING ? 1.0 : 0.0;
+      // Reset fallback mode to retry GPGPU
+      if (fallbackMode) {
+        fallbackMode = false;
+        gpuReady = false;
+      }
       rebuildSystem();
     };
 
@@ -588,10 +706,11 @@
 
     // ---- Resize ----
     function onWindowResize() {
+      if (!camera || !renderer) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      composer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
       if (lensingPass) {
         lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
       }
@@ -600,6 +719,7 @@
     // ---- Animation ----
     function animate() {
       requestAnimationFrame(animate);
+      if (!renderer || !camera || !scene) return;
 
       const now = performance.now();
       frameCount++;
@@ -609,40 +729,41 @@
         lastFpsTime = now;
       }
 
-      if (paused) {
-        controls.update();
-        composer.render();
-        return;
-      }
-
       controls.update();
 
-      if (gpuCompute && velVariable && posVariable) {
-        velVariable.material.uniforms.u_Time.value = now * 0.001;
-        gpuCompute.compute();
-        particleSystem.material.uniforms.u_posTexture.value =
-          gpuCompute.getCurrentRenderTarget(posVariable).texture;
-        particleSystem.material.uniforms.u_velTexture.value =
-          gpuCompute.getCurrentRenderTarget(velVariable).texture;
-        particleSystem.material.uniforms.u_cameraPos.value.copy(camera.position);
+      if (!paused) {
+        if (gpuReady && gpuCompute && velVariable && posVariable && particleSystem) {
+          velVariable.material.uniforms.u_Time.value = now * 0.001;
+          gpuCompute.compute();
+          particleSystem.material.uniforms.u_posTexture.value =
+            gpuCompute.getCurrentRenderTarget(posVariable).texture;
+          particleSystem.material.uniforms.u_velTexture.value =
+            gpuCompute.getCurrentRenderTarget(velVariable).texture;
+          particleSystem.material.uniforms.u_cameraPos.value.copy(camera.position);
+        } else if (fallbackMode) {
+          updateFallbackParticles();
+        }
       }
 
       // Screen-space black hole params for lensing
-      const bhPos = new THREE.Vector3(0, 0, 0);
-      bhPos.project(camera);
-      const sx = (bhPos.x + 1) / 2;
-      const sy = (bhPos.y + 1) / 2;
-      const dist = camera.position.length();
-      const fov = camera.fov * (Math.PI / 180);
-      const vh = 2 * Math.tan(fov / 2) * dist;
-      const sR = (1.0 * 2 / vh) * 0.5;
-
-      if (lensingPass) {
+      if (lensingPass && camera && params.LENSING) {
+        const bhPos = new THREE.Vector3(0, 0, 0);
+        bhPos.project(camera);
+        const sx = (bhPos.x + 1) / 2;
+        const sy = (bhPos.y + 1) / 2;
+        const dist = camera.position.length();
+        const fov = camera.fov * (Math.PI / 180);
+        const vh = 2 * Math.tan(fov / 2) * dist;
+        const sR = (1.0 * 2 / vh) * 0.5;
         lensingPass.uniforms['u_bhCenter'].value.set(sx, sy);
         lensingPass.uniforms['u_bhRadius'].value = Math.max(0.01, sR);
       }
 
-      composer.render();
+      if (composer && composer.render) {
+        composer.render();
+      } else if (renderer) {
+        renderer.render(scene, camera);
+      }
     }
   </script>
 </body>
