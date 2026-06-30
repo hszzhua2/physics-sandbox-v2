@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="shared-theme.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; color: #fff; font-family: 'Courier New', Courier, monospace; }
+        body { margin: 0; overflow: hidden; background-color: #050510; color: #fff; font-family: 'Courier New', Courier, monospace; }
         #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; }
         #ui-panel {
             position: absolute; top: 80px; left: 30px; width: 340px; max-height: 88vh;
@@ -33,12 +33,22 @@
         .formula-box .eq { font-family: 'Courier New', monospace; text-align: center; margin: 4px 0; font-size: 0.88rem; color: #94a3b8; }
         #entrance-toast { transition: opacity 0.8s ease; }
 
+        /* Visualization canvas */
+        #viz-canvas {
+            position: absolute; bottom: 20px; right: 20px;
+            width: 360px; height: 220px; z-index: 10;
+            background: rgba(5, 5, 16, 0.85);
+            border: 1px solid #334155; border-radius: 8px;
+        }
+
         /* Theme overrides */
         [data-theme="academic"] #ui-panel { background: #ffffff; border-color: #e0e0e0; }
         [data-theme="academic"] .slider-container label { color: #555; }
         [data-theme="academic"] .data-readout { background: #f4f5f7; color: #333; }
         [data-theme="academic"] .alert-text { color: #c0392b; border-color: #e0e0e0; }
         [data-theme="academic"] .formula-box { background: #f4f5f7; }
+        [data-theme="academic"] body { background-color: #f5f5f7; color: #1a1a2e; }
+        [data-theme="academic"] #viz-canvas { background: rgba(255,255,255,0.9); border-color: #e0e0e0; }
     </style>
     <script type="importmap">
     {
@@ -51,6 +61,7 @@
 </head>
 <body>
     <div id="canvas-container"></div>
+    <canvas id="viz-canvas" width="720" height="440"></canvas>
 
     <div id="ui-panel">
         <h2 class="text-lg font-bold mb-3 text-slate-200 border-b border-slate-600 pb-2">⚡ 特斯拉线圈参数控制</h2>
@@ -142,10 +153,11 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         /* ================================================================
-           特斯拉线圈物理模拟
+           特斯拉线圈物理模拟 v2
            - LC 谐振电路计算
-           - 三维线圈模型 + 随机游走电弧
-           - 实时参数调节
+           - 三维线圈模型 + 玻璃球罩
+           - 优化电弧（平滑主电弧 + 分支）
+           - LC 谐振实时波形可视化
            ================================================================ */
 
         PSUTheme.createSwitcher();
@@ -182,7 +194,9 @@
                     f1_kHz: f1 / 1000,
                     f2_kHz: f2 / 1000,
                     match_percent: match * 100,
-                    Vout_kV: Vout
+                    Vout_kV: Vout,
+                    f1_hz: f1,
+                    f2_hz: f2
                 };
             }
         }
@@ -247,76 +261,173 @@
         // ---- Three.js ----
         let scene, camera, renderer, controls;
         const arcsPool = [];
-        const MAX_ARCS = 20;
-        const ARC_SEGMENTS = 25;
+        const branchPool = [];
+        const MAX_ARCS = 12;
+        const MAX_BRANCHES = 18;
+        const ARC_SEGMENTS = 40;
         const TOROID_HEIGHT = 20;
-        let arcLight;
+        let arcLight, glowLight, fillLight;
 
         function init3D() {
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x000000, 0.015);
+            scene.background = new THREE.Color(0x050510);
+            scene.fog = new THREE.FogExp2(0x050510, 0.008);
 
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-            camera.position.set(0, 20, 60);
+            camera.position.set(0, 25, 55);
 
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.toneMappingExposure = 1.3;
             container.appendChild(renderer.domElement);
 
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.maxPolarAngle = Math.PI / 2 + 0.1;
+            controls.maxPolarAngle = Math.PI / 2 + 0.15;
 
-            const ambientLight = new THREE.AmbientLight(0x222222);
+            // ==== Lighting - dramatically improved ====
+            const ambientLight = new THREE.AmbientLight(0x444466, 1.2);
             scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            dirLight.position.set(10, 20, 10);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            dirLight.position.set(15, 30, 15);
             scene.add(dirLight);
 
-            const gridHelper = new THREE.GridHelper(100, 100, 0x333333, 0x111111);
+            const backLight = new THREE.DirectionalLight(0x6688ff, 0.4);
+            backLight.position.set(-10, 10, -20);
+            scene.add(backLight);
+
+            // Blue fill light for metallic reflections
+            fillLight = new THREE.PointLight(0x4488ff, 0.8, 80);
+            fillLight.position.set(-15, 15, 15);
+            scene.add(fillLight);
+
+            // Arc dynamic light
+            arcLight = new THREE.PointLight(0xaaddff, 0, 120);
+            arcLight.position.set(0, 1 + TOROID_HEIGHT, 0);
+            scene.add(arcLight);
+
+            // Glow light under toroid
+            glowLight = new THREE.PointLight(0x4488ff, 0.5, 40);
+            glowLight.position.set(0, 10, 0);
+            scene.add(glowLight);
+
+            // ==== Floor with reflection-like appearance ====
+            const floorGeo = new THREE.PlaneGeometry(200, 200);
+            const floorMat = new THREE.MeshStandardMaterial({
+                color: 0x0a0a18,
+                roughness: 0.2,
+                metalness: 0.6
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.5;
+            scene.add(floor);
+
+            const gridHelper = new THREE.GridHelper(100, 100, 0x223355, 0x111122);
+            gridHelper.position.y = -0.4;
             scene.add(gridHelper);
 
-            // Tesla coil model
+            // ==== Tesla coil model ====
             const coilGroup = new THREE.Group();
-            const baseGeo = new THREE.CylinderGeometry(8, 8, 2, 32);
-            const baseMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+
+            // Base
+            const baseGeo = new THREE.CylinderGeometry(8, 9, 2.5, 32);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.5, metalness: 0.7 });
             const base = new THREE.Mesh(baseGeo, baseMat);
-            base.position.y = 1;
+            base.position.y = 1.25;
             coilGroup.add(base);
 
-            const primaryMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.8, roughness: 0.2 });
+            // Primary coil (4 copper rings)
+            const primaryMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.85, roughness: 0.15 });
             for (let i = 0; i < 4; i++) {
                 const pRingGeo = new THREE.TorusGeometry(6, 0.4, 8, 32);
                 const pRing = new THREE.Mesh(pRingGeo, primaryMat);
                 pRing.rotation.x = Math.PI / 2;
-                pRing.position.y = 3 + i * 1.5;
+                pRing.position.y = 3.5 + i * 1.5;
                 coilGroup.add(pRing);
             }
 
-            const secondaryGeo = new THREE.CylinderGeometry(2, 2, TOROID_HEIGHT, 32);
-            const secondaryMat = new THREE.MeshStandardMaterial({ color: 0xcc5500, roughness: 0.9 });
+            // Secondary coil
+            const secondaryGeo = new THREE.CylinderGeometry(1.8, 1.8, TOROID_HEIGHT, 32);
+            const secondaryMat = new THREE.MeshStandardMaterial({ color: 0xcc5500, roughness: 0.85, metalness: 0.3 });
             const secondary = new THREE.Mesh(secondaryGeo, secondaryMat);
-            secondary.position.y = 1 + TOROID_HEIGHT / 2;
+            secondary.position.y = 1 + TOROID_HEIGHT / 2 + 1;
             coilGroup.add(secondary);
 
-            const toroidGeo = new THREE.TorusGeometry(4, 1.5, 16, 64);
-            const toroidMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.1 });
+            // Secondary coil winding texture effect (multiple thin rings)
+            const windMat = new THREE.MeshStandardMaterial({ color: 0xdd6600, metalness: 0.5, roughness: 0.6 });
+            for (let i = 0; i < 30; i++) {
+                const wGeo = new THREE.TorusGeometry(1.85, 0.06, 4, 24);
+                const wRing = new THREE.Mesh(wGeo, windMat);
+                wRing.rotation.x = Math.PI / 2;
+                wRing.position.y = 3 + i * 0.6;
+                coilGroup.add(wRing);
+            }
+
+            // Toroid top
+            const toroidGeo = new THREE.TorusGeometry(4.2, 1.4, 16, 64);
+            const toroidMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.95, roughness: 0.05 });
             const toroid = new THREE.Mesh(toroidGeo, toroidMat);
             toroid.rotation.x = Math.PI / 2;
-            toroid.position.y = 1 + TOROID_HEIGHT;
+            toroid.position.y = 1 + TOROID_HEIGHT + 1;
             coilGroup.add(toroid);
 
             scene.add(coilGroup);
 
-            // Arc pool
+            // ==== Glass sphere enclosure ====
+            const sphereGeo = new THREE.SphereGeometry(22, 64, 64);
+            const glassMat = new THREE.MeshPhysicalMaterial({
+                color: 0x88ccff,
+                metalness: 0.0,
+                roughness: 0.05,
+                transmission: 0.92,
+                thickness: 1.5,
+                transparent: true,
+                opacity: 0.18,
+                envMapIntensity: 1.0,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.05,
+                ior: 1.5,
+                side: THREE.DoubleSide
+            });
+            const glassSphere = new THREE.Mesh(sphereGeo, glassMat);
+            glassSphere.position.y = 12;
+            scene.add(glassSphere);
+
+            // Metal ring frame for glass sphere
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0x888899, metalness: 0.9, roughness: 0.1 });
+            const equatorRing = new THREE.Mesh(new THREE.TorusGeometry(22, 0.25, 8, 64), ringMat);
+            equatorRing.rotation.x = Math.PI / 2;
+            equatorRing.position.y = 12;
+            scene.add(equatorRing);
+
+            const vertRing1 = new THREE.Mesh(new THREE.TorusGeometry(22, 0.15, 8, 64), ringMat);
+            vertRing1.position.y = 12;
+            scene.add(vertRing1);
+
+            const vertRing2 = new THREE.Mesh(new THREE.TorusGeometry(22, 0.15, 8, 64), ringMat);
+            vertRing2.position.y = 12;
+            vertRing2.rotation.y = Math.PI / 2;
+            scene.add(vertRing2);
+
+            // Base stand for sphere
+            const standGeo = new THREE.CylinderGeometry(23, 24, 1.5, 64);
+            const standMat = new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.8, roughness: 0.2 });
+            const stand = new THREE.Mesh(standGeo, standMat);
+            stand.position.y = 0.5;
+            scene.add(stand);
+
+            // ==== Arc pool - main arcs ====
             const arcMat = new THREE.LineBasicMaterial({
-                color: 0xaaddff,
+                color: 0xcceeff,
                 blending: THREE.AdditiveBlending,
                 transparent: true,
-                opacity: 1.0,
+                opacity: 0.9,
                 depthWrite: false
             });
 
@@ -324,16 +435,29 @@
                 const points = new Float32Array(ARC_SEGMENTS * 3);
                 const geo = new THREE.BufferGeometry();
                 geo.setAttribute('position', new THREE.BufferAttribute(points, 3));
-                const line = new THREE.Line(geo, arcMat);
+                const line = new THREE.Line(geo, arcMat.clone());
                 line.visible = false;
                 scene.add(line);
                 arcsPool.push(line);
             }
 
-            // Arc light
-            arcLight = new THREE.PointLight(0x88bbff, 0, 100);
-            arcLight.position.y = 1 + TOROID_HEIGHT;
-            scene.add(arcLight);
+            // Branch arcs (thinner, shorter)
+            const branchMat = new THREE.LineBasicMaterial({
+                color: 0x88bbff,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                opacity: 0.6,
+                depthWrite: false
+            });
+            for (let i = 0; i < MAX_BRANCHES; i++) {
+                const points = new Float32Array(15 * 3);
+                const geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.BufferAttribute(points, 3));
+                const line = new THREE.Line(geo, branchMat.clone());
+                line.visible = false;
+                scene.add(line);
+                branchPool.push(line);
+            }
 
             window.addEventListener('resize', onWindowResize, false);
             updatePhysics();
@@ -351,13 +475,24 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function updateArcs() {
+        // Smooth random using simplex-like interpolation
+        function smoothNoise(t) {
+            return Math.sin(t * 1.7) * 0.5 + Math.sin(t * 3.1) * 0.25 + Math.sin(t * 5.7) * 0.125;
+        }
+
+        function updateArcs(time) {
             const match = currentPhysicsState.match_percent / 100;
             const vout = currentPhysicsState.Vout_kV;
-            const activeArcCount = Math.min(MAX_ARCS, Math.floor((vout / 500) * MAX_ARCS * match * 0.5));
-            const arcLengthScaler = (vout / 300) * match * 2.0;
+            const activeArcCount = Math.min(MAX_ARCS, Math.floor((vout / 500) * MAX_ARCS * match * 0.8 + 1));
+            const arcLengthScaler = (vout / 300) * match * 3.5;
 
-            arcLight.intensity = match * (vout / 500) * 8 + Math.random() * 3;
+            // Dynamic lighting based on match and voltage
+            const flicker = 0.8 + Math.random() * 0.4;
+            arcLight.intensity = match * (vout / 300) * 12 * flicker;
+            arcLight.color.setHSL(0.58, 0.4 + match * 0.4, 0.5 + match * 0.4);
+            glowLight.intensity = 0.5 + match * 2.0;
+
+            const toroidY = 1 + TOROID_HEIGHT + 1;
 
             for (let i = 0; i < MAX_ARCS; i++) {
                 const line = arcsPool[i];
@@ -369,29 +504,45 @@
                 line.visible = true;
                 const positions = line.geometry.attributes.position.array;
 
-                const startAngle = Math.random() * Math.PI * 2;
-                let currentX = Math.cos(startAngle) * 5;
-                let currentY = 1 + TOROID_HEIGHT + (Math.random() - 0.5) * 1.5;
-                let currentZ = Math.sin(startAngle) * 5;
+                // Fixed seed-like angle for each arc (smoother, less chaotic)
+                const seed = i * 2.718 + time * 0.001;
+                const startAngle = (i / MAX_ARCS) * Math.PI * 2 + smoothNoise(seed) * 0.3;
+                const startR = 5.0 + Math.random() * 0.5;
 
-                const dirX = Math.cos(startAngle);
-                const dirZ = Math.sin(startAngle);
-                const dirY = (Math.random() - 0.2);
+                let currentX = Math.cos(startAngle) * startR;
+                let currentY = toroidY + (Math.random() - 0.5) * 0.8;
+                let currentZ = Math.sin(startAngle) * startR;
+
+                // Primary direction: outward and slightly up/down
+                const baseDirX = Math.cos(startAngle);
+                const baseDirZ = Math.sin(startAngle);
+                const baseDirY = (Math.random() - 0.5) * 0.6;
+                const dirLen = Math.sqrt(baseDirX*baseDirX + baseDirY*baseDirY + baseDirZ*baseDirZ);
+                const dirX = baseDirX / dirLen;
+                const dirY = baseDirY / dirLen;
+                const dirZ = baseDirZ / dirLen;
 
                 positions[0] = currentX;
                 positions[1] = currentY;
                 positions[2] = currentZ;
 
-                const jitterScale = 3.5 + match * 3.0;
+                const jitterScale = 1.2 + (1 - match) * 2.5; // Less jitter when matched
 
                 for (let j = 1; j < ARC_SEGMENTS; j++) {
-                    const stepSize = (1.5 - (j / ARC_SEGMENTS)) * arcLengthScaler;
-                    const jitterX = (Math.random() - 0.5) * jitterScale;
-                    const jitterY = (Math.random() - 0.5) * jitterScale;
-                    const jitterZ = (Math.random() - 0.5) * jitterScale;
+                    const t = j / ARC_SEGMENTS;
+                    const stepSize = (1.8 - t * 0.8) * arcLengthScaler;
+
+                    // Smooth jitter using sine combinations
+                    const jSeed = seed + j * 0.5;
+                    const jitterX = smoothNoise(jSeed) * jitterScale;
+                    const jitterY = smoothNoise(jSeed + 10) * jitterScale;
+                    const jitterZ = smoothNoise(jSeed + 20) * jitterScale;
+
+                    // Add some downward gravity effect on later segments
+                    const gravity = t * t * 0.8;
 
                     currentX += (dirX + jitterX) * stepSize;
-                    currentY += (dirY + jitterY) * stepSize;
+                    currentY += (dirY + jitterY - gravity) * stepSize;
                     currentZ += (dirZ + jitterZ) * stepSize;
 
                     positions[j * 3] = currentX;
@@ -400,14 +551,256 @@
                 }
 
                 line.geometry.attributes.position.needsUpdate = true;
-                if (Math.random() > 0.7) line.visible = false;
+                // Color shift: white core when matched, blue when unmatched
+                const hue = 0.55 + (1 - match) * 0.1;
+                const sat = 0.3 + match * 0.5;
+                const light = 0.5 + match * 0.4;
+                line.material.color.setHSL(hue, sat, light);
+                line.material.opacity = 0.4 + match * 0.5;
+
+                // Flicker effect
+                if (Math.random() > 0.85) line.visible = false;
             }
+
+            // Update branches
+            const activeBranches = Math.floor(activeArcCount * 1.5);
+            for (let i = 0; i < MAX_BRANCHES; i++) {
+                const line = branchPool[i];
+                if (i >= activeBranches || match === 0) {
+                    line.visible = false;
+                    continue;
+                }
+                line.visible = true;
+                const positions = line.geometry.attributes.position.array;
+                const parentArcIdx = i % activeArcCount;
+                const parentArc = arcsPool[parentArcIdx];
+                if (!parentArc.visible) { line.visible = false; continue; }
+
+                const parentPos = parentArc.geometry.attributes.position.array;
+                const branchStartIdx = Math.floor(ARC_SEGMENTS * 0.3 + Math.random() * ARC_SEGMENTS * 0.4);
+                const startIdx = Math.min(branchStartIdx, ARC_SEGMENTS - 2);
+
+                positions[0] = parentPos[startIdx * 3];
+                positions[1] = parentPos[startIdx * 3 + 1];
+                positions[2] = parentPos[startIdx * 3 + 2];
+
+                let cx = positions[0], cy = positions[1], cz = positions[2];
+                const bDirX = (Math.random() - 0.5) * 2;
+                const bDirY = (Math.random() - 0.5) * 2;
+                const bDirZ = (Math.random() - 0.5) * 2;
+
+                for (let j = 1; j < 15; j++) {
+                    const t = j / 15;
+                    const step = 0.6 * arcLengthScaler * (1 - t);
+                    cx += (bDirX + smoothNoise(i + j * 0.7)) * step;
+                    cy += (bDirY + smoothNoise(i + j * 0.7 + 5)) * step - t * t * 0.5;
+                    cz += (bDirZ + smoothNoise(i + j * 0.7 + 10)) * step;
+                    positions[j * 3] = cx;
+                    positions[j * 3 + 1] = cy;
+                    positions[j * 3 + 2] = cz;
+                }
+                line.geometry.attributes.position.needsUpdate = true;
+                line.material.opacity = 0.2 + match * 0.3;
+                if (Math.random() > 0.8) line.visible = false;
+            }
+        }
+
+        // ---- LC Resonance Visualization Canvas ----
+        const vizCanvas = document.getElementById('viz-canvas');
+        const vizCtx = vizCanvas.getContext('2d');
+        const vizW = vizCanvas.width;
+        const vizH = vizCanvas.height;
+        let vizTime = 0;
+
+        function drawVisualization() {
+            const ctx = vizCtx;
+            const w = vizW, h = vizH;
+            const match = currentPhysicsState.match_percent / 100;
+            const f1 = currentPhysicsState.f1_hz;
+            const f2 = currentPhysicsState.f2_hz;
+            const vin = currentPhysicsState.Vout_kV / match || 0; // Approximate input
+            const vout = currentPhysicsState.Vout_kV;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background
+            ctx.fillStyle = 'rgba(5,5,16,0.6)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Title
+            ctx.fillStyle = '#8899aa';
+            ctx.font = 'bold 20px "Courier New", monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('LC 谐振实时波形', 16, 30);
+
+            // Match indicator bar
+            const barW = 200;
+            const barX = w - barW - 16;
+            const barY = 16;
+            ctx.fillStyle = '#334455';
+            ctx.fillRect(barX, barY, barW, 14);
+            const grad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+            grad.addColorStop(0, '#ff4444');
+            grad.addColorStop(0.5, '#ffcc00');
+            grad.addColorStop(1, '#44ff44');
+            ctx.fillStyle = grad;
+            ctx.fillRect(barX, barY, barW * match, 14);
+            ctx.strokeStyle = '#556677';
+            ctx.strokeRect(barX, barY, barW, 14);
+            ctx.fillStyle = '#aabbcc';
+            ctx.font = '12px "Courier New", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('谐振匹配度', barX + barW / 2, barY + 30);
+
+            // Waveform area
+            const waveTop = 55;
+            const waveH = (h - waveTop - 20) / 2;
+            const mid1 = waveTop + waveH / 2;
+            const mid2 = waveTop + waveH * 1.5;
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(100,120,150,0.2)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 5; i++) {
+                const y = waveTop + (waveH * 2 / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(60, y);
+                ctx.lineTo(w - 10, y);
+                ctx.stroke();
+            }
+
+            // Primary voltage waveform (blue)
+            ctx.strokeStyle = '#4488ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x < w - 70; x += 2) {
+                const t = (x / (w - 70)) * Math.PI * 6 + vizTime * f1 * 0.0005;
+                const amp = 0.8;
+                const y = mid1 - Math.sin(t) * waveH * 0.35 * amp;
+                if (x === 0) ctx.moveTo(60 + x, y);
+                else ctx.lineTo(60 + x, y);
+            }
+            ctx.stroke();
+
+            // Primary envelope (damping)
+            ctx.strokeStyle = 'rgba(68,136,255,0.2)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            for (let x = 0; x < w - 70; x += 2) {
+                const env = Math.exp(-x / ((w - 70) * 0.4)) * 0.9 + 0.1;
+                const y = mid1 - waveH * 0.35 * env;
+                if (x === 0) ctx.moveTo(60 + x, y);
+                else ctx.lineTo(60 + x, y);
+            }
+            ctx.stroke();
+            ctx.beginPath();
+            for (let x = 0; x < w - 70; x += 2) {
+                const env = Math.exp(-x / ((w - 70) * 0.4)) * 0.9 + 0.1;
+                const y = mid1 + waveH * 0.35 * env;
+                if (x === 0) ctx.moveTo(60 + x, y);
+                else ctx.lineTo(60 + x, y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Secondary voltage waveform (purple/magenta) - amplitude depends on match
+            ctx.strokeStyle = match > 0.8 ? '#ff66ff' : '#aa66cc';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let x = 0; x < w - 70; x += 2) {
+                const t = (x / (w - 70)) * Math.PI * 6 + vizTime * f2 * 0.0005;
+                // Beat frequency effect when f1 != f2
+                const beat = f1 !== f2 ? Math.sin((f1 - f2) * 0.0005 * vizTime + x * 0.01) * 0.5 + 0.5 : 1;
+                const amp = match * beat;
+                const y = mid2 - Math.sin(t) * waveH * 0.35 * amp;
+                if (x === 0) ctx.moveTo(60 + x, y);
+                else ctx.lineTo(60 + x, y);
+            }
+            ctx.stroke();
+
+            // Beat envelope when not matched
+            if (match > 0 && match < 0.95) {
+                ctx.strokeStyle = 'rgba(255,100,255,0.15)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                for (let x = 0; x < w - 70; x += 2) {
+                    const beat = Math.sin((f1 - f2) * 0.0005 * vizTime + x * 0.01) * 0.5 + 0.5;
+                    const env = Math.exp(-x / ((w - 70) * 0.3)) * 0.9 + 0.1;
+                    const y = mid2 - waveH * 0.35 * match * beat * env;
+                    if (x === 0) ctx.moveTo(60 + x, y);
+                    else ctx.lineTo(60 + x, y);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Labels
+            ctx.fillStyle = '#4488ff';
+            ctx.font = 'bold 14px "Courier New", monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('V₁ (初级)', 8, mid1 - 5);
+            ctx.fillStyle = match > 0.8 ? '#ff66ff' : '#aa66cc';
+            ctx.fillText('V₂ (次级)', 8, mid2 - 5);
+
+            // Center line
+            ctx.strokeStyle = 'rgba(150,170,200,0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(60, mid1);
+            ctx.lineTo(w - 10, mid1);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(60, mid2);
+            ctx.lineTo(w - 10, mid2);
+            ctx.stroke();
+
+            // Time axis
+            ctx.strokeStyle = 'rgba(150,170,200,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(60, waveTop + waveH * 2);
+            ctx.lineTo(w - 10, waveTop + waveH * 2);
+            ctx.stroke();
+
+            // Energy transfer arrows
+            if (match > 0.3) {
+                const arrowAlpha = match;
+                ctx.strokeStyle = `rgba(100,255,150,${arrowAlpha * 0.6})`;
+                ctx.lineWidth = 2;
+                const arrowX = w / 2;
+                ctx.beginPath();
+                ctx.moveTo(arrowX, mid1 + waveH * 0.3);
+                ctx.lineTo(arrowX, mid2 - waveH * 0.3);
+                ctx.stroke();
+                // Arrow head
+                ctx.beginPath();
+                ctx.moveTo(arrowX - 6, mid2 - waveH * 0.3 - 8);
+                ctx.lineTo(arrowX, mid2 - waveH * 0.3);
+                ctx.lineTo(arrowX + 6, mid2 - waveH * 0.3 - 8);
+                ctx.stroke();
+                ctx.fillStyle = `rgba(100,255,150,${arrowAlpha * 0.6})`;
+                ctx.font = '12px "Courier New", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('能量传递', arrowX, (mid1 + mid2) / 2);
+            }
+
+            // Frequency annotation
+            ctx.fillStyle = '#778899';
+            ctx.font = '11px "Courier New", monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(`f₁ = ${currentPhysicsState.f1_kHz.toFixed(2)} kHz`, w - 16, h - 10);
+            ctx.fillText(`f₂ = ${currentPhysicsState.f2_kHz.toFixed(2)} kHz`, w - 16, h - 26);
+
+            vizTime += 1;
         }
 
         function animate() {
             requestAnimationFrame(animate);
+            const time = performance.now();
             controls.update();
-            updateArcs();
+            updateArcs(time);
+            drawVisualization();
             renderer.render(scene, camera);
         }
 
