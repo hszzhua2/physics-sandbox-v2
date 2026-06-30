@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>洛伦兹吸引子 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #container { position: fixed; inset: 0; z-index: 0; }
+    #ui-panel {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      width: 370px;
+      padding: 20px;
+      z-index: 10;
+      max-height: 82vh;
+      overflow-y: auto;
+    }
+    h1 { margin: 0; font-size: 1.4rem; transition: var(--theme-transition); }
+    .subtitle { color: var(--text-muted); font-size: 0.8rem; margin: 2px 0 10px 0; }
+    .section-title { font-size: 1rem; font-weight: 700; margin: 12px 0 6px 0; transition: color .4s; }
+    .formula {
+      font-family: 'Times New Roman', serif; font-style: italic;
+      padding: 10px 14px; margin: 6px 0; border-radius: 8px; font-size: 1rem;
+      line-height: 1.8; background: rgba(128,128,128,0.06);
+      border-left: 3px solid var(--accent-1);
+      transition: all .4s;
+    }
+    .explain { font-size: 0.82rem; color: var(--text-muted); margin: 4px 0 8px 0; line-height: 1.6; }
+    .param-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin: 7px 0 2px; }
+    .param-row span { font-family: monospace; font-weight: bold; }
+    .color-picker-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+    .color-picker-row label { font-size: 0.85rem; flex: 1; }
+    .color-picker-row input[type="color"] { width: 36px; height: 36px; border: 1px solid var(--panel-border); border-radius: 6px; cursor: pointer; padding: 0; background: none; }
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn-row .theme-btn { flex: 1; min-width: 90px; padding: 10px 12px; font-size: 0.85rem; }
+    .stat-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin: 4px 0; }
+
+    /* Theme overrides */
+    [data-theme="cartoon"] h1 { color: var(--accent-1); }
+    [data-theme="cartoon"] .section-title { color: var(--accent-2); }
+    [data-theme="cartoon"] .param-row span { color: var(--accent-1); }
+
+    [data-theme="glass"] h1 { color: #ff6b6b; }
+    [data-theme="glass"] .section-title { color: #74b9ff; }
+    [data-theme="glass"] .param-row span { color: #74b9ff; }
+
+    [data-theme="cyber"] h1 { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,0.4); }
+    [data-theme="cyber"] .section-title { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,0.3); }
+    [data-theme="cyber"] .param-row span { color: #00f3ff; }
+
+    [data-theme="academic"] h1 { color: #1a1a2e; }
+    [data-theme="academic"] .section-title { color: #6b8cae; }
+    [data-theme="academic"] .param-row span { color: #6b8cae; }
+    [data-theme="academic"] .formula { background: #f8f9fa; border-left: 3px solid #6b8cae; }
+    [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
+
+    #ui-panel::-webkit-scrollbar { width: 5px; }
+    [data-theme="cartoon"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+    [data-theme="glass"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    [data-theme="cyber"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(189,0,255,0.3); border-radius: 3px; }
+    [data-theme="academic"] #ui-panel::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 0; }
+
+    /* Entance toast */
+    #entrance-toast { transition: opacity 0.8s ease; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <div id="container"></div>
+
+  <div id="ui-panel" class="glass-panel">
+    <h1>洛伦兹吸引子</h1>
+    <div class="subtitle">Lorenz Attractor — 混沌学标志性蝴蝶</div>
+
+    <!-- Formula + Explanation -->
+    <div class="section-title">📐 核心公式</div>
+    <div class="formula">
+      dx/dt = σ(y &minus; x)<br>
+      dy/dt = x(ρ &minus; z) &minus; y<br>
+      dz/dt = xy &minus; βz
+    </div>
+    <div class="explain">
+      这是1963年气象学家爱德华·洛伦兹发现的一组方程。σ 是普朗特数（流体粘性），ρ 是瑞利数（温差驱动力），β 是空间尺度因子。当 ρ &gt; 24.74 时，系统进入混沌状态，轨道形成一对蝴蝶翅膀形状的"吸引子"——初始条件的微小差异会被疯狂放大，这就是"蝴蝶效应"的由来。
+    </div>
+
+    <!-- Sliders -->
+    <div class="section-title">🎛️ 参数控制</div>
+
+    <div class="param-row"><label>σ — 流体粘性</label><span id="sigma-val">10.0</span></div>
+    <input type="range" id="slider-sigma" min="1" max="20" step="0.1" value="10">
+    <div class="param-row"><label>ρ — 温差驱动力</label><span id="rho-val">28.0</span></div>
+    <input type="range" id="slider-rho" min="5" max="50" step="0.5" value="28">
+    <div class="param-row"><label>β — 空间尺度</label><span id="beta-val">2.67</span></div>
+    <input type="range" id="slider-beta" min="0.5" max="6" step="0.01" value="2.67">
+    <div class="param-row"><label>粒子数量</label><span id="count-val">3000</span></div>
+    <input type="range" id="slider-count" min="500" max="8000" step="100" value="3000">
+    <div class="param-row"><label>粒子大小</label><span id="size-val">1.2</span></div>
+    <input type="range" id="slider-size" min="0.2" max="4" step="0.1" value="1.2">
+    <div class="param-row"><label>粒子速度 ×</label><span id="speed-val">1.0</span></div>
+    <input type="range" id="slider-speed" min="0.1" max="3" step="0.1" value="1.0">
+
+    <!-- Colors -->
+    <div class="section-title">🎨 视觉</div>
+    <div class="color-picker-row">
+      <label>粒子颜色 A</label><input type="color" id="color-a" value="#ff6b6b">
+      <label>粒子颜色 B</label><input type="color" id="color-b" value="#4ecdc4">
+    </div>
+    <div class="color-picker-row">
+      <label>背景颜色</label><input type="color" id="color-bg" value="#0a0014">
+      <label>背景光</label><input type="color" id="color-ambient" value="#1a0033">
+    </div>
+
+    <div class="btn-row">
+      <button class="theme-btn" onclick="window.randomize()">🎲 随机参数</button>
+      <button class="theme-btn" onclick="window.resetLorenz()">复位</button>
+      <button class="theme-btn" onclick="window.togglePause()" id="pause-btn">暂停</button>
+    </div>
+
+    <div class="stat-row" style="margin-top:8px;">
+      <span>粒子数: <span id="stat-count">3000</span></span>
+      <span>帧率: <span id="stat-fps">60</span></span>
+    </div>
+  </div>
+
+  <!-- Entrance Toast -->
+  <div id="entrance-toast" class="glass-panel" style="
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
+    opacity:1;">
+    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:6px; color:var(--text-color);">
+      🦋 蝴蝶效应 · 3D 洛伦兹吸引子
+    </div>
+    <div style="font-size:0.9rem; color:var(--text-muted); line-height:1.8;">
+      转动视角观察混沌轨道 · 调节参数改变蝴蝶翅膀
+    </div>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ---- Init Shared UI ----
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    // ---- Three.js Setup ----
+    const container = document.getElementById('container');
+    const scene = new THREE.Scene();
+
+    // --- Camera ---
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(45, 30, 60);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    // ---- Starfield ----
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 1500;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i++) starPos[i] = (Math.random() - 0.5) * 800;
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.2, transparent: true, opacity: 0.5 });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    // ---- Unused ambient light (we use ParticlesMaterial colors) ----
+    // ---- Physics State (Lorenz) ----
+    const LORENZ_SIGMA = 10;
+    const LORENZ_RHO = 28;
+    const LORENZ_BETA = 8 / 3;
+
+    let PARTICLE_COUNT = 3000;
+    let PARTICLE_SIZE = 1.2;
+    let SPEED_MULT = 1.0;
+    let CLR_A = new THREE.Color('#ff6b6b');
+    let CLR_B = new THREE.Color('#4ecdc4');
+    let CLR_BG = new THREE.Color('#0a0014');
+    let CLR_AMB = new THREE.Color('#1a0033');
+
+    let sigma = LORENZ_SIGMA;
+    let rho = LORENZ_RHO;
+    let beta = LORENZ_BETA;
+    let paused = false;
+
+    // Particle system
+    let positions, colors, localSigma, localRho, localBeta;
+    let currentPositions; // Float32Array for updating
+    let targetColors = null; // For smooth color transition
+    let particleSystem = null;
+    let particleGeometry = null;
+    let lorenzTime = 0;
+    let fpsCount = 0, fpsTime = 0;
+
+    // ---- Utility ----
+    function lorenzDeriv(x, y, z, sig, r, b) {
+      return {
+        dx: sig * (y - x),
+        dy: x * (r - z) - y,
+        dz: x * y - b * z
+      };
+    }
+
+    function initParticles(count) {
+      // Remove old system
+      if (particleSystem) {
+        scene.remove(particleSystem);
+        particleGeometry.dispose();
+        particleSystem.material.dispose();
+      }
+
+      PARTICLE_COUNT = count;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      const col = new Float32Array(count * 3);
+      const randStates = new Float32Array(count * 3); // x,y,z seed for each
+
+      // Initialize random starting points near the attractor
+      for (let i = 0; i < count; i++) {
+        const t = i / count;
+        const x = (Math.random() - 0.5) * 5;
+        const y = (Math.random() - 0.5) * 5;
+        const z = (Math.random() - 0.5) * 5;
+        pos[i*3] = x; pos[i*3+1] = y; pos[i*3+2] = z;
+        randStates[i*3] = x; randStates[i*3+1] = y; randStates[i*3+2] = z;
+        // Initial color
+        const ratio = Math.random();
+        const c = CLR_A.clone().lerp(CLR_B, ratio);
+        col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
+      }
+
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+
+      // Initialize target colors for smooth transition
+      targetColors = new Float32Array(count * 3);
+      for (let i = 0; i < count * 3; i++) targetColors[i] = col[i];
+
+      const mat = new THREE.PointsMaterial({
+        size: PARTICLE_SIZE,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true
+      });
+
+      particleSystem = new THREE.Points(geo, mat);
+      particleGeometry = geo;
+      scene.add(particleSystem);
+
+      currentPositions = pos;
+      localSigma = new Float32Array(count);
+      localRho = new Float32Array(count);
+      localBeta = new Float32Array(count);
+
+      // Very tiny random variations per particle for organic feel
+      for (let i = 0; i < count; i++) {
+        localSigma[i] = sigma + (Math.random() - 0.5) * 0.02;
+        localRho[i] = rho + (Math.random() - 0.5) * 0.02;
+        localBeta[i] = beta + (Math.random() - 0.5) * 0.005;
+      }
+    }
+
+    function rebuildParticles(preserveState) {
+      // Save current state if preserving
+      const oldCount = particleGeometry ? PARTICLE_COUNT : 0;
+      const oldPos = preserveState && currentPositions ? new Float32Array(currentPositions) : null;
+      const oldSigma = preserveState && localSigma ? new Float32Array(localSigma) : null;
+      const oldRho = preserveState && localRho ? new Float32Array(localRho) : null;
+      const oldBeta = preserveState && localBeta ? new Float32Array(localBeta) : null;
+      const oldTargetCol = preserveState && targetColors ? new Float32Array(targetColors) : null;
+      const oldCol = preserveState && particleGeometry
+        ? new Float32Array(particleGeometry.attributes.color.array) : null;
+
+      if (particleSystem) {
+        scene.remove(particleSystem);
+        particleGeometry.dispose();
+        particleSystem.material.dispose();
+      }
+
+      const newCount = PARTICLE_COUNT;
+      initParticles(newCount);
+
+      // Restore old particle state for the overlapping count
+      if (preserveState && oldPos) {
+        const copyN = Math.min(oldCount, newCount);
+        for (let i = 0; i < copyN * 3; i++) currentPositions[i] = oldPos[i];
+        if (oldSigma) for (let i = 0; i < copyN; i++) localSigma[i] = oldSigma[i];
+        if (oldRho) for (let i = 0; i < copyN; i++) localRho[i] = oldRho[i];
+        if (oldBeta) for (let i = 0; i < copyN; i++) localBeta[i] = oldBeta[i];
+        if (oldTargetCol && targetColors) for (let i = 0; i < copyN * 3; i++) targetColors[i] = oldTargetCol[i];
+        if (oldCol) {
+          const colArr = particleGeometry.attributes.color.array;
+          for (let i = 0; i < copyN * 3; i++) colArr[i] = oldCol[i];
+        }
+        particleGeometry.attributes.position.needsUpdate = true;
+        particleGeometry.attributes.color.needsUpdate = true;
+      }
+    }
+
+    function updateTargetColors() {
+      if (!particleGeometry || !targetColors) return;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const ratio = Math.random();
+        const c = CLR_A.clone().lerp(CLR_B, ratio);
+        targetColors[i*3] = c.r; targetColors[i*3+1] = c.g; targetColors[i*3+2] = c.b;
+      }
+    }
+
+    function stepLorenz(dt) {
+      if (!particleSystem) return;
+      const pos = currentPositions;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const idx = i * 3;
+        let x = pos[idx], y = pos[idx+1], z = pos[idx+2];
+        const sig = localSigma[i], r = localRho[i], b = localBeta[i];
+        const d = lorenzDeriv(x, y, z, sig, r, b);
+        pos[idx] += d.dx * dt * SPEED_MULT;
+        pos[idx+1] += d.dy * dt * SPEED_MULT;
+        pos[idx+2] += d.dz * dt * SPEED_MULT;
+      }
+      particleGeometry.attributes.position.needsUpdate = true;
+    }
+
+    // ---- Sliders ----
+    document.getElementById('slider-sigma').addEventListener('input', (e) => {
+      sigma = parseFloat(e.target.value);
+      document.getElementById('sigma-val').textContent = sigma.toFixed(1);
+      // Rebuild local variations
+      for (let i = 0; i < (localSigma ? localSigma.length : 0); i++) {
+        localSigma[i] = sigma + (Math.random() - 0.5) * 0.02;
+      }
+    });
+    document.getElementById('slider-rho').addEventListener('input', (e) => {
+      rho = parseFloat(e.target.value);
+      document.getElementById('rho-val').textContent = rho.toFixed(1);
+      for (let i = 0; i < (localRho ? localRho.length : 0); i++) {
+        localRho[i] = rho + (Math.random() - 0.5) * 0.02;
+      }
+    });
+    document.getElementById('slider-beta').addEventListener('input', (e) => {
+      beta = parseFloat(e.target.value);
+      document.getElementById('beta-val').textContent = beta.toFixed(2);
+      for (let i = 0; i < (localBeta ? localBeta.length : 0); i++) {
+        localBeta[i] = beta + (Math.random() - 0.5) * 0.005;
+      }
+    });
+    document.getElementById('slider-count').addEventListener('input', (e) => {
+      PARTICLE_COUNT = parseInt(e.target.value);
+      document.getElementById('count-val').textContent = PARTICLE_COUNT;
+      document.getElementById('stat-count').textContent = PARTICLE_COUNT;
+      rebuildParticles(true); // preserve existing particle trajectories
+    });
+    document.getElementById('slider-size').addEventListener('input', (e) => {
+      PARTICLE_SIZE = parseFloat(e.target.value);
+      document.getElementById('size-val').textContent = PARTICLE_SIZE.toFixed(1);
+      if (particleSystem) particleSystem.material.size = PARTICLE_SIZE;
+    });
+    document.getElementById('slider-speed').addEventListener('input', (e) => {
+      SPEED_MULT = parseFloat(e.target.value);
+      document.getElementById('speed-val').textContent = SPEED_MULT.toFixed(1);
+    });
+
+    document.getElementById('color-a').addEventListener('input', (e) => {
+      CLR_A = new THREE.Color(e.target.value);
+      updateTargetColors();
+    });
+    document.getElementById('color-b').addEventListener('input', (e) => {
+      CLR_B = new THREE.Color(e.target.value);
+      updateTargetColors();
+    });
+    document.getElementById('color-bg').addEventListener('input', (e) => {
+      CLR_BG = new THREE.Color(e.target.value);
+      applyBgColor();
+    });
+    document.getElementById('color-ambient').addEventListener('input', (e) => {
+      CLR_AMB = new THREE.Color(e.target.value);
+      applyBgColor();
+    });
+
+    function applyBgColor() {
+      // Use background color as a gradient: slightly brighter edge
+      scene.background = CLR_BG;
+      stars.material.color.set(CLR_AMB);
+    }
+
+    // ---- Randomize ----
+    window.randomize = function() {
+      sigma = +(1 + Math.random() * 19).toFixed(1);
+      rho = +(5 + Math.random() * 45).toFixed(1);
+      beta = +(0.5 + Math.random() * 5.5).toFixed(2);
+      PARTICLE_COUNT = Math.round(500 + Math.random() * 7500 / 100) * 100;
+      PARTICLE_SIZE = +(0.2 + Math.random() * 3.8).toFixed(1);
+      SPEED_MULT = +(0.1 + Math.random() * 2.9).toFixed(1);
+
+      const huesA = Math.floor(Math.random() * 360);
+      const huesB = (huesA + 120 + Math.floor(Math.random() * 120)) % 360;
+      CLR_A = new THREE.Color(`hsl(${huesA}, 85%, 60%)`);
+      CLR_B = new THREE.Color(`hsl(${huesB}, 85%, 60%)`);
+      const bgDarkness = Math.random() < 0.7 ? 0 : Math.floor(Math.random() * 30);
+      const bgLightness = bgDarkness === 0 ? 8 : Math.floor(Math.random() * 30 + 20);
+      CLR_BG = new THREE.Color(`hsl(${Math.floor(Math.random() * 360)}, ${bgDarkness === 0 ? 30 : 10}%, ${bgLightness}%)`);
+      CLR_AMB = CLR_BG.clone().offsetHSL(0, 0, 0.15);
+
+      // Reset 3D camera view — spherical coordinates to see full attractor
+      const radius = 70 + Math.random() * 30;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI * 0.4 + 0.3; // 0.3 to 0.7π
+      camera.position.set(
+        radius * Math.sin(theta) * Math.cos(phi),
+        radius * Math.sin(phi),
+        radius * Math.cos(theta) * Math.cos(phi)
+      );
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      // Update UI
+      document.getElementById('slider-sigma').value = sigma;
+      document.getElementById('sigma-val').textContent = sigma.toFixed(1);
+      document.getElementById('slider-rho').value = rho;
+      document.getElementById('rho-val').textContent = rho.toFixed(1);
+      document.getElementById('slider-beta').value = beta;
+      document.getElementById('beta-val').textContent = beta.toFixed(2);
+      document.getElementById('slider-count').value = PARTICLE_COUNT;
+      document.getElementById('count-val').textContent = PARTICLE_COUNT;
+      document.getElementById('stat-count').textContent = PARTICLE_COUNT;
+      document.getElementById('slider-size').value = PARTICLE_SIZE;
+      document.getElementById('size-val').textContent = PARTICLE_SIZE.toFixed(1);
+      document.getElementById('slider-speed').value = SPEED_MULT;
+      document.getElementById('speed-val').textContent = SPEED_MULT.toFixed(1);
+      document.getElementById('color-a').value = '#' + CLR_A.getHexString();
+      document.getElementById('color-b').value = '#' + CLR_B.getHexString();
+      document.getElementById('color-bg').value = '#' + CLR_BG.getHexString();
+      document.getElementById('color-ambient').value = '#' + CLR_AMB.getHexString();
+
+      applyBgColor();
+      rebuildParticles(false); // full rebuild with new parameters
+    };
+
+    window.resetLorenz = function() {
+      sigma = LORENZ_SIGMA; rho = LORENZ_RHO; beta = LORENZ_BETA;
+      PARTICLE_COUNT = 3000; PARTICLE_SIZE = 1.2; SPEED_MULT = 1.0;
+      CLR_A = new THREE.Color('#ff6b6b');
+      CLR_B = new THREE.Color('#4ecdc4');
+      CLR_BG = new THREE.Color('#0a0014');
+      CLR_AMB = new THREE.Color('#1a0033');
+
+      document.getElementById('slider-sigma').value = sigma;
+      document.getElementById('sigma-val').textContent = sigma.toFixed(1);
+      document.getElementById('slider-rho').value = rho;
+      document.getElementById('rho-val').textContent = rho.toFixed(1);
+      document.getElementById('slider-beta').value = beta;
+      document.getElementById('beta-val').textContent = beta.toFixed(2);
+      document.getElementById('slider-count').value = PARTICLE_COUNT;
+      document.getElementById('count-val').textContent = PARTICLE_COUNT;
+      document.getElementById('stat-count').textContent = PARTICLE_COUNT;
+      document.getElementById('slider-size').value = PARTICLE_SIZE;
+      document.getElementById('size-val').textContent = PARTICLE_SIZE.toFixed(1);
+      document.getElementById('slider-speed').value = SPEED_MULT;
+      document.getElementById('speed-val').textContent = SPEED_MULT.toFixed(1);
+      document.getElementById('color-a').value = '#ff6b6b';
+      document.getElementById('color-b').value = '#4ecdc4';
+      document.getElementById('color-bg').value = '#0a0014';
+      document.getElementById('color-ambient').value = '#1a0033';
+
+      camera.position.set(45, 30, 60);
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      applyBgColor();
+      rebuildParticles(false);
+    };
+
+    window.togglePause = function() {
+      paused = !paused;
+      document.getElementById('pause-btn').textContent = paused ? '继续' : '暂停';
+    };
+
+    // ---- Init ----
+    applyBgColor();
+    initParticles(PARTICLE_COUNT);
+
+    // ---- Theme background sync ----
+    function applyThemeBg() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+      if (theme === 'academic') {
+        scene.background = new THREE.Color(0xf8f9fa);
+        stars.material.color.setHex(0xc0c0c8);
+      }
+      // For other themes, keep user set colors
+    }
+    const themeObs = new MutationObserver(applyThemeBg);
+    themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // ---- Resize ----
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ---- FPS ----
+    function updateFPS(time) {
+      fpsCount++;
+      if (time - fpsTime >= 1) {
+        document.getElementById('stat-fps').textContent = fpsCount;
+        fpsCount = 0;
+        fpsTime = time;
+      }
+    }
+
+    // ---- Main Loop ----
+    let lastTime = performance.now();
+
+    function animate(time) {
+      requestAnimationFrame(animate);
+      controls.update();
+      updateFPS(time * 0.001);
+
+      const dt = (time - lastTime) * 0.001;
+      lastTime = time;
+      const cappedDt = Math.min(dt, 0.05);
+
+      if (!paused) {
+        const SUBSTEPS = 3;
+        const stepSize = cappedDt * 5 / SUBSTEPS;
+        for (let s = 0; s < SUBSTEPS; s++) {
+          stepLorenz(stepSize);
+        }
+      }
+
+      // Smooth color transition: gradually lerp current colors toward target
+      if (targetColors && particleGeometry) {
+        const col = particleGeometry.attributes.color.array;
+        const lerpSpeed = 0.06;
+        let anyChange = false;
+        for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+          const diff = targetColors[i] - col[i];
+          if (Math.abs(diff) > 0.001) {
+            col[i] += diff * lerpSpeed;
+            anyChange = true;
+          } else {
+            col[i] = targetColors[i];
+          }
+        }
+        if (anyChange) particleGeometry.attributes.color.needsUpdate = true;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate(performance.now());
+
+    // Entrance toast
+    setTimeout(() => {
+      const toast = document.getElementById('entrance-toast');
+      if (toast) toast.style.opacity = '0';
+    }, 5000);
+  </script>
+</body>
+</html>

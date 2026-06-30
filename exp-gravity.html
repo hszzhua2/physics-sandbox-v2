@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>万有引力 · 3D三体 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #container { position: fixed; inset: 0; z-index: 0; }
+    #ui-panel {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      width: 320px;
+      padding: 20px;
+      z-index: 10;
+    }
+    h1 { margin: 0; font-size: 1.4rem; transition: var(--theme-transition); }
+    p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
+    .stat-row { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px; color: var(--text-muted); }
+    .stat-row span { font-family: monospace; font-weight: bold; }
+    .slider-group label { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 12px 0 5px; font-weight: bold; }
+    .val-display { font-family: monospace; }
+    .btn-row { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+    .btn-row .theme-btn { flex: 1; min-width: 80px; padding: 10px 12px; font-size: 0.85rem; }
+
+    /* Theme colors */
+    [data-theme="cartoon"] h1 { color: var(--accent-3); text-shadow: 2px 2px 0 rgba(0,0,0,0.08); }
+    [data-theme="cartoon"] .stat-row span { color: var(--accent-1); }
+    [data-theme="cartoon"] .val-display { color: var(--accent-1); }
+    [data-theme="glass"] h1 { color: #ffeaa7; text-shadow: 0 0 10px rgba(255,234,167,0.3); }
+    [data-theme="glass"] .stat-row span { color: #74b9ff; }
+    [data-theme="glass"] .val-display { color: #ffeaa7; }
+    [data-theme="cyber"] h1 { color: #ffeaa7; text-shadow: 0 0 15px rgba(255,234,167,0.5), 0 0 30px rgba(255,157,0,0.3); }
+    [data-theme="cyber"] .stat-row span { color: #00f3ff; }
+    [data-theme="cyber"] .val-display { color: #ffeaa7; }
+
+    /* Entrance toast */
+    #entrance-toast { transition: opacity 0.8s ease; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <div id="container"></div>
+
+  <div id="ui-panel" class="glass-panel">
+    <h1>万有引力 · 3D三体</h1>
+    <p class="desc">Three.js N-body 三维引力模拟</p>
+
+    <div class="stat-row"><span>星球数量</span><span id="body-count">3</span></div>
+    <div class="stat-row"><span>总质量</span><span id="total-mass">0</span></div>
+
+    <div class="slider-group">
+      <label><span>新星球质量</span><span id="mass-val" class="val-display">500</span></label>
+      <input type="range" id="slider-mass" min="50" max="5000" step="50" value="500">
+    </div>
+    <div class="slider-group">
+      <label><span>引力常数 G</span><span id="g-val" class="val-display">1.0</span></label>
+      <input type="range" id="slider-g" min="0.1" max="5.0" step="0.1" value="1.0">
+    </div>
+    <div class="slider-group">
+      <label><span>时间倍速</span><span id="speed-val" class="val-display">1.0x</span></label>
+      <input type="range" id="slider-speed" min="0.1" max="3.0" step="0.1" value="1.0">
+    </div>
+    <div class="slider-group">
+      <label><span>轨迹长度</span><span id="trail-val" class="val-display">200</span></label>
+      <input type="range" id="slider-trail" min="0" max="800" step="50" value="200">
+    </div>
+
+    <div class="btn-row">
+      <button class="theme-btn" onclick="window.resetThreeBody()">三体初始化</button>
+      <button class="theme-btn" onclick="window.clearAll()">清空空间</button>
+      <button class="theme-btn" onclick="window.togglePause()" id="pause-btn">暂停</button>
+    </div>
+  </div>
+
+  <!-- Entrance hint toast -->
+  <div id="entrance-toast" class="glass-panel" style="
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
+    opacity:1;">
+    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:var(--text-color);">
+      🪐 3D 交互提示
+    </div>
+    <div style="font-size:0.95rem; color:var(--text-muted); line-height:1.8;">
+      <strong style="color:var(--accent-1);">左键拖拽</strong> 旋转视角<br>
+      <strong style="color:var(--accent-2);">滚轮</strong> 缩放 &nbsp;·&nbsp;
+      <strong style="color:var(--accent-3);">右键拖拽</strong> 平移<br>
+      <strong style="color:var(--accent-1);">点击空白处</strong> 添加星球
+    </div>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    // ---- Scene setup ----
+    const container = document.getElementById('container');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
+    camera.position.set(0, 0, 400);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // ---- Theme background ----
+    function applyThemeBg() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
+      if (theme === 'cartoon') {
+        scene.background = new THREE.Color(0xfef6e4);
+      } else if (theme === 'glass') {
+        scene.background = new THREE.Color(0x0f1117);
+      } else {
+        scene.background = new THREE.Color(0x0a0014);
+      }
+    }
+    applyThemeBg();
+    const themeObserver = new MutationObserver(applyThemeBg);
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // ---- Starfield ----
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 2000;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i++) starPos[i] = (Math.random() - 0.5) * 3000;
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 2, transparent: true, opacity: 0.6 });
+    const starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    // ---- Physics state ----
+    let bodies = [];
+    let paused = false;
+    let G_CONST = 1.0;
+    let TIME_SCALE = 1.0;
+    let NEW_MASS = 500;
+    let TRAIL_LEN = 200;
+
+    class Body3D {
+      constructor(x, y, z, mass, vx, vy, vz, color) {
+        this.pos = new THREE.Vector3(x, y, z);
+        this.vel = new THREE.Vector3(vx || 0, vy || 0, vz || 0);
+        this.acc = new THREE.Vector3(0, 0, 0);
+        this.mass = mass;
+        this.radius = Math.max(2, Math.pow(mass, 0.28));
+        this.color = new THREE.Color(color || this.randomColor());
+        this.trail = [];
+
+        // Mesh
+        const geo = new THREE.SphereGeometry(this.radius, 32, 32);
+        const mat = new THREE.MeshBasicMaterial({ color: this.color });
+        this.mesh = new THREE.Mesh(geo, mat);
+        this.mesh.position.copy(this.pos);
+        scene.add(this.mesh);
+
+        // Glow sprite
+        const canvas = document.createElement('canvas');
+        canvas.width = 64; canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        const grd = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grd.addColorStop(0, `rgba(${this.color.r*255|0},${this.color.g*255|0},${this.color.b*255|0},0.8)`);
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grd; ctx.fillRect(0, 0, 64, 64);
+        const tex = new THREE.CanvasTexture(canvas);
+        const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending });
+        this.glow = new THREE.Sprite(spriteMat);
+        this.glow.scale.set(this.radius * 6, this.radius * 6, 1);
+        this.glow.position.copy(this.pos);
+        scene.add(this.glow);
+
+        // Trail line
+        this.trailGeo = new THREE.BufferGeometry();
+        this.trailMat = new THREE.LineBasicMaterial({
+          color: this.color,
+          transparent: true,
+          opacity: 0.4,
+          blending: THREE.AdditiveBlending
+        });
+        this.trailLine = new THREE.Line(this.trailGeo, this.trailMat);
+        this.trailLine.frustumCulled = false;
+        scene.add(this.trailLine);
+      }
+      randomColor() {
+        const hues = [30, 45, 190, 200, 280, 320, 50, 10];
+        return `hsl(${hues[Math.floor(Math.random() * hues.length)]}, 85%, 65%)`;
+      }
+      dispose() {
+        scene.remove(this.mesh); this.mesh.geometry.dispose(); this.mesh.material.dispose();
+        scene.remove(this.glow); this.glow.material.map.dispose(); this.glow.material.dispose();
+        scene.remove(this.trailLine); this.trailGeo.dispose(); this.trailMat.dispose();
+      }
+      updateTrail() {
+        this.trail.push(this.pos.clone());
+        if (this.trail.length > TRAIL_LEN) this.trail.shift();
+        const positions = new Float32Array(this.trail.length * 3);
+        for (let i = 0; i < this.trail.length; i++) {
+          positions[i*3] = this.trail[i].x;
+          positions[i*3+1] = this.trail[i].y;
+          positions[i*3+2] = this.trail[i].z;
+        }
+        this.trailGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        this.trailGeo.attributes.position.needsUpdate = true;
+      }
+    }
+
+    // ---- Three-body 3D initial conditions ----
+    window.resetThreeBody = function() {
+      bodies.forEach(b => b.dispose());
+      bodies = [];
+      const scale = 80;
+      const mass = 800;
+
+      // Figure-8 in XY plane, with slight Z variation for 3D feel
+      bodies.push(new Body3D(-scale, 0, 10, mass, 0.347111 * scale * 0.015, 0.532728 * scale * 0.015, 0.1, '#ff6b6b'));
+      bodies.push(new Body3D(scale, 0, -10, mass, 0.347111 * scale * 0.015, 0.532728 * scale * 0.015, -0.1, '#4ecdc4'));
+      bodies.push(new Body3D(0, 0, 0, mass, -2 * 0.347111 * scale * 0.015, -2 * 0.532728 * scale * 0.015, 0, '#ffe66d'));
+
+      updateStats();
+    };
+
+    window.clearAll = function() {
+      bodies.forEach(b => b.dispose());
+      bodies = [];
+      updateStats();
+    };
+
+    window.togglePause = function() {
+      paused = !paused;
+      document.getElementById('pause-btn').textContent = paused ? '继续' : '暂停';
+    };
+
+    function updateStats() {
+      document.getElementById('body-count').textContent = bodies.length;
+      const totalMass = bodies.reduce((s, b) => s + b.mass, 0);
+      document.getElementById('total-mass').textContent = totalMass.toFixed(0);
+    }
+
+    // ---- Sliders ----
+    document.getElementById('slider-mass').addEventListener('input', (e) => {
+      NEW_MASS = parseInt(e.target.value);
+      document.getElementById('mass-val').textContent = NEW_MASS;
+    });
+    document.getElementById('slider-g').addEventListener('input', (e) => {
+      G_CONST = parseFloat(e.target.value);
+      document.getElementById('g-val').textContent = G_CONST.toFixed(1);
+    });
+    document.getElementById('slider-speed').addEventListener('input', (e) => {
+      TIME_SCALE = parseFloat(e.target.value);
+      document.getElementById('speed-val').textContent = TIME_SCALE.toFixed(1) + 'x';
+    });
+    document.getElementById('slider-trail').addEventListener('input', (e) => {
+      TRAIL_LEN = parseInt(e.target.value);
+      document.getElementById('trail-val').textContent = TRAIL_LEN;
+    });
+
+    // ---- 3D Physics ----
+    function computeAccelerations3D() {
+      for (let b of bodies) b.acc.set(0, 0, 0);
+      for (let i = 0; i < bodies.length; i++) {
+        for (let j = i + 1; j < bodies.length; j++) {
+          const bi = bodies[i], bj = bodies[j];
+          const dx = bj.pos.x - bi.pos.x;
+          const dy = bj.pos.y - bi.pos.y;
+          const dz = bj.pos.z - bi.pos.z;
+          const distSq = dx*dx + dy*dy + dz*dz;
+          const dist = Math.sqrt(distSq) || 1;
+          const softening = bi.radius + bj.radius + 5;
+          const force = G_CONST * bi.mass * bj.mass / (distSq + softening * softening);
+          const fx = force * dx / dist;
+          const fy = force * dy / dist;
+          const fz = force * dz / dist;
+          bi.acc.x += fx / bi.mass; bi.acc.y += fy / bi.mass; bi.acc.z += fz / bi.mass;
+          bj.acc.x -= fx / bj.mass; bj.acc.y -= fy / bj.mass; bj.acc.z -= fz / bj.mass;
+        }
+      }
+    }
+
+    function stepPhysics3D(dt) {
+      for (let b of bodies) {
+        b.vel.x += b.acc.x * dt * 0.5;
+        b.vel.y += b.acc.y * dt * 0.5;
+        b.vel.z += b.acc.z * dt * 0.5;
+        b.pos.x += b.vel.x * dt;
+        b.pos.y += b.vel.y * dt;
+        b.pos.z += b.vel.z * dt;
+      }
+      computeAccelerations3D();
+      for (let b of bodies) {
+        b.vel.x += b.acc.x * dt * 0.5;
+        b.vel.y += b.acc.y * dt * 0.5;
+        b.vel.z += b.acc.z * dt * 0.5;
+      }
+      for (let b of bodies) {
+        b.mesh.position.copy(b.pos);
+        b.glow.position.copy(b.pos);
+        b.updateTrail();
+      }
+    }
+
+    // ---- Click to add body ----
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    const clickPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      // Skip if clicking UI panel
+      if (e.clientX < 380 && e.clientY < 500) return;
+
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+
+      // Intersect with a plane facing the camera at z=0
+      clickPlane.normal.copy(camera.position).normalize();
+      const target = new THREE.Vector3();
+      raycaster.ray.intersectPlane(clickPlane, target);
+      if (!target) return;
+
+      // Give it a small orbital velocity around the center of mass
+      const center = new THREE.Vector3(0, 0, 0);
+      const toCenter = new THREE.Vector3().subVectors(center, target);
+      const tangent = new THREE.Vector3(-toCenter.y, toCenter.x, 0).normalize();
+      const dist = toCenter.length() || 1;
+      const speed = Math.sqrt(G_CONST * 500 / dist) * 0.3;
+      const vx = tangent.x * speed + (Math.random() - 0.5) * 0.5;
+      const vy = tangent.y * speed + (Math.random() - 0.5) * 0.5;
+      const vz = (Math.random() - 0.5) * 0.5;
+
+      bodies.push(new Body3D(target.x, target.y, target.z, NEW_MASS, vx, vy, vz));
+      updateStats();
+    });
+
+    // ---- Main loop ----
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      if (!paused) {
+        const dt = TIME_SCALE / 4;
+        for (let s = 0; s < 4; s++) {
+          computeAccelerations3D();
+          stepPhysics3D(dt);
+        }
+      }
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ---- Init ----
+    window.resetThreeBody();
+    computeAccelerations3D();
+    animate();
+
+    // Entrance toast
+    setTimeout(() => {
+      const toast = document.getElementById('entrance-toast');
+      if (toast) toast.style.opacity = '0';
+    }, 5000);
+  </script>
+</body>
+</html>

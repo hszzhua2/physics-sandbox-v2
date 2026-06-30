@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物理沙盒宇宙 - Physics Sandbox Universe</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    /* ========== Home Page Specific Styles ========== */
+    #home-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .header-title {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      z-index: 10;
+      transition: all 0.5s ease;
+    }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 2.8rem;
+      letter-spacing: 6px;
+      font-weight: 800;
+      transition: all 0.5s ease;
+    }
+
+    .header-title p {
+      margin: 10px 0 0 0;
+      letter-spacing: 2px;
+      font-size: 0.95rem;
+      transition: all 0.5s ease;
+    }
+
+    /* Cartoon title */
+    [data-theme="cartoon"] .header-title h1 {
+      color: #2d3436;
+      text-shadow: 2px 2px 0px #ff6b6b, 4px 4px 0px rgba(255, 107, 107, 0.2);
+    }
+    [data-theme="cartoon"] .header-title p {
+      color: #636e72;
+      text-transform: uppercase;
+    }
+
+    /* Glass title */
+    [data-theme="glass"] .header-title h1 {
+      color: #e0e6ed;
+      text-shadow: 0 0 20px rgba(116, 185, 255, 0.5), 0 0 40px rgba(116, 185, 255, 0.2);
+    }
+    [data-theme="glass"] .header-title p {
+      color: #8b92a8;
+      text-transform: uppercase;
+    }
+
+    /* Cyber title */
+    [data-theme="cyber"] .header-title h1 {
+      color: #f0e6ff;
+      text-shadow:
+        0 0 10px #bd00ff,
+        0 0 30px rgba(189, 0, 255, 0.5),
+        0 0 60px rgba(189, 0, 255, 0.3);
+      animation: cyberPulse 3s ease-in-out infinite alternate;
+    }
+    [data-theme="cyber"] .header-title p {
+      color: #a080c0;
+      text-shadow: 0 0 10px rgba(189, 0, 255, 0.3);
+      text-transform: uppercase;
+    }
+
+    @keyframes cyberPulse {
+      0% { text-shadow: 0 0 10px #bd00ff, 0 0 30px rgba(189,0,255,0.5); }
+      100% { text-shadow: 0 0 20px #bd00ff, 0 0 60px rgba(189,0,255,0.6), 0 0 90px rgba(189,0,255,0.3); }
+    }
+
+    /* Academic title */
+    [data-theme="academic"] .header-title h1 {
+      color: #1a1a2e;
+      font-size: 3.2rem;
+      letter-spacing: 8px;
+      font-weight: 900;
+      text-shadow: none;
+      animation: none;
+    }
+    [data-theme="academic"] .header-title p {
+      color: #7a7a8a;
+      font-size: 0.85rem;
+      font-weight: 300;
+      letter-spacing: 4px;
+      margin-top: 12px;
+    }
+    #en-title { transition: color 0.4s ease; }
+    [data-theme="cartoon"] #en-title { color: #a0a0a8; }
+    [data-theme="glass"] #en-title { color: #5a5a6a; }
+    [data-theme="cyber"] #en-title { color: #7060a0; text-shadow: 0 0 6px rgba(189,0,255,0.15); }
+    [data-theme="academic"] #en-title { color: #b0b0b8; }
+
+    /* Floating decorative particles */
+    .bg-particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    [data-theme="academic"] .bg-particles { display: none; }
+
+    .bg-particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: floatParticle 20s infinite ease-in-out;
+    }
+
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      25% { transform: translateY(-30px) translateX(20px); }
+      50% { transform: translateY(20px) translateX(-20px); }
+      75% { transform: translateY(-10px) translateX(30px); }
+    }
+
+    [data-theme="cartoon"] .bg-particle {
+      background: radial-gradient(circle, rgba(255,107,107,0.4) 0%, transparent 70%);
+    }
+    [data-theme="glass"] .bg-particle {
+      background: radial-gradient(circle, rgba(116,185,255,0.3) 0%, transparent 70%);
+    }
+    [data-theme="cyber"] .bg-particle {
+      background: radial-gradient(circle, rgba(189,0,255,0.4) 0%, transparent 70%);
+    }
+
+    /* Hint text at bottom */
+    .hint-text {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-size: 0.85rem;
+      opacity: 0.7;
+      pointer-events: none;
+      transition: all 0.5s ease;
+      white-space: nowrap;
+    }
+
+    [data-theme="cartoon"] .hint-text { color: #636e72; animation: hintBounce 2s ease-in-out infinite; }
+    [data-theme="glass"] .hint-text { color: #8b92a8; animation: hintBounce 2s ease-in-out infinite; }
+    [data-theme="cyber"] .hint-text { color: #a080c0; text-shadow: 0 0 10px rgba(189,0,255,0.3); animation: hintBounce 2s ease-in-out infinite; }
+    [data-theme="academic"] .hint-text {
+      color: #b0b0b8;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      animation: none;
+      opacity: 1;
+    }
+
+    @keyframes hintBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-8px); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background decorative particles -->
+  <div class="bg-particles" id="bg-particles"></div>
+
+  <!-- Header -->
+  <div class="header-title">
+    <h1 id="main-title">砰！粒子！</h1>
+    <p id="sub-title">交互式物理与数学实验平台</p>
+    <p id="en-title" style="margin:8px 0 0 0; font-size:0.75rem; letter-spacing:3px; text-transform:uppercase; color:#b0b0b8; font-weight:300;">BANG! PARTICLES!</p>
+  </div>
+
+  <!-- Theme Switcher (built by JS) -->
+
+  <!-- Main Canvas -->
+  <canvas id="home-canvas"></canvas>
+
+  <!-- Hint -->
+  <div class="hint-text" id="hint-text">点击气泡进入实验 · 拖拽鼠标吸引节点</div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+    // ==========================================
+    // Dynamic title for academic theme
+    // ==========================================
+    function updateTitle() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'cartoon';
+      const mainTitle = document.getElementById('main-title');
+      const subTitle = document.getElementById('sub-title');
+      const hintText = document.getElementById('hint-text');
+      if (theme === 'academic') {
+        mainTitle.textContent = '砰！粒子！';
+        subTitle.textContent = '交互式物理与数学实验平台';
+        hintText.textContent = '拖拽节点 · 点击节点进入实验';
+      } else {
+        mainTitle.textContent = '物理沙盒宇宙';
+        subTitle.textContent = '交互式生成物理与数学实验室';
+        hintText.textContent = '点击气泡进入实验 · 拖拽鼠标吸引节点';
+      }
+    }
+    // Listen for theme changes
+    const titleObserver = new MutationObserver(updateTitle);
+    titleObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // ==========================================
+    // Background Particles (decorative)
+    // ==========================================
+    const bgContainer = document.getElementById('bg-particles');
+    for (let i = 0; i < 15; i++) {
+      const p = document.createElement('div');
+      p.className = 'bg-particle';
+      const size = Math.random() * 60 + 20;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.top = Math.random() * 100 + '%';
+      p.style.animationDelay = Math.random() * 20 + 's';
+      p.style.animationDuration = (15 + Math.random() * 15) + 's';
+      bgContainer.appendChild(p);
+    }
+
+    // ==========================================
+    // Theme Switcher
+    // ==========================================
+    PSUTheme.createSwitcher();
+    updateTitle();
+
+    // ==========================================
+    // Graph Node System (Bubbles)
+    // ==========================================
+    const canvas = document.getElementById('home-canvas');
+    const ctx = canvas.getContext('2d');
+    let cw, ch;
+    let mouseX = -1000, mouseY = -1000;
+
+    // Academic muted colors for each discipline
+    const ACADEMIC_COLORS = {
+      '流体力学': '#6b8cae',
+      '大数定律': '#c4956a',
+      '简谐共振': '#8a7ca8',
+      '声学驻波': '#6b8cae',
+      '蝴蝶效应': '#8a7ca8',
+      '链式反应': '#6a9e8a',
+      '量子物理': '#6b8cae',
+      '量子力学': '#8a7ca8',
+      '三体问题': '#c4956a'
+    };
+
+    // Minimalist single-letter icons for academic mode
+    const ACADEMIC_ICONS = {
+      'taylor':   'T',
+      'galton':   'G',
+      'lissajous': 'L',
+      'chladni':  'C',
+      'pendulum': 'P',
+      'matter':   'M',
+      'quantum':  'Q',
+      'potential': 'V',
+      'gravity':  'N',
+      'lorenz':   'Lz'
+    };
+
+    const graphNodes = [
+      { id: 'taylor',   title: '泰勒-库埃特流',    subtitle: '流体力学',       color: '#00f3ff', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🌊' },
+      { id: 'galton',   title: '高尔顿钉板',       subtitle: '大数定律',       color: '#ff9d00', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '📊' },
+      { id: 'lissajous',title: '利萨茹曲线',       subtitle: '简谐共振',       color: '#ff00ea', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🎵' },
+      { id: 'chladni',  title: '克拉尼图形',       subtitle: '声学驻波',       color: '#00f3ff', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🔊' },
+      { id: 'pendulum', title: '混沌双摆',         subtitle: '蝴蝶效应',       color: '#ff00ea', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🦋' },
+      { id: 'matter',   title: '刚体沙盒',         subtitle: '链式反应',       color: '#39ff14', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '⚙️' },
+      { id: 'quantum',  title: '双缝干涉',         subtitle: '量子物理',       color: '#38bdf8', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '⚛️' },
+      { id: 'potential',title: '一维势阱',         subtitle: '量子力学',       color: '#d946ef', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🔮' },
+      { id: 'gravity',  title: '万有引力',         subtitle: '三体问题',       color: '#ffeaa7', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🪐' },
+      { id: 'lorenz',   title: '洛伦兹吸引子',     subtitle: '混沌理论',       color: '#ff6b6b', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🦋' }
+    ];
+
+    function resize() {
+      cw = canvas.width = window.innerWidth;
+      ch = canvas.height = window.innerHeight;
+      graphNodes.forEach(node => {
+        if (node.x === 0) {
+          node.x = Math.random() * (cw - 200) + 100;
+          node.y = Math.random() * (ch - 200) + 100;
+          node.vx = (Math.random() - 0.5) * 1.5;
+          node.vy = (Math.random() - 0.5) * 1.5;
+        }
+      });
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let draggedNode = null;
+    let dragOffsetX = 0, dragOffsetY = 0;
+    let hasDragged = false;
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      for (let node of graphNodes) {
+        const dist = Math.hypot(node.x - mx, node.y - my);
+        if (dist <= node.rad + 10) {
+          draggedNode = node;
+          dragOffsetX = node.x - mx;
+          dragOffsetY = node.y - my;
+          hasDragged = false;
+          node.vx = 0; node.vy = 0;
+          break;
+        }
+      }
+    });
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+      if (draggedNode) {
+        draggedNode.x = mouseX + dragOffsetX;
+        draggedNode.y = mouseY + dragOffsetY;
+        hasDragged = true;
+      }
+    });
+    canvas.addEventListener('mouseup', () => {
+      if (draggedNode) {
+        draggedNode.vx = (Math.random() - 0.5) * 0.2;
+        draggedNode.vy = (Math.random() - 0.5) * 0.2;
+      }
+      draggedNode = null;
+    });
+    canvas.addEventListener('mouseleave', () => {
+      mouseX = -1000; mouseY = -1000;
+      draggedNode = null;
+    });
+    canvas.addEventListener('click', (e) => {
+      if (hasDragged) return;
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      for (let node of graphNodes) {
+        const dist = Math.hypot(node.x - clickX, node.y - clickY);
+        if (dist <= node.rad + 10) {
+          const theme = PSUTheme.get();
+          window.location.href = `exp-${node.id}.html?theme=${theme}`;
+          break;
+        }
+      }
+    });
+
+    // ---- Floating Physics with Soft Collision + Drag ----
+    function updateGraphPhysics() {
+      for (let i = 0; i < graphNodes.length; i++) {
+        let n = graphNodes[i];
+        if (n === draggedNode) continue;
+
+        n.x += n.vx;
+        n.y += n.vy;
+
+        const margin = n.rad + 20;
+        if (n.x < margin) n.vx += 0.003;
+        if (n.x > cw - margin) n.vx -= 0.003;
+        if (n.y < margin) n.vy += 0.003;
+        if (n.y > ch - margin) n.vy -= 0.003;
+
+        const time = performance.now() * 0.0003;
+        n.vx += Math.sin(time + n.id.charCodeAt(0)) * 0.0008;
+        n.vy += Math.cos(time + n.id.charCodeAt(2)) * 0.0008;
+
+        n.vx *= 0.998;
+        n.vy *= 0.998;
+
+        const speed = Math.hypot(n.vx, n.vy);
+        const maxSpeed = 0.6;
+        if (speed > maxSpeed) {
+          n.vx = (n.vx / speed) * maxSpeed;
+          n.vy = (n.vy / speed) * maxSpeed;
+        }
+      }
+
+      for (let i = 0; i < graphNodes.length; i++) {
+        for (let j = i + 1; j < graphNodes.length; j++) {
+          let a = graphNodes[i], b = graphNodes[j];
+          let dx = b.x - a.x, dy = b.y - a.y;
+          let dist = Math.hypot(dx, dy);
+          let minDist = a.rad + b.rad + 8;
+          if (dist < minDist && dist > 0) {
+            let overlap = (minDist - dist) * 0.5;
+            let nx = dx / dist, ny = dy / dist;
+            if (a !== draggedNode) { a.x -= nx * overlap; a.y -= ny * overlap; }
+            if (b !== draggedNode) { b.x += nx * overlap; b.y += ny * overlap; }
+          }
+        }
+      }
+    }
+
+    function getThemeColors() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'cartoon';
+      if (theme === 'cartoon') {
+        return {
+          bg: '#fef6e4',
+          lineBase: '255, 180, 100',
+          nodeFill: 'rgba(255, 255, 255, 0.95)',
+          textMain: '#2d3436',
+          textSub: '#636e72',
+          shadowColor: 'rgba(0,0,0,0.08)',
+          lineAlpha: 0.5,
+          isAcademic: false
+        };
+      } else if (theme === 'glass') {
+        return {
+          bg: '#0f1117',
+          lineBase: '116, 185, 255',
+          nodeFill: 'rgba(255, 255, 255, 0.06)',
+          textMain: '#e0e6ed',
+          textSub: '#8b92a8',
+          shadowColor: 'rgba(0,0,0,0.3)',
+          lineAlpha: 0.4,
+          isAcademic: false
+        };
+      } else if (theme === 'academic') {
+        return {
+          bg: '#f8f9fa',
+          lineBase: '180, 180, 190',
+          nodeFill: '#ffffff',
+          textMain: '#1a1a2e',
+          textSub: '#9a9aa5',
+          shadowColor: 'transparent',
+          lineAlpha: 0.35,
+          isAcademic: true
+        };
+      } else {
+        return {
+          bg: '#0a0014',
+          lineBase: '189, 0, 255',
+          nodeFill: 'rgba(20, 0, 40, 0.8)',
+          textMain: '#f0e6ff',
+          textSub: '#a080c0',
+          shadowColor: 'rgba(189, 0, 255, 0.15)',
+          lineAlpha: 0.5,
+          isAcademic: false
+        };
+      }
+    }
+
+    function drawGraph() {
+      const colors = getThemeColors();
+      ctx.fillStyle = colors.bg;
+      ctx.fillRect(0, 0, cw, ch);
+
+      const theme = document.documentElement.getAttribute('data-theme') || 'cartoon';
+
+      // ---- Draw connections ----
+      if (colors.isAcademic) {
+        // Academic: ultra-thin light gray lines
+        ctx.lineWidth = 0.8;
+        for (let i = 0; i < graphNodes.length; i++) {
+          for (let j = i + 1; j < graphNodes.length; j++) {
+            let dist = Math.hypot(graphNodes[i].x - graphNodes[j].x, graphNodes[i].y - graphNodes[j].y);
+            if (dist < 600) {
+              let alpha = Math.max(0, 1 - (dist / 600)) * 0.25;
+              ctx.strokeStyle = `rgba(160, 160, 170, ${alpha})`;
+              ctx.beginPath();
+              ctx.moveTo(graphNodes[i].x, graphNodes[i].y);
+              ctx.lineTo(graphNodes[j].x, graphNodes[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+      } else {
+        ctx.lineWidth = theme === 'cartoon' ? 2.5 : 1.5;
+        for (let i = 0; i < graphNodes.length; i++) {
+          for (let j = i + 1; j < graphNodes.length; j++) {
+            let dist = Math.hypot(graphNodes[i].x - graphNodes[j].x, graphNodes[i].y - graphNodes[j].y);
+            if (dist < 800) {
+              let alpha = Math.max(0, 1 - (dist / 800)) * colors.lineAlpha;
+              ctx.strokeStyle = `rgba(${colors.lineBase}, ${alpha})`;
+              ctx.beginPath();
+              ctx.moveTo(graphNodes[i].x, graphNodes[i].y);
+              ctx.lineTo(graphNodes[j].x, graphNodes[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // ---- Draw nodes ----
+      let hoverFound = false;
+
+      for (let node of graphNodes) {
+        let isHover = Math.hypot(mouseX - node.x, mouseY - node.y) <= node.rad + 10;
+        if (isHover) hoverFound = true;
+
+        let nodeColor = colors.isAcademic ? (ACADEMIC_COLORS[node.subtitle] || '#6b8cae') : node.color;
+
+        if (colors.isAcademic) {
+          // ---- Academic node: minimal thin outline, white fill ----
+          ctx.shadowBlur = 0;
+
+          // Outer ring on hover
+          if (isHover) {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.rad + 4, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(26, 26, 46, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+
+          // Node body: white fill, thin colored outline
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.rad, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+
+          // Thin outline
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = nodeColor;
+          ctx.stroke();
+
+          // Inner dot accent
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = nodeColor;
+          ctx.fill();
+
+          // Minimalist letter icon
+          const iconLetter = ACADEMIC_ICONS[node.id] || '';
+          if (iconLetter) {
+            ctx.fillStyle = nodeColor;
+            ctx.font = 'bold 20px "Segoe UI", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.globalAlpha = 0.6;
+            ctx.fillText(iconLetter, node.x, node.y - 12);
+            ctx.globalAlpha = 1.0;
+          }
+
+          // Title: regular weight, dark
+          ctx.fillStyle = colors.textMain;
+          ctx.font = '13px "Segoe UI", "Microsoft YaHei", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(node.title, node.x, node.y + 22);
+
+          // Subtitle: small, muted gray
+          ctx.fillStyle = colors.textSub;
+          ctx.font = '10px "Segoe UI", "Microsoft YaHei", sans-serif';
+          ctx.fillText(node.subtitle, node.x, node.y + 38);
+
+        } else {
+          // ---- Non-academic nodes (original style) ----
+          if (theme === 'cyber') {
+            ctx.shadowColor = node.color;
+            ctx.shadowBlur = isHover ? 30 : 15;
+          } else if (theme === 'glass') {
+            ctx.shadowColor = node.color;
+            ctx.shadowBlur = isHover ? 20 : 10;
+          } else {
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 8;
+          }
+
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.rad + (isHover ? 6 : 0), 0, Math.PI * 2);
+          ctx.fillStyle = colors.nodeFill;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          ctx.lineWidth = theme === 'cartoon' ? 4 : 2;
+          ctx.strokeStyle = node.color;
+          ctx.stroke();
+
+          if (isHover) {
+            ctx.fillStyle = node.color;
+            ctx.globalAlpha = theme === 'cartoon' ? 0.15 : 0.25;
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+          }
+
+          ctx.font = '24px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(node.icon, node.x, node.y - 10);
+
+          ctx.fillStyle = colors.textMain;
+          ctx.font = `bold ${theme === 'cartoon' ? '14px' : '13px'} sans-serif`;
+          ctx.fillText(node.title, node.x, node.y + 18);
+
+          ctx.fillStyle = colors.textSub;
+          ctx.font = '11px sans-serif';
+          ctx.fillText(node.subtitle, node.x, node.y + 34);
+        }
+      }
+
+      document.body.style.cursor = hoverFound ? 'pointer' : 'default';
+    }
+
+    function animateGraph() {
+      updateGraphPhysics();
+      drawGraph();
+      requestAnimationFrame(animateGraph);
+    }
+    animateGraph();
+  </script>
+</body>
+</html>

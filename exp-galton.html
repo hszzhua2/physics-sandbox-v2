@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高尔顿钉板 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+    #ui-panel {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      width: 340px;
+      padding: 25px;
+      z-index: 10;
+    }
+    h1 { margin: 0; font-size: 1.5rem; transition: var(--theme-transition); }
+    p.desc { color: var(--text-muted); font-size: 0.9rem; margin: 8px 0 15px 0; }
+    .stat { margin-bottom: 15px; font-size: 0.95rem; }
+    .stat span { font-family: monospace; font-weight: bold; font-size: 1.1rem; }
+    .slider-group label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: bold; }
+    .val-display { font-family: monospace; }
+
+    [data-theme="cartoon"] h1 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
+    [data-theme="cartoon"] .stat span { color: var(--accent-2); }
+    [data-theme="cartoon"] .val-display { color: var(--accent-1); }
+
+    [data-theme="glass"] h1 { color: #ff9d00; text-shadow: 0 0 10px rgba(255,157,0,0.3); }
+    [data-theme="glass"] .stat span { color: #74b9ff; }
+    [data-theme="glass"] .val-display { color: #ff9d00; }
+
+    [data-theme="cyber"] h1 { color: #ff9d00; text-shadow: 0 0 15px rgba(255,157,0,0.5); }
+    [data-theme="cyber"] .stat span { color: #00f3ff; }
+    [data-theme="cyber"] .val-display { color: #ff9d00; }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <canvas id="sim-canvas"></canvas>
+
+  <div id="ui-panel" class="glass-panel">
+    <h1>GALTON BOARD</h1>
+    <p class="desc">大数定律：从混沌中涌现的正态分布。</p>
+    <div class="stat">收集量: <span id="ball-count">0</span></div>
+    <div class="slider-group">
+      <label><span>下落速率</span><span id="rate-val" class="val-display">10</span></label>
+      <input type="range" id="slider-rate" min="1" max="20" step="1" value="10">
+    </div>
+    <div class="slider-group">
+      <label><span>漏斗风力 (Bias)</span><span id="bias-val" class="val-display">0</span></label>
+      <input type="range" id="slider-bias" min="-0.15" max="0.15" step="0.01" value="0">
+    </div>
+    <button class="theme-btn" onclick="resetBoard()">重置沙盒</button>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    const canvas = document.getElementById('sim-canvas'), ctx = canvas.getContext('2d');
+    const elCount = document.getElementById('ball-count');
+    const sliderRate = document.getElementById('slider-rate');
+    const sliderBias = document.getElementById('slider-bias');
+    const GRAVITY = 0.15, BALL_RADIUS = 3, PEG_RADIUS = 4, ROWS = 16, SPACING_X = 24, SPACING_Y = 28, NUM_BINS = ROWS + 1;
+    let pegs = [], particles = [], bins = [], totalSettled = 0, cx, topY;
+    let animationId = null;
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; cx = canvas.width / 2; topY = 80; buildPegs(); }
+    window.addEventListener('resize', resize);
+    function buildPegs() {
+      pegs = []; bins = new Array(NUM_BINS).fill(0); totalSettled = 0; elCount.innerText = "0";
+      for (let row = 0; row < ROWS; row++) {
+        const num = row + 1, startX = cx - (num - 1) * (SPACING_X / 2), y = topY + 40 + row * SPACING_Y;
+        for (let col = 0; col < num; col++) pegs.push({ x: startX + col * SPACING_X, y: y });
+      }
+    }
+    function resetBoard() { particles = []; buildPegs(); }
+
+    class Particle {
+      constructor(x, y) { this.x = x + (Math.random() - 0.5); this.y = y; this.vx = (Math.random() - 0.5)*0.5; this.vy = Math.random()*2; this.active = true; this.color = Math.random()>0.5?'#ff9d00':'#ff4000'; }
+      update(bias) {
+        if(!this.active) return;
+        this.vy += GRAVITY; this.vx += bias; this.x += this.vx; this.y += this.vy; this.vx *= 0.99; this.vy *= 0.99;
+        if(this.y > topY && this.y < topY + ROWS*SPACING_Y + 40) {
+          for(let p of pegs) {
+            if(Math.abs(this.x-p.x)>SPACING_X || Math.abs(this.y-p.y)>SPACING_Y) continue;
+            let dx = this.x-p.x, dy = this.y-p.y, distSq = dx*dx+dy*dy, minDist = BALL_RADIUS+PEG_RADIUS;
+            if(distSq < minDist*minDist) {
+              let dist = Math.sqrt(distSq), nx = dx/dist, ny = dy/dist;
+              this.x += nx*(minDist-dist); this.y += ny*(minDist-dist);
+              let dot = this.vx*nx + this.vy*ny;
+              this.vx -= 2*dot*nx; this.vy -= 2*dot*ny;
+              this.vx *= 0.6; this.vy *= 0.6; this.vx += (Math.random()-0.5)*0.3;
+            }
+          }
+        }
+        const bottomY = topY + 40 + ROWS*SPACING_Y;
+        if(this.y > bottomY + 20) {
+          this.active = false;
+          let binIdx = Math.floor((this.x - (cx - (ROWS*SPACING_X)/2)) / SPACING_X);
+          binIdx = Math.max(0, Math.min(NUM_BINS-1, binIdx));
+          bins[binIdx]++; totalSettled++;
+          if(totalSettled%5===0) elCount.innerText = totalSettled;
+        }
+      }
+    }
+
+    function getThemeColors() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
+      if (theme === 'cartoon') {
+        return { fade: 'rgba(254, 246, 228, 0.3)', peg: 'rgba(78, 205, 196, 0.6)', curve: 'rgba(78, 205, 196, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
+      } else if (theme === 'glass') {
+        return { fade: 'rgba(15, 17, 23, 0.3)', peg: 'rgba(116, 185, 255, 0.6)', curve: 'rgba(116, 185, 255, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
+      } else {
+        return { fade: 'rgba(5, 5, 8, 0.3)', peg: 'rgba(0, 243, 255, 0.6)', curve: 'rgba(0, 243, 255, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
+      }
+    }
+
+    function animate() {
+      let rate = parseInt(sliderRate.value), bias = parseFloat(sliderBias.value);
+      document.getElementById('rate-val').innerText = rate; document.getElementById('bias-val').innerText = bias.toFixed(2);
+      for(let i=0; i<rate; i++) if(particles.length<2000) particles.push(new Particle(cx, topY));
+      for(let i=particles.length-1; i>=0; i--) { particles[i].update(bias); if(!particles[i].active) particles.splice(i,1); }
+
+      const colors = getThemeColors();
+      ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = colors.fade; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = colors.peg; for(let p of pegs) { ctx.beginPath(); ctx.arc(p.x, p.y, PEG_RADIUS, 0, Math.PI*2); ctx.fill(); }
+      for(let p of particles) if(p.active){ ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x, p.y, BALL_RADIUS, 0, Math.PI*2); ctx.fill(); }
+
+      const bottomY = topY + 80 + ROWS*SPACING_Y, leftEdge = cx - (ROWS*SPACING_X)/2;
+      ctx.fillStyle = colors.bin;
+      for(let i=0; i<NUM_BINS; i++) if(bins[i]>0) { ctx.beginPath(); ctx.roundRect(leftEdge + i*SPACING_X + SPACING_X/2 - SPACING_X/2 + 2, bottomY - bins[i]*2, SPACING_X-4, bins[i]*2, 4); ctx.fill(); }
+
+      if(totalSettled > 50) {
+        ctx.beginPath(); ctx.strokeStyle = colors.curve; ctx.lineWidth = 3;
+        for(let i=0; i<NUM_BINS; i++) {
+          let binX = leftEdge + i*SPACING_X + SPACING_X/2, curveY = bottomY - bins[i]*2 - 10;
+          if(i===0) ctx.moveTo(binX, curveY);
+          else {
+            let prevX = leftEdge + (i-1)*SPACING_X + SPACING_X/2, prevY = bottomY - bins[i-1]*2 - 10, ctrlX = (prevX+binX)/2;
+            ctx.bezierCurveTo(ctrlX, prevY, ctrlX, curveY, binX, curveY);
+          }
+        }
+        ctx.stroke();
+      }
+      animationId = requestAnimationFrame(animate);
+    }
+    resize(); animate();
+    window.addEventListener('beforeunload', () => cancelAnimationFrame(animationId));
+  </script>
+</body>
+</html>

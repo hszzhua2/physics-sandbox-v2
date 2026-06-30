@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>泰勒-库埃特流 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+    #ui-panel {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      width: 360px;
+      padding: 25px;
+      z-index: 10;
+    }
+    .header h1 { margin: 0; font-size: 1.5rem; transition: var(--theme-transition); }
+    .header h2 { margin: 6px 0 15px 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; transition: var(--theme-transition); }
+    .info-group {
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      padding: 12px;
+      border-radius: 12px;
+      transition: var(--theme-transition);
+    }
+    #flow-state-display {
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      letter-spacing: 2px;
+      transition: all 0.4s;
+    }
+    .slider-group label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: bold; }
+    .val-display { font-family: monospace; }
+
+    /* Theme-specific overrides */
+    [data-theme="cartoon"] .header h1 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
+    [data-theme="cartoon"] .header h2 { color: var(--accent-2); }
+    [data-theme="cartoon"] .info-group { background: rgba(255,255,255,0.6); color: var(--text-color); border-left: 4px solid var(--accent-2); }
+    [data-theme="cartoon"] #flow-state-display { background: rgba(255,255,255,0.7); border: 2px solid #ddd; }
+    [data-theme="cartoon"] .state-laminar { color: #888; border-color: #ccc !important; }
+    [data-theme="cartoon"] .state-taylor { color: var(--accent-2); border-color: var(--accent-2) !important; box-shadow: inset 0 0 15px rgba(78,205,196,0.15); }
+    [data-theme="cartoon"] .state-wavy { color: var(--accent-1); border-color: var(--accent-1) !important; box-shadow: inset 0 0 15px rgba(255,107,107,0.15); }
+    [data-theme="cartoon"] .val-display { color: var(--accent-1); }
+
+    [data-theme="glass"] .header h1 { color: #74b9ff; text-shadow: 0 0 10px rgba(116,185,255,0.3); }
+    [data-theme="glass"] .header h2 { color: #a29bfe; }
+    [data-theme="glass"] .info-group { background: rgba(0,0,0,0.3); color: #ccc; border-left: 3px solid #74b9ff; }
+    [data-theme="glass"] #flow-state-display { background: rgba(0,0,0,0.4); border: 1px solid #333; }
+    [data-theme="glass"] .state-laminar { color: #888; border-color: #555 !important; }
+    [data-theme="glass"] .state-taylor { color: #74b9ff; border-color: #74b9ff !important; text-shadow: 0 0 10px rgba(116,185,255,0.3); box-shadow: inset 0 0 15px rgba(116,185,255,0.1); }
+    [data-theme="glass"] .state-wavy { color: #fd79a8; border-color: #fd79a8 !important; text-shadow: 0 0 10px rgba(253,121,168,0.3); box-shadow: inset 0 0 15px rgba(253,121,168,0.1); }
+    [data-theme="glass"] .val-display { color: #74b9ff; }
+
+    [data-theme="cyber"] .header h1 { color: #00f3ff; text-shadow: 0 0 15px rgba(0,243,255,0.5); }
+    [data-theme="cyber"] .header h2 { color: #ff00ea; }
+    [data-theme="cyber"] .info-group { background: rgba(0,0,0,0.4); color: #ccc; border-left: 3px solid #00f3ff; }
+    [data-theme="cyber"] #flow-state-display { background: rgba(0,0,0,0.5); border: 1px solid #333; }
+    [data-theme="cyber"] .state-laminar { color: #888; border-color: #555 !important; }
+    [data-theme="cyber"] .state-taylor { color: #00f3ff; border-color: #00f3ff !important; text-shadow: 0 0 10px #00f3ff; box-shadow: inset 0 0 15px rgba(0,243,255,0.15); }
+    [data-theme="cyber"] .state-wavy { color: #ff00ea; border-color: #ff00ea !important; text-shadow: 0 0 10px #ff00ea; box-shadow: inset 0 0 15px rgba(255,0,234,0.15); }
+    [data-theme="cyber"] .val-display { color: #00f3ff; }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <canvas id="sim-canvas"></canvas>
+
+  <div id="ui-panel" class="glass-panel">
+    <div class="header">
+      <h1>TAYLOR-COUETTE</h1>
+      <h2>涡流不稳定性可视化</h2>
+    </div>
+    <div class="info-group">
+      流体力学相变奇观：当内壁旋转速度跨越临界值，液体将自发破缺重组为环状斑马纹。
+    </div>
+    <div id="flow-state-display" class="state-laminar">层流状态 (LAMINAR)</div>
+    <div class="slider-group">
+      <label><span>内壁转速 (RPM)</span><span id="rpm-val" class="val-display">20</span></label>
+      <input type="range" id="slider-rpm" min="0" max="100" step="1" value="20">
+    </div>
+    <button class="theme-btn" onclick="injectDye()">注入荧光杂质</button>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    const canvas = document.getElementById('sim-canvas'), ctx = canvas.getContext('2d');
+    const elStateDisplay = document.getElementById('flow-state-display');
+    const sliderRPM = document.getElementById('slider-rpm');
+    const labelRPM = document.getElementById('rpm-val');
+    const NUM_PARTICLES = 35000, NUM_BANDS = 12, CRITICAL_TAYLOR = 35, CRITICAL_WAVY = 70;
+    let targetRPM = parseInt(sliderRPM.value), currentRPM = targetRPM;
+    let targetVortexAmp = 0, targetWaveAmp = 0, currentVortexAmp = 0, currentWaveAmp = 0;
+    const positionsX = new Float32Array(NUM_PARTICLES), positionsY = new Float32Array(NUM_PARTICLES);
+    const velocitiesX = new Float32Array(NUM_PARTICLES), velocitiesY = new Float32Array(NUM_PARTICLES);
+    let animationId = null;
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+
+    function injectDye() {
+      for (let i = 0; i < NUM_PARTICLES; i++) {
+        positionsX[i] = Math.random() * canvas.width;
+        positionsY[i] = Math.random() * canvas.height;
+        velocitiesX[i] = 0; velocitiesY[i] = 0;
+      }
+      const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
+      ctx.fillStyle = theme === 'cartoon' ? '#fff' : '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    sliderRPM.addEventListener('input', (e) => {
+      targetRPM = parseInt(e.target.value); labelRPM.innerText = targetRPM;
+      if (targetRPM < CRITICAL_TAYLOR) {
+        elStateDisplay.className = "state-laminar"; elStateDisplay.innerText = "层流状态 (LAMINAR)";
+      } else if (targetRPM < CRITICAL_WAVY) {
+        elStateDisplay.className = "state-taylor"; elStateDisplay.innerText = "泰勒涡流 (TAYLOR VORTEX)";
+      } else {
+        elStateDisplay.className = "state-wavy"; elStateDisplay.innerText = "波状泰勒涡 (WAVY VORTEX)";
+      }
+    });
+
+    function updatePhysics(time) {
+      currentRPM += (targetRPM - currentRPM) * 0.03;
+      if (targetRPM < CRITICAL_TAYLOR) { targetVortexAmp = 0; targetWaveAmp = 0; }
+      else if (targetRPM < CRITICAL_WAVY) { targetVortexAmp = (targetRPM - CRITICAL_TAYLOR) * 0.3; targetWaveAmp = 0; }
+      else { targetVortexAmp = (CRITICAL_WAVY - CRITICAL_TAYLOR) * 0.3 + (targetRPM - CRITICAL_WAVY) * 0.1; targetWaveAmp = (targetRPM - CRITICAL_WAVY) * 0.15; }
+      currentVortexAmp += (targetVortexAmp - currentVortexAmp) * 0.05;
+      currentWaveAmp += (targetWaveAmp - currentWaveAmp) * 0.05;
+      const freqY = (Math.PI * 2 * NUM_BANDS) / canvas.height;
+      const freqX = (Math.PI * 2 * 4) / canvas.width;
+      for (let i = 0; i < NUM_PARTICLES; i++) {
+        let px = positionsX[i], py = positionsY[i], vx = velocitiesX[i], vy = velocitiesY[i];
+        let targetVx = currentRPM * 0.25;
+        let phaseX = px * freqX, waveOffset = currentWaveAmp * Math.sin(phaseX - time * 1.5), phaseY = py * freqY;
+        let targetVy = -currentVortexAmp * Math.sin(phaseY + waveOffset);
+        vx = vx * 0.85 + targetVx * 0.15 + (Math.random() - 0.5) * 0.8;
+        vy = vy * 0.85 + targetVy * 0.15 + (Math.random() - 0.5) * 1.5;
+        px += vx; py += vy;
+        if (px > canvas.width) px -= canvas.width; if (px < 0) px += canvas.width;
+        if (py > canvas.height) py -= canvas.height; if (py < 0) py += canvas.height;
+        positionsX[i] = px; positionsY[i] = py; velocitiesX[i] = vx; velocitiesY[i] = vy;
+      }
+    }
+
+    function getDrawColors() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
+      if (theme === 'cartoon') {
+        return { bg: 'rgba(254, 246, 228, 0.15)', particle: targetRPM >= CRITICAL_WAVY ? 'rgba(255, 107, 107, 0.4)' : 'rgba(78, 205, 196, 0.4)' };
+      } else if (theme === 'glass') {
+        return { bg: 'rgba(15, 17, 23, 0.15)', particle: targetRPM >= CRITICAL_WAVY ? 'rgba(253, 121, 168, 0.4)' : 'rgba(116, 185, 255, 0.4)' };
+      } else {
+        return { bg: 'rgba(2, 3, 5, 0.15)', particle: targetRPM >= CRITICAL_WAVY ? 'rgba(255, 0, 234, 0.4)' : 'rgba(0, 243, 255, 0.4)' };
+      }
+    }
+
+    function draw() {
+      const colors = getDrawColors();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = colors.bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = colors.particle;
+      ctx.beginPath();
+      for (let i = 0; i < NUM_PARTICLES; i++) ctx.rect(positionsX[i], positionsY[i], 1.2, 1.2);
+      ctx.fill();
+    }
+
+    function animate() { updatePhysics(performance.now() * 0.001); draw(); animationId = requestAnimationFrame(animate); }
+    injectDye(); animate();
+    window.addEventListener('beforeunload', () => cancelAnimationFrame(animationId));
+  </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>刚体沙盒 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <style>
+    .exp-bg { z-index: -1; }
+    body { display: flex; overflow: hidden; }
+    #left {
+      width: 30%; min-width: 300px; padding: 20px;
+      display: flex; flex-direction: column; gap: 15px;
+      height: 100vh; overflow-y: auto; z-index: 10;
+    }
+    #left h2 { margin: 0; font-size: 1.5rem; transition: var(--theme-transition); }
+    #left p { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 10px 0; }
+    textarea {
+      flex: 1 1 auto; background: rgba(0,0,0,0.3); color: var(--text-color);
+      border: 1px solid var(--panel-border); padding: 15px;
+      font-family: monospace; resize: none; overflow-y: auto; min-height: 150px;
+      border-radius: var(--radius); transition: var(--theme-transition);
+    }
+    [data-theme="cartoon"] textarea { background: rgba(255,255,255,0.7); color: #2d3436; }
+    #right {
+      width: 70%; flex-grow: 1; display: flex; justify-content: center; align-items: center;
+      background: transparent; z-index: 0;
+    }
+    .button-group { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; padding-bottom: 10px; }
+    .btn-secondary {
+      padding: 12px; border: none; border-radius: var(--radius); cursor: pointer;
+      font-weight: bold; transition: all 0.2s; font-family: var(--font-main);
+      background: rgba(128,128,128,0.2); color: var(--text-color); border: var(--border-width) solid var(--panel-border);
+    }
+    .btn-secondary:hover { background: rgba(128,128,128,0.3); }
+    [data-theme="cartoon"] .btn-secondary { background: #f0f0f0; color: #555; border: 2px solid #ddd; }
+
+    @media (max-width: 768px) {
+      body { flex-direction: column; overflow: auto; }
+      #left { width: 100%; height: auto; min-height: 50vh; border-right: none; border-bottom: 1px solid var(--panel-border); overflow-y: visible; }
+      #right { width: 100%; height: 50vh; min-height: 400px; }
+    }
+
+    [data-theme="cartoon"] #left h2 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
+    [data-theme="glass"] #left h2 { color: #39ff14; text-shadow: 0 0 10px rgba(57,255,20,0.3); }
+    [data-theme="cyber"] #left h2 { color: #39ff14; text-shadow: 0 0 15px rgba(57,255,20,0.5); }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <div id="left" class="glass-panel">
+    <h2>Rigid Body Sandbox</h2>
+    <p>Matter.js Chain Reaction</p>
+    <textarea id="json-input">{
+  "entities": [
+    {"type": "ball", "params": {"x": 100, "y": 50}},
+    {"type": "ramp", "params": {"x": 200, "y": 200, "width": 300, "angle": 0.2}},
+    {"type": "dominoes", "params": {"x": 400, "y": 400, "count": 6, "spacing": 40}},
+    {"type": "seesaw", "params": {"x": 600, "y": 500, "length": 200}}
+  ]
+}</textarea>
+    <div class="button-group">
+      <button class="theme-btn" id="generate">确认修改并生成</button>
+      <button class="btn-secondary" id="reset">重置沙盒</button>
+    </div>
+  </div>
+  <div id="right"></div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    window.addEventListener('load', () => {
+      const { Engine, Render, Runner, World, Bodies, Constraint } = Matter;
+      const engine = Engine.create();
+      const render = Render.create({
+        element: document.getElementById('right'),
+        engine: engine,
+        options: {
+          width: window.innerWidth * 0.7,
+          height: window.innerHeight,
+          wireframes: false,
+          background: 'transparent'
+        }
+      });
+      Render.run(render);
+      const runner = Runner.create();
+      Runner.run(runner, engine);
+
+      const walls = [
+        Bodies.rectangle(render.options.width/2, render.options.height + 25, render.options.width, 50, { isStatic: true }),
+        Bodies.rectangle(-25, render.options.height/2, 50, render.options.height, { isStatic: true }),
+        Bodies.rectangle(render.options.width + 25, render.options.height/2, 50, render.options.height, { isStatic: true })
+      ];
+      World.add(engine.world, walls);
+
+      function generate() {
+        World.clear(engine.world, false);
+        World.add(engine.world, walls);
+        try {
+          const data = JSON.parse(document.getElementById('json-input').value.trim());
+          const bodies = [];
+          data.entities.forEach(e => {
+            const p = e.params;
+            if(e.type==='ball') bodies.push(Bodies.circle(p.x, p.y, 15, { restitution: 0.85, render:{fillStyle:'#39ff14'} }));
+            if(e.type==='ramp') bodies.push(Bodies.rectangle(p.x, p.y, p.width, 15, { isStatic:true, angle:p.angle, render:{fillStyle:'#00ffff'} }));
+            if(e.type==='dominoes') {
+              for(let i=0;i<p.count;i++) bodies.push(Bodies.rectangle(p.x+i*p.spacing, p.y, 10, 60, { render:{fillStyle:'#ffff00'} }));
+              bodies.push(Bodies.rectangle(p.x+((p.count-1)*p.spacing)/2, p.y+40, (p.count-1)*p.spacing+20, 20, { isStatic:true, render:{fillStyle:'#ff00ff'} }));
+            }
+            if(e.type==='seesaw') {
+              const lever = Bodies.rectangle(p.x, p.y, p.length, 15, { render:{fillStyle:'#ff00ff'} });
+              const pivot = Bodies.polygon(p.x, p.y+25, 3, 30, { isStatic:true, render:{fillStyle:'#888'} });
+              const constraint = Constraint.create({ bodyA: lever, pointB: {x:0, y:0}, stiffness: 1, length: 0 });
+              const ball = Bodies.rectangle(p.x-p.length/2+20, p.y-20, 20, 20, {render:{fillStyle:'#39ff14'}});
+              bodies.push(lever, pivot, constraint, ball);
+            }
+          });
+          World.add(engine.world, bodies);
+        } catch (e) {
+          alert('JSON格式错误：' + e.message);
+        }
+      }
+
+      document.getElementById('reset').onclick = () => {
+        World.clear(engine.world, false);
+        World.add(engine.world, walls);
+      };
+      document.getElementById('generate').onclick = generate;
+      generate();
+
+      window.addEventListener('beforeunload', () => {
+        Runner.stop(runner);
+        Render.stop(render);
+        World.clear(engine.world);
+        Engine.clear(engine);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>混沌N阶摆 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; cursor: grab; }
+    #sim-canvas:active { cursor: grabbing; }
+    #ui-panel {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      width: 330px;
+      padding: 20px;
+      z-index: 10;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    h1 { margin: 0; font-size: 1.4rem; transition: var(--theme-transition); }
+    p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
+    .slider-group { margin-bottom: 12px; }
+    .slider-group label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold; }
+    .val-display { font-family: monospace; font-size: 0.9rem; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .btn-row .theme-btn { flex: 1; min-width: 80px; padding: 10px 12px; font-size: 0.85rem; }
+    .hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; text-align: center; line-height: 1.5; }
+    .hint strong { color: var(--text-color); }
+    .stats { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; }
+    .stats span { font-family: monospace; font-weight: bold; }
+
+    /* Theme colors */
+    [data-theme="cartoon"] h1 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
+    [data-theme="cartoon"] .val-display { color: var(--accent-1); }
+    [data-theme="cartoon"] .stats span { color: var(--accent-1); }
+
+    [data-theme="glass"] h1 { color: #ff00ea; text-shadow: 0 0 10px rgba(255,0,234,0.3); }
+    [data-theme="glass"] .val-display { color: #74b9ff; }
+    [data-theme="glass"] .stats span { color: #74b9ff; }
+
+    [data-theme="cyber"] h1 { color: #ff00ea; text-shadow: 0 0 15px rgba(255,0,234,0.5); }
+    [data-theme="cyber"] .val-display { color: #00f3ff; }
+    [data-theme="cyber"] .stats span { color: #00f3ff; }
+
+    /* Academic theme */
+    [data-theme="academic"] h1 { color: #1a1a2e; font-weight: 700; text-shadow: none; }
+    [data-theme="academic"] p.desc { color: #7a7a8a; }
+    [data-theme="academic"] .val-display { color: #1a1a2e; }
+    [data-theme="academic"] .stats span { color: #1a1a2e; }
+    [data-theme="academic"] .hint { color: #9a9aa5; }
+    [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
+
+    /* Scrollbar theming for panel */
+    #ui-panel::-webkit-scrollbar { width: 5px; }
+    [data-theme="cartoon"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+    [data-theme="glass"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    [data-theme="cyber"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(189,0,255,0.3); border-radius: 3px; }
+
+    /* Ideal mode switch */
+    #ideal-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(128,128,128,0.2); border-radius: 26px; transition: .3s; }
+    #ideal-slider::before {
+      position: absolute; content: "";
+      height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%; transition: .3s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    #ideal-toggle:checked + #ideal-slider { background: #4ecdc4; box-shadow: 0 0 10px rgba(78,205,196,0.5); }
+    #ideal-toggle:checked + #ideal-slider::before { transform: translateX(22px); }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <canvas id="sim-canvas"></canvas>
+
+  <div id="ui-panel" class="glass-panel">
+    <h1>CHAOS PENDULUM</h1>
+    <p class="desc">N阶链式摆 — 蝴蝶效应的可视化</p>
+
+    <div class="stats">
+      系统数: <span id="sys-count">26</span> &nbsp;|&nbsp;
+      关节数: <span id="joint-count">3</span>
+    </div>
+
+    <div class="slider-group">
+      <label><span>摆臂阶数 (N)</span><span id="n-val" class="val-display">3</span></label>
+      <input type="range" id="slider-n" min="1" max="8" step="1" value="3">
+    </div>
+    <div class="slider-group">
+      <label><span>臂长 (px)</span><span id="len-val" class="val-display">110</span></label>
+      <input type="range" id="slider-len" min="40" max="200" step="10" value="110">
+    </div>
+    <div class="slider-group">
+      <label><span>重力加速度</span><span id="g-val" class="val-display">0</span></label>
+      <input type="range" id="slider-g" min="0" max="2" step="0.05" value="0">
+    </div>
+    <div class="slider-group">
+      <label><span>阻尼 (空气阻力)</span><span id="damp-val" class="val-display">0</span></label>
+      <input type="range" id="slider-damp" min="0" max="1.0" step="0.001" value="0">
+    </div>
+    <div class="slider-group">
+      <label><span>驱动幅度 (持续摆动)</span><span id="drive-val" class="val-display">0</span></label>
+      <input type="range" id="slider-drive" min="0" max="3" step="0.05" value="0">
+    </div>
+    <div class="slider-group">
+      <label><span>驱动频率</span><span id="freq-val" class="val-display">0.20</span></label>
+      <input type="range" id="slider-freq" min="0.01" max="0.2" step="0.01" value="0.2">
+    </div>
+    <div class="slider-group">
+      <label><span>轨迹长度</span><span id="trail-val" class="val-display">1200</span></label>
+      <input type="range" id="slider-trail" min="0" max="1200" step="50" value="1200">
+    </div>
+    <div class="slider-group">
+      <label><span>差异数量</span><span id="num-val" class="val-display">26</span></label>
+      <input type="range" id="slider-num" min="1" max="150" step="5" value="26">
+    </div>
+
+    <div class="slider-group" style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+      <label style="margin:0; flex:1;"><span>理想模式 (无耗散)</span></label>
+      <label class="switch" style="position:relative; display:inline-block; width:48px; height:26px;">
+        <input type="checkbox" id="ideal-toggle" style="opacity:0; width:0; height:0;" onchange="toggleIdealMode()" checked>
+        <span id="ideal-slider"></span>
+      </label>
+    </div>
+
+    <div class="btn-row">
+      <button class="theme-btn" onclick="releaseAll()">释放</button>
+      <button class="theme-btn" onclick="resetSimulation()">重置</button>
+      <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
+    </div>
+
+  </div>
+
+  <!-- Entrance hint toast -->
+  <div id="entrance-toast" class="glass-panel" style="
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
+    opacity:1; transition:opacity 0.8s ease;">
+    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:var(--text-color);">
+      交互提示
+    </div>
+    <div style="font-size:0.95rem; color:var(--text-muted); line-height:1.8;">
+      <strong style="color:var(--accent-1);">左键拖拽</strong> 关节甩动摆臂<br>
+      <strong style="color:var(--accent-2);">右键拖拽</strong> 平移画布 &nbsp;·&nbsp;
+      <strong style="color:var(--accent-2);">右键点击</strong> 关节固定/释放
+    </div>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+    /* ================================================================
+       混沌N阶摆 — 完全重写版
+       物理引擎: Velocity Verlet + 距离约束迭代
+       修复问题:
+       1. 阻尼语义反转 (0=无阻力, 1=完全停止)
+       2. 初始推动不足导致摆不动
+       3. 系统间差异太小导致26条线重叠
+       4. PAN偏移下鼠标交互坐标错误
+       5. 学术模式可见性极差
+       6. 驱动作为全局水平加速度更合理
+       7. 约束迭代次数增加到10次提高稳定性
+       ================================================================ */
+
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    const canvas = document.getElementById('sim-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, cx, cy;
+    let paused = false;
+    let animId = null;
+
+    // ---- Parameters ----
+    let N_JOINTS = 3;
+    let SEG_LEN = 110;
+    let GRAVITY = 0;
+    let DAMPING = 0;      // 0 = no drag, 1.0 = full stop
+    let DRIVE_AMP = 0;
+    let DRIVE_FREQ = 0.2;
+    let TRAIL_LEN = 1200;
+    let NUM_SYSTEMS = 26;
+    let IDEAL_MODE = true;
+    let driveTime = 0;
+
+    // ---- State ----
+    let systems = [];
+    let grab = { active: false, sys: -1, joint: -1 };
+    let pan = { active: false, sx: 0, sy: 0, ox: 0, oy: 0 };
+    let SCALE = 1.0;
+
+    class Node {
+      constructor(x, y) {
+        this.x = x; this.y = y;
+        this.px = x; this.py = y;
+        this.fixed = false;
+      }
+    }
+
+    function resize() {
+      const oldCx = cx, oldCy = cy;
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      cx = W / 2;
+      cy = H * 0.25;
+      // Adjust pan offset so the view stays centered relative to the anchor
+      if (oldCx !== undefined) {
+        pan.ox += cx - oldCx;
+        pan.oy += cy - oldCy;
+      }
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // ---- Build a pendulum system ----
+    function buildSystem(sysIndex) {
+      const nodes = [];
+      // Root anchor
+      nodes.push(new Node(cx, cy));
+      nodes[0].fixed = true;
+
+      // Chain: initial angle ~108deg with tiny per-system variation
+      const baseAngle = Math.PI * 0.6 + sysIndex * 0.001;
+      let angle = baseAngle;
+      for (let i = 1; i <= N_JOINTS; i++) {
+        const x = nodes[i - 1].x + SEG_LEN * Math.sin(angle);
+        const y = nodes[i - 1].y + SEG_LEN * Math.cos(angle);
+        nodes.push(new Node(x, y));
+        angle += (Math.random() - 0.5) * 0.08;
+      }
+
+      // Initial push: each system gets a distinct horizontal velocity
+      // so the butterfly effect is visible immediately
+      const pushDir = (sysIndex % 2 === 0) ? 1 : -1;
+      const pushStrength = 3 + (Math.random() * 4) + sysIndex * 0.15;
+      for (let i = 1; i < nodes.length; i++) {
+        const factor = i / nodes.length; // stronger at tip
+        nodes[i].px = nodes[i].x - pushDir * pushStrength * factor;
+        nodes[i].py = nodes[i].y + (Math.random() - 0.5) * 1.5;
+      }
+      return nodes;
+    }
+
+    function initSystems() {
+      systems = [];
+      for (let i = 0; i < NUM_SYSTEMS; i++) {
+        systems.push({
+          nodes: buildSystem(i),
+          color: `hsl(${180 + 180 * (i / Math.max(1, NUM_SYSTEMS - 1))}, 100%, 60%)`,
+          trail: []
+        });
+      }
+      updateStats();
+    }
+
+    function updateStats() {
+      document.getElementById('sys-count').textContent = NUM_SYSTEMS;
+      document.getElementById('joint-count').textContent = N_JOINTS;
+    }
+
+    function releaseAll() {
+      for (let sys of systems) {
+        for (let i = 1; i < sys.nodes.length; i++) {
+          sys.nodes[i].fixed = false;
+        }
+      }
+    }
+
+    function resetSimulation() {
+      initSystems();
+      driveTime = 0;
+      clearCanvas();
+    }
+
+    function togglePause() {
+      paused = !paused;
+      document.getElementById('pause-btn').textContent = paused ? '继续' : '暂停';
+    }
+
+    function toggleIdealMode() {
+      IDEAL_MODE = document.getElementById('ideal-toggle').checked;
+    }
+
+    function clearCanvas() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+      let bg;
+      if (theme === 'cartoon') bg = '#fef6e4';
+      else if (theme === 'glass') bg = '#0f1117';
+      else if (theme === 'academic') bg = '#f8f9fa';
+      else bg = '#050508';
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // ---- Physics ----
+    function stepPhysics(nodes) {
+      const damp = IDEAL_MODE ? 1.0 : Math.max(0, 1.0 - DAMPING);
+      const drive = IDEAL_MODE ? 0 : DRIVE_AMP * Math.sin(driveTime);
+
+      // 1. Velocity Verlet integration with gravity + drive
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].fixed) continue;
+        const vx = (nodes[i].x - nodes[i].px) * damp;
+        const vy = (nodes[i].y - nodes[i].py) * damp;
+        nodes[i].px = nodes[i].x;
+        nodes[i].py = nodes[i].y;
+        nodes[i].x += vx + drive;
+        nodes[i].y += vy + GRAVITY;
+      }
+
+      // 2. Distance constraints (iterative relaxation)
+      const ITERATIONS = 10;
+      for (let iter = 0; iter < ITERATIONS; iter++) {
+        for (let i = 1; i < nodes.length; i++) {
+          const dx = nodes[i].x - nodes[i - 1].x;
+          const dy = nodes[i].y - nodes[i - 1].y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const diff = dist - SEG_LEN;
+          const ratio = diff / dist * 0.5;
+          const ox = dx * ratio;
+          const oy = dy * ratio;
+
+          if (!nodes[i].fixed) {
+            nodes[i].x -= ox;
+            nodes[i].y -= oy;
+          }
+          if (!nodes[i - 1].fixed) {
+            nodes[i - 1].x += ox;
+            nodes[i - 1].y += oy;
+          }
+        }
+        // Anchor stays at root
+        nodes[0].x = cx;
+        nodes[0].y = cy;
+      }
+    }
+
+    // ---- Mouse: screen <-> physics coordinate conversion ----
+    function screenToPhysics(sx, sy) {
+      return { x: (sx - pan.ox) / SCALE, y: (sy - pan.oy) / SCALE };
+    }
+
+    function getNearestJoint(sx, sy) {
+      const p = screenToPhysics(sx, sy);
+      let best = { sys: -1, joint: -1, dist: Infinity };
+      for (let s = 0; s < systems.length; s++) {
+        const nodes = systems[s].nodes;
+        for (let i = 0; i < nodes.length; i++) {
+          const d = Math.hypot(nodes[i].x - p.x, nodes[i].y - p.y);
+          if (d < best.dist && d < 50) {
+            best = { sys: s, joint: i, dist: d };
+          }
+        }
+      }
+      return best;
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+
+      if (e.button === 2) {
+        const nearest = getNearestJoint(sx, sy);
+        if (nearest.sys >= 0 && nearest.dist < 25) {
+          e.preventDefault();
+          const n = systems[nearest.sys].nodes[nearest.joint];
+          n.fixed = !n.fixed;
+          if (n.fixed) { n.px = n.x; n.py = n.y; }
+        } else {
+          e.preventDefault();
+          pan.active = true;
+          pan.sx = sx;
+          pan.sy = sy;
+        }
+      } else {
+        const nearest = getNearestJoint(sx, sy);
+        if (nearest.sys >= 0) {
+          grab.active = true;
+          grab.sys = nearest.sys;
+          grab.joint = nearest.joint;
+        }
+      }
+    });
+
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+
+      if (grab.active) {
+        const p = screenToPhysics(sx, sy);
+        const n = systems[grab.sys].nodes[grab.joint];
+        n.x = p.x; n.y = p.y;
+        n.px = p.x; n.py = p.y;
+      }
+      if (pan.active) {
+        pan.ox += sx - pan.sx;
+        pan.oy += sy - pan.sy;
+        pan.sx = sx;
+        pan.sy = sy;
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      grab.active = false;
+      grab.sys = -1;
+      grab.joint = -1;
+      pan.active = false;
+    });
+
+    // ---- Wheel zoom (centered on mouse) ----
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      const newScale = Math.max(0.3, Math.min(5.0, SCALE * zoomFactor));
+
+      // Keep the point under the mouse stationary
+      const physX = (mx - pan.ox) / SCALE;
+      const physY = (my - pan.oy) / SCALE;
+      pan.ox = mx - physX * newScale;
+      pan.oy = my - physY * newScale;
+      SCALE = newScale;
+    }, { passive: false });
+
+    // ---- Drawing helpers ----
+    function getThemeFade() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+      if (theme === 'cartoon') return 'rgba(254, 246, 228, 0.05)';
+      if (theme === 'glass') return 'rgba(15, 17, 23, 0.06)';
+      if (theme === 'academic') return 'rgba(240, 242, 245, 0.08)';
+      return 'rgba(5, 5, 8, 0.06)';
+    }
+
+    const ACADEMIC_HUES = [200, 220, 260, 280, 320, 340, 180, 200, 240, 260, 300, 320];
+
+    function getSystemColor(sys, isAcademic) {
+      if (!isAcademic) return sys.color;
+      const hue = ACADEMIC_HUES[systems.indexOf(sys) % ACADEMIC_HUES.length];
+      return `hsl(${hue}, 40%, 45%)`;
+    }
+
+    function draw() {
+      // Fade background
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = getThemeFade();
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.save();
+      ctx.translate(pan.ox, pan.oy);
+      ctx.scale(SCALE, SCALE);
+
+      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+      const isAcademic = theme === 'academic';
+
+      for (let s = 0; s < systems.length; s++) {
+        const sys = systems[s];
+        const nodes = sys.nodes;
+        const drawColor = getSystemColor(sys, isAcademic);
+
+        // -- Draw rods --
+        ctx.globalCompositeOperation = isAcademic ? 'source-over' : 'lighter';
+        if (isAcademic) {
+          ctx.lineWidth = (s === 0) ? 1.5 : 0.8;
+          ctx.strokeStyle = drawColor.replace('45%)', '35%)');
+        } else if (theme === 'cartoon') {
+          ctx.lineWidth = (s === 0) ? 2 : 0.8;
+          ctx.strokeStyle = sys.color.replace('60%)', '40%)').replace('hsl', 'hsla');
+        } else {
+          ctx.lineWidth = (s === 0) ? 1.5 : 0.5;
+          ctx.strokeStyle = sys.color.replace('60%)', '20%)').replace('hsl', 'hsla');
+        }
+        ctx.beginPath();
+        ctx.moveTo(nodes[0].x, nodes[0].y);
+        for (let i = 1; i < nodes.length; i++) ctx.lineTo(nodes[i].x, nodes[i].y);
+        ctx.stroke();
+
+        // -- Draw trail --
+        if (TRAIL_LEN > 0 && sys.trail.length > 1) {
+          ctx.beginPath();
+          ctx.moveTo(sys.trail[0].x, sys.trail[0].y);
+          for (let i = 1; i < sys.trail.length; i++) ctx.lineTo(sys.trail[i].x, sys.trail[i].y);
+
+          if (isAcademic) {
+            const alpha = (s === 0) ? 0.5 : 0.12;
+            ctx.strokeStyle = drawColor.replace('45%)', `${Math.round(alpha * 100)}%)`);
+            ctx.lineWidth = (s === 0) ? 1.5 : 0.7;
+          } else if (theme === 'cartoon') {
+            const alpha = (s === 0) ? 0.7 : 0.2;
+            ctx.strokeStyle = sys.color.replace('60%)', `${Math.round(alpha * 100)}%)`).replace('hsl', 'hsla');
+            ctx.lineWidth = (s === 0) ? 2.5 : 1;
+          } else {
+            const alpha = (s === 0) ? 0.5 : 0.1;
+            ctx.strokeStyle = sys.color.replace('60%)', `${Math.round(alpha * 100)}%)`).replace('hsl', 'hsla');
+            ctx.lineWidth = (s === 0) ? 2 : 1;
+          }
+          ctx.stroke();
+        }
+
+        // -- Draw joints (first system only, prominently) --
+        if (s === 0) {
+          ctx.globalCompositeOperation = 'source-over';
+          for (let i = 0; i < nodes.length; i++) {
+            const r = i === 0 ? 5 : (i === nodes.length - 1 ? 6 : 3.5);
+            const fixed = nodes[i].fixed;
+
+            if (isAcademic) {
+              ctx.shadowBlur = 0;
+              ctx.beginPath();
+              ctx.arc(nodes[i].x, nodes[i].y, r, 0, Math.PI * 2);
+              ctx.fillStyle = fixed ? '#1a1a2e' : '#ffffff';
+              ctx.fill();
+              ctx.lineWidth = 1.5;
+              ctx.strokeStyle = fixed ? '#1a1a2e' : drawColor;
+              ctx.stroke();
+            } else {
+              ctx.shadowBlur = fixed ? 20 : 10;
+              ctx.shadowColor = fixed ? '#fbbf24' : sys.color;
+
+              ctx.beginPath();
+              ctx.arc(nodes[i].x, nodes[i].y, r, 0, Math.PI * 2);
+              ctx.fillStyle = fixed ? '#fde68a' : '#fff';
+              ctx.fill();
+
+              ctx.beginPath();
+              ctx.arc(nodes[i].x, nodes[i].y, r - 1, 0, Math.PI * 2);
+              ctx.fillStyle = sys.color;
+              ctx.fill();
+
+              ctx.shadowBlur = 0;
+
+              if (theme === 'cyber' && fixed) {
+                ctx.beginPath();
+                ctx.arc(nodes[i].x, nodes[i].y, r + 3, 0, Math.PI * 2);
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 1;
+                ctx.shadowColor = '#fbbf24';
+                ctx.shadowBlur = 15;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+              }
+            }
+          }
+
+          // End-effector highlight
+          const end = nodes[nodes.length - 1];
+          ctx.beginPath();
+          ctx.arc(end.x, end.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = isAcademic ? drawColor : sys.color;
+          ctx.fill();
+        } else {
+          // Faint end dots for other systems
+          const end = nodes[nodes.length - 1];
+          if (isAcademic) {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.beginPath();
+            ctx.arc(end.x, end.y, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = drawColor.replace('45%)', '30%)');
+            ctx.fill();
+          } else {
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.beginPath();
+            ctx.arc(end.x, end.y, 2, 0, Math.PI * 2);
+            const faintAlpha = theme === 'cartoon' ? '25%' : '30%';
+            ctx.fillStyle = sys.color.replace('60%)', faintAlpha).replace('hsl', 'hsla');
+            ctx.fill();
+          }
+        }
+      }
+
+      // Anchor pivot
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+      if (isAcademic) {
+        ctx.fillStyle = '#e0e0e0';
+        ctx.fill();
+        ctx.strokeStyle = '#a0a0a8';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = 'rgba(128,128,128,0.3)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(128,128,128,0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // ---- Main loop ----
+    function loop() {
+      if (!paused) {
+        driveTime += DRIVE_FREQ;
+        for (let sys of systems) {
+          stepPhysics(sys.nodes);
+          const end = sys.nodes[sys.nodes.length - 1];
+          sys.trail.push({ x: end.x, y: end.y });
+          if (sys.trail.length > TRAIL_LEN) sys.trail.shift();
+        }
+      }
+      draw();
+      animId = requestAnimationFrame(loop);
+    }
+
+    // ---- Sliders ----
+    document.getElementById('slider-n').addEventListener('input', (e) => {
+      N_JOINTS = parseInt(e.target.value);
+      document.getElementById('n-val').textContent = N_JOINTS;
+      resetSimulation();
+    });
+    document.getElementById('slider-len').addEventListener('input', (e) => {
+      SEG_LEN = parseInt(e.target.value);
+      document.getElementById('len-val').textContent = SEG_LEN;
+    });
+    document.getElementById('slider-g').addEventListener('input', (e) => {
+      GRAVITY = parseFloat(e.target.value);
+      document.getElementById('g-val').textContent = GRAVITY.toFixed(2);
+    });
+    document.getElementById('slider-damp').addEventListener('input', (e) => {
+      DAMPING = parseFloat(e.target.value);
+      document.getElementById('damp-val').textContent = DAMPING.toFixed(3);
+    });
+    document.getElementById('slider-drive').addEventListener('input', (e) => {
+      DRIVE_AMP = parseFloat(e.target.value);
+      document.getElementById('drive-val').textContent = DRIVE_AMP.toFixed(2);
+    });
+    document.getElementById('slider-freq').addEventListener('input', (e) => {
+      DRIVE_FREQ = parseFloat(e.target.value);
+      document.getElementById('freq-val').textContent = DRIVE_FREQ.toFixed(2);
+    });
+    document.getElementById('slider-trail').addEventListener('input', (e) => {
+      TRAIL_LEN = parseInt(e.target.value);
+      document.getElementById('trail-val').textContent = TRAIL_LEN;
+    });
+    document.getElementById('slider-num').addEventListener('input', (e) => {
+      NUM_SYSTEMS = parseInt(e.target.value);
+      document.getElementById('num-val').textContent = NUM_SYSTEMS;
+      resetSimulation();
+    });
+
+    // ---- Start ----
+    initSystems();
+    toggleIdealMode();
+    clearCanvas();
+    loop();
+
+    // Entrance toast auto-dismiss
+    setTimeout(() => {
+      const toast = document.getElementById('entrance-toast');
+      if (toast) toast.style.opacity = '0';
+    }, 5000);
+
+    window.addEventListener('beforeunload', () => cancelAnimationFrame(animId));
+  </script>
+</body>
+</html>
