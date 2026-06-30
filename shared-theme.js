@@ -7,7 +7,7 @@
   'use strict';
 
   const THEME_KEY = 'psu-theme-v1';
-  const VALID_THEMES = ['cartoon', 'glass', 'cyber', 'academic'];
+  const VALID_THEMES = ['academic', 'glass', 'cartoon', 'cyber'];
   const DEFAULT_THEME = 'academic';
 
   // --- Core Theme Functions ---
@@ -58,10 +58,10 @@
     container.className = 'theme-switcher';
 
     const themes = [
-      { key: 'cartoon', label: '🎨 卡通' },
+      { key: 'academic', label: '📐 学术' },
       { key: 'glass', label: '🧊 玻璃' },
-      { key: 'cyber', label: '👾 赛博' },
-      { key: 'academic', label: '📐 学术' }
+      { key: 'cartoon', label: '🎨 卡通' },
+      { key: 'cyber', label: '👾 赛博' }
     ];
 
     const current = getCurrentTheme();

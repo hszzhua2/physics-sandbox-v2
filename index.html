@@ -191,19 +191,12 @@
     // Dynamic title for academic theme
     // ==========================================
     function updateTitle() {
-      const theme = document.documentElement.getAttribute('data-theme') || 'cartoon';
       const mainTitle = document.getElementById('main-title');
       const subTitle = document.getElementById('sub-title');
       const hintText = document.getElementById('hint-text');
-      if (theme === 'academic') {
-        mainTitle.textContent = '砰！粒子！';
-        subTitle.textContent = '交互式物理与数学实验平台';
-        hintText.textContent = '拖拽节点 · 点击节点进入实验';
-      } else {
-        mainTitle.textContent = '物理沙盒宇宙';
-        subTitle.textContent = '交互式生成物理与数学实验室';
-        hintText.textContent = '点击气泡进入实验 · 拖拽鼠标吸引节点';
-      }
+      mainTitle.textContent = '砰！粒子！';
+      subTitle.textContent = '交互式物理与数学实验平台';
+      hintText.textContent = '拖拽节点 · 点击节点进入实验';
     }
     // Listen for theme changes
     const titleObserver = new MutationObserver(updateTitle);
@@ -362,6 +355,12 @@
     });
 
     // ---- Floating Physics with Soft Collision + Drag ----
+    // Title repulsion zone (center of screen)
+    const TITLE_CX = () => cw / 2;
+    const TITLE_CY = () => ch / 2;
+    const TITLE_RX = 220; // horizontal repulsion radius
+    const TITLE_RY = 90;  // vertical repulsion radius
+
     function updateGraphPhysics() {
       for (let i = 0; i < graphNodes.length; i++) {
         let n = graphNodes[i];
@@ -375,6 +374,20 @@
         if (n.x > cw - margin) n.vx -= 0.003;
         if (n.y < margin) n.vy += 0.003;
         if (n.y > ch - margin) n.vy -= 0.003;
+
+        // Title area repulsion
+        const tcx = TITLE_CX();
+        const tcy = TITLE_CY();
+        const dx = n.x - tcx;
+        const dy = n.y - tcy;
+        // Elliptical distance approximation
+        const distEll = Math.sqrt((dx * dx) / (TITLE_RX * TITLE_RX) + (dy * dy) / (TITLE_RY * TITLE_RY));
+        if (distEll < 1.0) {
+          const push = (1.0 - distEll) * 0.08;
+          const angle = Math.atan2(dy, dx);
+          n.vx += Math.cos(angle) * push;
+          n.vy += Math.sin(angle) * push;
+        }
 
         const time = performance.now() * 0.0003;
         n.vx += Math.sin(time + n.id.charCodeAt(0)) * 0.0008;
