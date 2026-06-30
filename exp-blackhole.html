@@ -1,734 +1,394 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>黑洞吸积盘模拟 — 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css">
-  <style>
-    .exp-bg { z-index: -1; background: #000 !important; }
-    #container { position: fixed; inset: 0; z-index: 0; }
-    canvas { display: block; }
-
-    #ui-panel {
-      position: absolute; top: 80px; left: 30px; width: 360px; padding: 20px;
-      z-index: 10; max-height: 85vh; overflow-y: auto;
-    }
-    h1 { margin: 0; font-size: 1.3rem; transition: var(--theme-transition); }
-    p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
-    .slider-group { margin-bottom: 12px; }
-    .slider-group label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold; }
-    .val-display { font-family: monospace; font-size: 0.9rem; }
-    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .btn-row .theme-btn { flex: 1; min-width: 80px; padding: 10px 12px; font-size: 0.85rem; }
-    .stats { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; }
-    .stats span { font-family: monospace; font-weight: bold; }
-    .formula-box {
-      background: rgba(128,128,128,0.08); border-radius: 8px;
-      padding: 12px; margin: 10px 0; font-size: 0.82rem; line-height: 1.6;
-    }
-    .formula-box .eq { font-family: 'Courier New', monospace; text-align: center; margin: 6px 0; font-size: 0.9rem; }
-    .warn-box {
-      background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15);
-      border-radius: 8px; padding: 10px 14px; margin: 10px 0;
-      font-size: 0.8rem; line-height: 1.5; color: var(--text-muted);
-    }
-    .warn-box strong { color: #ef4444; }
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; font-size: 0.85rem; }
-    .toggle-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-
-    #info-overlay {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      z-index: 10; font-size: 0.8rem; color: rgba(255,255,255,0.5);
-      font-family: monospace; pointer-events: none; text-align: center;
-    }
-
-    /* Theme overrides */
-    [data-theme="cartoon"] h1 { color: #ff6b6b; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
-    [data-theme="cartoon"] .val-display { color: #ff6b6b; }
-    [data-theme="cartoon"] .stats span { color: #ff6b6b; }
-    [data-theme="glass"] h1 { color: #ff00ea; text-shadow: 0 0 10px rgba(255,0,234,0.3); }
-    [data-theme="glass"] .val-display { color: #74b9ff; }
-    [data-theme="glass"] .stats span { color: #74b9ff; }
-    [data-theme="cyber"] h1 { color: #ff00ea; text-shadow: 0 0 15px rgba(255,0,234,0.5); }
-    [data-theme="cyber"] .val-display { color: #00f3ff; }
-    [data-theme="cyber"] .stats span { color: #00f3ff; }
-    [data-theme="academic"] h1 { color: #1a1a2e; font-weight: 700; text-shadow: none; }
-    [data-theme="academic"] p.desc { color: #7a7a8a; }
-    [data-theme="academic"] .val-display { color: #1a1a2e; }
-    [data-theme="academic"] .stats span { color: #1a1a2e; }
-    [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
-    [data-theme="academic"] .formula-box { background: #f4f5f7; }
-    [data-theme="academic"] .warn-box { background: #fef2f2; border-color: #fecaca; }
-
-    #ui-panel::-webkit-scrollbar { width: 5px; }
-    #entrance-toast { transition: opacity 0.8s ease; }
-  </style>
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Hole Accretion Disk Simulation</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        #info {
+            position: absolute; top: 10px; left: 10px; color: #fff;
+            font-family: monospace; font-size: 12px; z-index: 100;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="exp-bg"></div>
-  <div id="container"></div>
-
-  <div id="ui-panel" class="glass-panel">
-    <h1>🌌 黑洞吸积盘模拟</h1>
-    <p class="desc">基于 GPGPU 的 26 万粒子引力流体动力学模拟</p>
-
-    <div class="stats">
-      粒子数: <span id="particle-count">262,144</span> &nbsp;|&nbsp;
-      FPS: <span id="fps-val">--</span> &nbsp;|&nbsp;
-      <span id="mode-badge" style="font-size:0.75rem; padding:2px 6px; border-radius:4px; background:rgba(79,70,229,0.15); color:var(--accent);">GPGPU</span>
-    </div>
-
-    <div class="slider-group">
-      <label><span>引力系数 GM</span><span id="gm-val" class="val-display">2.5</span></label>
-      <input type="range" id="slider-gm" min="0.5" max="8.0" step="0.1" value="2.5">
-    </div>
-    <div class="slider-group">
-      <label><span>吸积盘内径</span><span id="dmin-val" class="val-display">1.5</span></label>
-      <input type="range" id="slider-dmin" min="1.1" max="3.0" step="0.1" value="1.5">
-    </div>
-    <div class="slider-group">
-      <label><span>吸积盘外径</span><span id="dmax-val" class="val-display">5.0</span></label>
-      <input type="range" id="slider-dmax" min="3.0" max="10.0" step="0.2" value="5.0">
-    </div>
-    <div class="slider-group">
-      <label><span>多普勒效应强度</span><span id="doppler-val" class="val-display">1.2</span></label>
-      <input type="range" id="slider-doppler" min="0" max="3.0" step="0.1" value="1.2">
-    </div>
-    <div class="slider-group">
-      <label><span>时间流速</span><span id="speed-val" class="val-display">1.0×</span></label>
-      <input type="range" id="slider-speed" min="0.1" max="3.0" step="0.1" value="1.0">
-    </div>
-
-    <div class="toggle-row">
-      <label for="check-rotate">视角自动旋转</label>
-      <input type="checkbox" id="check-rotate" checked>
-    </div>
-    <div class="toggle-row">
-      <label for="check-lensing">引力透镜效应</label>
-      <input type="checkbox" id="check-lensing" checked>
-    </div>
-
-    <div class="formula-box">
-      <strong>史瓦西半径</strong>
-      <div class="eq">rₛ = 2GM / c² ≈ 3 km × (M / M☉)</div>
-      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        事件视界边界，任何物质与光都无法逃逸。吸积盘在 1.5rₛ ~ 5rₛ 范围内形成。
-      </p>
-    </div>
-
-    <div class="formula-box">
-      <strong>开普勒轨道速度</strong>
-      <div class="eq">v = √(GM / r)</div>
-      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        粒子在引力作用下沿近似圆形轨道运动，越靠近黑洞速度越快，多普勒效应越明显。
-      </p>
-    </div>
-
-    <div class="formula-box">
-      <strong>引力透镜方程</strong>
-      <div class="eq">α = 4GM / (c²b) = 2rₛ / b</div>
-      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        光线经过大质量天体附近时发生偏折，偏折角与撞击参数 b 成反比。
-      </p>
-    </div>
-
-    <div class="warn-box">
-      <strong>⚠ 物理近似说明</strong><br>
-      本模拟使用势流近似（圆柱绕流+环量）代替广义相对论数值解。
-      粒子颜色反映多普勒频移：蓝色=朝向观察者（蓝移），红色=远离观察者（红移）。
-    </div>
-
-    <div class="btn-row">
-      <button class="theme-btn" onclick="resetParams()">恢复默认</button>
-      <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
-    </div>
-
-    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px; text-align:center;">
-      鼠标拖拽旋转视角 · 滚轮缩放<br>
-      粒子颜色: 蓝=接近(蓝移) 红=远离(红移)
-    </p>
-  </div>
-
-  <div id="info-overlay">
-    <div id="info-text">正在初始化 WebGL 与 GPGPU 计算环境...</div>
-  </div>
-
-  <div id="entrance-toast" class="glass-panel" style="
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
-    opacity:1; transition:opacity 0.8s ease;">
-    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:#fff; text-shadow:0 0 10px rgba(255,255,255,0.3);">
-      🌌 黑洞吸积盘
-    </div>
-    <div style="font-size:0.95rem; color:rgba(255,255,255,0.7); line-height:1.8;">
-      <strong style="color:#74b9ff;">GPGPU</strong> 驱动 26 万粒子引力模拟<br>
-      <strong style="color:#ff6b6b;">多普勒效应</strong> 可视化相对论性光束<br>
-      <strong style="color:#ffeaa7;">引力透镜</strong> 弯曲时空光线
-    </div>
-  </div>
-
-  <script src="shared-theme.js"></script>
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
-    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-    import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-
-    /* ================================================================
-       黑洞吸积盘模拟 — GPGPU 粒子系统
-       - 26万粒子引力轨道运动
-       - 多普勒频移着色
-       - 引力透镜后处理
-       - 全可调节参数 + 降级渲染
-       ================================================================ */
-
-    PSUTheme.createSwitcher();
-    PSUTheme.createBackButton('index.html');
-
-    // ---- Parameters ----
-    const DEFAULTS = {
-      GM: 2.5,
-      DISK_MIN: 1.5,
-      DISK_MAX: 5.0,
-      DOPPLER: 1.2,
-      SPEED: 1.0,
-      AUTO_ROTATE: true,
-      LENSING: true
-    };
-    let params = { ...DEFAULTS };
-    let paused = false;
-    let frameCount = 0;
-    let lastFpsTime = performance.now();
-
-    // ---- DOM refs ----
-    const infoText = document.getElementById('info-text');
-    const fpsVal = document.getElementById('fps-val');
-    const pauseBtn = document.getElementById('pause-btn');
-    const modeBadge = document.getElementById('mode-badge');
-
-    // ---- Three.js globals ----
-    let scene, camera, renderer, composer, controls;
-    let gpuCompute, posVariable, velVariable;
-    let particleSystem;
-    let lensingPass;
-    let container;
-    let gpuReady = false;
-    let fallbackMode = false;
-    let fallbackParticles = null;
-    let fallbackData = [];
-
-    // ---- Shaders ----
-    const computeVelocityShader = /* glsl */ `
-      #define PI 3.14159265359
-      uniform float u_GM;
-      uniform float u_R;
-      uniform float u_Time;
-      uniform float u_Speed;
-
-      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
-
-      void main() {
-        vec2 uv = gl_FragCoord.xy / resolution.xy;
-        vec4 posData = texture2D(texturePosition, uv);
-        vec4 velData = texture2D(textureVelocity, uv);
-        vec3 pos = posData.xyz;
-        vec3 vel = velData.xyz;
-        float r = length(pos);
-
-        if (r < u_R || r > 6.0) {
-          vel = vec3(0.0);
-        } else {
-          float vMag = sqrt(u_GM / r);
-          vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), pos));
-          vec3 inward = -normalize(pos) * (0.05 / (r - u_R + 0.1));
-          vec3 noiseVec = vec3(
-            sin(pos.z * 10.0 + u_Time) * 0.02,
-            cos(pos.x * 12.0 - u_Time) * 0.05,
-            cos(pos.x * 10.0 + u_Time) * 0.02
-          );
-          vel = tangent * vMag + inward + noiseVec;
+    <div id="info">正在初始化 WebGL 与 GPGPU 计算环境... (待验证 FPS)</div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
         }
-        gl_FragColor = vec4(vel * u_Speed, 1.0);
-      }
-    `;
+    </script>
 
-    const computePositionShader = /* glsl */ `
-      uniform float u_R;
-      uniform float u_DiskMin;
-      uniform float u_DiskMax;
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+        // 物理与渲染参数标定
+        const PARAMS = {
+            PARTICLE_RES: 512, // 512x512 = 262,144 粒子
+            BH_RADIUS: 1.0,    // 史瓦西半径 R
+            DISK_MIN: 1.5,     // 吸积盘内边缘 1.5R
+            DISK_MAX: 5.0,     // 吸积盘外边缘 5.0R
+            G_MASS: 2.5,       // 引力系数常数近似
+            DOPPLER_FACTOR: 1.2// 多普勒频移视觉缩放系数
+        };
 
-      void main() {
-        vec2 uv = gl_FragCoord.xy / resolution.xy;
-        vec4 posData = texture2D(texturePosition, uv);
-        vec3 pos = posData.xyz;
-        vec4 velData = texture2D(textureVelocity, uv);
-        vec3 vel = velData.xyz;
-        pos += vel * 0.016;
-        float r = length(pos);
+        let scene, camera, renderer, composer, controls;
+        let gpuCompute, posVariable, velVariable;
+        let particleSystem;
+        let lensingPass;
+        
+        // GPGPU: 速度更新着色器
+        const computeVelocityShader = `
+            #define PI 3.14159265359
+            uniform float u_GM;
+            uniform float u_R;
+            uniform float u_Time;
 
-        if (r < u_R || r > u_DiskMax) {
-          float angle = hash(uv * pos.xy) * 2.0 * PI;
-          float radius = mix(u_DiskMin, u_DiskMax, pow(hash(uv.yx), 1.5));
-          pos = vec3(cos(angle) * radius, (hash(uv) - 0.5) * 0.1, sin(angle) * radius);
+            // 伪随机与噪声函数
+            float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+            
+            void main() {
+                vec2 uv = gl_FragCoord.xy / resolution.xy;
+                vec4 posData = texture2D(texturePosition, uv);
+                vec4 velData = texture2D(textureVelocity, uv);
+                
+                vec3 pos = posData.xyz;
+                vec3 vel = velData.xyz;
+                
+                float r = length(pos);
+                if(r < u_R || r > 6.0) {
+                    // 生命周期终结或逃逸，重置速度
+                    vel = vec3(0.0);
+                } else {
+                    // 开普勒轨道速度近似: v = sqrt(GM/r)
+                    float vMag = sqrt(u_GM / r);
+                    
+                    // 计算切向向量 (基于 Y 轴旋转)
+                    vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), pos));
+                    
+                    // 向心吸积漂移 (随距离黑洞变近而加速)
+                    vec3 inward = -normalize(pos) * (0.05 / (r - u_R + 0.1));
+                    
+                    // 添加微小湍流扰动
+                    vec3 noiseVec = vec3(
+                        sin(pos.z * 10.0 + u_Time) * 0.02,
+                        cos(pos.x * 12.0 - u_Time) * 0.05, // 垂直于盘面的轻微波动
+                        cos(pos.x * 10.0 + u_Time) * 0.02
+                    );
+                    
+                    // 速度合成
+                    vel = tangent * vMag + inward + noiseVec;
+                }
+                
+                gl_FragColor = vec4(vel, 1.0);
+            }
+        `;
+
+        // GPGPU: 位置更新着色器
+        const computePositionShader = `
+            uniform float u_R;
+            uniform float u_DiskMin;
+            uniform float u_DiskMax;
+            
+            float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / resolution.xy;
+                vec4 posData = texture2D(texturePosition, uv);
+                vec3 pos = posData.xyz;
+                
+                vec4 velData = texture2D(textureVelocity, uv);
+                vec3 vel = velData.xyz;
+                
+                pos += vel * 0.016; // 假设 60fps 对应的 dt = 0.016
+                
+                float r = length(pos);
+                // 粒子落入视界或飞离吸积盘，进行重置
+                if(r < u_R || r > u_DiskMax) {
+                    float angle = hash(uv * pos.xy) * 2.0 * 3.1415926;
+                    float radius = mix(u_DiskMin, u_DiskMax, pow(hash(uv.yx), 1.5)); // 更多粒子集中在内侧
+                    pos = vec3(cos(angle) * radius, (hash(uv)-0.5)*0.1, sin(angle) * radius);
+                }
+                
+                gl_FragColor = vec4(pos, 1.0);
+            }
+        `;
+
+        // 粒子渲染: 顶点着色器
+        const particleVertexShader = `
+            uniform sampler2D u_posTexture;
+            uniform sampler2D u_velTexture;
+            uniform vec3 u_cameraPos;
+            uniform float u_dopplerFactor;
+            
+            varying vec3 vColor;
+            
+            void main() {
+                vec4 posData = texture2D(u_posTexture, position.xy);
+                vec4 velData = texture2D(u_velTexture, position.xy);
+                
+                vec3 worldPos = posData.xyz;
+                vec3 vel = velData.xyz;
+                
+                vec4 mvPosition = modelViewMatrix * vec4(worldPos, 1.0);
+                gl_Position = projectionMatrix * mvPosition;
+                
+                // 大小衰减
+                gl_PointSize = 2.0 * (10.0 / -mvPosition.z);
+                
+                // 多普勒效应计算 (点乘相机方向与速度方向)
+                vec3 viewDir = normalize(u_cameraPos - worldPos);
+                vec3 velDir = normalize(vel);
+                float dopplerShift = dot(viewDir, velDir); // >0 为朝向(蓝移), <0 为背离(红移)
+                
+                // 基础色彩映射 (内侧蓝白, 外侧红橙)
+                float r = length(worldPos);
+                float heat = smoothstep(5.0, 1.5, r);
+                vec3 baseColor = mix(vec3(0.8, 0.2, 0.0), vec3(0.8, 0.9, 1.0), heat);
+                
+                // 应用相对论性光束效应调整亮度和颜色
+                float dopplerMultiplier = 1.0 + dopplerShift * u_dopplerFactor;
+                dopplerMultiplier = max(0.1, dopplerMultiplier); // 限制最低亮度
+                
+                vec3 shiftColor = dopplerShift > 0.0 ? vec3(0.2, 0.5, 1.0) : vec3(1.0, 0.2, 0.0);
+                vColor = mix(baseColor, shiftColor, abs(dopplerShift) * 0.5) * dopplerMultiplier;
+            }
+        `;
+
+        // 粒子渲染: 片元着色器
+        const particleFragmentShader = `
+            varying vec3 vColor;
+            void main() {
+                // 圆形粒子遮罩
+                vec2 pt = gl_PointCoord - vec2(0.5);
+                if(dot(pt, pt) > 0.25) discard;
+                
+                // 核心高亮，边缘衰减
+                float alpha = smoothstep(0.5, 0.0, length(pt));
+                gl_FragColor = vec4(vColor, alpha * 0.8);
+            }
+        `;
+
+        // 后处理: 引力透镜 (屏幕空间近似)
+        const LensingShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "u_aspect": { value: 1.0 },
+                "u_bhCenter": { value: new THREE.Vector2(0.5, 0.5) },
+                "u_bhRadius": { value: 0.1 } // 屏幕空间的视网膜半径
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float u_aspect;
+                uniform vec2 u_bhCenter;
+                uniform float u_bhRadius;
+                varying vec2 vUv;
+
+                void main() {
+                    vec2 uv = vUv;
+                    vec2 delta = uv - u_bhCenter;
+                    delta.x *= u_aspect;
+                    
+                    float dist = length(delta);
+                    
+                    // 视界内部处理：全黑，产生光子环截断
+                    if(dist < u_bhRadius) {
+                        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                        return;
+                    }
+                    
+                    // 屏幕空间史瓦西透镜近似: alpha = 4GM / (c^2 * b)
+                    // 简化为坐标偏移: offset = (R^2 / r^2) * r_vec
+                    float lensingForce = (u_bhRadius * u_bhRadius) / dist;
+                    vec2 offset = normalize(delta) * lensingForce;
+                    offset.x /= u_aspect; // 还原宽高比
+                    
+                    vec2 sampleUV = uv - offset * 0.8; // 采样被弯曲的远端像素
+                    
+                    // 光子环辉光衰减
+                    vec4 color = texture2D(tDiffuse, sampleUV);
+                    float ringGlow = smoothstep(u_bhRadius * 1.5, u_bhRadius, dist);
+                    color += vec4(0.8, 0.9, 1.0, 1.0) * ringGlow * 0.2;
+                    
+                    gl_FragColor = color;
+                }
+            `
+        };
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 2, 8);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 限制像素比以保性能
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.maxDistance = 20;
+            controls.minDistance = 3;
+
+            initGPGPU();
+            initParticles();
+            initPostProcessing();
+
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('info').innerText = `粒子数: ${PARAMS.PARTICLE_RES * PARAMS.PARTICLE_RES} | 可滚动鼠标缩放观察多普勒/引力透镜`;
         }
-        gl_FragColor = vec4(pos, 1.0);
-      }
-    `;
 
-    const particleVertexShader = /* glsl */ `
-      uniform sampler2D u_posTexture;
-      uniform sampler2D u_velTexture;
-      uniform vec3 u_cameraPos;
-      uniform float u_dopplerFactor;
-      varying vec3 vColor;
-
-      void main() {
-        vec4 posData = texture2D(u_posTexture, position.xy);
-        vec4 velData = texture2D(u_velTexture, position.xy);
-        vec3 worldPos = posData.xyz;
-        vec3 vel = velData.xyz;
-        vec4 mvPosition = modelViewMatrix * vec4(worldPos, 1.0);
-        gl_Position = projectionMatrix * mvPosition;
-        gl_PointSize = 2.0 * (10.0 / -mvPosition.z);
-
-        vec3 viewDir = normalize(u_cameraPos - worldPos);
-        vec3 velDir = normalize(vel);
-        float dopplerShift = dot(viewDir, velDir);
-        float r = length(worldPos);
-        float heat = smoothstep(5.0, 1.5, r);
-        vec3 baseColor = mix(vec3(0.8, 0.2, 0.0), vec3(0.8, 0.9, 1.0), heat);
-        float dopplerMultiplier = 1.0 + dopplerShift * u_dopplerFactor;
-        dopplerMultiplier = max(0.1, dopplerMultiplier);
-        vec3 shiftColor = dopplerShift > 0.0 ? vec3(0.2, 0.5, 1.0) : vec3(1.0, 0.2, 0.0);
-        vColor = mix(baseColor, shiftColor, abs(dopplerShift) * 0.5) * dopplerMultiplier;
-      }
-    `;
-
-    const particleFragmentShader = /* glsl */ `
-      varying vec3 vColor;
-      void main() {
-        vec2 pt = gl_PointCoord - vec2(0.5);
-        if (dot(pt, pt) > 0.25) discard;
-        float alpha = smoothstep(0.5, 0.0, length(pt));
-        gl_FragColor = vec4(vColor, alpha * 0.8);
-      }
-    `;
-
-    const LensingShader = {
-      uniforms: {
-        "tDiffuse": { value: null },
-        "u_aspect": { value: 1.0 },
-        "u_bhCenter": { value: new THREE.Vector2(0.5, 0.5) },
-        "u_bhRadius": { value: 0.1 },
-        "u_enabled": { value: 1.0 }
-      },
-      vertexShader: /* glsl */ `
-        varying vec2 vUv;
-        void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
-      `,
-      fragmentShader: /* glsl */ `
-        uniform sampler2D tDiffuse;
-        uniform float u_aspect;
-        uniform vec2 u_bhCenter;
-        uniform float u_bhRadius;
-        uniform float u_enabled;
-        varying vec2 vUv;
-
-        void main() {
-          if (u_enabled < 0.5) {
-            gl_FragColor = texture2D(tDiffuse, vUv);
-            return;
-          }
-          vec2 uv = vUv;
-          vec2 delta = uv - u_bhCenter;
-          delta.x *= u_aspect;
-          float dist = length(delta);
-
-          if (dist < u_bhRadius) {
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-            return;
-          }
-
-          float lensingForce = (u_bhRadius * u_bhRadius) / dist;
-          vec2 offset = normalize(delta) * lensingForce;
-          offset.x /= u_aspect;
-          vec2 sampleUV = uv - offset * 0.8;
-          vec4 color = texture2D(tDiffuse, sampleUV);
-          float ringGlow = smoothstep(u_bhRadius * 1.5, u_bhRadius, dist);
-          color += vec4(0.8, 0.9, 1.0, 1.0) * ringGlow * 0.2;
-          gl_FragColor = color;
+        function initGPGPU() {
+            gpuCompute = new GPUComputationRenderer(PARAMS.PARTICLE_RES, PARAMS.PARTICLE_RES, renderer);
+            
+            const dtPosition = gpuCompute.createTexture();
+            const dtVelocity = gpuCompute.createTexture();
+            
+            // 初始化粒子位置与速度
+            const posArray = dtPosition.image.data;
+            const velArray = dtVelocity.image.data;
+            
+            for (let i = 0; i < posArray.length; i += 4) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = PARAMS.DISK_MIN + Math.pow(Math.random(), 1.5) * (PARAMS.DISK_MAX - PARAMS.DISK_MIN);
+                
+                posArray[i + 0] = Math.cos(angle) * radius;
+                posArray[i + 1] = (Math.random() - 0.5) * 0.1; // 极薄的盘面
+                posArray[i + 2] = Math.sin(angle) * radius;
+                posArray[i + 3] = 1;
+                
+                velArray[i + 0] = 0;
+                velArray[i + 1] = 0;
+                velArray[i + 2] = 0;
+                velArray[i + 3] = 1;
+            }
+            
+            velVariable = gpuCompute.addVariable("textureVelocity", computeVelocityShader, dtVelocity);
+            posVariable = gpuCompute.addVariable("texturePosition", computePositionShader, dtPosition);
+            
+            gpuCompute.setVariableDependencies(velVariable, [posVariable, velVariable]);
+            gpuCompute.setVariableDependencies(posVariable, [posVariable, velVariable]);
+            
+            velVariable.material.uniforms.u_GM = { value: PARAMS.G_MASS };
+            velVariable.material.uniforms.u_R = { value: PARAMS.BH_RADIUS };
+            velVariable.material.uniforms.u_Time = { value: 0.0 };
+            
+            posVariable.material.uniforms.u_R = { value: PARAMS.BH_RADIUS };
+            posVariable.material.uniforms.u_DiskMin = { value: PARAMS.DISK_MIN };
+            posVariable.material.uniforms.u_DiskMax = { value: PARAMS.DISK_MAX };
+            
+            const error = gpuCompute.init();
+            if (error !== null) {
+                console.error(error);
+                document.getElementById('info').innerText = "GPGPU 初始化失败: 硬件不支持";
+            }
         }
-      `
-    };
 
-    // ---- Init ----
-    try {
-      init();
-      animate();
-    } catch (e) {
-      console.error('Init failed:', e);
-      infoText.textContent = '初始化失败: ' + e.message;
-      infoText.style.color = '#ef4444';
-    }
-
-    function init() {
-      container = document.getElementById('container');
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x020204);
-
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 2, 8);
-      camera.lookAt(0, 0, 0);
-
-      renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(renderer.domElement);
-
-      controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-      controls.maxDistance = 20;
-      controls.minDistance = 3;
-      controls.autoRotate = params.AUTO_ROTATE;
-      controls.autoRotateSpeed = 0.5;
-
-      const isWebGL2 = renderer.capabilities.isWebGL2;
-      if (!isWebGL2) {
-        infoText.textContent = '提示: WebGL 2.0 不可用，已切换至降级渲染模式';
-        modeBadge.textContent = 'CPU';
-        modeBadge.style.background = 'rgba(239,68,68,0.15)';
-        modeBadge.style.color = '#ef4444';
-        fallbackMode = true;
-        initFallbackParticles();
-        initPostProcessing();
-        initUI();
-        window.addEventListener('resize', onWindowResize);
-        setTimeout(() => {
-          const toast = document.getElementById('entrance-toast');
-          if (toast) toast.style.opacity = '0';
-        }, 4000);
-        return;
-      }
-
-      try {
-        initGPGPU();
-        initParticles();
-        gpuReady = true;
-      } catch (e) {
-        console.warn('GPGPU failed, using fallback:', e);
-        gpuReady = false;
-        fallbackMode = true;
-        infoText.textContent = 'GPGPU 计算失败，已切换至降级渲染模式';
-        modeBadge.textContent = 'CPU';
-        modeBadge.style.background = 'rgba(239,68,68,0.15)';
-        modeBadge.style.color = '#ef4444';
-        initFallbackParticles();
-      }
-
-      initPostProcessing();
-      initUI();
-      window.addEventListener('resize', onWindowResize);
-
-      const count = gpuReady ? 262144 : 2000;
-      infoText.innerHTML = `粒子数: ${count.toLocaleString()} | 鼠标拖拽旋转 · 滚轮缩放`;
-
-      setTimeout(() => {
-        const toast = document.getElementById('entrance-toast');
-        if (toast) toast.style.opacity = '0';
-      }, 4000);
-    }
-
-    function initGPGPU() {
-      const res = 512;
-      gpuCompute = new GPUComputationRenderer(res, res, renderer);
-
-      const dtPosition = gpuCompute.createTexture();
-      const dtVelocity = gpuCompute.createTexture();
-      const posArray = dtPosition.image.data;
-      const velArray = dtVelocity.image.data;
-
-      for (let i = 0; i < posArray.length; i += 4) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = params.DISK_MIN + Math.pow(Math.random(), 1.5) * (params.DISK_MAX - params.DISK_MIN);
-        posArray[i + 0] = Math.cos(angle) * radius;
-        posArray[i + 1] = (Math.random() - 0.5) * 0.1;
-        posArray[i + 2] = Math.sin(angle) * radius;
-        posArray[i + 3] = 1;
-        velArray[i + 0] = 0;
-        velArray[i + 1] = 0;
-        velArray[i + 2] = 0;
-        velArray[i + 3] = 1;
-      }
-
-      velVariable = gpuCompute.addVariable("textureVelocity", computeVelocityShader, dtVelocity);
-      posVariable = gpuCompute.addVariable("texturePosition", computePositionShader, dtPosition);
-
-      gpuCompute.setVariableDependencies(velVariable, [posVariable, velVariable]);
-      gpuCompute.setVariableDependencies(posVariable, [posVariable, velVariable]);
-
-      velVariable.material.uniforms.u_GM = { value: params.GM };
-      velVariable.material.uniforms.u_R = { value: 1.0 };
-      velVariable.material.uniforms.u_Time = { value: 0.0 };
-      velVariable.material.uniforms.u_Speed = { value: params.SPEED };
-
-      posVariable.material.uniforms.u_R = { value: 1.0 };
-      posVariable.material.uniforms.u_DiskMin = { value: params.DISK_MIN };
-      posVariable.material.uniforms.u_DiskMax = { value: params.DISK_MAX };
-
-      const error = gpuCompute.init();
-      if (error !== null) {
-        throw new Error('GPGPU init failed: ' + error);
-      }
-    }
-
-    function initParticles() {
-      const res = 512;
-      const geometry = new THREE.BufferGeometry();
-      const uvs = new Float32Array(res * res * 2);
-      let p = 0;
-      for (let j = 0; j < res; j++) {
-        for (let i = 0; i < res; i++) {
-          uvs[p++] = i / (res - 1);
-          uvs[p++] = j / (res - 1);
+        function initParticles() {
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(PARAMS.PARTICLE_RES * PARAMS.PARTICLE_RES * 3);
+            const uvs = new Float32Array(PARAMS.PARTICLE_RES * PARAMS.PARTICLE_RES * 2);
+            
+            let p = 0;
+            for (let j = 0; j < PARAMS.PARTICLE_RES; j++) {
+                for (let i = 0; i < PARAMS.PARTICLE_RES; i++) {
+                    uvs[p++] = i / (PARAMS.PARTICLE_RES - 1);
+                    uvs[p++] = j / (PARAMS.PARTICLE_RES - 1);
+                }
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(uvs, 2)); // 传入 UV 作为 position
+            
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    u_posTexture: { value: null },
+                    u_velTexture: { value: null },
+                    u_cameraPos: { value: new THREE.Vector3() },
+                    u_dopplerFactor: { value: PARAMS.DOPPLER_FACTOR }
+                },
+                vertexShader: particleVertexShader,
+                fragmentShader: particleFragmentShader,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                transparent: true
+            });
+            
+            particleSystem = new THREE.Points(geometry, material);
+            // 禁用包围盒剔除，因为顶点是在着色器中计算的
+            particleSystem.frustumCulled = false; 
+            scene.add(particleSystem);
         }
-      }
-      geometry.setAttribute('position', new THREE.BufferAttribute(uvs, 2));
 
-      const material = new THREE.ShaderMaterial({
-        uniforms: {
-          u_posTexture: { value: null },
-          u_velTexture: { value: null },
-          u_cameraPos: { value: new THREE.Vector3() },
-          u_dopplerFactor: { value: params.DOPPLER }
-        },
-        vertexShader: particleVertexShader,
-        fragmentShader: particleFragmentShader,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        transparent: true
-      });
-
-      particleSystem = new THREE.Points(geometry, material);
-      particleSystem.frustumCulled = false;
-      scene.add(particleSystem);
-    }
-
-    function initFallbackParticles() {
-      const count = 2000;
-      const geometry = new THREE.BufferGeometry();
-      const positions = new Float32Array(count * 3);
-      const colors = new Float32Array(count * 3);
-      fallbackData = [];
-
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = params.DISK_MIN + Math.pow(Math.random(), 1.5) * (params.DISK_MAX - params.DISK_MIN);
-        const y = (Math.random() - 0.5) * 0.1;
-        positions[i * 3] = Math.cos(angle) * radius;
-        positions[i * 3 + 1] = y;
-        positions[i * 3 + 2] = Math.sin(angle) * radius;
-
-        const speed = 0.3 + Math.random() * 0.5;
-        const heat = Math.max(0, 1 - (radius - params.DISK_MIN) / (params.DISK_MAX - params.DISK_MIN));
-        colors[i * 3] = 0.5 + heat * 0.4;
-        colors[i * 3 + 1] = 0.3 + heat * 0.5;
-        colors[i * 3 + 2] = 0.8 + heat * 0.2;
-
-        fallbackData.push({ angle, radius, y, speed, inward: Math.random() < 0.5 });
-      }
-
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-      const material = new THREE.PointsMaterial({
-        size: 0.2,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.85,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-
-      fallbackParticles = new THREE.Points(geometry, material);
-      fallbackParticles.frustumCulled = false;
-      scene.add(fallbackParticles);
-    }
-
-    function updateFallbackParticles() {
-      if (!fallbackParticles) return;
-      const positions = fallbackParticles.geometry.attributes.position.array;
-      const colors = fallbackParticles.geometry.attributes.color.array;
-      const { DISK_MIN, DISK_MAX, SPEED } = params;
-
-      for (let i = 0; i < fallbackData.length; i++) {
-        const pd = fallbackData[i];
-        pd.angle += pd.speed * 0.008 * SPEED;
-        if (pd.inward) {
-          pd.radius -= 0.008 * SPEED;
-          if (pd.radius < DISK_MIN + 0.2) pd.inward = false;
-        } else {
-          pd.radius += 0.008 * SPEED;
-          if (pd.radius > DISK_MAX - 0.2) pd.inward = true;
+        function initPostProcessing() {
+            composer = new EffectComposer(renderer);
+            composer.addPass(new RenderPass(scene, camera));
+            
+            lensingPass = new ShaderPass(LensingShader);
+            lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
+            composer.addPass(lensingPass);
         }
-        positions[i * 3] = Math.cos(pd.angle) * pd.radius;
-        positions[i * 3 + 1] = pd.y + Math.sin(pd.angle * 3 + performance.now() * 0.001) * 0.03;
-        positions[i * 3 + 2] = Math.sin(pd.angle) * pd.radius;
 
-        const heat = Math.max(0, 1 - (pd.radius - DISK_MIN) / (DISK_MAX - DISK_MIN));
-        colors[i * 3] = 0.5 + heat * 0.4;
-        colors[i * 3 + 1] = 0.3 + heat * 0.5;
-        colors[i * 3 + 2] = 0.8 + heat * 0.2;
-      }
-      fallbackParticles.geometry.attributes.position.needsUpdate = true;
-      fallbackParticles.geometry.attributes.color.needsUpdate = true;
-    }
-
-    function initPostProcessing() {
-      composer = new EffectComposer(renderer);
-      composer.addPass(new RenderPass(scene, camera));
-      lensingPass = new ShaderPass(LensingShader);
-      lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
-      composer.addPass(lensingPass);
-    }
-
-    // ---- UI ----
-    function initUI() {
-      document.getElementById('slider-gm').addEventListener('input', e => {
-        params.GM = parseFloat(e.target.value);
-        document.getElementById('gm-val').textContent = params.GM.toFixed(1);
-        if (gpuReady && velVariable) velVariable.material.uniforms.u_GM.value = params.GM;
-      });
-      document.getElementById('slider-dmin').addEventListener('input', e => {
-        params.DISK_MIN = parseFloat(e.target.value);
-        document.getElementById('dmin-val').textContent = params.DISK_MIN.toFixed(1);
-        if (gpuReady && posVariable) posVariable.material.uniforms.u_DiskMin.value = params.DISK_MIN;
-      });
-      document.getElementById('slider-dmax').addEventListener('input', e => {
-        params.DISK_MAX = parseFloat(e.target.value);
-        document.getElementById('dmax-val').textContent = params.DISK_MAX.toFixed(1);
-        if (gpuReady && posVariable) posVariable.material.uniforms.u_DiskMax.value = params.DISK_MAX;
-      });
-      document.getElementById('slider-doppler').addEventListener('input', e => {
-        params.DOPPLER = parseFloat(e.target.value);
-        document.getElementById('doppler-val').textContent = params.DOPPLER.toFixed(1);
-        if (gpuReady && particleSystem) particleSystem.material.uniforms.u_dopplerFactor.value = params.DOPPLER;
-      });
-      document.getElementById('slider-speed').addEventListener('input', e => {
-        params.SPEED = parseFloat(e.target.value);
-        document.getElementById('speed-val').textContent = params.SPEED.toFixed(1) + '×';
-        if (gpuReady && velVariable) velVariable.material.uniforms.u_Speed.value = params.SPEED;
-      });
-      document.getElementById('check-rotate').addEventListener('change', e => {
-        params.AUTO_ROTATE = e.target.checked;
-        if (controls) controls.autoRotate = params.AUTO_ROTATE;
-      });
-      document.getElementById('check-lensing').addEventListener('change', e => {
-        params.LENSING = e.target.checked;
-        if (lensingPass) lensingPass.uniforms.u_enabled.value = params.LENSING ? 1.0 : 0.0;
-      });
-    }
-
-    window.resetParams = function() {
-      params = { ...DEFAULTS };
-      document.getElementById('slider-gm').value = params.GM;
-      document.getElementById('gm-val').textContent = params.GM.toFixed(1);
-      document.getElementById('slider-dmin').value = params.DISK_MIN;
-      document.getElementById('dmin-val').textContent = params.DISK_MIN.toFixed(1);
-      document.getElementById('slider-dmax').value = params.DISK_MAX;
-      document.getElementById('dmax-val').textContent = params.DISK_MAX.toFixed(1);
-      document.getElementById('slider-doppler').value = params.DOPPLER;
-      document.getElementById('doppler-val').textContent = params.DOPPLER.toFixed(1);
-      document.getElementById('slider-speed').value = params.SPEED;
-      document.getElementById('speed-val').textContent = params.SPEED.toFixed(1) + '×';
-      document.getElementById('check-rotate').checked = params.AUTO_ROTATE;
-      document.getElementById('check-lensing').checked = params.LENSING;
-      if (controls) controls.autoRotate = params.AUTO_ROTATE;
-      if (lensingPass) lensingPass.uniforms.u_enabled.value = params.LENSING ? 1.0 : 0.0;
-      if (gpuReady && velVariable) {
-        velVariable.material.uniforms.u_GM.value = params.GM;
-        velVariable.material.uniforms.u_Speed.value = params.SPEED;
-      }
-      if (gpuReady && posVariable) {
-        posVariable.material.uniforms.u_DiskMin.value = params.DISK_MIN;
-        posVariable.material.uniforms.u_DiskMax.value = params.DISK_MAX;
-      }
-    };
-
-    window.togglePause = function() {
-      paused = !paused;
-      pauseBtn.textContent = paused ? '继续' : '暂停';
-    };
-
-    function onWindowResize() {
-      if (!camera || !renderer) return;
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
-      if (lensingPass) lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
-    }
-
-    // ---- Animation ----
-    function animate() {
-      requestAnimationFrame(animate);
-      if (!renderer || !camera || !scene) return;
-
-      const now = performance.now();
-      frameCount++;
-      if (now - lastFpsTime >= 1000) {
-        fpsVal.textContent = frameCount;
-        frameCount = 0;
-        lastFpsTime = now;
-      }
-
-      controls.update();
-
-      if (!paused) {
-        if (gpuReady && gpuCompute && velVariable && posVariable && particleSystem) {
-          velVariable.material.uniforms.u_Time.value = now * 0.001;
-          gpuCompute.compute();
-          particleSystem.material.uniforms.u_posTexture.value =
-            gpuCompute.getCurrentRenderTarget(posVariable).texture;
-          particleSystem.material.uniforms.u_velTexture.value =
-            gpuCompute.getCurrentRenderTarget(velVariable).texture;
-          particleSystem.material.uniforms.u_cameraPos.value.copy(camera.position);
-        } else if (fallbackMode) {
-          updateFallbackParticles();
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+            lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
         }
-      }
 
-      if (lensingPass && camera && params.LENSING) {
-        const bhPos = new THREE.Vector3(0, 0, 0);
-        bhPos.project(camera);
-        const sx = (bhPos.x + 1) / 2;
-        const sy = (bhPos.y + 1) / 2;
-        const dist = camera.position.length();
-        const fov = camera.fov * (Math.PI / 180);
-        const visibleHeight = 2 * Math.tan(fov / 2) * dist;
-        const screenRadius = (1.0 * 2 / visibleHeight) * 0.5;
-        lensingPass.uniforms['u_bhCenter'].value.set(sx, sy);
-        lensingPass.uniforms['u_bhRadius'].value = Math.max(0.01, screenRadius);
-      }
-
-      if (composer && composer.render) {
-        composer.render();
-      } else if (renderer) {
-        renderer.render(scene, camera);
-      }
-    }
-  </script>
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            controls.update();
+            
+            // 运行 GPGPU 步进
+            velVariable.material.uniforms.u_Time.value = performance.now() * 0.001;
+            gpuCompute.compute();
+            
+            // 将 GPGPU 结果纹理传给粒子系统
+            particleSystem.material.uniforms.u_posTexture.value = gpuCompute.getCurrentRenderTarget(posVariable).texture;
+            particleSystem.material.uniforms.u_velTexture.value = gpuCompute.getCurrentRenderTarget(velVariable).texture;
+            particleSystem.material.uniforms.u_cameraPos.value.copy(camera.position);
+            
+            // 计算屏幕空间的黑洞参数用于后处理
+            // 黑洞中心在世界坐标 (0,0,0)
+            const bhPosition = new THREE.Vector3(0, 0, 0);
+            bhPosition.project(camera);
+            const screenX = (bhPosition.x + 1) / 2;
+            const screenY = (bhPosition.y + 1) / 2;
+            
+            // 计算屏幕空间的视界半径 (基础三角学近似)
+            const dist = camera.position.length();
+            const fov = camera.fov * (Math.PI / 180);
+            const visibleHeight = 2 * Math.tan(fov / 2) * dist;
+            const screenRadius = (PARAMS.BH_RADIUS * 2 / visibleHeight) * 0.5;
+            
+            lensingPass.uniforms['u_bhCenter'].value.set(screenX, screenY);
+            lensingPass.uniforms['u_bhRadius'].value = screenRadius;
+            
+            composer.render();
+        }
+    </script>
 </body>
 </html>
