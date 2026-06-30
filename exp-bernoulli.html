@@ -7,16 +7,11 @@
   <link rel="stylesheet" href="shared-theme.css">
   <style>
     .exp-bg { z-index: -1; }
-    #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+    #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; cursor: crosshair; }
+    #sim-canvas.dragging { cursor: grabbing; }
     #ui-panel {
-      position: absolute;
-      top: 80px;
-      left: 30px;
-      width: 340px;
-      padding: 20px;
-      z-index: 10;
-      max-height: 85vh;
-      overflow-y: auto;
+      position: absolute; top: 80px; left: 30px; width: 340px; padding: 20px;
+      z-index: 10; max-height: 85vh; overflow-y: auto;
     }
     h1 { margin: 0; font-size: 1.35rem; transition: var(--theme-transition); }
     p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
@@ -28,35 +23,34 @@
     .stats { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; }
     .stats span { font-family: monospace; font-weight: bold; }
     .formula-box {
-      background: rgba(128,128,128,0.08);
-      border-radius: 8px;
-      padding: 12px;
-      margin: 10px 0;
-      font-size: 0.82rem;
-      line-height: 1.6;
+      background: rgba(128,128,128,0.08); border-radius: 8px;
+      padding: 12px; margin: 10px 0; font-size: 0.82rem; line-height: 1.6;
     }
     .formula-box .eq { font-family: 'Courier New', monospace; text-align: center; margin: 6px 0; font-size: 0.9rem; }
+    .coord-box {
+      background: rgba(79,70,229,0.06); border: 1px solid rgba(79,70,229,0.2);
+      border-radius: 8px; padding: 10px 14px; margin-top: 10px;
+      font-size: 0.82rem; min-height: 36px;
+    }
+    .coord-box .coord-label { color: var(--text-muted); font-size: 0.75rem; }
+    .coord-box .coord-val { font-family: monospace; font-weight: bold; color: var(--accent); }
 
-    /* Theme colors */
     [data-theme="cartoon"] h1 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
     [data-theme="cartoon"] .val-display { color: var(--accent-1); }
     [data-theme="cartoon"] .stats span { color: var(--accent-1); }
-
     [data-theme="glass"] h1 { color: #ff00ea; text-shadow: 0 0 10px rgba(255,0,234,0.3); }
     [data-theme="glass"] .val-display { color: #74b9ff; }
     [data-theme="glass"] .stats span { color: #74b9ff; }
-
     [data-theme="cyber"] h1 { color: #ff00ea; text-shadow: 0 0 15px rgba(255,0,234,0.5); }
     [data-theme="cyber"] .val-display { color: #00f3ff; }
     [data-theme="cyber"] .stats span { color: #00f3ff; }
-
     [data-theme="academic"] h1 { color: #1a1a2e; font-weight: 700; text-shadow: none; }
     [data-theme="academic"] p.desc { color: #7a7a8a; }
     [data-theme="academic"] .val-display { color: #1a1a2e; }
     [data-theme="academic"] .stats span { color: #1a1a2e; }
     [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
     [data-theme="academic"] .formula-box { background: #f4f5f7; }
-
+    [data-theme="academic"] .coord-box { background: #f4f5f7; border-color: #c0c0c0; }
     #ui-panel::-webkit-scrollbar { width: 5px; }
   </style>
 </head>
@@ -66,10 +60,10 @@
 
   <div id="ui-panel" class="glass-panel">
     <h1>伯努利原理与升力</h1>
-    <p class="desc">飞机为什么能飞？流速与压力的魔法</p>
+    <p class="desc">点击机翼或控制点查看坐标，拖拽移动/旋转/编辑形状</p>
 
     <div class="stats">
-      升力: <span id="lift-val">0</span> N &nbsp;|&nbsp;
+      升力: <span id="lift-val">0</span> kN &nbsp;|&nbsp;
       上表面流速: <span id="top-speed">0</span> m/s
     </div>
 
@@ -82,8 +76,8 @@
       <input type="range" id="slider-wind" min="20" max="200" step="5" value="80">
     </div>
     <div class="slider-group">
-      <label><span>粒子数量</span><span id="particle-val" class="val-display">60</span></label>
-      <input type="range" id="slider-particle" min="20" max="120" step="10" value="60">
+      <label><span>流线密度</span><span id="stream-val" class="val-display">30</span></label>
+      <input type="range" id="slider-stream" min="10" max="60" step="5" value="30">
     </div>
     <div class="slider-group">
       <label><span>空气密度</span><span id="rho-val" class="val-display">1.225</span> kg/m³</label>
@@ -102,17 +96,27 @@
       <strong>升力公式</strong>
       <div class="eq">L = ½ · ρ · v² · S · CL</div>
       <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        CL 为升力系数，与攻角和翼型形状有关。攻角过小升力不足，过大则气流分离导致失速。
+        CL 为升力系数，与攻角有关。攻角过小升力不足，过大则气流分离导致失速。
       </p>
     </div>
 
     <div class="btn-row">
-      <button class="theme-btn" onclick="resetSim()">重置</button>
+      <button class="theme-btn" onclick="resetWingShape()">恢复默认翼型</button>
+      <button class="theme-btn" onclick="resetSim()">重置全部</button>
       <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
     </div>
+
+    <div class="coord-box" id="coord-display">
+      <div class="coord-label">坐标信息</div>
+      <div class="coord-val" id="coord-val">点击机翼或控制点查看坐标</div>
+    </div>
+
+    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px; text-align:center;">
+      左键拖拽控制点编辑形状 · 左键拖拽机身移动<br>
+      左键拖拽旋转手柄旋转 · 右键拖拽平移 · 滚轮缩放
+    </p>
   </div>
 
-  <!-- Entrance hint -->
   <div id="entrance-toast" class="glass-panel" style="
     position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
     z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
@@ -121,13 +125,25 @@
       ✈️ 交互提示
     </div>
     <div style="font-size:0.95rem; color:var(--text-muted); line-height:1.8;">
-      调节<strong style="color:var(--accent-1);">攻角</strong>观察升力变化<br>
-      增大攻角至 <strong style="color:var(--accent-2);">15° 以上</strong> 观察失速现象
+      <strong style="color:var(--accent-1);">拖拽控制点</strong> 修改翼型截面<br>
+      <strong style="color:var(--accent-2);">拖拽机身</strong> 移动位置 &nbsp;·&nbsp;
+      <strong style="color:var(--accent-2);">拖拽旋转手柄</strong> 改变攻角<br>
+      <strong style="color:var(--accent-1);">右键拖拽</strong> 平移画布 &nbsp;·&nbsp;
+      <strong style="color:var(--accent-1);">滚轮</strong> 缩放
     </div>
   </div>
 
   <script src="shared-theme.js"></script>
   <script>
+    /* ================================================================
+       伯努利原理与升力 — 可编辑翼型版
+       - 势流绕翼型：圆柱绕流+环量
+       - 粒子沿流线运动，留下轨迹尾迹
+       - 翼型可编辑：拖拽控制点修改截面形状
+       - 翼型可移动/旋转：拖拽机身或旋转手柄
+       - 画布支持右键拖拽 + 滚轮缩放
+       ================================================================ */
+
     PSUTheme.createSwitcher();
     PSUTheme.createBackButton('index.html');
 
@@ -137,139 +153,372 @@
     let paused = false;
     let animId = null;
 
+    // ---- View transform ----
+    let SCALE = 1.0;
+    let viewPan = { ox: 0, oy: 0, active: false, sx: 0, sy: 0 };
+
+    function screenToPhys(sx, sy) {
+      return { x: (sx - viewPan.ox) / SCALE, y: (sy - viewPan.oy) / SCALE };
+    }
+
     // ---- Parameters ----
-    let AOA = 8;          // Angle of attack in degrees
-    let WIND_SPEED = 80;  // Free stream velocity (m/s)
-    let PARTICLE_COUNT = 60;
-    let RHO = 1.225;      // Air density (kg/m^3)
+    let AOA = 8;
+    let WIND_SPEED = 80;
+    let STREAM_COUNT = 30;
+    let RHO = 1.225;
 
-    // ---- Airfoil geometry ----
-    // Simplified NACA 2412-like airfoil using cubic Bezier
-    const CHORD = 360;    // Pixel length of chord
-    const THICKNESS = 0.12 * CHORD; // Max thickness
+    // ---- Editable Wing ----
+    const CHORD = 360;
+    const DEFAULT_UPPER = [
+      { x: -180, y: 0 },
+      { x: -90, y: -35 },
+      { x: 0, y: -40 },
+      { x: 90, y: -25 },
+      { x: 180, y: 0 }
+    ];
+    const DEFAULT_LOWER = [
+      { x: -180, y: 0 },
+      { x: -90, y: 25 },
+      { x: 0, y: 30 },
+      { x: 90, y: 18 },
+      { x: 180, y: 0 }
+    ];
 
-    function getAirfoilPoints(cx, cy, angleDeg) {
-      const rad = angleDeg * Math.PI / 180;
+    let wing = {
+      x: 0, y: 0,           // Center position in physics coords
+      angle: 8,              // Rotation angle (degrees)
+      upperAnchors: DEFAULT_UPPER.map(a => ({...a})),
+      lowerAnchors: DEFAULT_LOWER.map(a => ({...a}))
+    };
+
+    // Convert local anchor point to world coords
+    function localToWorld(lx, ly) {
+      const rad = wing.angle * Math.PI / 180;
       const cos = Math.cos(rad), sin = Math.sin(rad);
+      return {
+        x: wing.x + lx * cos - ly * sin,
+        y: wing.y + lx * sin + ly * cos
+      };
+    }
 
-      // Upper surface control points (Bezier)
-      const up = [];
-      for (let t = 0; t <= 1; t += 0.02) {
-        const x = (t - 0.5) * CHORD;
-        // NACA-like shape: thickness distribution
-        const yt = 5 * THICKNESS * (0.2969 * Math.sqrt(t) - 0.1260 * t - 0.3516 * t * t + 0.2843 * t * t * t - 0.1015 * t * t * t * t);
-        // Rotate
-        const rx = x * cos - yt * sin;
-        const ry = x * sin + yt * cos;
-        up.push({ x: cx + rx, y: cy + ry });
-      }
+    // Convert world point to local coords
+    function worldToLocal(wx, wy) {
+      const dx = wx - wing.x, dy = wy - wing.y;
+      const rad = -wing.angle * Math.PI / 180;
+      const cos = Math.cos(rad), sin = Math.sin(rad);
+      return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
+    }
 
-      // Lower surface
-      const lo = [];
-      for (let t = 1; t >= 0; t -= 0.02) {
-        const x = (t - 0.5) * CHORD;
-        const yt = -5 * THICKNESS * (0.2969 * Math.sqrt(t) - 0.1260 * t - 0.3516 * t * t + 0.2843 * t * t * t - 0.1015 * t * t * t * t);
-        const rx = x * cos - yt * sin;
-        const ry = x * sin + yt * cos;
-        lo.push({ x: cx + rx, y: cy + ry });
+    // ---- Catmull-Rom spline ----
+    function catmullRom(p0, p1, p2, p3, t) {
+      const t2 = t * t, t3 = t2 * t;
+      return 0.5 * (
+        (2 * p1) +
+        (-p0 + p2) * t +
+        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+        (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+      );
+    }
+
+    function getSplinePoints(anchors, stepsPerSeg) {
+      const pts = [];
+      const n = anchors.length;
+      for (let i = 0; i < n - 1; i++) {
+        const p0 = anchors[Math.max(0, i - 1)];
+        const p1 = anchors[i];
+        const p2 = anchors[i + 1];
+        const p3 = anchors[Math.min(n - 1, i + 2)];
+        for (let s = 0; s <= stepsPerSeg; s++) {
+          const t = s / stepsPerSeg;
+          const sx = catmullRom(p0.x, p1.x, p2.x, p3.x, t);
+          const sy = catmullRom(p0.y, p1.y, p2.y, p3.y, t);
+          pts.push(localToWorld(sx, sy));
+        }
       }
-      return { upper: up, lower: lo };
+      // Remove duplicate points at segment boundaries
+      const unique = [pts[0]];
+      for (let i = 1; i < pts.length; i++) {
+        if (Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y) > 0.5) {
+          unique.push(pts[i]);
+        }
+      }
+      return unique;
+    }
+
+    function getWingWorldPoints() {
+      return {
+        upper: getSplinePoints(wing.upperAnchors, 15),
+        lower: getSplinePoints(wing.lowerAnchors, 15)
+      };
+    }
+
+    // ---- Point-in-polygon test ----
+    function pointInPolygon(px, py, poly) {
+      let inside = false;
+      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+        const xi = poly[i].x, yi = poly[i].y;
+        const xj = poly[j].x, yj = poly[j].y;
+        const intersect = ((yi > py) !== (yj > py)) &&
+          (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    // ---- Physics: cylinder + circulation ----
+    const CYLINDER_R = 60;
+
+    function getCirculation() {
+      const alphaRad = wing.angle * Math.PI / 180;
+      let gamma = 4 * Math.PI * CYLINDER_R * Math.sin(alphaRad);
+      if (Math.abs(wing.angle) > 15) {
+        const stallDrop = Math.min(1.0, (Math.abs(wing.angle) - 15) / 10);
+        gamma *= (1.0 - stallDrop * 0.6);
+      }
+      return gamma;
+    }
+
+    function getVelocity(px, py) {
+      const dx = px - wing.x;
+      const dy = py - wing.y;
+      const r2 = dx * dx + dy * dy;
+      const r = Math.sqrt(r2);
+      if (r < CYLINDER_R * 1.02) return null;
+
+      const gamma = getCirculation();
+      const U = WIND_SPEED * 0.01;
+      const R2 = CYLINDER_R * CYLINDER_R;
+
+      const u = U * (1 - R2 * (dx * dx - dy * dy) / (r2 * r2)) - gamma * dy / (2 * Math.PI * r2);
+      const v = U * (-2 * R2 * dx * dy / (r2 * r2)) + gamma * dx / (2 * Math.PI * r2);
+      return { u, v };
     }
 
     // ---- Streamline particles ----
-    let particles = [];
-
-    class Particle {
-      constructor(yOffset, layer) {
-        this.reset(yOffset, layer);
-      }
-      reset(yOffset, layer) {
-        this.x = -50;
-        this.baseY = yOffset;
-        this.y = yOffset;
-        this.layer = layer; // 'upper', 'lower', 'freestream'
-        this.progress = 0;
-        this.speed = 1.0;
+    class StreamParticle {
+      constructor() { this.trail = []; this.maxTrail = 180; this.reset(); }
+      reset() {
+        this.x = wing.x - CHORD * 0.8;
+        this.y = wing.y + (Math.random() - 0.5) * CHORD * 2.5;
+        this.trail = [];
+        this.alive = true;
       }
     }
 
-    function initParticles() {
-      particles = [];
-      const spacing = CHORD * 1.2 / (PARTICLE_COUNT / 3);
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const layer = i % 3;
-        let yOffset;
-        if (layer === 0) yOffset = -CHORD * 0.35 - (Math.floor(i/3) * spacing * 0.4); // upper
-        else if (layer === 1) yOffset = CHORD * 0.35 + (Math.floor(i/3) * spacing * 0.4);  // lower
-        else yOffset = -CHORD * 0.8 + (Math.floor(i/3) * spacing * 1.2); // freestream
-        particles.push(new Particle(yOffset, layer === 0 ? 'upper' : (layer === 1 ? 'lower' : 'freestream')));
-        // Stagger start positions
-        particles[i].x = -50 - Math.random() * 200;
+    let streams = [];
+    function initStreams() {
+      streams = [];
+      for (let i = 0; i < STREAM_COUNT; i++) {
+        const p = new StreamParticle();
+        p.y = wing.y - CHORD * 1.2 + (i / (STREAM_COUNT - 1)) * CHORD * 2.4;
+        p.x = wing.x - CHORD * 0.8 - Math.random() * 100;
+        streams.push(p);
       }
     }
 
-    // ---- Physics ----
-    function getFlowSpeed(x, layer) {
-      // Normalized position along chord (-0.5 to 0.5)
-      const nx = x / CHORD;
-      const absNx = Math.abs(nx);
+    // ---- Interaction state ----
+    let drag = { active: false, type: 'none', anchor: null, offsetX: 0, offsetY: 0 };
+    let hoverInfo = { type: 'none', target: null };
 
-      // Base speed factor
-      let speedFactor = 1.0;
+    const ANCHOR_HIT_R = 10;
+    const ROT_HANDLE_DIST = CHORD * 0.55;
+    const ROT_HANDLE_R = 14;
 
-      if (layer === 'upper') {
-        // Upper surface: speed increases due to curvature + angle of attack
-        // Maximum speed near leading edge and peak suction
-        const aoaFactor = Math.max(0, AOA / 25); // 0 to ~1
-        const curvatureBoost = Math.sin(absNx * Math.PI) * (0.4 + aoaFactor * 0.8);
-        speedFactor = 1.0 + curvatureBoost;
-      } else if (layer === 'lower') {
-        // Lower surface: speed decreases slightly or stays similar
-        const aoaFactor = Math.max(0, -AOA / 25); // Effect reverses at negative AOA
-        speedFactor = 1.0 - Math.sin(absNx * Math.PI) * (0.1 + aoaFactor * 0.2);
-      }
-
-      // Stall effect: at high AOA, upper surface flow separates (turbulent)
-      if (AOA > 15 && layer === 'upper') {
-        const stallFactor = (AOA - 15) / 10; // 0 to 1
-        const separation = Math.sin(nx * Math.PI) * stallFactor * 0.5;
-        speedFactor *= (1.0 - separation * 0.3);
-      }
-
-      return speedFactor;
+    function getRotHandleWorld() {
+      return localToWorld(0, -ROT_HANDLE_DIST);
     }
 
+    function findTargetAt(mx, my) {
+      const p = screenToPhys(mx, my);
+
+      // 1. Check rotation handle
+      const rot = getRotHandleWorld();
+      if (Math.hypot(p.x - rot.x, p.y - rot.y) < ROT_HANDLE_R / SCALE) {
+        return { type: 'rotate' };
+      }
+
+      // 2. Check control points (upper, skip endpoints)
+      for (let i = 1; i < wing.upperAnchors.length - 1; i++) {
+        const wp = localToWorld(wing.upperAnchors[i].x, wing.upperAnchors[i].y);
+        if (Math.hypot(p.x - wp.x, p.y - wp.y) < ANCHOR_HIT_R / SCALE) {
+          return { type: 'anchor', surface: 'upper', index: i };
+        }
+      }
+
+      // 3. Check control points (lower, skip endpoints)
+      for (let i = 1; i < wing.lowerAnchors.length - 1; i++) {
+        const wp = localToWorld(wing.lowerAnchors[i].x, wing.lowerAnchors[i].y);
+        if (Math.hypot(p.x - wp.x, p.y - wp.y) < ANCHOR_HIT_R / SCALE) {
+          return { type: 'anchor', surface: 'lower', index: i };
+        }
+      }
+
+      // 4. Check if inside wing polygon
+      const foil = getWingWorldPoints();
+      const poly = [...foil.upper, ...foil.lower.reverse()];
+      if (pointInPolygon(p.x, p.y, poly)) {
+        return { type: 'body' };
+      }
+
+      return { type: 'none' };
+    }
+
+    function updateCoordDisplay(target) {
+      const el = document.getElementById('coord-val');
+      const label = document.querySelector('.coord-label');
+      if (!target || target.type === 'none') {
+        label.textContent = '坐标信息';
+        el.textContent = '点击机翼或控制点查看坐标';
+        return;
+      }
+
+      if (target.type === 'rotate') {
+        const rot = getRotHandleWorld();
+        label.textContent = '旋转手柄';
+        el.textContent = `中心: (${wing.x.toFixed(1)}, ${wing.y.toFixed(1)})  攻角: ${wing.angle.toFixed(1)}°`;
+      } else if (target.type === 'anchor') {
+        const a = target.surface === 'upper' ? wing.upperAnchors[target.index] : wing.lowerAnchors[target.index];
+        const wp = localToWorld(a.x, a.y);
+        label.textContent = `${target.surface === 'upper' ? '上表面' : '下表面'} 控制点 #${target.index}`;
+        el.textContent = `局部: (${a.x.toFixed(1)}, ${a.y.toFixed(1)})  世界: (${wp.x.toFixed(1)}, ${wp.y.toFixed(1)})`;
+      } else if (target.type === 'body') {
+        label.textContent = '翼型机身';
+        el.textContent = `中心: (${wing.x.toFixed(1)}, ${wing.y.toFixed(1)})  攻角: ${wing.angle.toFixed(1)}°`;
+      }
+    }
+
+    // ---- Mouse events ----
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+
+      if (e.button === 2) {
+        viewPan.active = true;
+        viewPan.sx = mx; viewPan.sy = my;
+        return;
+      }
+
+      const target = findTargetAt(mx, my);
+      if (target.type === 'none') {
+        updateCoordDisplay(target);
+        return;
+      }
+
+      drag.active = true;
+      drag.type = target.type;
+      drag.anchor = target;
+
+      if (target.type === 'anchor') {
+        const a = target.surface === 'upper' ? wing.upperAnchors[target.index] : wing.lowerAnchors[target.index];
+        const wp = localToWorld(a.x, a.y);
+        const p = screenToPhys(mx, my);
+        drag.offsetX = p.x - wp.x;
+        drag.offsetY = p.y - wp.y;
+      } else if (target.type === 'body') {
+        const p = screenToPhys(mx, my);
+        drag.offsetX = p.x - wing.x;
+        drag.offsetY = p.y - wing.y;
+      } else if (target.type === 'rotate') {
+        const p = screenToPhys(mx, my);
+        drag.startAngle = Math.atan2(p.y - wing.y, p.x - wing.x);
+        drag.startWingAngle = wing.angle;
+      }
+
+      updateCoordDisplay(target);
+      canvas.classList.add('dragging');
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+
+      if (viewPan.active && e.buttons === 2) {
+        viewPan.ox += mx - viewPan.sx;
+        viewPan.oy += my - viewPan.sy;
+        viewPan.sx = mx; viewPan.sy = my;
+        return;
+      }
+
+      if (!drag.active) {
+        const target = findTargetAt(mx, my);
+        if (target.type !== hoverInfo.type ||
+            (target.type === 'anchor' && (target.surface !== hoverInfo.surface || target.index !== hoverInfo.index))) {
+          hoverInfo = target;
+          updateCoordDisplay(target);
+        }
+        // Cursor
+        if (target.type === 'rotate') canvas.style.cursor = 'grab';
+        else if (target.type === 'anchor') canvas.style.cursor = 'grab';
+        else if (target.type === 'body') canvas.style.cursor = 'move';
+        else canvas.style.cursor = 'crosshair';
+        return;
+      }
+
+      const p = screenToPhys(mx, my);
+
+      if (drag.type === 'anchor') {
+        const wx = p.x - drag.offsetX, wy = p.y - drag.offsetY;
+        const local = worldToLocal(wx, wy);
+        // Constrain: keep within chord, don't cross centerline too much
+        const a = drag.anchor.surface === 'upper' ? wing.upperAnchors : wing.lowerAnchors;
+        a[drag.anchor.index].x = Math.max(-170, Math.min(170, local.x));
+        a[drag.anchor.index].y = drag.anchor.surface === 'upper'
+          ? Math.min(-2, local.y)
+          : Math.max(2, local.y);
+        // Sync endpoints
+        a[0].y = 0; a[a.length - 1].y = 0;
+      } else if (drag.type === 'body') {
+        wing.x = p.x - drag.offsetX;
+        wing.y = p.y - drag.offsetY;
+      } else if (drag.type === 'rotate') {
+        const currentAngle = Math.atan2(p.y - wing.y, p.x - wing.x);
+        const delta = (currentAngle - drag.startAngle) * 180 / Math.PI;
+        wing.angle = Math.max(-25, Math.min(30, drag.startWingAngle - delta));
+        AOA = Math.round(wing.angle);
+        document.getElementById('slider-aoa').value = AOA;
+        document.getElementById('aoa-val').textContent = AOA + '°';
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      drag.active = false;
+      drag.type = 'none';
+      canvas.classList.remove('dragging');
+    });
+    canvas.addEventListener('mouseleave', () => {
+      drag.active = false;
+      viewPan.active = false;
+      canvas.classList.remove('dragging');
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const mx = e.clientX, my = e.clientY;
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      const newScale = Math.max(0.3, Math.min(5.0, SCALE * zoomFactor));
+      viewPan.ox = mx - (mx - viewPan.ox) * newScale / SCALE;
+      viewPan.oy = my - (my - viewPan.oy) * newScale / SCALE;
+      SCALE = newScale;
+    }, { passive: false });
+
+    // ---- Lift ----
     function getLift() {
-      // Simplified lift calculation
-      // CL ≈ 2π * α (in radians) for thin airfoil theory
-      // With stall correction
-      const alphaRad = AOA * Math.PI / 180;
+      const alphaRad = wing.angle * Math.PI / 180;
       let CL = 2 * Math.PI * alphaRad;
-
-      // Stall: CL drops after ~15 degrees
-      if (AOA > 15) {
-        const stallDrop = Math.min(1.0, (AOA - 15) / 10);
-        CL *= (1.0 - stallDrop * 0.7);
-      }
-      if (AOA < -10) {
-        const stallDrop = Math.min(1.0, (-AOA - 10) / 10);
-        CL *= (1.0 - stallDrop * 0.7);
-      }
-
-      // L = 0.5 * rho * v^2 * S * CL (using arbitrary S=1 for visualization)
+      if (wing.angle > 15) CL *= (1.0 - Math.min(1.0, (wing.angle - 15) / 10) * 0.7);
+      if (wing.angle < -10) CL *= (1.0 - Math.min(1.0, (-wing.angle - 10) / 10) * 0.7);
       return 0.5 * RHO * WIND_SPEED * WIND_SPEED * CL;
     }
 
     function getAvgTopSpeed() {
-      let sum = 0, count = 0;
-      for (let nx = -0.4; nx <= 0.4; nx += 0.05) {
-        sum += getFlowSpeed(nx * CHORD, 'upper');
-        count++;
-      }
-      return (sum / count) * WIND_SPEED;
+      const baseFactor = 1.0 + 0.8 * Math.max(0, wing.angle / 25);
+      if (wing.angle > 15) return baseFactor * WIND_SPEED * (1.0 - Math.min(1.0, (wing.angle - 15) / 10) * 0.3);
+      return baseFactor * WIND_SPEED;
     }
 
-    // ---- Drawing ----
+    // ---- Theme ----
     function getThemeColors() {
       const theme = document.documentElement.getAttribute('data-theme') || 'academic';
       if (theme === 'cartoon') return { bg: '#fef6e4', grid: 'rgba(0,0,0,0.06)', ink: '#2d3436' };
@@ -278,188 +527,9 @@
       return { bg: '#050508', grid: 'rgba(255,255,255,0.03)', ink: '#f0e6ff' };
     }
 
-    function draw() {
-      const theme = getThemeColors();
-      ctx.fillStyle = theme.bg;
-      ctx.fillRect(0, 0, W, H);
-
-      const cx = W / 2;
-      const cy = H / 2;
-      const foil = getAirfoilPoints(cx, cy, AOA);
-
-      // Draw subtle grid
-      ctx.strokeStyle = theme.grid;
-      ctx.lineWidth = 1;
-      for (let x = 0; x < W; x += 60) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-      }
-      for (let y = 0; y < H; y += 60) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-      }
-
-      // Draw freestream arrow (left side)
-      ctx.strokeStyle = theme.ink;
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.4;
-      ctx.beginPath();
-      ctx.moveTo(40, cy);
-      ctx.lineTo(100, cy);
-      ctx.stroke();
-      // Arrowhead
-      ctx.beginPath();
-      ctx.moveTo(100, cy); ctx.lineTo(90, cy - 6); ctx.lineTo(90, cy + 6); ctx.closePath();
-      ctx.fillStyle = theme.ink; ctx.fill();
-      ctx.globalAlpha = 1.0;
-      ctx.font = 'bold 13px sans-serif';
-      ctx.fillStyle = theme.ink;
-      ctx.fillText('v∞ = ' + WIND_SPEED + ' m/s', 40, cy - 20);
-
-      // Draw particles (streamlines)
-      for (let p of particles) {
-        const speedFactor = getFlowSpeed(p.x - cx, p.layer);
-        const speed = speedFactor * WIND_SPEED;
-        const color = getSpeedColor(speedFactor);
-
-        // Particle position with deflection around airfoil
-        let py = p.baseY;
-        const dx = p.x - cx;
-        const absDx = Math.abs(dx);
-
-        if (absDx < CHORD * 0.6) {
-          // Deflection based on layer and position
-          const influence = Math.cos((dx / (CHORD * 0.6)) * Math.PI / 2);
-          if (p.layer === 'upper') {
-            py -= influence * CHORD * 0.08 * (1 + AOA / 30);
-          } else if (p.layer === 'lower') {
-            py += influence * CHORD * 0.05 * (1 - AOA / 30);
-          }
-        }
-
-        p.y = py;
-
-        // Draw particle
-        const size = 2 + speedFactor * 1.5;
-        ctx.globalAlpha = 0.7;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Trail (short streak)
-        ctx.globalAlpha = 0.2;
-        ctx.strokeStyle = color;
-        ctx.lineWidth = size * 0.5;
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.x - speedFactor * 8, p.y);
-        ctx.stroke();
-        ctx.globalAlpha = 1.0;
-      }
-
-      // Draw airfoil
-      ctx.fillStyle = theme.ink;
-      ctx.globalAlpha = 0.15;
-      ctx.beginPath();
-      ctx.moveTo(foil.upper[0].x, foil.upper[0].y);
-      for (let p of foil.upper) ctx.lineTo(p.x, p.y);
-      for (let p of foil.lower) ctx.lineTo(p.x, p.y);
-      ctx.closePath();
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
-
-      ctx.strokeStyle = theme.ink;
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(foil.upper[0].x, foil.upper[0].y);
-      for (let p of foil.upper) ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(foil.lower[0].x, foil.lower[0].y);
-      for (let p of foil.lower) ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-
-      // Draw chord line (dashed)
-      ctx.strokeStyle = theme.ink;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([6, 4]);
-      ctx.globalAlpha = 0.3;
-      ctx.beginPath();
-      const cStart = { x: cx - CHORD/2 * Math.cos(AOA*Math.PI/180), y: cy - CHORD/2 * Math.sin(AOA*Math.PI/180) };
-      const cEnd = { x: cx + CHORD/2 * Math.cos(AOA*Math.PI/180), y: cy + CHORD/2 * Math.sin(AOA*Math.PI/180) };
-      ctx.moveTo(cStart.x, cStart.y);
-      ctx.lineTo(cEnd.x, cEnd.y);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.globalAlpha = 1.0;
-
-      // Draw lift arrow
-      const lift = getLift();
-      const liftMag = Math.min(CHORD * 0.5, Math.abs(lift) / 200);
-      const liftColor = lift > 0 ? '#10b981' : '#ef4444';
-
-      ctx.strokeStyle = liftColor;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx, cy - liftMag);
-      ctx.stroke();
-
-      // Arrowhead for lift
-      ctx.fillStyle = liftColor;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - liftMag);
-      ctx.lineTo(cx - 8, cy - liftMag + 12);
-      ctx.lineTo(cx + 8, cy - liftMag + 12);
-      ctx.closePath();
-      ctx.fill();
-
-      // Lift label
-      ctx.font = 'bold 14px sans-serif';
-      ctx.fillStyle = liftColor;
-      ctx.fillText('L = ' + (lift/1000).toFixed(2) + ' kN', cx + 20, cy - liftMag * 0.5);
-
-      // Draw AOA arc
-      if (Math.abs(AOA) > 2) {
-        ctx.strokeStyle = theme.ink;
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.4;
-        ctx.beginPath();
-        const arcR = CHORD * 0.35;
-        const arcStart = 0;
-        const arcEnd = -AOA * Math.PI / 180;
-        ctx.arc(cx - CHORD*0.35, cy, arcR, Math.min(arcStart, arcEnd), Math.max(arcStart, arcEnd), AOA < 0);
-        ctx.stroke();
-        ctx.globalAlpha = 1.0;
-
-        // AOA label
-        ctx.font = '12px sans-serif';
-        ctx.fillStyle = theme.ink;
-        ctx.globalAlpha = 0.6;
-        const labelAngle = -AOA * Math.PI / 180 / 2;
-        const labelX = cx - CHORD*0.35 + (arcR + 20) * Math.cos(labelAngle);
-        const labelY = cy + (arcR + 20) * Math.sin(labelAngle);
-        ctx.fillText('α = ' + AOA + '°', labelX - 20, labelY);
-        ctx.globalAlpha = 1.0;
-      }
-
-      // Stall warning
-      if (AOA > 15) {
-        ctx.font = 'bold 18px sans-serif';
-        ctx.fillStyle = '#ef4444';
-        ctx.textAlign = 'center';
-        ctx.fillText('⚠️ 失速警告 (Stall)', W / 2, H - 40);
-        ctx.textAlign = 'left';
-      }
-
-      // Legend
-      drawLegend(theme);
-    }
-
     function getSpeedColor(factor) {
-      // factor 0.5 (slow) = blue, 1.0 (normal) = green, 1.8 (fast) = red
       if (factor < 0.8) {
-        const t = (factor - 0.5) / 0.3;
+        const t = Math.max(0, (factor - 0.5) / 0.3);
         return `rgb(${Math.round(59 + t * 100)}, ${Math.round(130 + t * 100)}, ${Math.round(246 - t * 100)})`;
       } else if (factor < 1.3) {
         const t = (factor - 0.8) / 0.5;
@@ -470,28 +540,253 @@
       }
     }
 
+    // ---- Physics step ----
+    function stepParticles() {
+      const speedScale = WIND_SPEED * 0.0008;
+      for (let p of streams) {
+        if (!p.alive) continue;
+        const vel = getVelocity(p.x, p.y);
+        if (!vel) { p.alive = false; continue; }
+        const speed = Math.sqrt(vel.u * vel.u + vel.v * vel.v);
+        const speedFactor = speed / (WIND_SPEED * 0.01);
+        p.x += vel.u * speedScale * 60;
+        p.y += vel.v * speedScale * 60;
+        p.trail.push({ x: p.x, y: p.y, speed: speedFactor });
+        if (p.trail.length > p.maxTrail) p.trail.shift();
+        if (p.x > wing.x + CHORD * 1.2 || p.x < wing.x - CHORD * 1.5) p.reset();
+        if (Math.hypot(p.x - wing.x, p.y - wing.y) < CYLINDER_R * 1.05) p.alive = false;
+      }
+      for (let p of streams) { if (!p.alive) p.reset(); }
+    }
+
+    // ---- Drawing ----
+    function draw() {
+      const theme = getThemeColors();
+      ctx.fillStyle = theme.bg;
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.save();
+      ctx.translate(viewPan.ox, viewPan.oy);
+      ctx.scale(SCALE, SCALE);
+
+      // Grid
+      ctx.strokeStyle = theme.grid;
+      ctx.lineWidth = 1 / SCALE;
+      const gridStep = 60;
+      const vl = -viewPan.ox / SCALE, vr = (W - viewPan.ox) / SCALE;
+      const vt = -viewPan.oy / SCALE, vb = (H - viewPan.oy) / SCALE;
+      const gx0 = Math.floor(vl / gridStep) * gridStep;
+      const gy0 = Math.floor(vt / gridStep) * gridStep;
+      for (let x = gx0; x <= vr; x += gridStep) {
+        ctx.beginPath(); ctx.moveTo(x, vt); ctx.lineTo(x, vb); ctx.stroke();
+      }
+      for (let y = gy0; y <= vb; y += gridStep) {
+        ctx.beginPath(); ctx.moveTo(vl, y); ctx.lineTo(vr, y); ctx.stroke();
+      }
+
+      // Streamline trails
+      for (let p of streams) {
+        if (p.trail.length < 2) continue;
+        for (let i = 1; i < p.trail.length; i++) {
+          const a = p.trail[i - 1], b = p.trail[i];
+          const color = getSpeedColor(b.speed);
+          const alpha = Math.min(0.8, 0.15 + 0.65 * (i / p.trail.length));
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = color;
+          ctx.lineWidth = Math.max(0.5, 1.2 + b.speed * 0.8);
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+        if (p.trail.length > 0) {
+          const head = p.trail[p.trail.length - 1];
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = getSpeedColor(head.speed);
+          ctx.beginPath(); ctx.arc(head.x, head.y, 2 + head.speed, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Wing shape
+      const foil = getWingWorldPoints();
+
+      // Fill
+      ctx.fillStyle = theme.ink;
+      ctx.globalAlpha = 0.18;
+      ctx.beginPath();
+      ctx.moveTo(foil.upper[0].x, foil.upper[0].y);
+      for (let p of foil.upper) ctx.lineTo(p.x, p.y);
+      for (let p of foil.lower) ctx.lineTo(p.x, p.y);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1.0;
+
+      // Outline
+      ctx.strokeStyle = theme.ink;
+      ctx.lineWidth = 2.5 / SCALE;
+      ctx.beginPath();
+      ctx.moveTo(foil.upper[0].x, foil.upper[0].y);
+      for (let p of foil.upper) ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(foil.lower[0].x, foil.lower[0].y);
+      for (let p of foil.lower) ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+
+      // Chord line
+      ctx.strokeStyle = theme.ink;
+      ctx.lineWidth = 1 / SCALE;
+      ctx.setLineDash([6 / SCALE, 4 / SCALE]);
+      ctx.globalAlpha = 0.3;
+      const cStart = localToWorld(-CHORD/2, 0);
+      const cEnd = localToWorld(CHORD/2, 0);
+      ctx.beginPath(); ctx.moveTo(cStart.x, cStart.y); ctx.lineTo(cEnd.x, cEnd.y); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1.0;
+
+      // Control points
+      const isAcademic = (document.documentElement.getAttribute('data-theme') || 'academic') === 'academic';
+      const cpFill = isAcademic ? '#4f46e5' : '#ff6b6b';
+      const cpStroke = isAcademic ? '#ffffff' : '#2d3436';
+
+      // Upper anchors (skip endpoints)
+      for (let i = 1; i < wing.upperAnchors.length - 1; i++) {
+        const wp = localToWorld(wing.upperAnchors[i].x, wing.upperAnchors[i].y);
+        const isHover = hoverInfo.type === 'anchor' && hoverInfo.surface === 'upper' && hoverInfo.index === i;
+        const r = isHover ? 7 / SCALE : 5 / SCALE;
+        ctx.fillStyle = cpFill;
+        ctx.strokeStyle = cpStroke;
+        ctx.lineWidth = 1.5 / SCALE;
+        ctx.beginPath(); ctx.arc(wp.x, wp.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Dashed line to show local position
+        ctx.strokeStyle = cpFill;
+        ctx.globalAlpha = 0.3;
+        ctx.setLineDash([3 / SCALE, 3 / SCALE]);
+        ctx.lineWidth = 0.8 / SCALE;
+        ctx.beginPath(); ctx.moveTo(wp.x, wing.y); ctx.lineTo(wp.x, wp.y); ctx.stroke();
+        ctx.setLineDash([]); ctx.globalAlpha = 1.0;
+      }
+      // Lower anchors
+      for (let i = 1; i < wing.lowerAnchors.length - 1; i++) {
+        const wp = localToWorld(wing.lowerAnchors[i].x, wing.lowerAnchors[i].y);
+        const isHover = hoverInfo.type === 'anchor' && hoverInfo.surface === 'lower' && hoverInfo.index === i;
+        const r = isHover ? 7 / SCALE : 5 / SCALE;
+        ctx.fillStyle = cpFill;
+        ctx.strokeStyle = cpStroke;
+        ctx.lineWidth = 1.5 / SCALE;
+        ctx.beginPath(); ctx.arc(wp.x, wp.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = cpFill;
+        ctx.globalAlpha = 0.3;
+        ctx.setLineDash([3 / SCALE, 3 / SCALE]);
+        ctx.lineWidth = 0.8 / SCALE;
+        ctx.beginPath(); ctx.moveTo(wp.x, wing.y); ctx.lineTo(wp.x, wp.y); ctx.stroke();
+        ctx.setLineDash([]); ctx.globalAlpha = 1.0;
+      }
+
+      // Rotation handle
+      const rot = getRotHandleWorld();
+      const isRotHover = hoverInfo.type === 'rotate';
+      ctx.fillStyle = isRotHover ? '#f59e0b' : '#fbbf24';
+      ctx.strokeStyle = isAcademic ? '#1a1a2e' : '#2d3436';
+      ctx.lineWidth = 2 / SCALE;
+      ctx.beginPath(); ctx.arc(rot.x, rot.y, (isRotHover ? 10 : 8) / SCALE, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Line from center to handle
+      ctx.strokeStyle = '#fbbf24';
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1.5 / SCALE;
+      ctx.setLineDash([4 / SCALE, 3 / SCALE]);
+      ctx.beginPath(); ctx.moveTo(wing.x, wing.y); ctx.lineTo(rot.x, rot.y); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1.0;
+
+      // Lift arrow
+      const lift = getLift();
+      const liftMag = Math.min(CHORD * 0.5, Math.abs(lift) / 150);
+      const liftColor = lift > 0 ? '#10b981' : '#ef4444';
+      if (Math.abs(liftMag) > 3) {
+        ctx.strokeStyle = liftColor;
+        ctx.lineWidth = 4 / SCALE;
+        ctx.beginPath(); ctx.moveTo(wing.x, wing.y); ctx.lineTo(wing.x, wing.y - liftMag); ctx.stroke();
+        ctx.fillStyle = liftColor;
+        ctx.beginPath();
+        ctx.moveTo(wing.x, wing.y - liftMag);
+        ctx.lineTo(wing.x - 8/SCALE, wing.y - liftMag + 12/SCALE);
+        ctx.lineTo(wing.x + 8/SCALE, wing.y - liftMag + 12/SCALE);
+        ctx.closePath(); ctx.fill();
+        ctx.font = `bold ${14/SCALE}px sans-serif`;
+        ctx.fillStyle = liftColor;
+        ctx.fillText('L = ' + (lift/1000).toFixed(2) + ' kN', wing.x + 20/SCALE, wing.y - liftMag * 0.5);
+      }
+
+      // AOA arc
+      if (Math.abs(wing.angle) > 2) {
+        ctx.strokeStyle = theme.ink;
+        ctx.lineWidth = 1.5 / SCALE;
+        ctx.globalAlpha = 0.4;
+        const arcR = CHORD * 0.35;
+        const a1 = -wing.angle * Math.PI / 180;
+        ctx.beginPath();
+        ctx.arc(wing.x - CHORD*0.35, wing.y, arcR, Math.min(0, a1), Math.max(0, a1), wing.angle < 0);
+        ctx.stroke();
+        ctx.globalAlpha = 0.6;
+        ctx.font = `${12/SCALE}px sans-serif`;
+        ctx.fillStyle = theme.ink;
+        const la = a1 / 2;
+        ctx.fillText('α = ' + wing.angle.toFixed(0) + '°', wing.x - CHORD*0.35 + (arcR + 20/SCALE)*Math.cos(la), wing.y + (arcR + 20/SCALE)*Math.sin(la));
+        ctx.globalAlpha = 1.0;
+      }
+
+      // Stall warning
+      if (wing.angle > 15) {
+        ctx.font = `bold ${18/SCALE}px sans-serif`;
+        ctx.fillStyle = '#ef4444';
+        ctx.textAlign = 'center';
+        ctx.fillText('⚠ 失速警告 (Stall)', vl + (vr - vl)/2, vb - 30/SCALE);
+        ctx.textAlign = 'left';
+      }
+
+      // Pressure labels
+      ctx.font = `${11/SCALE}px sans-serif`;
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = '#ef4444';
+      ctx.fillText('低压 (快)', wing.x - 30/SCALE, wing.y - CHORD * 0.12);
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillText('高压 (慢)', wing.x - 30/SCALE, wing.y + CHORD * 0.12);
+      ctx.globalAlpha = 1.0;
+
+      // Freestream arrow
+      ctx.strokeStyle = theme.ink;
+      ctx.lineWidth = 2 / SCALE;
+      ctx.globalAlpha = 0.4;
+      const arrowX = vl + 40/SCALE;
+      ctx.beginPath(); ctx.moveTo(arrowX, wing.y); ctx.lineTo(arrowX + 60/SCALE, wing.y); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(arrowX + 60/SCALE, wing.y);
+      ctx.lineTo(arrowX + 50/SCALE, wing.y - 6/SCALE);
+      ctx.lineTo(arrowX + 50/SCALE, wing.y + 6/SCALE);
+      ctx.closePath(); ctx.fillStyle = theme.ink; ctx.fill();
+      ctx.globalAlpha = 1.0;
+      ctx.font = `bold ${13/SCALE}px sans-serif`;
+      ctx.fillStyle = theme.ink;
+      ctx.fillText('v∞ = ' + WIND_SPEED + ' m/s', arrowX, wing.y - 15/SCALE);
+
+      ctx.restore();
+
+      // Legend (screen space)
+      drawLegend(theme);
+    }
+
     function drawLegend(theme) {
-      const lx = W - 160;
-      const ly = H - 90;
+      const lx = W - 150, ly = H - 85;
       ctx.font = '11px sans-serif';
       ctx.fillStyle = theme.ink;
       ctx.globalAlpha = 0.6;
       ctx.fillText('流速图例', lx, ly);
-
-      const colors = [
+      const items = [
         { c: getSpeedColor(0.6), label: '慢 (高压)' },
         { c: getSpeedColor(1.0), label: '正常' },
         { c: getSpeedColor(1.6), label: '快 (低压)' }
       ];
-      colors.forEach((item, i) => {
+      items.forEach((item, i) => {
         const y = ly + 18 + i * 18;
-        ctx.fillStyle = item.c;
-        ctx.globalAlpha = 0.8;
-        ctx.beginPath();
-        ctx.arc(lx + 8, y, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = theme.ink;
-        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = item.c; ctx.globalAlpha = 0.8;
+        ctx.beginPath(); ctx.arc(lx + 8, y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = theme.ink; ctx.globalAlpha = 0.5;
         ctx.fillText(item.label, lx + 22, y + 4);
       });
       ctx.globalAlpha = 1.0;
@@ -499,16 +794,7 @@
 
     // ---- Main loop ----
     function loop() {
-      if (!paused) {
-        for (let p of particles) {
-          const speedFactor = getFlowSpeed(p.x - W/2, p.layer);
-          p.x += speedFactor * WIND_SPEED * 0.15;
-          if (p.x > W + 50) {
-            p.x = -50 - Math.random() * 100;
-            p.progress = 0;
-          }
-        }
-      }
+      if (!paused) stepParticles();
       draw();
       updateStats();
       animId = requestAnimationFrame(loop);
@@ -517,8 +803,7 @@
     function updateStats() {
       const lift = getLift();
       document.getElementById('lift-val').textContent = (lift / 1000).toFixed(2);
-      const topSpeed = getAvgTopSpeed();
-      document.getElementById('top-speed').textContent = topSpeed.toFixed(1);
+      document.getElementById('top-speed').textContent = getAvgTopSpeed().toFixed(1);
     }
 
     function resize() {
@@ -531,36 +816,44 @@
     // ---- Sliders ----
     document.getElementById('slider-aoa').addEventListener('input', (e) => {
       AOA = parseInt(e.target.value);
+      wing.angle = AOA;
       document.getElementById('aoa-val').textContent = AOA + '°';
+      for (let p of streams) { p.trail = []; }
     });
     document.getElementById('slider-wind').addEventListener('input', (e) => {
       WIND_SPEED = parseInt(e.target.value);
       document.getElementById('wind-val').textContent = WIND_SPEED;
     });
-    document.getElementById('slider-particle').addEventListener('input', (e) => {
-      PARTICLE_COUNT = parseInt(e.target.value);
-      document.getElementById('particle-val').textContent = PARTICLE_COUNT;
-      initParticles();
+    document.getElementById('slider-stream').addEventListener('input', (e) => {
+      STREAM_COUNT = parseInt(e.target.value);
+      document.getElementById('stream-val').textContent = STREAM_COUNT;
+      initStreams();
     });
     document.getElementById('slider-rho').addEventListener('input', (e) => {
       RHO = parseFloat(e.target.value);
       document.getElementById('rho-val').textContent = RHO.toFixed(3);
     });
 
+    function resetWingShape() {
+      wing.upperAnchors = DEFAULT_UPPER.map(a => ({...a}));
+      wing.lowerAnchors = DEFAULT_LOWER.map(a => ({...a}));
+    }
+
     function resetSim() {
-      AOA = 8;
-      WIND_SPEED = 80;
-      PARTICLE_COUNT = 60;
-      RHO = 1.225;
+      AOA = 8; wing.angle = 8;
+      WIND_SPEED = 80; STREAM_COUNT = 30; RHO = 1.225;
+      wing.x = 0; wing.y = 0;
+      resetWingShape();
       document.getElementById('slider-aoa').value = 8;
       document.getElementById('aoa-val').textContent = '8°';
       document.getElementById('slider-wind').value = 80;
       document.getElementById('wind-val').textContent = '80';
-      document.getElementById('slider-particle').value = 60;
-      document.getElementById('particle-val').textContent = '60';
+      document.getElementById('slider-stream').value = 30;
+      document.getElementById('stream-val').textContent = '30';
       document.getElementById('slider-rho').value = 1.225;
       document.getElementById('rho-val').textContent = '1.225';
-      initParticles();
+      SCALE = 1.0; viewPan.ox = 0; viewPan.oy = 0;
+      initStreams();
     }
 
     function togglePause() {
@@ -569,7 +862,7 @@
     }
 
     // ---- Start ----
-    initParticles();
+    initStreams();
     loop();
 
     setTimeout(() => {
