@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>爱因斯坦-罗森桥 — 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; background: #020204 !important; }
+    #container { position: fixed; inset: 0; z-index: 0; }
+    canvas { display: block; }
+
+    #ui-panel {
+      position: absolute; top: 80px; left: 30px; width: 380px; padding: 20px;
+      z-index: 10; max-height: 85vh; overflow-y: auto;
+    }
+    h1 { margin: 0; font-size: 1.3rem; transition: var(--theme-transition); }
+    p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
+    .slider-group { margin-bottom: 12px; }
+    .slider-group label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold; }
+    .val-display { font-family: monospace; font-size: 0.9rem; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .btn-row .theme-btn { flex: 1; min-width: 80px; padding: 10px 12px; font-size: 0.85rem; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; font-size: 0.85rem; }
+    .toggle-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    .formula-box {
+      background: rgba(128,128,128,0.08); border-radius: 8px;
+      padding: 12px; margin: 10px 0; font-size: 0.82rem; line-height: 1.6;
+    }
+    .formula-box .eq { font-family: 'Courier New', monospace; text-align: center; margin: 6px 0; font-size: 0.9rem; }
+    .warn-box {
+      background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15);
+      border-radius: 8px; padding: 10px 14px; margin: 10px 0;
+      font-size: 0.8rem; line-height: 1.5; color: var(--text-muted);
+    }
+    .warn-box strong { color: #ef4444; }
+
+    #info-overlay {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 10; font-size: 0.8rem; color: rgba(255,255,255,0.5);
+      font-family: monospace; pointer-events: none; text-align: center;
+    }
+
+    /* Theme overrides */
+    [data-theme="cartoon"] h1 { color: #ff6b6b; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+    [data-theme="cartoon"] .val-display { color: #ff6b6b; }
+    [data-theme="glass"] h1 { color: #ff00ea; text-shadow: 0 0 10px rgba(255,0,234,0.3); }
+    [data-theme="glass"] .val-display { color: #74b9ff; }
+    [data-theme="cyber"] h1 { color: #ff00ea; text-shadow: 0 0 15px rgba(255,0,234,0.5); }
+    [data-theme="cyber"] .val-display { color: #00f3ff; }
+    [data-theme="academic"] h1 { color: #1a1a2e; font-weight: 700; text-shadow: none; }
+    [data-theme="academic"] p.desc { color: #7a7a8a; }
+    [data-theme="academic"] .val-display { color: #1a1a2e; }
+    [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
+    [data-theme="academic"] .formula-box { background: #f4f5f7; }
+    [data-theme="academic"] .warn-box { background: #fef2f2; border-color: #fecaca; }
+
+    #ui-panel::-webkit-scrollbar { width: 5px; }
+    #entrance-toast { transition: opacity 0.8s ease; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <div id="container"></div>
+
+  <div id="ui-panel" class="glass-panel">
+    <h1>🌉 爱因斯坦-罗森桥</h1>
+    <p class="desc">弗拉姆抛物面嵌入图 — 连接两个渐近平坦时空的拓扑通道</p>
+
+    <div class="slider-group">
+      <label><span>施瓦西半径 rₛ</span><span id="rs-val" class="val-display">1.0</span></label>
+      <input type="range" id="slider-rs" min="0.5" max="3.0" step="0.1" value="1.0">
+    </div>
+    <div class="slider-group">
+      <label><span>外部边界 rₘₐₓ</span><span id="rmax-val" class="val-display">15.0</span></label>
+      <input type="range" id="slider-rmax" min="5.0" max="25.0" step="0.5" value="15.0">
+    </div>
+    <div class="slider-group">
+      <label><span>曲面采样密度</span><span id="seg-val" class="val-display">60</span></label>
+      <input type="range" id="slider-seg" min="30" max="120" step="10" value="60">
+    </div>
+    <div class="slider-group">
+      <label><span>测试粒子数量</span><span id="pc-val" class="val-display">200</span></label>
+      <input type="range" id="slider-pc" min="50" max="500" step="50" value="200">
+    </div>
+    <div class="slider-group">
+      <label><span>流动速度</span><span id="flow-val" class="val-display">1.0×</span></label>
+      <input type="range" id="slider-flow" min="0.2" max="3.0" step="0.1" value="1.0">
+    </div>
+    <div class="slider-group">
+      <label><span>表面透明度</span><span id="sop-val" class="val-display">0.6</span></label>
+      <input type="range" id="slider-sop" min="0.1" max="1.0" step="0.05" value="0.6">
+    </div>
+    <div class="slider-group">
+      <label><span>线框透明度</span><span id="wop-val" class="val-display">0.4</span></label>
+      <input type="range" id="slider-wop" min="0.1" max="1.0" step="0.05" value="0.4">
+    </div>
+
+    <div class="toggle-row">
+      <label for="check-rotate">自动旋转</label>
+      <input type="checkbox" id="check-rotate" checked>
+    </div>
+    <div class="toggle-row">
+      <label for="check-grid">显示参考网格</label>
+      <input type="checkbox" id="check-grid" checked>
+    </div>
+    <div class="toggle-row">
+      <label for="check-throat">标记喉部</label>
+      <input type="checkbox" id="check-throat" checked>
+    </div>
+
+    <div class="formula-box">
+      <strong>弗拉姆抛物面嵌入方程</strong>
+      <div class="eq">z(r) = ±2√(rₛ(r − rₛ))</div>
+      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
+        将施瓦西度规的空间部分嵌入三维欧氏空间，得到旋转抛物面。喉部位于 r = rₛ，z = 0 处。
+      </p>
+    </div>
+
+    <div class="formula-box">
+      <strong>史瓦西半径</strong>
+      <div class="eq">rₛ = 2GM / c² ≈ 3 km × (M / M☉)</div>
+      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
+        太阳质量黑洞的史瓦西半径约 3 km。rₛ 也是事件视界的边界。
+      </p>
+    </div>
+
+    <div class="formula-box">
+      <strong>爱因斯坦-罗森桥度规</strong>
+      <div class="eq">ds² = −(1 − rₛ/r)dt² + (1 − rₛ/r)⁻¹dr² + r²dΩ²</div>
+      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
+        1935 年爱因斯坦与罗森发现该度规在 r = rₛ 处存在坐标奇点，通过解析延拓可得到连接两个时空区域的桥。
+      </p>
+    </div>
+
+    <div class="formula-box">
+      <strong>潮汐力加速度 (径向)</strong>
+      <div class="eq">Δa ≈ (2GM / r³) · Δr = (c²rₛ / r³) · Δr</div>
+      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
+        在喉部 r = rₛ 处潮汐力最大。对于恒星质量黑洞，人体在喉部受到的拉伸力约 10⁹ g/m，瞬间撕裂。
+      </p>
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠ 物理限制</strong><br>
+      1. 此嵌入图截断了时间维度和一个空间角，仅为数学可视化工具。<br>
+      2. 原始爱因斯坦-罗森桥在动力学上不稳定，喉部会在光穿越时间内坍缩。<br>
+      3. 维持可穿越虫洞（Morris-Thorne）需要违反类光能量条件的奇异物质。<br>
+      4. 宏观可穿越虫洞在现有物理框架内尚无理论支持。
+    </div>
+
+    <div class="btn-row">
+      <button class="theme-btn" onclick="resetParams()">恢复默认</button>
+      <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
+    </div>
+
+    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px; text-align:center;">
+      左键拖拽旋转 · 右键平移 · 滚轮缩放
+    </p>
+  </div>
+
+  <div id="info-overlay">
+    <div id="info-text">正在初始化三维嵌入图...</div>
+  </div>
+
+  <div id="entrance-toast" class="glass-panel" style="
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
+    opacity:1; transition:opacity 0.8s ease;">
+    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:#fff; text-shadow:0 0 10px rgba(255,255,255,0.3);">
+      🌉 爱因斯坦-罗森桥
+    </div>
+    <div style="font-size:0.95rem; color:rgba(255,255,255,0.7); line-height:1.8;">
+      <strong style="color:#74b9ff;">弗拉姆抛物面</strong> 嵌入图可视化<br>
+      <strong style="color:#ff6b6b;">测试粒子</strong> 穿越两个渐近平坦时空<br>
+      左键旋转 · 右键平移 · 滚轮缩放
+    </div>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    /* ================================================================
+       爱因斯坦-罗森桥可视化
+       - 弗拉姆抛物面嵌入图 (Flamm's paraboloid)
+       - 测试粒子沿表面流动
+       - 全参数可调节
+       ================================================================ */
+
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    // ---- Parameters ----
+    const DEFAULTS = {
+      RS: 1.0,
+      R_MAX: 15.0,
+      SEGMENTS: 60,
+      PARTICLE_COUNT: 200,
+      FLOW_SPEED: 1.0,
+      SURFACE_OPACITY: 0.6,
+      WIREFRAME_OPACITY: 0.4,
+      AUTO_ROTATE: true,
+      SHOW_GRID: true,
+      SHOW_THROAT: true
+    };
+
+    let params = { ...DEFAULTS };
+    let paused = false;
+
+    // ---- Three.js globals ----
+    let scene, camera, renderer, controls;
+    let surfaceMesh, wireframeMesh, throatMesh, gridHelper;
+    let particleSystem, particleData = [];
+    let container;
+
+    // ---- DOM refs ----
+    const infoText = document.getElementById('info-text');
+    const pauseBtn = document.getElementById('pause-btn');
+
+    // ---- Init ----
+    init();
+    animate();
+
+    function init() {
+      container = document.getElementById('container');
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x020204);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 15, 35);
+      camera.lookAt(0, 0, 0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxDistance = 80;
+      controls.minDistance = 3;
+      controls.autoRotate = params.AUTO_ROTATE;
+      controls.autoRotateSpeed = 0.8;
+
+      buildScene();
+      initParticles();
+      initUI();
+
+      window.addEventListener('resize', onWindowResize);
+      infoText.textContent = '弗拉姆抛物面已生成 · 粒子流动模拟中';
+
+      setTimeout(() => {
+        const toast = document.getElementById('entrance-toast');
+        if (toast) toast.style.opacity = '0';
+      }, 4000);
+    }
+
+    // ---- Build / Rebuild scene objects ----
+    function buildScene() {
+      // Remove old
+      if (surfaceMesh) { scene.remove(surfaceMesh); surfaceMesh.geometry.dispose(); surfaceMesh.material.dispose(); surfaceMesh = null; }
+      if (wireframeMesh) { scene.remove(wireframeMesh); wireframeMesh.geometry.dispose(); wireframeMesh.material.dispose(); wireframeMesh = null; }
+      if (throatMesh) { scene.remove(throatMesh); throatMesh.geometry.dispose(); throatMesh.material.dispose(); throatMesh = null; }
+      if (gridHelper) { scene.remove(gridHelper); gridHelper = null; }
+
+      const { RS, R_MAX, SEGMENTS, SURFACE_OPACITY, WIREFRAME_OPACITY, SHOW_GRID, SHOW_THROAT } = params;
+
+      // Flamm paraboloid profile points
+      const points = [];
+      // Lower half (z < 0)
+      for (let i = SEGMENTS; i >= 0; i--) {
+        const t = i / SEGMENTS;
+        const r = RS + (R_MAX - RS) * Math.pow(t, 2.5);
+        const z = -2 * Math.sqrt(RS * Math.max(0, r - RS));
+        points.push(new THREE.Vector2(r, z));
+      }
+      // Upper half (z > 0)
+      for (let i = 1; i <= SEGMENTS; i++) {
+        const t = i / SEGMENTS;
+        const r = RS + (R_MAX - RS) * Math.pow(t, 2.5);
+        const z = 2 * Math.sqrt(RS * Math.max(0, r - RS));
+        points.push(new THREE.Vector2(r, z));
+      }
+
+      const geometry = new THREE.LatheGeometry(points, 64);
+
+      // Surface
+      const surfaceMat = new THREE.MeshBasicMaterial({
+        color: 0x112233,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: SURFACE_OPACITY,
+        depthWrite: false
+      });
+      surfaceMesh = new THREE.Mesh(geometry, surfaceMat);
+      scene.add(surfaceMesh);
+
+      // Wireframe
+      const edgesGeo = new THREE.WireframeGeometry(geometry);
+      const wireMat = new THREE.LineBasicMaterial({
+        color: 0x4488ff,
+        transparent: true,
+        opacity: WIREFRAME_OPACITY
+      });
+      wireframeMesh = new THREE.LineSegments(edgesGeo, wireMat);
+      scene.add(wireframeMesh);
+
+      // Throat marker
+      if (SHOW_THROAT) {
+        const throatGeo = new THREE.TorusGeometry(RS, 0.06, 16, 64);
+        const throatMat = new THREE.MeshBasicMaterial({ color: 0xff3333 });
+        throatMesh = new THREE.Mesh(throatGeo, throatMat);
+        throatMesh.rotation.x = Math.PI / 2;
+        scene.add(throatMesh);
+      }
+
+      // Grid
+      if (SHOW_GRID) {
+        gridHelper = new THREE.GridHelper(R_MAX * 2, 20, 0x333333, 0x1a1a1a);
+        gridHelper.position.y = -R_MAX * 0.5;
+        scene.add(gridHelper);
+      }
+    }
+
+    // ---- Particles ----
+    function initParticles() {
+      if (particleSystem) {
+        scene.remove(particleSystem);
+        particleSystem.geometry.dispose();
+        particleSystem.material.dispose();
+        particleSystem = null;
+      }
+      particleData = [];
+
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(params.PARTICLE_COUNT * 3);
+      const colors = new Float32Array(params.PARTICLE_COUNT * 3);
+
+      for (let i = 0; i < params.PARTICLE_COUNT; i++) {
+        resetParticle(positions, colors, i, true);
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const material = new THREE.PointsMaterial({
+        size: 0.18,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      particleSystem = new THREE.Points(geometry, material);
+      scene.add(particleSystem);
+    }
+
+    function resetParticle(posArr, colArr, i, initial = false) {
+      const { RS, R_MAX } = params;
+      const angle = Math.random() * Math.PI * 2;
+      const radius = RS + 0.5 + Math.random() * (R_MAX - RS - 1);
+      const z = 2 * Math.sqrt(RS * (radius - RS));
+
+      posArr[i * 3] = Math.cos(angle) * radius;
+      posArr[i * 3 + 1] = initial ? z + Math.random() * 2 : z + 1;
+      posArr[i * 3 + 2] = Math.sin(angle) * radius;
+
+      // Color based on altitude (blue at top, red after throat)
+      colArr[i * 3] = 0.6;
+      colArr[i * 3 + 1] = 0.8;
+      colArr[i * 3 + 2] = 1.0;
+
+      particleData[i] = {
+        angle: angle,
+        radius: radius,
+        phase: 'upper', // 'upper' | 'throat' | 'lower'
+        speed: 0.05 + Math.random() * 0.04
+      };
+    }
+
+    function updateParticles() {
+      if (!particleSystem) return;
+      const positions = particleSystem.geometry.attributes.position.array;
+      const colors = particleSystem.geometry.attributes.color.array;
+      const { RS, R_MAX, FLOW_SPEED } = params;
+
+      for (let i = 0; i < params.PARTICLE_COUNT; i++) {
+        const pd = particleData[i];
+        let px = positions[i * 3];
+        let py = positions[i * 3 + 1];
+        let pz = positions[i * 3 + 2];
+        const r = Math.sqrt(px * px + pz * pz);
+
+        if (pd.phase === 'upper') {
+          // Moving down toward throat
+          py -= pd.speed * FLOW_SPEED;
+          // Clamp to surface
+          const surfaceZ = 2 * Math.sqrt(RS * Math.max(0.001, r - RS));
+          if (py < surfaceZ) {
+            py = surfaceZ;
+            if (py < 0.3) pd.phase = 'throat';
+          }
+          // Radial contraction
+          const targetR = Math.max(RS + 0.1, r - 0.03 * FLOW_SPEED);
+          const ratio = targetR / Math.max(0.1, r);
+          px *= ratio;
+          pz *= ratio;
+
+          // Color: blue-white at top
+          colors[i * 3] = 0.5;
+          colors[i * 3 + 1] = 0.7;
+          colors[i * 3 + 2] = 1.0;
+        }
+        else if (pd.phase === 'throat') {
+          // Passing through throat
+          py -= pd.speed * 0.5 * FLOW_SPEED;
+          if (py < -0.3) pd.phase = 'lower';
+
+          // Color: white flash at throat
+          colors[i * 3] = 1.0;
+          colors[i * 3 + 1] = 0.9;
+          colors[i * 3 + 2] = 0.6;
+        }
+        else if (pd.phase === 'lower') {
+          // Moving down/out on lower half
+          py -= pd.speed * FLOW_SPEED;
+          const absZ = Math.abs(py);
+          // r from z: z = -2*sqrt(RS*(r-RS)) => r = RS + (z/2)^2 / RS
+          const targetR = RS + (absZ / 2) * (absZ / 2) / RS;
+          // Also expand outward
+          const expandedR = Math.min(R_MAX - 0.1, targetR + 0.02 * FLOW_SPEED);
+          const ratio = expandedR / Math.max(0.1, r);
+          px *= ratio;
+          pz *= ratio;
+
+          // Color: orange-red in lower half
+          const t = Math.min(1, (absZ - 0.5) / 5);
+          colors[i * 3] = 0.9 + t * 0.1;
+          colors[i * 3 + 1] = 0.5 - t * 0.2;
+          colors[i * 3 + 2] = 0.2 - t * 0.1;
+        }
+
+        // Reset if too far
+        if (py < -2 * Math.sqrt(RS * (R_MAX - RS)) - 2 || isNaN(py)) {
+          resetParticle(positions, colors, i);
+          continue;
+        }
+
+        positions[i * 3] = px;
+        positions[i * 3 + 1] = py;
+        positions[i * 3 + 2] = pz;
+      }
+
+      particleSystem.geometry.attributes.position.needsUpdate = true;
+      particleSystem.geometry.attributes.color.needsUpdate = true;
+    }
+
+    // ---- UI ----
+    function initUI() {
+      const bind = (id, key, displayId, suffix = '') => {
+        document.getElementById(id).addEventListener('input', e => {
+          const val = parseFloat(e.target.value);
+          params[key] = val;
+          document.getElementById(displayId).textContent = val.toFixed(key === 'FLOW_SPEED' ? 1 : (key === 'RS' || key === 'R_MAX' ? 1 : 0)) + suffix;
+          if (key === 'RS' || key === 'R_MAX' || key === 'SEGMENTS') {
+            buildScene();
+          }
+          if (key === 'PARTICLE_COUNT') {
+            initParticles();
+          }
+          if (key === 'SURFACE_OPACITY' && surfaceMesh) {
+            surfaceMesh.material.opacity = val;
+          }
+          if (key === 'WIREFRAME_OPACITY' && wireframeMesh) {
+            wireframeMesh.material.opacity = val;
+          }
+        });
+      };
+
+      bind('slider-rs', 'RS', 'rs-val');
+      bind('slider-rmax', 'R_MAX', 'rmax-val');
+      bind('slider-seg', 'SEGMENTS', 'seg-val');
+      bind('slider-pc', 'PARTICLE_COUNT', 'pc-val');
+      bind('slider-flow', 'FLOW_SPEED', 'flow-val', '×');
+      bind('slider-sop', 'SURFACE_OPACITY', 'sop-val');
+      bind('slider-wop', 'WIREFRAME_OPACITY', 'wop-val');
+
+      document.getElementById('check-rotate').addEventListener('change', e => {
+        params.AUTO_ROTATE = e.target.checked;
+        controls.autoRotate = params.AUTO_ROTATE;
+      });
+      document.getElementById('check-grid').addEventListener('change', e => {
+        params.SHOW_GRID = e.target.checked;
+        buildScene();
+      });
+      document.getElementById('check-throat').addEventListener('change', e => {
+        params.SHOW_THROAT = e.target.checked;
+        buildScene();
+      });
+    }
+
+    window.resetParams = function() {
+      params = { ...DEFAULTS };
+      document.getElementById('slider-rs').value = params.RS;
+      document.getElementById('rs-val').textContent = params.RS.toFixed(1);
+      document.getElementById('slider-rmax').value = params.R_MAX;
+      document.getElementById('rmax-val').textContent = params.R_MAX.toFixed(1);
+      document.getElementById('slider-seg').value = params.SEGMENTS;
+      document.getElementById('seg-val').textContent = params.SEGMENTS;
+      document.getElementById('slider-pc').value = params.PARTICLE_COUNT;
+      document.getElementById('pc-val').textContent = params.PARTICLE_COUNT;
+      document.getElementById('slider-flow').value = params.FLOW_SPEED;
+      document.getElementById('flow-val').textContent = params.FLOW_SPEED.toFixed(1) + '×';
+      document.getElementById('slider-sop').value = params.SURFACE_OPACITY;
+      document.getElementById('sop-val').textContent = params.SURFACE_OPACITY.toFixed(2);
+      document.getElementById('slider-wop').value = params.WIREFRAME_OPACITY;
+      document.getElementById('wop-val').textContent = params.WIREFRAME_OPACITY.toFixed(2);
+      document.getElementById('check-rotate').checked = params.AUTO_ROTATE;
+      document.getElementById('check-grid').checked = params.SHOW_GRID;
+      document.getElementById('check-throat').checked = params.SHOW_THROAT;
+      controls.autoRotate = params.AUTO_ROTATE;
+      buildScene();
+      initParticles();
+    };
+
+    window.togglePause = function() {
+      paused = !paused;
+      pauseBtn.textContent = paused ? '继续' : '暂停';
+    };
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ---- Animation ----
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      if (!paused) {
+        updateParticles();
+      }
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
