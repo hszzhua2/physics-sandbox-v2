@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>砰！粒子！— Demo 介绍</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --bg2: #ffffff;
+      --ink: #1a1a2e;
+      --muted: #6b7280;
+      --rule: #e5e7eb;
+      --accent: #4f46e5;
+      --accent2: #06b6d4;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 48px 0 32px;
+      border-bottom: 2px solid var(--rule);
+      margin-bottom: 40px;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .hero .subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 40px;
+    }
+    .section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+      display: inline-block;
+    }
+    .section h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 20px 0 10px;
+      color: var(--accent);
+    }
+    .section p {
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+
+    /* Cards */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 24px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .feature-card .icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    .feature-card h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* Experiment list */
+    .exp-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 0.92rem;
+    }
+    .exp-table th {
+      text-align: left;
+      padding: 10px 12px;
+      background: var(--bg2);
+      border-bottom: 2px solid var(--rule);
+      font-weight: 600;
+    }
+    .exp-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .exp-table tr:hover td {
+      background: rgba(79, 70, 229, 0.04);
+    }
+
+    /* Quote / highlight */
+    .quote {
+      background: var(--bg2);
+      border-left: 4px solid var(--accent);
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* Link box */
+    .link-box {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .link-box a {
+      color: #fff;
+      text-decoration: underline;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .link-box a:hover {
+      opacity: 0.9;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.8rem; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .exp-table { font-size: 0.85rem; }
+      .exp-table th, .exp-table td { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="badge">Web 交互式实验平台</div>
+      <h1>砰！粒子！</h1>
+      <p class="subtitle">Physics Sandbox Universe — 交互式物理与数学实验平台</p>
+    </div>
+
+    <!-- 1. Demo 简介 -->
+    <div class="section">
+      <h2>1. Demo 简介</h2>
+
+      <h3>是什么</h3>
+      <p><strong>「砰！粒子！」</strong>是一个面向中学生的浏览器端交互式物理与数学实验平台。零安装、零配置，打开网页即可亲手操作 10 个经典科学模拟实验，从流体力学到量子力学，从三体问题到混沌理论，全部在浏览器中实时运行。</p>
+
+      <h3>面向谁</h3>
+      <p>核心用户是<strong>中学生、物理教师</strong>，以及对科学可视化感兴趣的普通用户。平台用中文输出、中学水平的讲解、可实时调节的参数滑块，让抽象的物理概念变得触手可及。</p>
+
+      <h3>主要功能</h3>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon">🧪</div>
+          <h4>10 个交互实验</h4>
+          <p>覆盖经典力学、流体力学、声学、量子物理、混沌理论五大领域，每个实验支持实时参数调节与可视化。</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎨</div>
+          <h4>四主题一键切换</h4>
+          <p>学术 / 卡通 / 液态玻璃 / 赛博四种风格，适配课堂演示、个人探索、科幻展示等不同场景。</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h4>实时物理模拟</h4>
+          <p>基于 Canvas 2D 与 Three.js 的实时渲染，Velocity Verlet 数值积分，参数改变即时反映在画面上。</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:28px">实验清单</h3>
+      <table class="exp-table">
+        <tr><th>实验</th><th>学科</th><th>核心概念</th></tr>
+        <tr><td>泰勒-库埃特流</td><td>流体力学</td><td>层流与湍流转换</td></tr>
+        <tr><td>高尔顿钉板</td><td>概率统计</td><td>中心极限定理可视化</td></tr>
+        <tr><td>利萨茹曲线</td><td>简谐振动</td><td>频率比与相位差</td></tr>
+        <tr><td>克拉尼图形</td><td>声学</td><td>二维驻波模态</td></tr>
+        <tr><td>混沌 N 阶摆</td><td>非线性动力学</td><td>蝴蝶效应 / 初始条件敏感性</td></tr>
+        <tr><td>刚体沙盒</td><td>经典力学</td><td>动量守恒与链式碰撞</td></tr>
+        <tr><td>双缝干涉</td><td>量子物理</td><td>波粒二象性</td></tr>
+        <tr><td>一维势阱</td><td>量子力学</td><td>薛定谔方程与能级</td></tr>
+        <tr><td>万有引力（3D）</td><td>天体力学</td><td>N 体引力模拟 / 三体问题</td></tr>
+        <tr><td>洛伦兹吸引子（3D）</td><td>混沌理论</td><td>蝴蝶效应三维可视化</td></tr>
+      </table>
+    </div>
+
+    <!-- 2. Demo 创作思路 -->
+    <div class="section">
+      <h2>2. Demo 创作思路</h2>
+
+      <h3>灵感来源</h3>
+      <p>中学物理课上，老师用粉笔画受力分析图，讲「蝴蝶效应」时只能口述「巴西的蝴蝶扇动翅膀可能引发德克萨斯的龙卷风」。学生听得懂字面意思，但<strong>无法直观感受</strong>什么叫「初始条件的微小差异被指数级放大」。</p>
+      <p>我想到：如果能让学生亲手「放」26 个几乎完全一样的摆，看着它们从几乎重叠逐渐发散成一片混乱的轨迹——蝴蝶效应就不再是比喻，而是<strong>眼前发生的事实</strong>。</p>
+
+      <h3>想解决的问题</h3>
+      <div class="quote">
+        "传统物理教学缺乏低门槛、高互动性的演示工具；MATLAB、COMSOL 等专业仿真软件对中学生来说门槛太高，而网上的物理演示大多是静态图片或预录视频，学生无法亲手实验。"
+      </div>
+      <p>本平台要解决的核心痛点是：<strong>让中学生能在浏览器里「玩」物理</strong>——不用安装软件、不用写代码、不用懂高等数学，打开网页就能操作实验、调节参数、观察现象。</p>
+
+      <h3>为什么做这个方向</h3>
+      <p><strong>浏览器是最大众化的平台。</strong>手机、平板、电脑都能打开，不需要安装任何软件，学校机房、家里、图书馆随时可用。</p>
+      <p><strong>Web 技术已经足够成熟。</strong>Canvas 2D 可以流畅运行数十个物体的实时物理模拟；Three.js 能在浏览器中渲染复杂的 3D 场景（如三体运动、洛伦兹吸引子）；现代 JavaScript 引擎的性能足以支撑数值积分。</p>
+      <p><strong>中文科学教育内容稀缺。</strong>大部分优质的物理仿真工具是英文界面、面向大学或研究者。我希望做一个<strong>中学生能看懂、老师能直接用在课堂上</strong>的中文平台。</p>
+    </div>
+
+    <!-- 3. Demo 体验地址 -->
+    <div class="section">
+      <h2>3. Demo 体验地址</h2>
+      <div class="link-box">
+        <p style="margin-bottom:8px; opacity:0.9;">在线体验（GitHub Pages 自动部署）</p>
+        <a href="https://你的用户名.github.io/physics-sandbox/" target="_blank">
+          https://你的用户名.github.io/physics-sandbox/
+        </a>
+        <p style="margin-top:12px; font-size:0.85rem; opacity:0.8;">
+          请将「你的用户名」替换为你的 GitHub 用户名后访问
+        </p>
+      </div>
+
+      <h3 style="margin-top:24px">本地运行</h3>
+      <p>本项目是纯静态 HTML/CSS/JS，无需构建步骤。下载后直接用浏览器打开 <code>index.html</code> 即可运行，或执行：</p>
+      <div class="quote" style="font-family: monospace; font-style: normal;">
+        npx serve .
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding: 32px 0; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--rule);">
+      <p>「砰！粒子！」— Physics Sandbox Universe</p>
+      <p>纯前端实现 · 零后端依赖 · 开源可扩展</p>
+    </div>
+
+  </div>
+</body>
+</html>
