@@ -4,7 +4,7 @@
 
 ## 在线体验
 
-访问 [https://你的用户名.github.io/physics-sandbox/](https://你的用户名.github.io/physics-sandbox/)
+访问 [https://hszzhua2.github.io/physics-sandbox/](https://hszzhua2.github.io/physics-sandbox/)
 
 ## 实验列表
 
