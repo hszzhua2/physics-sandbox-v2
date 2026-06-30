@@ -502,15 +502,46 @@
     // ---- Init ----
     applyBgColor();
     initParticles(PARTICLE_COUNT);
+    applyThemeBg();
 
     // ---- Theme background sync ----
     function applyThemeBg() {
       const theme = document.documentElement.getAttribute('data-theme') || 'academic';
       if (theme === 'academic') {
         scene.background = new THREE.Color(0xf8f9fa);
-        stars.material.color.setHex(0xc0c0c8);
+        stars.material.color.setHex(0x8899aa);
+        stars.material.opacity = 0.6;
+        if (particleSystem && particleGeometry) {
+          particleSystem.material.blending = THREE.NormalBlending;
+          particleSystem.material.opacity = 1.0;
+          particleSystem.material.depthWrite = true;
+          particleSystem.material.size = Math.max(PARTICLE_SIZE, 1.8);
+          // Dark, highly visible colors for academic light background
+          const darkA = new THREE.Color('#0f1b2e');
+          const darkB = new THREE.Color('#1e3a5f');
+          const col = particleGeometry.attributes.color.array;
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const ratio = Math.random();
+            const c = darkA.clone().lerp(darkB, ratio);
+            col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
+            if (targetColors) {
+              targetColors[i*3] = c.r; targetColors[i*3+1] = c.g; targetColors[i*3+2] = c.b;
+            }
+          }
+          particleGeometry.attributes.color.needsUpdate = true;
+        }
+      } else {
+        scene.background = CLR_BG;
+        stars.material.color.set(CLR_AMB);
+        stars.material.opacity = 0.5;
+        if (particleSystem && particleGeometry) {
+          particleSystem.material.blending = THREE.AdditiveBlending;
+          particleSystem.material.opacity = 0.85;
+          particleSystem.material.depthWrite = false;
+          particleSystem.material.size = PARTICLE_SIZE;
+          updateTargetColors();
+        }
       }
-      // For other themes, keep user set colors
     }
     const themeObs = new MutationObserver(applyThemeBg);
     themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
