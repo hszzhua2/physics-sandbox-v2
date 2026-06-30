@@ -14,7 +14,7 @@
       position: absolute; top: 80px; left: 30px; width: 360px; padding: 20px;
       z-index: 10; max-height: 85vh; overflow-y: auto;
     }
-    h1 { margin: 0; font-size: 1.35rem; transition: var(--theme-transition); }
+    h1 { margin: 0; font-size: 1.3rem; transition: var(--theme-transition); }
     p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
     .slider-group { margin-bottom: 12px; }
     .slider-group label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold; }
@@ -28,10 +28,15 @@
       padding: 12px; margin: 10px 0; font-size: 0.82rem; line-height: 1.6;
     }
     .formula-box .eq { font-family: 'Courier New', monospace; text-align: center; margin: 6px 0; font-size: 0.9rem; }
+    .warn-box {
+      background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15);
+      border-radius: 8px; padding: 10px 14px; margin: 10px 0;
+      font-size: 0.8rem; line-height: 1.5; color: var(--text-muted);
+    }
+    .warn-box strong { color: #ef4444; }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; font-size: 0.85rem; }
     .toggle-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
 
-    /* Info overlay */
     #info-overlay {
       position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
       z-index: 10; font-size: 0.8rem; color: rgba(255,255,255,0.5);
@@ -54,10 +59,9 @@
     [data-theme="academic"] .stats span { color: #1a1a2e; }
     [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
     [data-theme="academic"] .formula-box { background: #f4f5f7; }
+    [data-theme="academic"] .warn-box { background: #fef2f2; border-color: #fecaca; }
 
     #ui-panel::-webkit-scrollbar { width: 5px; }
-
-    /* Entrance toast */
     #entrance-toast { transition: opacity 0.8s ease; }
   </style>
   <script type="importmap">
@@ -79,24 +83,21 @@
 
     <div class="stats">
       粒子数: <span id="particle-count">262,144</span> &nbsp;|&nbsp;
-      FPS: <span id="fps-val">--</span>
+      FPS: <span id="fps-val">--</span> &nbsp;|&nbsp;
+      <span id="mode-badge" style="font-size:0.75rem; padding:2px 6px; border-radius:4px; background:rgba(79,70,229,0.15); color:var(--accent);">GPGPU</span>
     </div>
 
     <div class="slider-group">
-      <label><span>黑洞质量 (GM)</span><span id="gm-val" class="val-display">2.5</span></label>
+      <label><span>引力系数 GM</span><span id="gm-val" class="val-display">2.5</span></label>
       <input type="range" id="slider-gm" min="0.5" max="8.0" step="0.1" value="2.5">
     </div>
     <div class="slider-group">
-      <label><span>吸积盘内径 (R)</span><span id="dmin-val" class="val-display">1.5</span></label>
+      <label><span>吸积盘内径</span><span id="dmin-val" class="val-display">1.5</span></label>
       <input type="range" id="slider-dmin" min="1.1" max="3.0" step="0.1" value="1.5">
     </div>
     <div class="slider-group">
-      <label><span>吸积盘外径 (R)</span><span id="dmax-val" class="val-display">5.0</span></label>
+      <label><span>吸积盘外径</span><span id="dmax-val" class="val-display">5.0</span></label>
       <input type="range" id="slider-dmax" min="3.0" max="10.0" step="0.2" value="5.0">
-    </div>
-    <div class="slider-group">
-      <label><span>粒子分辨率</span><span id="res-val" class="val-display">512²</span></label>
-      <input type="range" id="slider-res" min="0" max="2" step="1" value="2">
     </div>
     <div class="slider-group">
       <label><span>多普勒效应强度</span><span id="doppler-val" class="val-display">1.2</span></label>
@@ -118,9 +119,9 @@
 
     <div class="formula-box">
       <strong>史瓦西半径</strong>
-      <div class="eq">Rₛ = 2GM / c²</div>
+      <div class="eq">rₛ = 2GM / c² ≈ 3 km × (M / M☉)</div>
       <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        事件视界边界，任何物质与光都无法逃逸。吸积盘在 1.5R ~ 5R 的范围内形成。
+        事件视界边界，任何物质与光都无法逃逸。吸积盘在 1.5rₛ ~ 5rₛ 范围内形成。
       </p>
     </div>
 
@@ -128,8 +129,22 @@
       <strong>开普勒轨道速度</strong>
       <div class="eq">v = √(GM / r)</div>
       <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        粒子在引力作用下沿近似圆形轨道运动，越靠近黑洞速度越快。
+        粒子在引力作用下沿近似圆形轨道运动，越靠近黑洞速度越快，多普勒效应越明显。
       </p>
+    </div>
+
+    <div class="formula-box">
+      <strong>引力透镜方程</strong>
+      <div class="eq">α = 4GM / (c²b) = 2rₛ / b</div>
+      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
+        光线经过大质量天体附近时发生偏折，偏折角与撞击参数 b 成反比。
+      </p>
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠ 物理近似说明</strong><br>
+      本模拟使用势流近似（圆柱绕流+环量）代替广义相对论数值解。
+      粒子颜色反映多普勒频移：蓝色=朝向观察者（蓝移），红色=远离观察者（红移）。
     </div>
 
     <div class="btn-row">
@@ -175,25 +190,22 @@
        - 26万粒子引力轨道运动
        - 多普勒频移着色
        - 引力透镜后处理
-       - 全可调节参数
+       - 全可调节参数 + 降级渲染
        ================================================================ */
 
     PSUTheme.createSwitcher();
     PSUTheme.createBackButton('index.html');
 
     // ---- Parameters ----
-    const RES_OPTIONS = [128, 256, 512];
     const DEFAULTS = {
       GM: 2.5,
       DISK_MIN: 1.5,
       DISK_MAX: 5.0,
-      RES_INDEX: 2, // 512
       DOPPLER: 1.2,
       SPEED: 1.0,
       AUTO_ROTATE: true,
       LENSING: true
     };
-
     let params = { ...DEFAULTS };
     let paused = false;
     let frameCount = 0;
@@ -203,6 +215,7 @@
     const infoText = document.getElementById('info-text');
     const fpsVal = document.getElementById('fps-val');
     const pauseBtn = document.getElementById('pause-btn');
+    const modeBadge = document.getElementById('mode-badge');
 
     // ---- Three.js globals ----
     let scene, camera, renderer, composer, controls;
@@ -213,6 +226,7 @@
     let gpuReady = false;
     let fallbackMode = false;
     let fallbackParticles = null;
+    let fallbackData = [];
 
     // ---- Shaders ----
     const computeVelocityShader = /* glsl */ `
@@ -232,16 +246,16 @@
         vec3 vel = velData.xyz;
         float r = length(pos);
 
-        if (r < u_R * 0.98 || r > 12.0) {
+        if (r < u_R || r > 6.0) {
           vel = vec3(0.0);
         } else {
-          float vMag = sqrt(u_GM / max(r, u_R * 1.01));
+          float vMag = sqrt(u_GM / r);
           vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), pos));
-          vec3 inward = -normalize(pos) * (0.04 / (r - u_R + 0.15));
+          vec3 inward = -normalize(pos) * (0.05 / (r - u_R + 0.1));
           vec3 noiseVec = vec3(
-            sin(pos.z * 8.0 + u_Time * 0.5) * 0.015,
-            cos(pos.x * 10.0 - u_Time * 0.3) * 0.03,
-            cos(pos.y * 8.0 + u_Time * 0.4) * 0.015
+            sin(pos.z * 10.0 + u_Time) * 0.02,
+            cos(pos.x * 12.0 - u_Time) * 0.05,
+            cos(pos.x * 10.0 + u_Time) * 0.02
           );
           vel = tangent * vMag + inward + noiseVec;
         }
@@ -265,10 +279,10 @@
         pos += vel * 0.016;
         float r = length(pos);
 
-        if (r < u_R || r > u_DiskMax * 1.3) {
+        if (r < u_R || r > u_DiskMax) {
           float angle = hash(uv * pos.xy) * 2.0 * PI;
           float radius = mix(u_DiskMin, u_DiskMax, pow(hash(uv.yx), 1.5));
-          pos = vec3(cos(angle) * radius, (hash(uv) - 0.5) * 0.08, sin(angle) * radius);
+          pos = vec3(cos(angle) * radius, (hash(uv) - 0.5) * 0.1, sin(angle) * radius);
         }
         gl_FragColor = vec4(pos, 1.0);
       }
@@ -280,7 +294,6 @@
       uniform vec3 u_cameraPos;
       uniform float u_dopplerFactor;
       varying vec3 vColor;
-      varying float vAlpha;
 
       void main() {
         vec4 posData = texture2D(u_posTexture, position.xy);
@@ -289,31 +302,28 @@
         vec3 vel = velData.xyz;
         vec4 mvPosition = modelViewMatrix * vec4(worldPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
-        gl_PointSize = 2.2 * (12.0 / -mvPosition.z);
+        gl_PointSize = 2.0 * (10.0 / -mvPosition.z);
 
         vec3 viewDir = normalize(u_cameraPos - worldPos);
-        vec3 velDir = normalize(vel + vec3(0.001));
+        vec3 velDir = normalize(vel);
         float dopplerShift = dot(viewDir, velDir);
         float r = length(worldPos);
-        float heat = smoothstep(6.0, 1.5, r);
-        vec3 baseColor = mix(vec3(0.9, 0.25, 0.0), vec3(0.8, 0.9, 1.0), heat);
-        float dm = 1.0 + dopplerShift * u_dopplerFactor;
-        dm = max(0.15, dm);
-        vec3 shiftColor = dopplerShift > 0.0 ? vec3(0.2, 0.5, 1.0) : vec3(1.0, 0.15, 0.0);
-        vColor = mix(baseColor, shiftColor, abs(dopplerShift) * 0.5) * dm;
-        vAlpha = smoothstep(0.5, 2.5, gl_PointSize) * 0.7 + 0.3;
+        float heat = smoothstep(5.0, 1.5, r);
+        vec3 baseColor = mix(vec3(0.8, 0.2, 0.0), vec3(0.8, 0.9, 1.0), heat);
+        float dopplerMultiplier = 1.0 + dopplerShift * u_dopplerFactor;
+        dopplerMultiplier = max(0.1, dopplerMultiplier);
+        vec3 shiftColor = dopplerShift > 0.0 ? vec3(0.2, 0.5, 1.0) : vec3(1.0, 0.2, 0.0);
+        vColor = mix(baseColor, shiftColor, abs(dopplerShift) * 0.5) * dopplerMultiplier;
       }
     `;
 
     const particleFragmentShader = /* glsl */ `
       varying vec3 vColor;
-      varying float vAlpha;
       void main() {
         vec2 pt = gl_PointCoord - vec2(0.5);
-        float d = dot(pt, pt);
-        if (d > 0.25) discard;
-        float alpha = smoothstep(0.5, 0.05, d) * vAlpha;
-        gl_FragColor = vec4(vColor, alpha);
+        if (dot(pt, pt) > 0.25) discard;
+        float alpha = smoothstep(0.5, 0.0, length(pt));
+        gl_FragColor = vec4(vColor, alpha * 0.8);
       }
     `;
 
@@ -322,7 +332,7 @@
         "tDiffuse": { value: null },
         "u_aspect": { value: 1.0 },
         "u_bhCenter": { value: new THREE.Vector2(0.5, 0.5) },
-        "u_bhRadius": { value: 0.08 },
+        "u_bhRadius": { value: 0.1 },
         "u_enabled": { value: 1.0 }
       },
       vertexShader: /* glsl */ `
@@ -352,13 +362,13 @@
             return;
           }
 
-          float lensingForce = (u_bhRadius * u_bhRadius) / max(dist, 0.001);
+          float lensingForce = (u_bhRadius * u_bhRadius) / dist;
           vec2 offset = normalize(delta) * lensingForce;
           offset.x /= u_aspect;
-          vec2 sampleUV = uv - offset * 0.75;
+          vec2 sampleUV = uv - offset * 0.8;
           vec4 color = texture2D(tDiffuse, sampleUV);
-          float ringGlow = smoothstep(u_bhRadius * 2.0, u_bhRadius, dist);
-          color += vec4(0.7, 0.85, 1.0, 1.0) * ringGlow * 0.25;
+          float ringGlow = smoothstep(u_bhRadius * 1.5, u_bhRadius, dist);
+          color += vec4(0.8, 0.9, 1.0, 1.0) * ringGlow * 0.2;
           gl_FragColor = color;
         }
       `
@@ -369,7 +379,7 @@
       init();
       animate();
     } catch (e) {
-      console.error('Init error:', e);
+      console.error('Init failed:', e);
       infoText.textContent = '初始化失败: ' + e.message;
       infoText.style.color = '#ef4444';
     }
@@ -379,8 +389,8 @@
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x020204);
 
-      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
-      camera.position.set(0, 3, 9);
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 2, 8);
       camera.lookAt(0, 0, 0);
 
       renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
@@ -390,16 +400,17 @@
 
       controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.maxDistance = 30;
-      controls.minDistance = 2;
+      controls.maxDistance = 20;
+      controls.minDistance = 3;
       controls.autoRotate = params.AUTO_ROTATE;
       controls.autoRotateSpeed = 0.5;
 
-      // Check WebGL2 support
       const isWebGL2 = renderer.capabilities.isWebGL2;
       if (!isWebGL2) {
         infoText.textContent = '提示: WebGL 2.0 不可用，已切换至降级渲染模式';
+        modeBadge.textContent = 'CPU';
+        modeBadge.style.background = 'rgba(239,68,68,0.15)';
+        modeBadge.style.color = '#ef4444';
         fallbackMode = true;
         initFallbackParticles();
         initPostProcessing();
@@ -412,7 +423,6 @@
         return;
       }
 
-      // Try GPGPU, fall back on failure
       try {
         initGPGPU();
         initParticles();
@@ -422,6 +432,9 @@
         gpuReady = false;
         fallbackMode = true;
         infoText.textContent = 'GPGPU 计算失败，已切换至降级渲染模式';
+        modeBadge.textContent = 'CPU';
+        modeBadge.style.background = 'rgba(239,68,68,0.15)';
+        modeBadge.style.color = '#ef4444';
         initFallbackParticles();
       }
 
@@ -429,7 +442,7 @@
       initUI();
       window.addEventListener('resize', onWindowResize);
 
-      const count = gpuReady ? RES_OPTIONS[params.RES_INDEX] ** 2 : 2000;
+      const count = gpuReady ? 262144 : 2000;
       infoText.innerHTML = `粒子数: ${count.toLocaleString()} | 鼠标拖拽旋转 · 滚轮缩放`;
 
       setTimeout(() => {
@@ -439,12 +452,26 @@
     }
 
     function initGPGPU() {
-      const res = RES_OPTIONS[params.RES_INDEX];
+      const res = 512;
       gpuCompute = new GPUComputationRenderer(res, res, renderer);
 
       const dtPosition = gpuCompute.createTexture();
       const dtVelocity = gpuCompute.createTexture();
-      fillInitialData(dtPosition, dtVelocity);
+      const posArray = dtPosition.image.data;
+      const velArray = dtVelocity.image.data;
+
+      for (let i = 0; i < posArray.length; i += 4) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = params.DISK_MIN + Math.pow(Math.random(), 1.5) * (params.DISK_MAX - params.DISK_MIN);
+        posArray[i + 0] = Math.cos(angle) * radius;
+        posArray[i + 1] = (Math.random() - 0.5) * 0.1;
+        posArray[i + 2] = Math.sin(angle) * radius;
+        posArray[i + 3] = 1;
+        velArray[i + 0] = 0;
+        velArray[i + 1] = 0;
+        velArray[i + 2] = 0;
+        velArray[i + 3] = 1;
+      }
 
       velVariable = gpuCompute.addVariable("textureVelocity", computeVelocityShader, dtVelocity);
       posVariable = gpuCompute.addVariable("texturePosition", computePositionShader, dtPosition);
@@ -467,25 +494,8 @@
       }
     }
 
-    function fillInitialData(dtPos, dtVel) {
-      const posArr = dtPos.image.data;
-      const velArr = dtVel.image.data;
-      for (let i = 0; i < posArr.length; i += 4) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = params.DISK_MIN + Math.pow(Math.random(), 1.5) * (params.DISK_MAX - params.DISK_MIN);
-        posArr[i + 0] = Math.cos(angle) * radius;
-        posArr[i + 1] = (Math.random() - 0.5) * 0.06;
-        posArr[i + 2] = Math.sin(angle) * radius;
-        posArr[i + 3] = 1;
-        velArr[i + 0] = 0;
-        velArr[i + 1] = 0;
-        velArr[i + 2] = 0;
-        velArr[i + 3] = 1;
-      }
-    }
-
     function initParticles() {
-      const res = RES_OPTIONS[params.RES_INDEX];
+      const res = 512;
       const geometry = new THREE.BufferGeometry();
       const uvs = new Float32Array(res * res * 2);
       let p = 0;
@@ -516,7 +526,6 @@
       scene.add(particleSystem);
     }
 
-    // ---- Fallback particles (CPU-based, no GPGPU) ----
     function initFallbackParticles() {
       const count = 2000;
       const geometry = new THREE.BufferGeometry();
@@ -527,7 +536,7 @@
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const radius = params.DISK_MIN + Math.pow(Math.random(), 1.5) * (params.DISK_MAX - params.DISK_MIN);
-        const y = (Math.random() - 0.5) * 0.3;
+        const y = (Math.random() - 0.5) * 0.1;
         positions[i * 3] = Math.cos(angle) * radius;
         positions[i * 3 + 1] = y;
         positions[i * 3 + 2] = Math.sin(angle) * radius;
@@ -545,7 +554,7 @@
       geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
       const material = new THREE.PointsMaterial({
-        size: 0.25,
+        size: 0.2,
         vertexColors: true,
         transparent: true,
         opacity: 0.85,
@@ -575,7 +584,7 @@
           if (pd.radius > DISK_MAX - 0.2) pd.inward = true;
         }
         positions[i * 3] = Math.cos(pd.angle) * pd.radius;
-        positions[i * 3 + 1] = pd.y + Math.sin(pd.angle * 3 + performance.now() * 0.001) * 0.05;
+        positions[i * 3 + 1] = pd.y + Math.sin(pd.angle * 3 + performance.now() * 0.001) * 0.03;
         positions[i * 3 + 2] = Math.sin(pd.angle) * pd.radius;
 
         const heat = Math.max(0, 1 - (pd.radius - DISK_MIN) / (DISK_MAX - DISK_MIN));
@@ -600,33 +609,27 @@
       document.getElementById('slider-gm').addEventListener('input', e => {
         params.GM = parseFloat(e.target.value);
         document.getElementById('gm-val').textContent = params.GM.toFixed(1);
-        if (velVariable) velVariable.material.uniforms.u_GM.value = params.GM;
+        if (gpuReady && velVariable) velVariable.material.uniforms.u_GM.value = params.GM;
       });
       document.getElementById('slider-dmin').addEventListener('input', e => {
         params.DISK_MIN = parseFloat(e.target.value);
         document.getElementById('dmin-val').textContent = params.DISK_MIN.toFixed(1);
-        if (posVariable) posVariable.material.uniforms.u_DiskMin.value = params.DISK_MIN;
+        if (gpuReady && posVariable) posVariable.material.uniforms.u_DiskMin.value = params.DISK_MIN;
       });
       document.getElementById('slider-dmax').addEventListener('input', e => {
         params.DISK_MAX = parseFloat(e.target.value);
         document.getElementById('dmax-val').textContent = params.DISK_MAX.toFixed(1);
-        if (posVariable) posVariable.material.uniforms.u_DiskMax.value = params.DISK_MAX;
-      });
-      document.getElementById('slider-res').addEventListener('change', e => {
-        params.RES_INDEX = parseInt(e.target.value);
-        const labels = ['128²', '256²', '512²'];
-        document.getElementById('res-val').textContent = labels[params.RES_INDEX];
-        rebuildSystem();
+        if (gpuReady && posVariable) posVariable.material.uniforms.u_DiskMax.value = params.DISK_MAX;
       });
       document.getElementById('slider-doppler').addEventListener('input', e => {
         params.DOPPLER = parseFloat(e.target.value);
         document.getElementById('doppler-val').textContent = params.DOPPLER.toFixed(1);
-        if (particleSystem) particleSystem.material.uniforms.u_dopplerFactor.value = params.DOPPLER;
+        if (gpuReady && particleSystem) particleSystem.material.uniforms.u_dopplerFactor.value = params.DOPPLER;
       });
       document.getElementById('slider-speed').addEventListener('input', e => {
         params.SPEED = parseFloat(e.target.value);
         document.getElementById('speed-val').textContent = params.SPEED.toFixed(1) + '×';
-        if (velVariable) velVariable.material.uniforms.u_Speed.value = params.SPEED;
+        if (gpuReady && velVariable) velVariable.material.uniforms.u_Speed.value = params.SPEED;
       });
       document.getElementById('check-rotate').addEventListener('change', e => {
         params.AUTO_ROTATE = e.target.checked;
@@ -638,43 +641,6 @@
       });
     }
 
-    function rebuildSystem() {
-      if (fallbackMode) {
-        if (fallbackParticles) {
-          scene.remove(fallbackParticles);
-          fallbackParticles.geometry.dispose();
-          fallbackParticles.material.dispose();
-          fallbackParticles = null;
-        }
-        initFallbackParticles();
-        return;
-      }
-      // Clean up old
-      if (gpuCompute) {
-        gpuCompute.dispose();
-        gpuCompute = null;
-      }
-      if (particleSystem) {
-        scene.remove(particleSystem);
-        particleSystem.geometry.dispose();
-        particleSystem.material.dispose();
-        particleSystem = null;
-      }
-      try {
-        initGPGPU();
-        initParticles();
-        gpuReady = true;
-      } catch (e) {
-        console.warn('Rebuild GPGPU failed:', e);
-        gpuReady = false;
-        fallbackMode = true;
-        initFallbackParticles();
-      }
-      const count = gpuReady ? RES_OPTIONS[params.RES_INDEX] ** 2 : 2000;
-      document.getElementById('particle-count').textContent = count.toLocaleString();
-    }
-
-    // ---- Global controls ----
     window.resetParams = function() {
       params = { ...DEFAULTS };
       document.getElementById('slider-gm').value = params.GM;
@@ -691,12 +657,14 @@
       document.getElementById('check-lensing').checked = params.LENSING;
       if (controls) controls.autoRotate = params.AUTO_ROTATE;
       if (lensingPass) lensingPass.uniforms.u_enabled.value = params.LENSING ? 1.0 : 0.0;
-      // Reset fallback mode to retry GPGPU
-      if (fallbackMode) {
-        fallbackMode = false;
-        gpuReady = false;
+      if (gpuReady && velVariable) {
+        velVariable.material.uniforms.u_GM.value = params.GM;
+        velVariable.material.uniforms.u_Speed.value = params.SPEED;
       }
-      rebuildSystem();
+      if (gpuReady && posVariable) {
+        posVariable.material.uniforms.u_DiskMin.value = params.DISK_MIN;
+        posVariable.material.uniforms.u_DiskMax.value = params.DISK_MAX;
+      }
     };
 
     window.togglePause = function() {
@@ -704,16 +672,13 @@
       pauseBtn.textContent = paused ? '继续' : '暂停';
     };
 
-    // ---- Resize ----
     function onWindowResize() {
       if (!camera || !renderer) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       if (composer) composer.setSize(window.innerWidth, window.innerHeight);
-      if (lensingPass) {
-        lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
-      }
+      if (lensingPass) lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
     }
 
     // ---- Animation ----
@@ -745,7 +710,6 @@
         }
       }
 
-      // Screen-space black hole params for lensing
       if (lensingPass && camera && params.LENSING) {
         const bhPos = new THREE.Vector3(0, 0, 0);
         bhPos.project(camera);
@@ -753,10 +717,10 @@
         const sy = (bhPos.y + 1) / 2;
         const dist = camera.position.length();
         const fov = camera.fov * (Math.PI / 180);
-        const vh = 2 * Math.tan(fov / 2) * dist;
-        const sR = (1.0 * 2 / vh) * 0.5;
+        const visibleHeight = 2 * Math.tan(fov / 2) * dist;
+        const screenRadius = (1.0 * 2 / visibleHeight) * 0.5;
         lensingPass.uniforms['u_bhCenter'].value.set(sx, sy);
-        lensingPass.uniforms['u_bhRadius'].value = Math.max(0.01, sR);
+        lensingPass.uniforms['u_bhRadius'].value = Math.max(0.01, screenRadius);
       }
 
       if (composer && composer.render) {
