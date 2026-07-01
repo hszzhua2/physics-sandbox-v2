@@ -1,876 +1,485 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>伯努利原理与升力 — 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css">
-  <style>
-    .exp-bg { z-index: -1; }
-    #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; cursor: crosshair; }
-    #sim-canvas.dragging { cursor: grabbing; }
-    #ui-panel {
-      position: absolute; top: 80px; left: 30px; width: 340px; padding: 20px;
-      z-index: 10; max-height: 85vh; overflow-y: auto;
-    }
-    h1 { margin: 0; font-size: 1.35rem; transition: var(--theme-transition); }
-    p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
-    .slider-group { margin-bottom: 12px; }
-    .slider-group label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; font-weight: bold; }
-    .val-display { font-family: monospace; font-size: 0.9rem; }
-    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .btn-row .theme-btn { flex: 1; min-width: 80px; padding: 10px 12px; font-size: 0.85rem; }
-    .stats { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; }
-    .stats span { font-family: monospace; font-weight: bold; }
-    .formula-box {
-      background: rgba(128,128,128,0.08); border-radius: 8px;
-      padding: 12px; margin: 10px 0; font-size: 0.82rem; line-height: 1.6;
-    }
-    .formula-box .eq { font-family: 'Courier New', monospace; text-align: center; margin: 6px 0; font-size: 0.9rem; }
-    .coord-box {
-      background: rgba(79,70,229,0.06); border: 1px solid rgba(79,70,229,0.2);
-      border-radius: 8px; padding: 10px 14px; margin-top: 10px;
-      font-size: 0.82rem; min-height: 36px;
-    }
-    .coord-box .coord-label { color: var(--text-muted); font-size: 0.75rem; }
-    .coord-box .coord-val { font-family: monospace; font-weight: bold; color: var(--accent); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伯努利原理 — 物理沙盒宇宙</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
+        #canvas-container { position: fixed; inset: 0; z-index: 0; }
 
-    [data-theme="cartoon"] h1 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
-    [data-theme="cartoon"] .val-display { color: var(--accent-1); }
-    [data-theme="cartoon"] .stats span { color: var(--accent-1); }
-    [data-theme="glass"] h1 { color: #ff00ea; text-shadow: 0 0 10px rgba(255,0,234,0.3); }
-    [data-theme="glass"] .val-display { color: #74b9ff; }
-    [data-theme="glass"] .stats span { color: #74b9ff; }
-    [data-theme="cyber"] h1 { color: #ff00ea; text-shadow: 0 0 15px rgba(255,0,234,0.5); }
-    [data-theme="cyber"] .val-display { color: #00f3ff; }
-    [data-theme="cyber"] .stats span { color: #00f3ff; }
-    [data-theme="academic"] h1 { color: #1a1a2e; font-weight: 700; text-shadow: none; }
-    [data-theme="academic"] p.desc { color: #7a7a8a; }
-    [data-theme="academic"] .val-display { color: #1a1a2e; }
-    [data-theme="academic"] .stats span { color: #1a1a2e; }
-    [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
-    [data-theme="academic"] .formula-box { background: #f4f5f7; }
-    [data-theme="academic"] .coord-box { background: #f4f5f7; border-color: #c0c0c0; }
-    #ui-panel::-webkit-scrollbar { width: 5px; }
-  </style>
+        /* Side panels */
+        .side-panel { position: absolute; top: 80px; z-index: 10; height: calc(100% - 80px); overflow-y: auto; padding: 20px; width: 320px; }
+        .left-panel { left: 30px; }
+        .right-panel { right: 30px; }
+
+        input[type=range] { width: 100%; margin-top: 0.5rem; margin-bottom: 1rem; cursor: pointer; }
+
+        .panel-card {
+            padding: 12px; border-radius: 8px; margin-bottom: 12px;
+            background: rgba(128,128,128,0.08); border: 1px solid rgba(128,128,128,0.15);
+        }
+        .panel-metric { font-family: 'Courier New', monospace; font-size: 1.1rem; font-weight: 700; }
+
+        .legend-bar {
+            width: 100%; height: 16px; border-radius: 4px;
+            background: linear-gradient(to right, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
+        }
+
+        /* Formula blocks */
+        .formula-box {
+            background: rgba(128,128,128,0.06); border: 1px solid rgba(128,128,128,0.15);
+            border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.85rem; line-height: 1.6;
+        }
+        .formula-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; }
+
+        /* Scrollbar */
+        .side-panel::-webkit-scrollbar { width: 5px; }
+        .side-panel::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 3px; }
+
+        /* ===== Theme Overrides ===== */
+        /* Academic */
+        [data-theme="academic"] body { background: #f0f2f5; }
+        [data-theme="academic"] .side-panel { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; color: #1a1a2e; }
+        [data-theme="academic"] .panel-card { background: #f4f5f7; border-color: #e0e0e0; }
+        [data-theme="academic"] .formula-box { background: #f8f9fa; border-color: #e0e0e0; }
+        [data-theme="academic"] .formula-title { color: #1a1a2e; }
+        [data-theme="academic"] h2 { color: #1a1a2e; border-color: #e0e0e0; }
+        [data-theme="academic"] label { color: #555; }
+        [data-theme="academic"] .text-gray-400 { color: #777; }
+        [data-theme="academic"] .text-gray-500 { color: #999; }
+        [data-theme="academic"] .text-gray-300 { color: #555; }
+        [data-theme="academic"] .text-blue-300 { color: #4a6a8a; }
+        [data-theme="academic"] .text-red-400 { color: #c0392b; }
+        [data-theme="academic"] .text-red-500 { color: #c0392b; }
+        [data-theme="academic"] .text-green-400 { color: #27ae60; }
+        [data-theme="academic"] .text-blue-400 { color: #2980b9; }
+        [data-theme="academic"] .side-panel::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 0; }
+
+        /* Cartoon */
+        [data-theme="cartoon"] body { background: #fef6e4; }
+        [data-theme="cartoon"] .side-panel { background: rgba(254,246,228,0.92); border: 2px solid rgba(255,107,107,0.25); border-radius: 16px; color: #2d3436; }
+        [data-theme="cartoon"] .panel-card { background: rgba(255,255,255,0.7); border-color: rgba(255,107,107,0.15); }
+        [data-theme="cartoon"] .formula-box { background: rgba(255,255,255,0.6); border-color: rgba(255,107,107,0.15); }
+        [data-theme="cartoon"] .formula-title { color: #ff6b6b; }
+        [data-theme="cartoon"] h2 { color: #ff6b6b; border-color: rgba(255,107,107,0.3); }
+
+        /* Glass */
+        [data-theme="glass"] body { background: #0a0a12; }
+        [data-theme="glass"] .side-panel { background: rgba(15,17,23,0.85); border: 1px solid rgba(116,185,255,0.15); border-radius: 12px; color: #e0e6ed; }
+        [data-theme="glass"] .panel-card { background: rgba(0,0,0,0.3); border-color: rgba(116,185,255,0.1); }
+        [data-theme="glass"] .formula-box { background: rgba(0,0,0,0.2); border-color: rgba(116,185,255,0.1); }
+        [data-theme="glass"] .formula-title { color: #74b9ff; }
+        [data-theme="glass"] h2 { color: #ff00ea; border-color: rgba(116,185,255,0.2); }
+        [data-theme="glass"] .text-gray-400 { color: #8b92a8; }
+        [data-theme="glass"] .text-gray-500 { color: #5a5a6a; }
+        [data-theme="glass"] .text-gray-300 { color: #a0a0b0; }
+
+        /* Cyber */
+        [data-theme="cyber"] body { background: #050008; }
+        [data-theme="cyber"] .side-panel { background: rgba(10,0,20,0.9); border: 1px solid rgba(189,0,255,0.25); border-radius: 8px; color: #f0e6ff; box-shadow: 0 0 20px rgba(189,0,255,0.08); }
+        [data-theme="cyber"] .panel-card { background: rgba(0,0,0,0.4); border-color: rgba(189,0,255,0.15); }
+        [data-theme="cyber"] .formula-box { background: rgba(0,0,0,0.3); border-color: rgba(189,0,255,0.15); }
+        [data-theme="cyber"] .formula-title { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,0.2); }
+        [data-theme="cyber"] h2 { color: #ff6b6b; text-shadow: 0 0 8px rgba(255,107,107,0.2); border-color: rgba(189,0,255,0.2); }
+        [data-theme="cyber"] .text-gray-400 { color: #a080c0; }
+        [data-theme="cyber"] .text-gray-500 { color: #705080; }
+        [data-theme="cyber"] .text-gray-300 { color: #c0a0d0; }
+        [data-theme="cyber"] .text-blue-300 { color: #00f3ff; text-shadow: 0 0 4px rgba(0,243,255,0.2); }
+        [data-theme="cyber"] .text-red-400 { color: #ff6b6b; text-shadow: 0 0 4px rgba(255,107,107,0.2); }
+        [data-theme="cyber"] .text-green-400 { color: #39ff14; text-shadow: 0 0 4px rgba(57,255,20,0.2); }
+        [data-theme="cyber"] .text-blue-400 { color: #74b9ff; text-shadow: 0 0 4px rgba(116,185,255,0.2); }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 <body>
-  <div class="exp-bg"></div>
-  <canvas id="sim-canvas"></canvas>
+    <div id="canvas-container"></div>
 
-  <div id="ui-panel" class="glass-panel">
-    <h1>伯努利原理与升力</h1>
-    <p class="desc">点击机翼或控制点查看坐标，拖拽移动/旋转/编辑形状</p>
+    <!-- 左侧：参数设置与实时数据 -->
+    <div class="side-panel left-panel glass-panel" id="left-panel">
+        <h2 class="text-xl font-bold mb-4 border-b border-gray-600 pb-2">系统参数设置</h2>
+        
+        <label class="text-sm">来流速度 (V) : <span id="val-velocity" class="font-mono font-bold">50</span> m/s</label>
+        <input type="range" id="input-velocity" min="10" max="150" value="50">
 
-    <div class="stats">
-      升力: <span id="lift-val">0</span> kN &nbsp;|&nbsp;
-      上表面流速: <span id="top-speed">0</span> m/s
+        <label class="text-sm">迎角 / 攻角 (α) : <span id="val-aoa" class="font-mono font-bold">5</span> °</label>
+        <input type="range" id="input-aoa" min="-5" max="25" value="5" step="0.5">
+
+        <label class="text-sm">空气密度 (ρ) : <span id="val-density" class="font-mono font-bold">1.225</span> kg/m³</label>
+        <input type="range" id="input-density" min="0.5" max="1.5" value="1.225" step="0.005">
+
+        <h2 class="text-xl font-bold mt-6 mb-4 border-b border-gray-600 pb-2">实时物理量监测</h2>
+        
+        <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+            <div class="panel-card">
+                <div class="text-gray-400 text-xs">升力系数 (C_L)</div>
+                <div id="out-cl" class="panel-metric text-blue-400">0.000</div>
+            </div>
+            <div class="panel-card">
+                <div class="text-gray-400 text-xs">总升力 (L)</div>
+                <div id="out-lift" class="panel-metric text-green-400">0 N</div>
+            </div>
+            <div class="panel-card col-span-2">
+                <div class="text-gray-400 text-xs">上下表面平均压差 (ΔP)</div>
+                <div id="out-dp" class="panel-metric text-red-400">0 Pa</div>
+            </div>
+        </div>
+        
+        <div class="mt-auto">
+            <h3 class="text-sm font-bold text-gray-400 mb-2">粒子速度/压力映射图例</h3>
+            <div class="legend-bar"></div>
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>低速 (高压)</span>
+                <span>中速 (常压)</span>
+                <span>高速 (低压)</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-4 border-t border-gray-700 pt-2">
+                * 注：该可视化模型基于叠加势流函数逼近，未包含粘性流体的纳维-斯托克斯方程全解。
+            </div>
+        </div>
     </div>
 
-    <div class="slider-group">
-      <label><span>攻角 (Angle of Attack)</span><span id="aoa-val" class="val-display">8°</span></label>
-      <input type="range" id="slider-aoa" min="-15" max="25" step="1" value="8">
-    </div>
-    <div class="slider-group">
-      <label><span>来流风速</span><span id="wind-val" class="val-display">80</span> m/s</label>
-      <input type="range" id="slider-wind" min="20" max="200" step="5" value="80">
-    </div>
-    <div class="slider-group">
-      <label><span>流线密度</span><span id="stream-val" class="val-display">30</span></label>
-      <input type="range" id="slider-stream" min="10" max="60" step="5" value="30">
-    </div>
-    <div class="slider-group">
-      <label><span>空气密度</span><span id="rho-val" class="val-display">1.225</span> kg/m³</label>
-      <input type="range" id="slider-rho" min="0.3" max="2.0" step="0.05" value="1.225">
-    </div>
+    <!-- 右侧：原理解析 -->
+    <div class="side-panel right-panel glass-panel" id="right-panel">
+        <h2 class="text-xl font-bold mb-4 border-b border-gray-600 pb-2">物理原理解析</h2>
+        
+        <div class="formula-box">
+            <div class="formula-title">1. 伯努利方程</div>
+            <p class="text-sm text-gray-300 mb-2">在不可压缩、无粘性的定常流动中，流线上各点的总压强保持常数：</p>
+            <div class="bg-gray-800 p-2 rounded text-sm mb-2 overflow-x-auto" style="background:rgba(0,0,0,0.15);">
+                $$ P + \frac{1}{2}\rho V^2 = \text{常数} $$
+            </div>
+            <p class="text-sm text-gray-400">
+                当流体流经具有迎角的机翼时，上表面的流线由于几何形状与环量叠加，被迫产生更大曲率，导致上表面流速（\(V_u\)）大于下表面流速（\(V_l\)）。由于动能项增加，上表面静压（\(P_u\)）必然下降。
+            </p>
+        </div>
 
-    <div class="formula-box">
-      <strong>伯努利方程</strong>
-      <div class="eq">P + ½ρv² = 常数</div>
-      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        流速越快的地方，压力越低。机翼上表面弯曲，空气被迫加速，形成低压区，从而产生向上的升力。
-      </p>
-    </div>
+        <div class="formula-box">
+            <div class="formula-title">2. 升力方程</div>
+            <p class="text-sm text-gray-300 mb-2">上下表面的压强差积分形成升力：</p>
+            <div class="bg-gray-800 p-2 rounded text-sm mb-2 overflow-x-auto" style="background:rgba(0,0,0,0.15);">
+                $$ L = \frac{1}{2} \rho V^2 S C_L $$
+            </div>
+            <ul class="text-sm text-gray-400 list-disc pl-5 space-y-1">
+                <li>\(L\)：升力 (N)</li>
+                <li>\(\rho\)：空气密度 (kg/m³)</li>
+                <li>\(V\)：来流速度 (m/s)</li>
+                <li>\(S\)：机翼参考面积 (设为 10 m²)</li>
+                <li>\(C_L\)：升力系数，通常与迎角 \(\alpha\) 成正比近似为 \(C_L = 2\pi\alpha\)。</li>
+            </ul>
+        </div>
 
-    <div class="formula-box">
-      <strong>升力公式</strong>
-      <div class="eq">L = ½ · ρ · v² · S · CL</div>
-      <p style="margin:4px 0 0 0; font-size:0.78rem; color:var(--text-muted);">
-        CL 为升力系数，与攻角有关。攻角过小升力不足，过大则气流分离导致失速。
-      </p>
-    </div>
-
-    <div class="btn-row">
-      <button class="theme-btn" onclick="resetWingShape()">恢复默认翼型</button>
-      <button class="theme-btn" onclick="resetSim()">重置全部</button>
-      <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
-    </div>
-
-    <div class="coord-box" id="coord-display">
-      <div class="coord-label">坐标信息</div>
-      <div class="coord-val" id="coord-val">点击机翼或控制点查看坐标</div>
+        <div class="formula-box">
+            <div class="formula-title" style="color:var(--accent-3,#ff6b6b);">3. 边界限制：失速现象</div>
+            <p class="text-sm text-gray-400">
+                伯努利方程假设无粘性。但在真实流体中，当迎角 \(\alpha\) 超过临界值（约 15°）时，逆压梯度会导致边界层分离，流场变为紊流。此时理论公式失效，升力系数急剧下降（失速）。您可调节左侧迎角滑块至 15° 以上观察此物理限制。
+            </p>
+        </div>
     </div>
 
-    <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px; text-align:center;">
-      左键拖拽控制点编辑形状 · 左键拖拽机身移动<br>
-      左键拖拽旋转手柄旋转 · 右键拖拽平移 · 滚轮缩放
-    </p>
-  </div>
+    <script src="shared-theme.js"></script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  <div id="entrance-toast" class="glass-panel" style="
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
-    opacity:1; transition:opacity 0.8s ease;">
-    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:var(--text-color);">
-      ✈️ 交互提示
-    </div>
-    <div style="font-size:0.95rem; color:var(--text-muted); line-height:1.8;">
-      <strong style="color:var(--accent-1);">拖拽控制点</strong> 修改翼型截面<br>
-      <strong style="color:var(--accent-2);">拖拽机身</strong> 移动位置 &nbsp;·&nbsp;
-      <strong style="color:var(--accent-2);">拖拽旋转手柄</strong> 改变攻角<br>
-      <strong style="color:var(--accent-1);">右键拖拽</strong> 平移画布 &nbsp;·&nbsp;
-      <strong style="color:var(--accent-1);">滚轮</strong> 缩放
-    </div>
-  </div>
+        PSUTheme.createSwitcher();
+        PSUTheme.createBackButton('index.html');
 
-  <script src="shared-theme.js"></script>
-  <script>
-    /* ================================================================
-       伯努利原理与升力 — 可编辑翼型版
-       - 势流绕翼型：圆柱绕流+环量
-       - 粒子沿流线运动，留下轨迹尾迹
-       - 翼型可编辑：拖拽控制点修改截面形状
-       - 翼型可移动/旋转：拖拽机身或旋转手柄
-       - 画布支持右键拖拽 + 滚轮缩放
-       ================================================================ */
+        // --- 全局状态变量 ---
+        const state = {
+            velocity: 50,
+            aoa: 5,
+            density: 1.225,
+            area: 10,
+            isStalled: false
+        };
 
-    PSUTheme.createSwitcher();
-    PSUTheme.createBackButton('index.html');
+        // --- DOM 元素引用 ---
+        const ui = {
+            inVel: document.getElementById('input-velocity'),
+            inAoA: document.getElementById('input-aoa'),
+            inDen: document.getElementById('input-density'),
+            valVel: document.getElementById('val-velocity'),
+            valAoA: document.getElementById('val-aoa'),
+            valDen: document.getElementById('val-density'),
+            outCl: document.getElementById('out-cl'),
+            outLift: document.getElementById('out-lift'),
+            outDp: document.getElementById('out-dp'),
+        };
 
-    const canvas = document.getElementById('sim-canvas');
-    const ctx = canvas.getContext('2d');
-    let W, H;
-    let paused = false;
-    let animId = null;
+        // --- 数据更新与计算逻辑 ---
+        function updatePhysics() {
+            state.velocity = parseFloat(ui.inVel.value);
+            state.aoa = parseFloat(ui.inAoA.value);
+            state.density = parseFloat(ui.inDen.value);
 
-    // ---- View transform ----
-    let SCALE = 1.0;
-    let viewPan = { ox: 0, oy: 0, active: false, sx: 0, sy: 0 };
+            ui.valVel.textContent = state.velocity.toFixed(1);
+            ui.valAoA.textContent = state.aoa.toFixed(1);
+            ui.valDen.textContent = state.density.toFixed(3);
 
-    function screenToPhys(sx, sy) {
-      return { x: (sx - viewPan.ox) / SCALE, y: (sy - viewPan.oy) / SCALE };
-    }
+            let aoaRad = state.aoa * (Math.PI / 180);
+            let cL = 0;
+            
+            if (state.aoa > 15) {
+                state.isStalled = true;
+                cL = 2 * Math.PI * (15 * Math.PI / 180) * Math.exp(-(state.aoa - 15) * 0.2); 
+            } else if (state.aoa < -5) {
+                cL = 2 * Math.PI * (-5 * Math.PI / 180);
+                state.isStalled = false;
+            } else {
+                state.isStalled = false;
+                cL = 2 * Math.PI * aoaRad;
+            }
 
-    // ---- Parameters ----
-    let AOA = 8;
-    let WIND_SPEED = 80;
-    let STREAM_COUNT = 30;
-    let RHO = 1.225;
+            let lift = 0.5 * state.density * Math.pow(state.velocity, 2) * state.area * cL;
+            let dp = lift / state.area;
 
-    // ---- Editable Wing ----
-    const CHORD = 360;
-    const DEFAULT_UPPER = [
-      { x: -180, y: 0 },
-      { x: -90, y: -35 },
-      { x: 0, y: -40 },
-      { x: 90, y: -25 },
-      { x: 180, y: 0 }
-    ];
-    const DEFAULT_LOWER = [
-      { x: -180, y: 0 },
-      { x: -90, y: 25 },
-      { x: 0, y: 30 },
-      { x: 90, y: 18 },
-      { x: 180, y: 0 }
-    ];
+            ui.outCl.textContent = cL.toFixed(3) + (state.isStalled ? " (失速)" : "");
+            ui.outCl.className = state.isStalled ? "panel-metric text-red-500" : "panel-metric text-blue-400";
+            ui.outLift.textContent = Math.round(lift).toLocaleString() + " N";
+            ui.outDp.textContent = Math.round(dp).toLocaleString() + " Pa";
 
-    let wing = {
-      x: 0, y: 0,           // Center position in physics coords
-      angle: 8,              // Rotation angle (degrees)
-      upperAnchors: DEFAULT_UPPER.map(a => ({...a})),
-      lowerAnchors: DEFAULT_LOWER.map(a => ({...a}))
-    };
-
-    // Convert local anchor point to world coords
-    function localToWorld(lx, ly) {
-      const rad = wing.angle * Math.PI / 180;
-      const cos = Math.cos(rad), sin = Math.sin(rad);
-      return {
-        x: wing.x + lx * cos - ly * sin,
-        y: wing.y + lx * sin + ly * cos
-      };
-    }
-
-    // Convert world point to local coords
-    function worldToLocal(wx, wy) {
-      const dx = wx - wing.x, dy = wy - wing.y;
-      const rad = -wing.angle * Math.PI / 180;
-      const cos = Math.cos(rad), sin = Math.sin(rad);
-      return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
-    }
-
-    // ---- Catmull-Rom spline ----
-    function catmullRom(p0, p1, p2, p3, t) {
-      const t2 = t * t, t3 = t2 * t;
-      return 0.5 * (
-        (2 * p1) +
-        (-p0 + p2) * t +
-        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
-        (-p0 + 3 * p1 - 3 * p2 + p3) * t3
-      );
-    }
-
-    function getSplinePoints(anchors, stepsPerSeg) {
-      const pts = [];
-      const n = anchors.length;
-      for (let i = 0; i < n - 1; i++) {
-        const p0 = anchors[Math.max(0, i - 1)];
-        const p1 = anchors[i];
-        const p2 = anchors[i + 1];
-        const p3 = anchors[Math.min(n - 1, i + 2)];
-        for (let s = 0; s <= stepsPerSeg; s++) {
-          const t = s / stepsPerSeg;
-          const sx = catmullRom(p0.x, p1.x, p2.x, p3.x, t);
-          const sy = catmullRom(p0.y, p1.y, p2.y, p3.y, t);
-          pts.push(localToWorld(sx, sy));
+            if(airfoilMesh) {
+                airfoilMesh.rotation.z = -aoaRad; 
+            }
         }
-      }
-      // Remove duplicate points at segment boundaries
-      const unique = [pts[0]];
-      for (let i = 1; i < pts.length; i++) {
-        if (Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y) > 0.5) {
-          unique.push(pts[i]);
+
+        ui.inVel.addEventListener('input', updatePhysics);
+        ui.inAoA.addEventListener('input', updatePhysics);
+        ui.inDen.addEventListener('input', updatePhysics);
+
+        // --- Three.js 场景初始化 ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 15);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // 灯光
+        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(ambientLight);
+        scene.add(directionalLight);
+
+        // --- 构建机翼几何体 (NACA 0012 翼型近似) ---
+        let airfoilMesh;
+        function buildAirfoil() {
+            const shape = new THREE.Shape();
+            const chord = 4.0;
+            const thickness = 0.12;
+            
+            const pts = [];
+            for (let i = 0; i <= 1.0; i += 0.02) {
+                const x_c = 0.5 * (1 - Math.cos(i * Math.PI)); 
+                const yt = 5 * thickness * chord * (0.2969 * Math.sqrt(x_c) - 0.1260 * x_c - 0.3516 * Math.pow(x_c, 2) + 0.2843 * Math.pow(x_c, 3) - 0.1015 * Math.pow(x_c, 4));
+                pts.push(new THREE.Vector2((x_c - 0.25) * chord, yt));
+            }
+            for (let i = 1.0; i >= 0; i -= 0.02) {
+                const x_c = 0.5 * (1 - Math.cos(i * Math.PI));
+                const yt = 5 * thickness * chord * (0.2969 * Math.sqrt(x_c) - 0.1260 * x_c - 0.3516 * Math.pow(x_c, 2) + 0.2843 * Math.pow(x_c, 3) - 0.1015 * Math.pow(x_c, 4));
+                pts.push(new THREE.Vector2((x_c - 0.25) * chord, -yt));
+            }
+
+            shape.setFromPoints(pts);
+
+            const extrudeSettings = { depth: 6, bevelEnabled: false, curveSegments: 32 };
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            geometry.translate(0, 0, -3); 
+            
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x8899aa, 
+                metalness: 0.6, 
+                roughness: 0.2 
+            });
+            
+            airfoilMesh = new THREE.Mesh(geometry, material);
+            scene.add(airfoilMesh);
         }
-      }
-      return unique;
-    }
+        buildAirfoil();
 
-    function getWingWorldPoints() {
-      return {
-        upper: getSplinePoints(wing.upperAnchors, 15),
-        lower: getSplinePoints(wing.lowerAnchors, 15)
-      };
-    }
+        // --- 粒子流系统 ---
+        const particleCount = 15000;
+        const particlesGeometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
 
-    // ---- Point-in-polygon test ----
-    function pointInPolygon(px, py, poly) {
-      let inside = false;
-      for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-        const xi = poly[i].x, yi = poly[i].y;
-        const xj = poly[j].x, yj = poly[j].y;
-        const intersect = ((yi > py) !== (yj > py)) &&
-          (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-      }
-      return inside;
-    }
-
-    // ---- Physics: cylinder + circulation ----
-    const CYLINDER_R = 60;
-
-    function getCirculation() {
-      const alphaRad = wing.angle * Math.PI / 180;
-      let gamma = 4 * Math.PI * CYLINDER_R * Math.sin(alphaRad);
-      if (Math.abs(wing.angle) > 15) {
-        const stallDrop = Math.min(1.0, (Math.abs(wing.angle) - 15) / 10);
-        gamma *= (1.0 - stallDrop * 0.6);
-      }
-      return gamma;
-    }
-
-    function getVelocity(px, py) {
-      const dx = px - wing.x;
-      const dy = py - wing.y;
-      const r2 = dx * dx + dy * dy;
-      const r = Math.sqrt(r2);
-      if (r < CYLINDER_R * 1.02) return null;
-
-      const gamma = getCirculation();
-      const U = WIND_SPEED * 0.01;
-      const R2 = CYLINDER_R * CYLINDER_R;
-
-      const u = U * (1 - R2 * (dx * dx - dy * dy) / (r2 * r2)) - gamma * dy / (2 * Math.PI * r2);
-      const v = U * (-2 * R2 * dx * dy / (r2 * r2)) + gamma * dx / (2 * Math.PI * r2);
-      return { u, v };
-    }
-
-    // ---- Streamline particles ----
-    class StreamParticle {
-      constructor() { this.trail = []; this.maxTrail = 180; this.reset(); }
-      reset() {
-        this.x = wing.x - CHORD * 0.8;
-        this.y = wing.y + (Math.random() - 0.5) * CHORD * 2.5;
-        this.trail = [];
-        this.alive = true;
-      }
-    }
-
-    let streams = [];
-    function initStreams() {
-      streams = [];
-      for (let i = 0; i < STREAM_COUNT; i++) {
-        const p = new StreamParticle();
-        p.y = wing.y - CHORD * 1.2 + (i / (STREAM_COUNT - 1)) * CHORD * 2.4;
-        p.x = wing.x - CHORD * 0.8 - Math.random() * 100;
-        streams.push(p);
-      }
-    }
-
-    // ---- Interaction state ----
-    let drag = { active: false, type: 'none', anchor: null, offsetX: 0, offsetY: 0 };
-    let hoverInfo = { type: 'none', target: null };
-
-    const ANCHOR_HIT_R = 10;
-    const ROT_HANDLE_DIST = CHORD * 0.55;
-    const ROT_HANDLE_R = 14;
-
-    function getRotHandleWorld() {
-      return localToWorld(0, -ROT_HANDLE_DIST);
-    }
-
-    function findTargetAt(mx, my) {
-      const p = screenToPhys(mx, my);
-
-      // 1. Check rotation handle
-      const rot = getRotHandleWorld();
-      if (Math.hypot(p.x - rot.x, p.y - rot.y) < ROT_HANDLE_R / SCALE) {
-        return { type: 'rotate' };
-      }
-
-      // 2. Check control points (upper, skip endpoints)
-      for (let i = 1; i < wing.upperAnchors.length - 1; i++) {
-        const wp = localToWorld(wing.upperAnchors[i].x, wing.upperAnchors[i].y);
-        if (Math.hypot(p.x - wp.x, p.y - wp.y) < ANCHOR_HIT_R / SCALE) {
-          return { type: 'anchor', surface: 'upper', index: i };
+        function getVelocityColor(val, minVal, maxVal) {
+            let t = (val - minVal) / (maxVal - minVal);
+            t = Math.max(0, Math.min(1, t));
+            const color = new THREE.Color();
+            const h = (1.0 - t) * 240 / 360; 
+            color.setHSL(h, 1.0, 0.5);
+            return color;
         }
-      }
 
-      // 3. Check control points (lower, skip endpoints)
-      for (let i = 1; i < wing.lowerAnchors.length - 1; i++) {
-        const wp = localToWorld(wing.lowerAnchors[i].x, wing.lowerAnchors[i].y);
-        if (Math.hypot(p.x - wp.x, p.y - wp.y) < ANCHOR_HIT_R / SCALE) {
-          return { type: 'anchor', surface: 'lower', index: i };
+        const domainExtents = { xMin: -10, xMax: 10, yMin: -5, yMax: 5, zMin: -3, zMax: 3 };
+
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = domainExtents.xMin + Math.random() * (domainExtents.xMax - domainExtents.xMin);
+            positions[i * 3 + 1] = domainExtents.yMin + Math.random() * (domainExtents.yMax - domainExtents.yMin);
+            positions[i * 3 + 2] = domainExtents.zMin + Math.random() * (domainExtents.zMax - domainExtents.zMin);
+            colors[i * 3] = 1;
+            colors[i * 3 + 1] = 1;
+            colors[i * 3 + 2] = 1;
         }
-      }
 
-      // 4. Check if inside wing polygon
-      const foil = getWingWorldPoints();
-      const poly = [...foil.upper, ...foil.lower.reverse()];
-      if (pointInPolygon(p.x, p.y, poly)) {
-        return { type: 'body' };
-      }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-      return { type: 'none' };
-    }
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.08,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending
+        });
 
-    function updateCoordDisplay(target) {
-      const el = document.getElementById('coord-val');
-      const label = document.querySelector('.coord-label');
-      if (!target || target.type === 'none') {
-        label.textContent = '坐标信息';
-        el.textContent = '点击机翼或控制点查看坐标';
-        return;
-      }
+        const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particleSystem);
 
-      if (target.type === 'rotate') {
-        const rot = getRotHandleWorld();
-        label.textContent = '旋转手柄';
-        el.textContent = `中心: (${wing.x.toFixed(1)}, ${wing.y.toFixed(1)})  攻角: ${wing.angle.toFixed(1)}°`;
-      } else if (target.type === 'anchor') {
-        const a = target.surface === 'upper' ? wing.upperAnchors[target.index] : wing.lowerAnchors[target.index];
-        const wp = localToWorld(a.x, a.y);
-        label.textContent = `${target.surface === 'upper' ? '上表面' : '下表面'} 控制点 #${target.index}`;
-        el.textContent = `局部: (${a.x.toFixed(1)}, ${a.y.toFixed(1)})  世界: (${wp.x.toFixed(1)}, ${wp.y.toFixed(1)})`;
-      } else if (target.type === 'body') {
-        label.textContent = '翼型机身';
-        el.textContent = `中心: (${wing.x.toFixed(1)}, ${wing.y.toFixed(1)})  攻角: ${wing.angle.toFixed(1)}°`;
-      }
-    }
+        // 简化的流场计算
+        function calculateVelocityField(px, py, pz, V_inf, aoa_rad, isStalled) {
+            let vx = V_inf;
+            let vy = 0;
+            let vz = 0;
 
-    // ---- Mouse events ----
-    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            let r2 = px*px + py*py;
+            let r = Math.sqrt(r2);
 
-    canvas.addEventListener('mousedown', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            if (r > 6.0) return { vx: vx * 0.05, vy, vz, v_mag: V_inf };
 
-      if (e.button === 2) {
-        viewPan.active = true;
-        viewPan.sx = mx; viewPan.sy = my;
-        return;
-      }
+            let thickness_effect = 0.5 / (r2 + 0.5); 
+            vx += V_inf * thickness_effect * (px*px - py*py)/(r2+0.1);
+            vy += V_inf * thickness_effect * (2*px*py)/(r2+0.1);
 
-      const target = findTargetAt(mx, my);
-      if (target.type === 'none') {
-        updateCoordDisplay(target);
-        return;
-      }
+            let gamma = (isStalled ? 0 : 1) * V_inf * Math.sin(aoa_rad) * 2.0;
+            if (isStalled) {
+                if (px > 0 && py > 0 && py < 2) {
+                    vy -= V_inf * 0.5 * Math.random();
+                    vx -= V_inf * 0.8 * Math.random();
+                }
+            } else {
+                if (r > 0.2) {
+                    let v_theta = gamma / (2 * Math.PI * r);
+                    vx += v_theta * (-py / r);
+                    vy += v_theta * (px / r);
+                }
+            }
 
-      drag.active = true;
-      drag.type = target.type;
-      drag.anchor = target;
+            if (px > -2.0 && px < 2.0 && Math.abs(py) < 0.3) {
+                if (py > 0) py = 0.35; else py = -0.35;
+                vy += (py > 0 ? 0.2 : -0.2) * V_inf;
+            }
 
-      if (target.type === 'anchor') {
-        const a = target.surface === 'upper' ? wing.upperAnchors[target.index] : wing.lowerAnchors[target.index];
-        const wp = localToWorld(a.x, a.y);
-        const p = screenToPhys(mx, my);
-        drag.offsetX = p.x - wp.x;
-        drag.offsetY = p.y - wp.y;
-      } else if (target.type === 'body') {
-        const p = screenToPhys(mx, my);
-        drag.offsetX = p.x - wing.x;
-        drag.offsetY = p.y - wing.y;
-      } else if (target.type === 'rotate') {
-        const p = screenToPhys(mx, my);
-        drag.startAngle = Math.atan2(p.y - wing.y, p.x - wing.x);
-        drag.startWingAngle = wing.angle;
-      }
-
-      updateCoordDisplay(target);
-      canvas.classList.add('dragging');
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-
-      if (viewPan.active && e.buttons === 2) {
-        viewPan.ox += mx - viewPan.sx;
-        viewPan.oy += my - viewPan.sy;
-        viewPan.sx = mx; viewPan.sy = my;
-        return;
-      }
-
-      if (!drag.active) {
-        const target = findTargetAt(mx, my);
-        if (target.type !== hoverInfo.type ||
-            (target.type === 'anchor' && (target.surface !== hoverInfo.surface || target.index !== hoverInfo.index))) {
-          hoverInfo = target;
-          updateCoordDisplay(target);
+            let v_mag = Math.sqrt(vx*vx + vy*vy);
+            return { vx: vx * 0.02, vy: vy * 0.02, vz: 0, v_mag: v_mag }; 
         }
-        // Cursor
-        if (target.type === 'rotate') canvas.style.cursor = 'grab';
-        else if (target.type === 'anchor') canvas.style.cursor = 'grab';
-        else if (target.type === 'body') canvas.style.cursor = 'move';
-        else canvas.style.cursor = 'crosshair';
-        return;
-      }
 
-      const p = screenToPhys(mx, my);
+        // --- 动画循环 ---
+        function animate() {
+            requestAnimationFrame(animate);
 
-      if (drag.type === 'anchor') {
-        const wx = p.x - drag.offsetX, wy = p.y - drag.offsetY;
-        const local = worldToLocal(wx, wy);
-        // Constrain: keep within chord, don't cross centerline too much
-        const a = drag.anchor.surface === 'upper' ? wing.upperAnchors : wing.lowerAnchors;
-        a[drag.anchor.index].x = Math.max(-170, Math.min(170, local.x));
-        a[drag.anchor.index].y = drag.anchor.surface === 'upper'
-          ? Math.min(-2, local.y)
-          : Math.max(2, local.y);
-        // Sync endpoints
-        a[0].y = 0; a[a.length - 1].y = 0;
-      } else if (drag.type === 'body') {
-        wing.x = p.x - drag.offsetX;
-        wing.y = p.y - drag.offsetY;
-      } else if (drag.type === 'rotate') {
-        const currentAngle = Math.atan2(p.y - wing.y, p.x - wing.x);
-        const delta = (currentAngle - drag.startAngle) * 180 / Math.PI;
-        wing.angle = Math.max(-25, Math.min(30, drag.startWingAngle - delta));
-        AOA = Math.round(wing.angle);
-        document.getElementById('slider-aoa').value = AOA;
-        document.getElementById('aoa-val').textContent = AOA + '°';
-      }
-    });
+            const positions = particleSystem.geometry.attributes.position.array;
+            const colors = particleSystem.geometry.attributes.color.array;
+            
+            const aoa_rad = state.aoa * (Math.PI / 180);
+            const minV = state.velocity * 0.5;
+            const maxV = state.velocity * 1.5;
 
-    canvas.addEventListener('mouseup', () => {
-      drag.active = false;
-      drag.type = 'none';
-      canvas.classList.remove('dragging');
-    });
-    canvas.addEventListener('mouseleave', () => {
-      drag.active = false;
-      viewPan.active = false;
-      canvas.classList.remove('dragging');
-    });
+            for (let i = 0; i < particleCount; i++) {
+                let px = positions[i * 3];
+                let py = positions[i * 3 + 1];
+                let pz = positions[i * 3 + 2];
 
-    canvas.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const mx = e.clientX, my = e.clientY;
-      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
-      const newScale = Math.max(0.3, Math.min(5.0, SCALE * zoomFactor));
-      viewPan.ox = mx - (mx - viewPan.ox) * newScale / SCALE;
-      viewPan.oy = my - (my - viewPan.oy) * newScale / SCALE;
-      SCALE = newScale;
-    }, { passive: false });
+                let vel = calculateVelocityField(px, py, pz, state.velocity, aoa_rad, state.isStalled);
 
-    // ---- Lift ----
-    function getLift() {
-      const alphaRad = wing.angle * Math.PI / 180;
-      let CL = 2 * Math.PI * alphaRad;
-      if (wing.angle > 15) CL *= (1.0 - Math.min(1.0, (wing.angle - 15) / 10) * 0.7);
-      if (wing.angle < -10) CL *= (1.0 - Math.min(1.0, (-wing.angle - 10) / 10) * 0.7);
-      return 0.5 * RHO * WIND_SPEED * WIND_SPEED * CL;
-    }
+                px += vel.vx * 0.5;
+                py += vel.vy * 0.5;
+                
+                if (px > domainExtents.xMax || Math.abs(py) > domainExtents.yMax) {
+                    px = domainExtents.xMin;
+                    py = domainExtents.yMin + Math.random() * (domainExtents.yMax - domainExtents.yMin);
+                    pz = domainExtents.zMin + Math.random() * (domainExtents.zMax - domainExtents.zMin);
+                }
 
-    function getAvgTopSpeed() {
-      const baseFactor = 1.0 + 0.8 * Math.max(0, wing.angle / 25);
-      if (wing.angle > 15) return baseFactor * WIND_SPEED * (1.0 - Math.min(1.0, (wing.angle - 15) / 10) * 0.3);
-      return baseFactor * WIND_SPEED;
-    }
+                positions[i * 3] = px;
+                positions[i * 3 + 1] = py;
+                positions[i * 3 + 2] = pz;
 
-    // ---- Theme ----
-    function getThemeColors() {
-      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
-      if (theme === 'cartoon') return { bg: '#fef6e4', grid: 'rgba(0,0,0,0.06)', ink: '#2d3436' };
-      if (theme === 'glass') return { bg: '#0f1117', grid: 'rgba(255,255,255,0.04)', ink: '#e0e6ed' };
-      if (theme === 'academic') return { bg: '#f8f9fa', grid: 'rgba(0,0,0,0.05)', ink: '#1a1a2e' };
-      return { bg: '#050508', grid: 'rgba(255,255,255,0.03)', ink: '#f0e6ff' };
-    }
+                const color = getVelocityColor(vel.v_mag, minV, maxV);
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+            }
 
-    function getSpeedColor(factor) {
-      if (factor < 0.8) {
-        const t = Math.max(0, (factor - 0.5) / 0.3);
-        return `rgb(${Math.round(59 + t * 100)}, ${Math.round(130 + t * 100)}, ${Math.round(246 - t * 100)})`;
-      } else if (factor < 1.3) {
-        const t = (factor - 0.8) / 0.5;
-        return `rgb(${Math.round(159 + t * 96)}, ${Math.round(230 - t * 80)}, ${Math.round(146 - t * 100)})`;
-      } else {
-        const t = Math.min(1, (factor - 1.3) / 0.5);
-        return `rgb(${Math.round(255)}, ${Math.round(150 - t * 100)}, ${Math.round(50 - t * 50)})`;
-      }
-    }
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+            particleSystem.geometry.attributes.color.needsUpdate = true;
 
-    // ---- Physics step ----
-    function stepParticles() {
-      const speedScale = WIND_SPEED * 0.0008;
-      for (let p of streams) {
-        if (!p.alive) continue;
-        const vel = getVelocity(p.x, p.y);
-        if (!vel) { p.alive = false; continue; }
-        const speed = Math.sqrt(vel.u * vel.u + vel.v * vel.v);
-        const speedFactor = speed / (WIND_SPEED * 0.01);
-        p.x += vel.u * speedScale * 60;
-        p.y += vel.v * speedScale * 60;
-        p.trail.push({ x: p.x, y: p.y, speed: speedFactor });
-        if (p.trail.length > p.maxTrail) p.trail.shift();
-        if (p.x > wing.x + CHORD * 1.2 || p.x < wing.x - CHORD * 1.5) p.reset();
-        if (Math.hypot(p.x - wing.x, p.y - wing.y) < CYLINDER_R * 1.05) p.alive = false;
-      }
-      for (let p of streams) { if (!p.alive) p.reset(); }
-    }
-
-    // ---- Drawing ----
-    function draw() {
-      const theme = getThemeColors();
-      ctx.fillStyle = theme.bg;
-      ctx.fillRect(0, 0, W, H);
-
-      ctx.save();
-      ctx.translate(viewPan.ox, viewPan.oy);
-      ctx.scale(SCALE, SCALE);
-
-      // Grid
-      ctx.strokeStyle = theme.grid;
-      ctx.lineWidth = 1 / SCALE;
-      const gridStep = 60;
-      const vl = -viewPan.ox / SCALE, vr = (W - viewPan.ox) / SCALE;
-      const vt = -viewPan.oy / SCALE, vb = (H - viewPan.oy) / SCALE;
-      const gx0 = Math.floor(vl / gridStep) * gridStep;
-      const gy0 = Math.floor(vt / gridStep) * gridStep;
-      for (let x = gx0; x <= vr; x += gridStep) {
-        ctx.beginPath(); ctx.moveTo(x, vt); ctx.lineTo(x, vb); ctx.stroke();
-      }
-      for (let y = gy0; y <= vb; y += gridStep) {
-        ctx.beginPath(); ctx.moveTo(vl, y); ctx.lineTo(vr, y); ctx.stroke();
-      }
-
-      // Streamline trails
-      for (let p of streams) {
-        if (p.trail.length < 2) continue;
-        for (let i = 1; i < p.trail.length; i++) {
-          const a = p.trail[i - 1], b = p.trail[i];
-          const color = getSpeedColor(b.speed);
-          const alpha = Math.min(0.8, 0.15 + 0.65 * (i / p.trail.length));
-          ctx.globalAlpha = alpha;
-          ctx.strokeStyle = color;
-          ctx.lineWidth = Math.max(0.5, 1.2 + b.speed * 0.8);
-          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            controls.update();
+            renderer.render(scene, camera);
         }
-        if (p.trail.length > 0) {
-          const head = p.trail[p.trail.length - 1];
-          ctx.globalAlpha = 0.9;
-          ctx.fillStyle = getSpeedColor(head.speed);
-          ctx.beginPath(); ctx.arc(head.x, head.y, 2 + head.speed, 0, Math.PI * 2); ctx.fill();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- Theme adapter ---
+        function applyTheme() {
+            const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+            if (theme === 'academic') {
+                scene.background = new THREE.Color(0xe8eaed);
+                ambientLight.intensity = 2.5;
+                directionalLight.intensity = 1.2;
+                if (airfoilMesh) airfoilMesh.material.color.setHex(0x6b7a8a);
+                particlesMaterial.opacity = 0.5;
+            } else if (theme === 'cartoon') {
+                scene.background = new THREE.Color(0xfef6e4);
+                ambientLight.intensity = 2.0;
+                directionalLight.intensity = 1.0;
+                if (airfoilMesh) airfoilMesh.material.color.setHex(0x8899aa);
+                particlesMaterial.opacity = 0.7;
+            } else if (theme === 'glass') {
+                scene.background = new THREE.Color(0x0a0a12);
+                ambientLight.intensity = 1.5;
+                directionalLight.intensity = 0.8;
+                if (airfoilMesh) airfoilMesh.material.color.setHex(0x556677);
+                particlesMaterial.opacity = 0.7;
+            } else { // cyber
+                scene.background = new THREE.Color(0x050008);
+                ambientLight.intensity = 1.2;
+                directionalLight.intensity = 0.6;
+                if (airfoilMesh) airfoilMesh.material.color.setHex(0x443355);
+                particlesMaterial.opacity = 0.8;
+            }
         }
-      }
-      ctx.globalAlpha = 1.0;
+        const themeObs = new MutationObserver(applyTheme);
+        themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-      // Wing shape
-      const foil = getWingWorldPoints();
-
-      // Fill
-      ctx.fillStyle = theme.ink;
-      ctx.globalAlpha = 0.18;
-      ctx.beginPath();
-      ctx.moveTo(foil.upper[0].x, foil.upper[0].y);
-      for (let p of foil.upper) ctx.lineTo(p.x, p.y);
-      for (let p of foil.lower) ctx.lineTo(p.x, p.y);
-      ctx.closePath(); ctx.fill();
-      ctx.globalAlpha = 1.0;
-
-      // Outline
-      ctx.strokeStyle = theme.ink;
-      ctx.lineWidth = 2.5 / SCALE;
-      ctx.beginPath();
-      ctx.moveTo(foil.upper[0].x, foil.upper[0].y);
-      for (let p of foil.upper) ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(foil.lower[0].x, foil.lower[0].y);
-      for (let p of foil.lower) ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-
-      // Chord line
-      ctx.strokeStyle = theme.ink;
-      ctx.lineWidth = 1 / SCALE;
-      ctx.setLineDash([6 / SCALE, 4 / SCALE]);
-      ctx.globalAlpha = 0.3;
-      const cStart = localToWorld(-CHORD/2, 0);
-      const cEnd = localToWorld(CHORD/2, 0);
-      ctx.beginPath(); ctx.moveTo(cStart.x, cStart.y); ctx.lineTo(cEnd.x, cEnd.y); ctx.stroke();
-      ctx.setLineDash([]); ctx.globalAlpha = 1.0;
-
-      // Control points
-      const isAcademic = (document.documentElement.getAttribute('data-theme') || 'academic') === 'academic';
-      const cpFill = isAcademic ? '#4f46e5' : '#ff6b6b';
-      const cpStroke = isAcademic ? '#ffffff' : '#2d3436';
-
-      // Upper anchors (skip endpoints)
-      for (let i = 1; i < wing.upperAnchors.length - 1; i++) {
-        const wp = localToWorld(wing.upperAnchors[i].x, wing.upperAnchors[i].y);
-        const isHover = hoverInfo.type === 'anchor' && hoverInfo.surface === 'upper' && hoverInfo.index === i;
-        const r = isHover ? 7 / SCALE : 5 / SCALE;
-        ctx.fillStyle = cpFill;
-        ctx.strokeStyle = cpStroke;
-        ctx.lineWidth = 1.5 / SCALE;
-        ctx.beginPath(); ctx.arc(wp.x, wp.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        // Dashed line to show local position
-        ctx.strokeStyle = cpFill;
-        ctx.globalAlpha = 0.3;
-        ctx.setLineDash([3 / SCALE, 3 / SCALE]);
-        ctx.lineWidth = 0.8 / SCALE;
-        ctx.beginPath(); ctx.moveTo(wp.x, wing.y); ctx.lineTo(wp.x, wp.y); ctx.stroke();
-        ctx.setLineDash([]); ctx.globalAlpha = 1.0;
-      }
-      // Lower anchors
-      for (let i = 1; i < wing.lowerAnchors.length - 1; i++) {
-        const wp = localToWorld(wing.lowerAnchors[i].x, wing.lowerAnchors[i].y);
-        const isHover = hoverInfo.type === 'anchor' && hoverInfo.surface === 'lower' && hoverInfo.index === i;
-        const r = isHover ? 7 / SCALE : 5 / SCALE;
-        ctx.fillStyle = cpFill;
-        ctx.strokeStyle = cpStroke;
-        ctx.lineWidth = 1.5 / SCALE;
-        ctx.beginPath(); ctx.arc(wp.x, wp.y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = cpFill;
-        ctx.globalAlpha = 0.3;
-        ctx.setLineDash([3 / SCALE, 3 / SCALE]);
-        ctx.lineWidth = 0.8 / SCALE;
-        ctx.beginPath(); ctx.moveTo(wp.x, wing.y); ctx.lineTo(wp.x, wp.y); ctx.stroke();
-        ctx.setLineDash([]); ctx.globalAlpha = 1.0;
-      }
-
-      // Rotation handle
-      const rot = getRotHandleWorld();
-      const isRotHover = hoverInfo.type === 'rotate';
-      ctx.fillStyle = isRotHover ? '#f59e0b' : '#fbbf24';
-      ctx.strokeStyle = isAcademic ? '#1a1a2e' : '#2d3436';
-      ctx.lineWidth = 2 / SCALE;
-      ctx.beginPath(); ctx.arc(rot.x, rot.y, (isRotHover ? 10 : 8) / SCALE, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      // Line from center to handle
-      ctx.strokeStyle = '#fbbf24';
-      ctx.globalAlpha = 0.4;
-      ctx.lineWidth = 1.5 / SCALE;
-      ctx.setLineDash([4 / SCALE, 3 / SCALE]);
-      ctx.beginPath(); ctx.moveTo(wing.x, wing.y); ctx.lineTo(rot.x, rot.y); ctx.stroke();
-      ctx.setLineDash([]); ctx.globalAlpha = 1.0;
-
-      // Lift arrow
-      const lift = getLift();
-      const liftMag = Math.min(CHORD * 0.5, Math.abs(lift) / 150);
-      const liftColor = lift > 0 ? '#10b981' : '#ef4444';
-      if (Math.abs(liftMag) > 3) {
-        ctx.strokeStyle = liftColor;
-        ctx.lineWidth = 4 / SCALE;
-        ctx.beginPath(); ctx.moveTo(wing.x, wing.y); ctx.lineTo(wing.x, wing.y - liftMag); ctx.stroke();
-        ctx.fillStyle = liftColor;
-        ctx.beginPath();
-        ctx.moveTo(wing.x, wing.y - liftMag);
-        ctx.lineTo(wing.x - 8/SCALE, wing.y - liftMag + 12/SCALE);
-        ctx.lineTo(wing.x + 8/SCALE, wing.y - liftMag + 12/SCALE);
-        ctx.closePath(); ctx.fill();
-        ctx.font = `bold ${14/SCALE}px sans-serif`;
-        ctx.fillStyle = liftColor;
-        ctx.fillText('L = ' + (lift/1000).toFixed(2) + ' kN', wing.x + 20/SCALE, wing.y - liftMag * 0.5);
-      }
-
-      // AOA arc
-      if (Math.abs(wing.angle) > 2) {
-        ctx.strokeStyle = theme.ink;
-        ctx.lineWidth = 1.5 / SCALE;
-        ctx.globalAlpha = 0.4;
-        const arcR = CHORD * 0.35;
-        const a1 = -wing.angle * Math.PI / 180;
-        ctx.beginPath();
-        ctx.arc(wing.x - CHORD*0.35, wing.y, arcR, Math.min(0, a1), Math.max(0, a1), wing.angle < 0);
-        ctx.stroke();
-        ctx.globalAlpha = 0.6;
-        ctx.font = `${12/SCALE}px sans-serif`;
-        ctx.fillStyle = theme.ink;
-        const la = a1 / 2;
-        ctx.fillText('α = ' + wing.angle.toFixed(0) + '°', wing.x - CHORD*0.35 + (arcR + 20/SCALE)*Math.cos(la), wing.y + (arcR + 20/SCALE)*Math.sin(la));
-        ctx.globalAlpha = 1.0;
-      }
-
-      // Stall warning
-      if (wing.angle > 15) {
-        ctx.font = `bold ${18/SCALE}px sans-serif`;
-        ctx.fillStyle = '#ef4444';
-        ctx.textAlign = 'center';
-        ctx.fillText('⚠ 失速警告 (Stall)', vl + (vr - vl)/2, vb - 30/SCALE);
-        ctx.textAlign = 'left';
-      }
-
-      // Pressure labels
-      ctx.font = `${11/SCALE}px sans-serif`;
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle = '#ef4444';
-      ctx.fillText('低压 (快)', wing.x - 30/SCALE, wing.y - CHORD * 0.12);
-      ctx.fillStyle = '#3b82f6';
-      ctx.fillText('高压 (慢)', wing.x - 30/SCALE, wing.y + CHORD * 0.12);
-      ctx.globalAlpha = 1.0;
-
-      // Freestream arrow
-      ctx.strokeStyle = theme.ink;
-      ctx.lineWidth = 2 / SCALE;
-      ctx.globalAlpha = 0.4;
-      const arrowX = vl + 40/SCALE;
-      ctx.beginPath(); ctx.moveTo(arrowX, wing.y); ctx.lineTo(arrowX + 60/SCALE, wing.y); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(arrowX + 60/SCALE, wing.y);
-      ctx.lineTo(arrowX + 50/SCALE, wing.y - 6/SCALE);
-      ctx.lineTo(arrowX + 50/SCALE, wing.y + 6/SCALE);
-      ctx.closePath(); ctx.fillStyle = theme.ink; ctx.fill();
-      ctx.globalAlpha = 1.0;
-      ctx.font = `bold ${13/SCALE}px sans-serif`;
-      ctx.fillStyle = theme.ink;
-      ctx.fillText('v∞ = ' + WIND_SPEED + ' m/s', arrowX, wing.y - 15/SCALE);
-
-      ctx.restore();
-
-      // Legend (screen space)
-      drawLegend(theme);
-    }
-
-    function drawLegend(theme) {
-      const lx = W - 150, ly = H - 85;
-      ctx.font = '11px sans-serif';
-      ctx.fillStyle = theme.ink;
-      ctx.globalAlpha = 0.6;
-      ctx.fillText('流速图例', lx, ly);
-      const items = [
-        { c: getSpeedColor(0.6), label: '慢 (高压)' },
-        { c: getSpeedColor(1.0), label: '正常' },
-        { c: getSpeedColor(1.6), label: '快 (低压)' }
-      ];
-      items.forEach((item, i) => {
-        const y = ly + 18 + i * 18;
-        ctx.fillStyle = item.c; ctx.globalAlpha = 0.8;
-        ctx.beginPath(); ctx.arc(lx + 8, y, 5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = theme.ink; ctx.globalAlpha = 0.5;
-        ctx.fillText(item.label, lx + 22, y + 4);
-      });
-      ctx.globalAlpha = 1.0;
-    }
-
-    // ---- Main loop ----
-    function loop() {
-      if (!paused) stepParticles();
-      draw();
-      updateStats();
-      animId = requestAnimationFrame(loop);
-    }
-
-    function updateStats() {
-      const lift = getLift();
-      document.getElementById('lift-val').textContent = (lift / 1000).toFixed(2);
-      document.getElementById('top-speed').textContent = getAvgTopSpeed().toFixed(1);
-    }
-
-    function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // ---- Sliders ----
-    document.getElementById('slider-aoa').addEventListener('input', (e) => {
-      AOA = parseInt(e.target.value);
-      wing.angle = AOA;
-      document.getElementById('aoa-val').textContent = AOA + '°';
-      for (let p of streams) { p.trail = []; }
-    });
-    document.getElementById('slider-wind').addEventListener('input', (e) => {
-      WIND_SPEED = parseInt(e.target.value);
-      document.getElementById('wind-val').textContent = WIND_SPEED;
-    });
-    document.getElementById('slider-stream').addEventListener('input', (e) => {
-      STREAM_COUNT = parseInt(e.target.value);
-      document.getElementById('stream-val').textContent = STREAM_COUNT;
-      initStreams();
-    });
-    document.getElementById('slider-rho').addEventListener('input', (e) => {
-      RHO = parseFloat(e.target.value);
-      document.getElementById('rho-val').textContent = RHO.toFixed(3);
-    });
-
-    function resetWingShape() {
-      wing.upperAnchors = DEFAULT_UPPER.map(a => ({...a}));
-      wing.lowerAnchors = DEFAULT_LOWER.map(a => ({...a}));
-    }
-
-    function resetSim() {
-      AOA = 8; wing.angle = 8;
-      WIND_SPEED = 80; STREAM_COUNT = 30; RHO = 1.225;
-      wing.x = 0; wing.y = 0;
-      resetWingShape();
-      document.getElementById('slider-aoa').value = 8;
-      document.getElementById('aoa-val').textContent = '8°';
-      document.getElementById('slider-wind').value = 80;
-      document.getElementById('wind-val').textContent = '80';
-      document.getElementById('slider-stream').value = 30;
-      document.getElementById('stream-val').textContent = '30';
-      document.getElementById('slider-rho').value = 1.225;
-      document.getElementById('rho-val').textContent = '1.225';
-      SCALE = 1.0; viewPan.ox = 0; viewPan.oy = 0;
-      initStreams();
-    }
-
-    function togglePause() {
-      paused = !paused;
-      document.getElementById('pause-btn').textContent = paused ? '继续' : '暂停';
-    }
-
-    // ---- Start ----
-    initStreams();
-    loop();
-
-    setTimeout(() => {
-      const toast = document.getElementById('entrance-toast');
-      if (toast) toast.style.opacity = '0';
-    }, 5000);
-
-    window.addEventListener('beforeunload', () => cancelAnimationFrame(animId));
-  </script>
+        updatePhysics();
+        applyTheme();
+        animate();
+    </script>
 </body>
 </html>
