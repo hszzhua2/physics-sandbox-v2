@@ -272,7 +272,7 @@
         const branchPool = [];
         const MAX_ARCS = 12;
         const MAX_BRANCHES = 18;
-        const ARC_SEGMENTS = 40;
+        const ARC_SEGMENTS = 80;
         const TOROID_HEIGHT = 20;
         let arcLight, glowLight, fillLight;
 
@@ -430,41 +430,99 @@
             stand.position.y = 0.5;
             scene.add(stand);
 
-            // ==== Arc pool - main arcs ====
-            const arcMat = new THREE.LineBasicMaterial({
-                color: 0xcceeff,
+            // ==== Arc shaders - tapered points from thick to thin ====
+            const arcVertexShader = `
+                attribute float progress;
+                varying float vProgress;
+                void main() {
+                    vProgress = progress;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_Position = projectionMatrix * mvPosition;
+                    // Size: thick at start (progress=0), thin at end (progress=1)
+                    float size = mix(14.0, 3.0, progress);
+                    gl_PointSize = size * (200.0 / -mvPosition.z);
+                }
+            `;
+            const arcFragmentShader = `
+                varying float vProgress;
+                void main() {
+                    vec2 pt = gl_PointCoord - vec2(0.5);
+                    float dist = length(pt);
+                    if (dist > 0.5) discard;
+                    // Bright white at start, fading to blue at end
+                    vec3 startColor = vec3(0.95, 0.98, 1.0);
+                    vec3 endColor = vec3(0.25, 0.45, 0.85);
+                    vec3 color = mix(startColor, endColor, vProgress);
+                    // Soft edge
+                    float alpha = 1.0 - smoothstep(0.15, 0.5, dist);
+                    // Brighter at start
+                    alpha *= mix(1.0, 0.35, vProgress);
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `;
+            const branchVertexShader = `
+                attribute float progress;
+                varying float vProgress;
+                void main() {
+                    vProgress = progress;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_Position = projectionMatrix * mvPosition;
+                    float size = mix(8.0, 1.5, progress);
+                    gl_PointSize = size * (200.0 / -mvPosition.z);
+                }
+            `;
+            const branchFragmentShader = `
+                varying float vProgress;
+                void main() {
+                    vec2 pt = gl_PointCoord - vec2(0.5);
+                    float dist = length(pt);
+                    if (dist > 0.5) discard;
+                    vec3 startColor = vec3(0.75, 0.88, 1.0);
+                    vec3 endColor = vec3(0.2, 0.35, 0.65);
+                    vec3 color = mix(startColor, endColor, vProgress);
+                    float alpha = 1.0 - smoothstep(0.15, 0.5, dist);
+                    alpha *= mix(0.9, 0.25, vProgress);
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `;
+
+            const arcMat = new THREE.ShaderMaterial({
+                vertexShader: arcVertexShader,
+                fragmentShader: arcFragmentShader,
                 blending: THREE.AdditiveBlending,
                 transparent: true,
-                opacity: 0.9,
                 depthWrite: false
             });
 
             for (let i = 0; i < MAX_ARCS; i++) {
-                const points = new Float32Array(ARC_SEGMENTS * 3);
+                const positions = new Float32Array(ARC_SEGMENTS * 3);
+                const progress = new Float32Array(ARC_SEGMENTS);
                 const geo = new THREE.BufferGeometry();
-                geo.setAttribute('position', new THREE.BufferAttribute(points, 3));
-                const line = new THREE.Line(geo, arcMat.clone());
-                line.visible = false;
-                scene.add(line);
-                arcsPool.push(line);
+                geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geo.setAttribute('progress', new THREE.BufferAttribute(progress, 1));
+                const pts = new THREE.Points(geo, arcMat.clone());
+                pts.visible = false;
+                scene.add(pts);
+                arcsPool.push(pts);
             }
 
-            // Branch arcs (thinner, shorter)
-            const branchMat = new THREE.LineBasicMaterial({
-                color: 0x88bbff,
+            const branchMat = new THREE.ShaderMaterial({
+                vertexShader: branchVertexShader,
+                fragmentShader: branchFragmentShader,
                 blending: THREE.AdditiveBlending,
                 transparent: true,
-                opacity: 0.6,
                 depthWrite: false
             });
             for (let i = 0; i < MAX_BRANCHES; i++) {
-                const points = new Float32Array(15 * 3);
+                const positions = new Float32Array(15 * 3);
+                const progress = new Float32Array(15);
                 const geo = new THREE.BufferGeometry();
-                geo.setAttribute('position', new THREE.BufferAttribute(points, 3));
-                const line = new THREE.Line(geo, branchMat.clone());
-                line.visible = false;
-                scene.add(line);
-                branchPool.push(line);
+                geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geo.setAttribute('progress', new THREE.BufferAttribute(progress, 1));
+                const pts = new THREE.Points(geo, branchMat.clone());
+                pts.visible = false;
+                scene.add(pts);
+                branchPool.push(pts);
             }
 
             window.addEventListener('resize', onWindowResize, false);
@@ -494,25 +552,25 @@
             const activeArcCount = Math.min(MAX_ARCS, Math.floor((vout / 500) * MAX_ARCS * match * 0.8 + 1));
             const arcLengthScaler = (vout / 300) * match * 3.5;
 
-            // Dynamic lighting based on match and voltage
+            // Dynamic lighting - brighter arcs
             const flicker = 0.8 + Math.random() * 0.4;
-            arcLight.intensity = match * (vout / 300) * 12 * flicker;
-            arcLight.color.setHSL(0.58, 0.4 + match * 0.4, 0.5 + match * 0.4);
-            glowLight.intensity = 0.5 + match * 2.0;
+            arcLight.intensity = match * (vout / 300) * 20 * flicker;
+            arcLight.color.setHSL(0.58, 0.3 + match * 0.5, 0.6 + match * 0.35);
+            glowLight.intensity = 0.8 + match * 3.0;
 
             const toroidY = 1 + TOROID_HEIGHT + 1;
 
             for (let i = 0; i < MAX_ARCS; i++) {
-                const line = arcsPool[i];
+                const pts = arcsPool[i];
                 if (i >= activeArcCount || match === 0) {
-                    line.visible = false;
+                    pts.visible = false;
                     continue;
                 }
 
-                line.visible = true;
-                const positions = line.geometry.attributes.position.array;
+                pts.visible = true;
+                const positions = pts.geometry.attributes.position.array;
+                const progressArr = pts.geometry.attributes.progress.array;
 
-                // Fixed seed-like angle for each arc (smoother, less chaotic)
                 const seed = i * 2.718 + time * 0.001;
                 const startAngle = (i / MAX_ARCS) * Math.PI * 2 + smoothNoise(seed) * 0.3;
                 const startR = 5.0 + Math.random() * 0.5;
@@ -521,7 +579,6 @@
                 let currentY = toroidY + (Math.random() - 0.5) * 0.8;
                 let currentZ = Math.sin(startAngle) * startR;
 
-                // Primary direction: outward and slightly up/down
                 const baseDirX = Math.cos(startAngle);
                 const baseDirZ = Math.sin(startAngle);
                 const baseDirY = (Math.random() - 0.5) * 0.6;
@@ -533,20 +590,19 @@
                 positions[0] = currentX;
                 positions[1] = currentY;
                 positions[2] = currentZ;
+                progressArr[0] = 0.0;
 
-                const jitterScale = 1.2 + (1 - match) * 2.5; // Less jitter when matched
+                const jitterScale = 1.2 + (1 - match) * 2.5;
 
                 for (let j = 1; j < ARC_SEGMENTS; j++) {
-                    const t = j / ARC_SEGMENTS;
+                    const t = j / (ARC_SEGMENTS - 1);
                     const stepSize = (1.8 - t * 0.8) * arcLengthScaler;
 
-                    // Smooth jitter using sine combinations
                     const jSeed = seed + j * 0.5;
                     const jitterX = smoothNoise(jSeed) * jitterScale;
                     const jitterY = smoothNoise(jSeed + 10) * jitterScale;
                     const jitterZ = smoothNoise(jSeed + 20) * jitterScale;
 
-                    // Add some downward gravity effect on later segments
                     const gravity = t * t * 0.8;
 
                     currentX += (dirX + jitterX) * stepSize;
@@ -556,33 +612,30 @@
                     positions[j * 3] = currentX;
                     positions[j * 3 + 1] = currentY;
                     positions[j * 3 + 2] = currentZ;
+                    progressArr[j] = t;
                 }
 
-                line.geometry.attributes.position.needsUpdate = true;
-                // Color shift: white core when matched, blue when unmatched
-                const hue = 0.55 + (1 - match) * 0.1;
-                const sat = 0.3 + match * 0.5;
-                const light = 0.5 + match * 0.4;
-                line.material.color.setHSL(hue, sat, light);
-                line.material.opacity = 0.4 + match * 0.5;
+                pts.geometry.attributes.position.needsUpdate = true;
+                pts.geometry.attributes.progress.needsUpdate = true;
 
                 // Flicker effect
-                if (Math.random() > 0.85) line.visible = false;
+                if (Math.random() > 0.85) pts.visible = false;
             }
 
             // Update branches
             const activeBranches = Math.floor(activeArcCount * 1.5);
             for (let i = 0; i < MAX_BRANCHES; i++) {
-                const line = branchPool[i];
+                const pts = branchPool[i];
                 if (i >= activeBranches || match === 0) {
-                    line.visible = false;
+                    pts.visible = false;
                     continue;
                 }
-                line.visible = true;
-                const positions = line.geometry.attributes.position.array;
+                pts.visible = true;
+                const positions = pts.geometry.attributes.position.array;
+                const progressArr = pts.geometry.attributes.progress.array;
                 const parentArcIdx = i % activeArcCount;
                 const parentArc = arcsPool[parentArcIdx];
-                if (!parentArc.visible) { line.visible = false; continue; }
+                if (!parentArc.visible) { pts.visible = false; continue; }
 
                 const parentPos = parentArc.geometry.attributes.position.array;
                 const branchStartIdx = Math.floor(ARC_SEGMENTS * 0.3 + Math.random() * ARC_SEGMENTS * 0.4);
@@ -591,6 +644,7 @@
                 positions[0] = parentPos[startIdx * 3];
                 positions[1] = parentPos[startIdx * 3 + 1];
                 positions[2] = parentPos[startIdx * 3 + 2];
+                progressArr[0] = 0.0;
 
                 let cx = positions[0], cy = positions[1], cz = positions[2];
                 const bDirX = (Math.random() - 0.5) * 2;
@@ -598,7 +652,7 @@
                 const bDirZ = (Math.random() - 0.5) * 2;
 
                 for (let j = 1; j < 15; j++) {
-                    const t = j / 15;
+                    const t = j / 14;
                     const step = 0.6 * arcLengthScaler * (1 - t);
                     cx += (bDirX + smoothNoise(i + j * 0.7)) * step;
                     cy += (bDirY + smoothNoise(i + j * 0.7 + 5)) * step - t * t * 0.5;
@@ -606,10 +660,11 @@
                     positions[j * 3] = cx;
                     positions[j * 3 + 1] = cy;
                     positions[j * 3 + 2] = cz;
+                    progressArr[j] = t;
                 }
-                line.geometry.attributes.position.needsUpdate = true;
-                line.material.opacity = 0.2 + match * 0.3;
-                if (Math.random() > 0.8) line.visible = false;
+                pts.geometry.attributes.position.needsUpdate = true;
+                pts.geometry.attributes.progress.needsUpdate = true;
+                if (Math.random() > 0.8) pts.visible = false;
             }
         }
 
