@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黑洞吸积盘（高级模式）— 物理沙盒宇宙</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        #info {
+            position: absolute; top: 10px; left: 10px; color: #fff;
+            font-family: monospace; font-size: 12px; z-index: 100;
+            pointer-events: none;
+        }
+        /* 左侧转速控制面板 */
+        #speedControl {
+            position: absolute;
+            top: 80px;
+            left: 30px;
+            z-index: 200;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            width: 200px;
+        }
+        #speedControl input {
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        /* 右侧模式切换面板 */
+        #controls {
+            position: absolute;
+            top: 80px;
+            right: 30px;
+            z-index: 200;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        #controls button {
+            margin: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            background: #222;
+            color: #fff;
+            border: 1px solid #666;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+        #controls button.active {
+            background: #0066cc;
+            border-color: #0088ff;
+        }
+
+        /* Theme overrides */
+        [data-theme="academic"] #speedControl { background: #fff; border: 1px solid #e0e0e0; color: #1a1a2e; box-shadow: none; backdrop-filter: none; }
+        [data-theme="academic"] #controls { background: #fff; border: 1px solid #e0e0e0; color: #1a1a2e; box-shadow: none; backdrop-filter: none; }
+        [data-theme="academic"] #controls button { background: #f4f5f7; color: #1a1a2e; border-color: #e0e0e0; }
+        [data-theme="academic"] #controls button.active { background: #6b8cae; border-color: #6b8cae; color: #fff; }
+
+        [data-theme="cartoon"] #speedControl { background: rgba(254,246,228,0.92); border: 2px solid rgba(255,107,107,0.3); color: #2d3436; }
+        [data-theme="cartoon"] #controls { background: rgba(254,246,228,0.92); border: 2px solid rgba(255,107,107,0.3); color: #2d3436; }
+        [data-theme="cartoon"] #controls button { background: #fff; color: #2d3436; border-color: #ff6b6b; }
+        [data-theme="cartoon"] #controls button.active { background: #ff6b6b; border-color: #ff6b6b; color: #fff; }
+
+        [data-theme="glass"] #speedControl { background: rgba(15,17,23,0.85); border: 1px solid rgba(116,185,255,0.2); color: #e0e6ed; }
+        [data-theme="glass"] #controls { background: rgba(15,17,23,0.85); border: 1px solid rgba(116,185,255,0.2); color: #e0e6ed; }
+        [data-theme="glass"] #controls button { background: rgba(0,0,0,0.4); color: #e0e6ed; border-color: rgba(116,185,255,0.3); }
+        [data-theme="glass"] #controls button.active { background: rgba(116,185,255,0.3); border-color: #74b9ff; }
+
+        [data-theme="cyber"] #speedControl { background: rgba(10,0,20,0.9); border: 1px solid rgba(189,0,255,0.3); color: #f0e6ff; box-shadow: 0 0 20px rgba(189,0,255,0.1); }
+        [data-theme="cyber"] #controls { background: rgba(10,0,20,0.9); border: 1px solid rgba(189,0,255,0.3); color: #f0e6ff; box-shadow: 0 0 20px rgba(189,0,255,0.1); }
+        [data-theme="cyber"] #controls button { background: rgba(0,0,0,0.5); color: #f0e6ff; border-color: rgba(189,0,255,0.4); }
+        [data-theme="cyber"] #controls button.active { background: rgba(189,0,255,0.3); border-color: #bd00ff; color: #fff; text-shadow: 0 0 6px rgba(189,0,255,0.5); }
+    </style>
+</head>
+<body>
+    <div id="info">正在初始化 WebGL 与 GPGPU 计算环境...</div>
+    
+    <!-- 左侧转速调节 -->
+    <div id="speedControl" class="glass-panel">
+        <div style="font-weight:bold; margin-bottom:4px; color:inherit;">🌌 黑洞吸积盘（高级）</div>
+        粒子转速: <span id="speedValue">1.0</span>x<br>
+        <input type="range" id="speedSlider" min="0.1" max="3.0" step="0.1" value="1.0">
+    </div>
+
+    <!-- 右侧三模式切换 -->
+    <div id="controls" class="glass-panel">
+        渲染模式：<br>
+        <button id="btnParticle" class="active">纯粒子模式</button>
+        <button id="btnDoppler">多普勒效应模式</button>
+        <button id="btnLensing">引力透镜模式</button>
+    </div>
+
+    <script src="shared-theme.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GPUComputationRenderer } from 'three/addons/misc/GPUComputationRenderer.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+        PSUTheme.createSwitcher();
+        PSUTheme.createBackButton('index.html');
+
+        // 物理参数
+        const PARAMS = {
+            PARTICLE_RES: 512,
+            BH_RADIUS: 1.0,
+            CRITICAL_IMPACT: 5.2,
+            DISK_MIN: 1.5,
+            DISK_MAX: 8.0,
+            G_MASS: 2.5,
+            DOPPLER_FACTOR: 1.2,
+            SPEED_FACTOR: 1.0
+        };
+
+        let scene, camera, renderer, composer, controls;
+        let gpuCompute, posVariable, velVariable;
+        let mainDisk, topDisk, bottomDisk;
+        let lensingPass;
+
+        const MODE = {
+            PURE_PARTICLE: 0,
+            DOPPLER_ONLY: 1,
+            LENSING_DOPPLER: 2
+        };
+        let currentMode = MODE.PURE_PARTICLE;
+
+        // GPGPU 速度着色器
+        const computeVelocityShader = `
+            #define PI 3.14159265359
+            uniform float u_GM;
+            uniform float u_R;
+            uniform float u_Time;
+            uniform float u_Speed;
+
+            float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+            
+            void main() {
+                vec2 uv = gl_FragCoord.xy / resolution.xy;
+                vec4 posData = texture2D(texturePosition, uv);
+                vec4 velData = texture2D(textureVelocity, uv);
+                
+                vec3 pos = posData.xyz;
+                vec3 vel = velData.xyz;
+                
+                float r = length(pos);
+                if(r < u_R || r > 10.0) {
+                    vel = vec3(0.0);
+                } else {
+                    float vMag = sqrt(u_GM / r) * u_Speed;
+                    vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), pos));
+                    vec3 inward = -normalize(pos) * (0.03 / (r - u_R + 0.1));
+                    vec3 noiseVec = vec3(
+                        sin(pos.z * 10.0 + u_Time) * 0.02,
+                        cos(pos.x * 12.0 - u_Time) * 0.04,
+                        cos(pos.x * 10.0 + u_Time) * 0.02
+                    );
+                    vel = tangent * vMag + inward + noiseVec;
+                }
+                
+                gl_FragColor = vec4(vel, 1.0);
+            }
+        `;
+
+        // GPGPU 位置着色器（修复PI宏定义）
+        const computePositionShader = `
+            #define PI 3.14159265359
+            uniform float u_R;
+            uniform float u_DiskMin;
+            uniform float u_DiskMax;
+            
+            float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / resolution.xy;
+                vec4 posData = texture2D(texturePosition, uv);
+                vec3 pos = posData.xyz;
+                
+                vec4 velData = texture2D(textureVelocity, uv);
+                vec3 vel = velData.xyz;
+                
+                pos += vel * 0.016;
+                
+                float r = length(pos);
+                if(r < u_R || r > u_DiskMax) {
+                    float angle = hash(uv * pos.xy) * 2.0 * PI;
+                    float radius = mix(u_DiskMin, u_DiskMax, pow(hash(uv.yx), 1.5));
+                    pos = vec3(cos(angle) * radius, (hash(uv)-0.5)*0.1, sin(angle) * radius);
+                }
+                
+                gl_FragColor = vec4(pos, 1.0);
+            }
+        `;
+
+        // 粒子顶点着色器
+        const particleVertexShader = `
+            uniform sampler2D u_posTexture;
+            uniform sampler2D u_velTexture;
+            uniform vec3 u_cameraPos;
+            uniform float u_dopplerFactor;
+            uniform int u_renderMode;
+            
+            varying vec3 vColor;
+            
+            void main() {
+                vec4 posData = texture2D(u_posTexture, position.xy);
+                vec4 velData = texture2D(u_velTexture, position.xy);
+                
+                vec3 worldPos = posData.xyz;
+                vec3 vel = velData.xyz;
+                
+                vec4 mvPosition = modelViewMatrix * vec4(worldPos, 1.0);
+                gl_Position = projectionMatrix * mvPosition;
+                
+                gl_PointSize = 3.0 * (10.0 / -mvPosition.z);
+                
+                float r = length(worldPos);
+                float heat = smoothstep(8.0, 1.5, r);
+                vec3 baseColor = mix(vec3(0.8, 0.3, 0.1), vec3(1.0, 0.95, 0.8), heat);
+
+                if(u_renderMode == 0) {
+                    vColor = baseColor;
+                    return;
+                }
+
+                vec3 viewDir = normalize(u_cameraPos - worldPos);
+                vec3 velDir = normalize(vel);
+                float dopplerShift = dot(viewDir, velDir);
+                
+                float dopplerMultiplier = 1.0 + dopplerShift * u_dopplerFactor;
+                dopplerMultiplier = max(0.1, dopplerMultiplier);
+                
+                vec3 shiftColor = dopplerShift > 0.0 ? vec3(0.3, 0.7, 1.0) : vec3(1.0, 0.3, 0.2);
+                vColor = mix(baseColor, shiftColor, abs(dopplerShift) * 0.6) * dopplerMultiplier;
+            }
+        `;
+
+        const particleFragmentShader = `
+            varying vec3 vColor;
+            void main() {
+                vec2 pt = gl_PointCoord - vec2(0.5);
+                if(dot(pt, pt) > 0.25) discard;
+                float alpha = smoothstep(0.5, 0.0, length(pt));
+                gl_FragColor = vec4(vColor, alpha * 0.85);
+            }
+        `;
+
+        // 修复版引力透镜：合理阴影半径 + 全范围强扭曲
+        const LensingShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "u_aspect": { value: 1.0 },
+                "u_bhCenter": { value: new THREE.Vector2(0.5, 0.5) },
+                "u_bhRadius": { value: 0.1 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float u_aspect;
+                uniform vec2 u_bhCenter;
+                uniform float u_bhRadius;
+                varying vec2 vUv;
+
+                void main() {
+                    vec2 uv = vUv;
+                    vec2 delta = uv - u_bhCenter;
+                    delta.x *= u_aspect;
+                    float dist = length(delta);
+
+                    if(dist < u_bhRadius) {
+                        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                        return;
+                    }
+
+                    float lensingStrength = u_bhRadius * 3.0;
+                    float lensingForce = lensingStrength / sqrt(dist);
+                    vec2 offset = normalize(delta) * lensingForce;
+                    offset.x /= u_aspect;
+                    
+                    vec2 sampleUV = uv - offset * 1.2;
+                    vec4 color = texture2D(tDiffuse, sampleUV);
+
+                    float ringGlow = smoothstep(u_bhRadius * 2.5, u_bhRadius * 1.2, dist);
+                    color += vec4(1.0, 0.9, 0.7, 1.0) * ringGlow * 0.35;
+                    
+                    gl_FragColor = color;
+                }
+            `
+        };
+
+        init();
+        animate();
+        initUI();
+
+        function initUI() {
+            const slider = document.getElementById('speedSlider');
+            const value = document.getElementById('speedValue');
+            slider.addEventListener('input', () => {
+                PARAMS.SPEED_FACTOR = parseFloat(slider.value);
+                value.textContent = PARAMS.SPEED_FACTOR.toFixed(1);
+            });
+
+            const btnP = document.getElementById('btnParticle');
+            const btnD = document.getElementById('btnDoppler');
+            const btnL = document.getElementById('btnLensing');
+            const buttons = [btnP, btnD, btnL];
+            
+            function setActive(idx) {
+                buttons.forEach((b, i) => b.classList.toggle('active', i === idx));
+                currentMode = idx;
+            }
+
+            btnP.onclick = () => setActive(0);
+            btnD.onclick = () => setActive(1);
+            btnL.onclick = () => setActive(2);
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 200);
+            camera.position.set(0, 4, 14);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.maxDistance = 30;
+            controls.minDistance = 5;
+
+            initGPGPU();
+            
+            mainDisk = createParticleSystem(1.0);
+            
+            topDisk = createParticleSystem(0.6);
+            topDisk.scale.set(1.15, 0.35, 1.15);
+            topDisk.position.y = 1.8;
+            
+            bottomDisk = createParticleSystem(0.6);
+            bottomDisk.scale.set(1.15, 0.35, 1.15);
+            bottomDisk.position.y = -1.8;
+            
+            scene.add(mainDisk, topDisk, bottomDisk);
+
+            initPostProcessing();
+            lensingPass.enabled = false;
+
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('info').innerText = 
+                `粒子数: ${PARAMS.PARTICLE_RES**2} | 左侧调节转速 | 右侧切换模式`;
+        }
+
+        function initGPGPU() {
+            gpuCompute = new GPUComputationRenderer(PARAMS.PARTICLE_RES, PARAMS.PARTICLE_RES, renderer);
+            const dtPosition = gpuCompute.createTexture();
+            const dtVelocity = gpuCompute.createTexture();
+            
+            const posArray = dtPosition.image.data;
+            for (let i = 0; i < posArray.length; i += 4) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = PARAMS.DISK_MIN + Math.pow(Math.random(), 1.5) * (PARAMS.DISK_MAX - PARAMS.DISK_MIN);
+                posArray[i+0] = Math.cos(angle) * radius;
+                posArray[i+1] = (Math.random() - 0.5) * 0.12;
+                posArray[i+2] = Math.sin(angle) * radius;
+                posArray[i+3] = 1.0;
+            }
+
+            velVariable = gpuCompute.addVariable("textureVelocity", computeVelocityShader, dtVelocity);
+            posVariable = gpuCompute.addVariable("texturePosition", computePositionShader, dtPosition);
+            gpuCompute.setVariableDependencies(velVariable, [posVariable, velVariable]);
+            gpuCompute.setVariableDependencies(posVariable, [posVariable, velVariable]);
+
+            velVariable.material.uniforms.u_GM = { value: PARAMS.G_MASS };
+            velVariable.material.uniforms.u_R = { value: PARAMS.BH_RADIUS };
+            velVariable.material.uniforms.u_Time = { value: 0 };
+            velVariable.material.uniforms.u_Speed = { value: PARAMS.SPEED_FACTOR };
+            posVariable.material.uniforms.u_R = { value: PARAMS.BH_RADIUS };
+            posVariable.material.uniforms.u_DiskMin = { value: PARAMS.DISK_MIN };
+            posVariable.material.uniforms.u_DiskMax = { value: PARAMS.DISK_MAX };
+
+            const error = gpuCompute.init();
+            if (error !== null) {
+                console.error("GPGPU 初始化失败:", error);
+                document.getElementById('info').innerText = "GPGPU 初始化失败: 硬件不支持";
+            }
+        }
+
+        function createParticleSystem(alphaMul = 1.0) {
+            const geo = new THREE.BufferGeometry();
+            const uvs = new Float32Array(PARAMS.PARTICLE_RES ** 2 * 2);
+            let p = 0;
+            for(let j = 0; j < PARAMS.PARTICLE_RES; j++) {
+                for(let i = 0; i < PARAMS.PARTICLE_RES; i++) {
+                    uvs[p++] = i / (PARAMS.PARTICLE_RES - 1);
+                    uvs[p++] = j / (PARAMS.PARTICLE_RES - 1);
+                }
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(uvs, 2));
+            
+            const mat = new THREE.ShaderMaterial({
+                uniforms: {
+                    u_posTexture: { value: null },
+                    u_velTexture: { value: null },
+                    u_cameraPos: { value: new THREE.Vector3() },
+                    u_dopplerFactor: { value: PARAMS.DOPPLER_FACTOR },
+                    u_renderMode: { value: currentMode }
+                },
+                vertexShader: particleVertexShader,
+                fragmentShader: particleFragmentShader,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                transparent: true,
+                opacity: alphaMul
+            });
+            const points = new THREE.Points(geo, mat);
+            points.frustumCulled = false;
+            return points;
+        }
+
+        function initPostProcessing() {
+            composer = new EffectComposer(renderer);
+            composer.addPass(new RenderPass(scene, camera));
+            lensingPass = new ShaderPass(LensingShader);
+            lensingPass.uniforms.u_aspect.value = window.innerWidth / window.innerHeight;
+            composer.addPass(lensingPass);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+            lensingPass.uniforms.u_aspect.value = window.innerWidth / window.innerHeight;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            velVariable.material.uniforms.u_Speed.value = PARAMS.SPEED_FACTOR;
+            velVariable.material.uniforms.u_Time.value = performance.now() * 0.001;
+            gpuCompute.compute();
+
+            const texPos = gpuCompute.getCurrentRenderTarget(posVariable).texture;
+            const texVel = gpuCompute.getCurrentRenderTarget(velVariable).texture;
+            [mainDisk, topDisk, bottomDisk].forEach(disk => {
+                disk.material.uniforms.u_posTexture.value = texPos;
+                disk.material.uniforms.u_velTexture.value = texVel;
+                disk.material.uniforms.u_cameraPos.value.copy(camera.position);
+                disk.material.uniforms.u_renderMode.value = currentMode;
+            });
+
+            if(currentMode === MODE.LENSING_DOPPLER) {
+                const bhPos = new THREE.Vector3(0, 0, 0).project(camera);
+                const screenX = (bhPos.x + 1) / 2;
+                const screenY = (bhPos.y + 1) / 2;
+                
+                const dist = camera.position.length();
+                const fov = camera.fov * Math.PI / 180;
+                const visibleHeight = 2 * Math.tan(fov / 2) * dist;
+                const screenR = (PARAMS.BH_RADIUS * 2 / visibleHeight) * 0.5;
+                
+                lensingPass.uniforms.u_bhCenter.value.set(screenX, screenY);
+                lensingPass.uniforms.u_bhRadius.value = screenR;
+                lensingPass.enabled = true;
+            } else {
+                lensingPass.enabled = false;
+            }
+
+            composer.render();
+        }
+    </script>
+</body>
+</html>
