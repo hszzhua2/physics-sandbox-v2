@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>波的干涉实验 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 四种主题适配
+   ================================================================ */
+[data-theme="glass"]{
+  --w-bg:#080812;--w-bg2:#0e0e1c;--w-surface:rgba(255,255,255,0.04);--w-surface-hover:rgba(255,255,255,0.08);
+  --w-ink:#f1f5f9;--w-ink2:#cbd5e1;--w-muted:#64748b;--w-rule:rgba(255,255,255,0.07);
+  --w-accent:#74b9ff;--w-accent2:#a29bfe;--w-accent3:#34d399;--w-accent4:#fbbf24;
+  --w-card-bg:rgba(255,255,255,0.03);--w-card-border:rgba(255,255,255,0.06);
+  --w-card-shadow:0 6px 24px rgba(0,0,0,0.4);--w-glow:none;
+  --w-canvas-bg:#040410;--w-param-bg:rgba(255,255,255,0.03);--w-param-border:rgba(255,255,255,0.06);
+  --w-output-bg:rgba(0,0,0,0.3);--w-output-border:rgba(255,255,255,0.06);
+  --w-formula-bg:rgba(116,185,255,0.05);--w-formula-border:rgba(116,185,255,0.12);
+  --w-scrollbar-thumb:rgba(116,185,255,0.3);--w-wave-pos:#74b9ff;--w-wave-neg:#1e293b;
+}
+[data-theme="cyber"]{
+  --w-bg:#040410;--w-bg2:#08081a;--w-surface:rgba(0,243,255,0.03);--w-surface-hover:rgba(0,243,255,0.06);
+  --w-ink:#e0f7fa;--w-ink2:#b2ebf2;--w-muted:#4dd0e1;--w-rule:rgba(0,243,255,0.1);
+  --w-accent:#00f3ff;--w-accent2:#ff00ea;--w-accent3:#39ff14;--w-accent4:#ffb800;
+  --w-card-bg:rgba(0,243,255,0.02);--w-card-border:rgba(0,243,255,0.12);
+  --w-card-shadow:0 0 16px rgba(0,243,255,0.05);--w-glow:0 0 8px rgba(0,243,255,0.25);
+  --w-canvas-bg:#020208;--w-param-bg:rgba(0,243,255,0.02);--w-param-border:rgba(0,243,255,0.1);
+  --w-output-bg:rgba(0,0,0,0.4);--w-output-border:rgba(0,243,255,0.08);
+  --w-formula-bg:rgba(0,243,255,0.04);--w-formula-border:rgba(0,243,255,0.15);
+  --w-scrollbar-thumb:rgba(0,243,255,0.4);--w-wave-pos:#00f3ff;--w-wave-neg:#0a0a1a;
+}
+[data-theme="cartoon"]{
+  --w-bg:#fef6e4;--w-bg2:#fff8f0;--w-surface:rgba(255,255,255,0.7);--w-surface-hover:rgba(255,255,255,0.9);
+  --w-ink:#2d3436;--w-ink2:#4a4a4a;--w-muted:#7a7a7a;--w-rule:rgba(0,0,0,0.08);
+  --w-accent:#ff6b6b;--w-accent2:#4ecdc4;--w-accent3:#ffe66d;--w-accent4:#a29bfe;
+  --w-card-bg:rgba(255,255,255,0.8);--w-card-border:rgba(0,0,0,0.1);
+  --w-card-shadow:0 6px 24px rgba(0,0,0,0.08);--w-glow:none;
+  --w-canvas-bg:#1a1a2e;--w-param-bg:rgba(255,255,255,0.5);--w-param-border:rgba(0,0,0,0.1);
+  --w-output-bg:rgba(255,255,255,0.6);--w-output-border:rgba(0,0,0,0.08);
+  --w-formula-bg:rgba(255,107,107,0.05);--w-formula-border:rgba(255,107,107,0.15);
+  --w-scrollbar-thumb:rgba(0,0,0,0.15);--w-wave-pos:#ff6b6b;--w-wave-neg:#0f0f1a;
+}
+[data-theme="academic"]{
+  --w-bg:#f8f9fa;--w-bg2:#f1f3f5;--w-surface:rgba(255,255,255,0.9);--w-surface-hover:#f0f0f0;
+  --w-ink:#1a1a2e;--w-ink2:#3d3d5c;--w-muted:#7a7a8a;--w-rule:#e0e0e0;
+  --w-accent:#6b8cae;--w-accent2:#8a7ca8;--w-accent3:#c4956a;--w-accent4:#6a9e8a;
+  --w-card-bg:#ffffff;--w-card-border:#e0e0e0;
+  --w-card-shadow:none;--w-glow:none;
+  --w-canvas-bg:#ffffff;--w-param-bg:#f8f9fa;--w-param-border:#e0e0e0;
+  --w-output-bg:#f4f5f7;--w-output-border:#e0e0e0;
+  --w-formula-bg:rgba(107,140,174,0.04);--w-formula-border:rgba(107,140,174,0.2);
+  --w-scrollbar-thumb:#d0d0d0;--w-wave-pos:#6b8cae;--w-wave-neg:#e8eaed;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--w-bg);color:var(--w-ink);line-height:1.6;overflow-x:hidden;min-height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--w-bg)}
+::-webkit-scrollbar-thumb{background:var(--w-scrollbar-thumb);border-radius:999px}
+
+/* TOP BAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--w-bg2);border-bottom:1px solid var(--w-rule);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background-color .5s ease,border-color .4s ease}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-logo{font-weight:700;font-size:1.05rem;letter-spacing:1px;text-decoration:none;color:var(--w-ink)}
+.topbar-title{font-size:0.85rem;color:var(--w-muted);font-weight:400}
+
+[data-theme="academic"] .topbar{background:#fff;border-bottom:1px solid #e0e0e0;backdrop-filter:none}
+[data-theme="cartoon"] .topbar{background:rgba(255,248,240,0.95);border-bottom:2px solid rgba(255,180,100,0.2)}
+
+/* LAYOUT */
+.app{padding-top:56px;padding-bottom:64px;display:flex;height:calc(100vh - 56px - 64px)}
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.side-panel{width:380px;min-width:340px;border-left:1px solid var(--w-rule);background:var(--w-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+
+[data-theme="academic"] .side-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .side-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+
+/* CANVAS */
+.canvas-container{flex:1;position:relative;background:var(--w-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--w-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--w-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;font-size:0.82rem;color:var(--w-muted);opacity:0.5;text-align:center;font-family:monospace;letter-spacing:1px}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+
+/* BOTTOM BAR */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 24px;background:var(--w-bg2);border-top:1px solid var(--w-rule);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(0,0,0,0.15);transition:background-color .5s ease,border-color .4s ease}
+.sim-btn{padding:10px 24px;border:1px solid var(--w-rule);background:var(--w-surface);color:var(--w-ink);border-radius:10px;font-family:var(--font-main);font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease}
+.sim-btn:hover{background:var(--w-surface-hover);border-color:var(--w-accent)}
+.sim-btn.primary{background:var(--w-accent);color:#fff;border-color:var(--w-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .bottom-bar{background:#fff;border-top:1px solid #e0e0e0;backdrop-filter:none;box-shadow:none}
+[data-theme="academic"] .sim-btn{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:4px}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae}
+[data-theme="cartoon"] .bottom-bar{background:rgba(255,248,240,0.95);border-top:2px solid rgba(255,180,100,0.2)}
+
+/* SIDE PANEL SECTIONS */
+.side-section{padding:20px 22px;border-bottom:1px solid var(--w-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--w-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-label::before{content:'';width:3px;height:14px;background:var(--w-accent);border-radius:2px}
+
+/* PARAMS */
+.param-group{margin-bottom:16px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--w-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--w-accent);font-weight:400;min-width:55px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--w-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--w-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--w-param-border);background:var(--w-param-bg);color:var(--w-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--w-accent);color:var(--w-accent);background:var(--w-formula-bg)}
+
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+
+/* OUTPUT */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--w-output-bg);border:1px solid var(--w-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.15rem;font-weight:700;color:var(--w-accent);line-height:1.2;transition:color .4s ease}
+.output-num.b{color:var(--w-accent2)}.output-num.c{color:var(--w-accent3)}.output-num.d{color:var(--w-accent4)}
+.output-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--w-muted);margin-top:2px}
+
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+
+/* CROSS-SECTION */
+.cross-container{background:var(--w-output-bg);border:1px solid var(--w-output-border);border-radius:12px;overflow:hidden;position:relative;transition:background-color .5s ease,border-color .4s ease}
+.cross-container canvas{display:block;width:100%;height:160px}
+.cross-label{position:absolute;top:8px;left:10px;font-family:monospace;font-size:0.65rem;color:var(--w-muted);letter-spacing:1px;text-transform:uppercase;pointer-events:none}
+
+[data-theme="academic"] .cross-container{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+
+/* FORMULA */
+.formula-block{background:var(--w-formula-bg);border:1px solid var(--w-formula-border);border-radius:12px;padding:16px 18px;margin-bottom:14px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--w-ink);margin-bottom:8px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.8rem;color:var(--w-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.78rem;color:var(--w-muted);margin-top:8px;line-height:1.6}
+.formula-desc strong{color:var(--w-ink2)}
+.formula-note{font-size:0.72rem;color:var(--w-accent3);margin-top:6px;font-style:italic}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+
+/* MODE INDICATOR */
+.mode-indicator{display:flex;gap:6px;margin-top:10px}
+.mode-btn{flex:1;padding:6px;border:1px solid var(--w-param-border);background:var(--w-param-bg);color:var(--w-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--w-accent);color:var(--w-accent);background:var(--w-formula-bg)}
+
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+
+/* RESPONSIVE */
+@media(max-width:900px){.app{flex-direction:column}.side-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--w-rule);max-height:50vh}}
+@media(max-width:600px){.topbar{padding:10px 14px}.topbar-title{display:none}.sim-btn{padding:8px 16px;font-size:0.78rem}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="topbar-logo" href="index.html">砰！粒子！</a>
+    <span class="topbar-title">/ 波的干涉实验</span>
+  </div>
+  <div class="topbar-right">
+    <!-- Theme switcher & back button will be injected by shared-theme.js -->
+  </div>
+</header>
+
+<div class="app">
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeTime">t = 0.00</span>
+        <span class="overlay-badge" id="badgeMode">双缝干涉</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">点击画布放置或拖动波源</div>
+    </div>
+  </div>
+
+  <aside class="side-panel">
+    <!-- Parameters -->
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">波长 λ</span><span class="param-value" id="valWavelength">40 px</span></div>
+        <input type="range" id="sliderWavelength" min="10" max="100" value="40" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">频率 f</span><span class="param-value" id="valFreq">1.0 Hz</span></div>
+        <input type="range" id="sliderFreq" min="1" max="50" value="10" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">振幅 A</span><span class="param-value" id="valAmp">1.0</span></div>
+        <input type="range" id="sliderAmp" min="1" max="20" value="10" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">衰减系数</span><span class="param-value" id="valDecay">0.003</span></div>
+        <input type="range" id="sliderDecay" min="0" max="20" value="3" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">波速 v</span><span class="param-value" id="valSpeed">40 px/s</span></div>
+        <input type="range" id="sliderSpeed" min="5" max="100" value="40" step="1">
+      </div>
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="classic">&#127760; 经典双缝</button>
+        <button class="preset-btn" data-preset="close">&#128256; 窄缝衍射</button>
+        <button class="preset-btn" data-preset="distant">&#128507; 远场干涉</button>
+        <button class="preset-btn" data-preset="beat">&#127925; 拍频</button>
+      </div>
+    </div>
+
+    <!-- Mode -->
+    <div class="side-section">
+      <div class="section-label">干涉模式</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-mode="double">双缝干涉</button>
+        <button class="mode-btn" data-mode="multi">多源阵列</button>
+        <button class="mode-btn" data-mode="beat">拍频效应</button>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="side-section">
+      <div class="section-label">实时输出</div>
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num" id="outLambda">40</div><div class="output-label">λ (px)</div></div>
+        <div class="output-card"><div class="output-num b" id="outFringe">--</div><div class="output-label">条纹间距</div></div>
+        <div class="output-card"><div class="output-num c" id="outSources">2</div><div class="output-label">波源数</div></div>
+        <div class="output-card"><div class="output-num d" id="outMaxAmp">2.00</div><div class="output-label">最大振幅</div></div>
+      </div>
+    </div>
+
+    <!-- Cross Section -->
+    <div class="side-section">
+      <div class="section-label">横截面波形</div>
+      <div class="cross-container">
+        <span class="cross-label">x 轴振幅分布</span>
+        <canvas id="crossCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Formulas -->
+    <div class="side-section">
+      <div class="section-label">公式讲解</div>
+      <div class="formula-block">
+        <div class="formula-title">波动方程</div>
+        <div class="formula-expr">ψ(r, t) = A / √r · cos(kr - ωt + φ)
+
+其中:
+  k = 2π / λ  (波数)
+  ω = 2πf     (角频率)
+  r = √((x-x₀)² + (y-y₀)²)  (到波源距离)</div>
+        <div class="formula-desc"><strong>A</strong> 为振幅，<strong>λ</strong> 为波长，<strong>f</strong> 为频率。波从点源以圆形波前向外传播，振幅随 1/√r 衰减（二维波的几何衰减）。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">叠加原理与干涉</div>
+        <div class="formula-expr">ψ<sub>total</sub> = ψ₁ + ψ₂ + ... + ψ<sub>n</sub>
+
+双源干涉:
+ψ<sub>total</sub> = A₁/√r₁ cos(kr₁-ωt)
+           + A₂/√r₂ cos(kr₂-ωt)
+
+合成振幅:
+A<sub>total</sub> = √(A₁² + A₂² + 2A₁A₂cosΔφ)
+
+其中 Δφ = k(r₁ - r₂) 为相位差</div>
+        <div class="formula-desc">当 Δφ = 2nπ 时，两波<strong>相长干涉</strong>（亮纹）；当 Δφ = (2n+1)π 时，<strong>相消干涉</strong>（暗纹）。这就是明暗交替的干涉条纹的成因。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">条纹间距公式</div>
+        <div class="formula-expr">Δy = λD / d
+
+λ = 波长
+D = 屏到波源的距离
+d = 两波源间距</div>
+        <div class="formula-desc">条纹间距与波长成正比，与波源间距成反比。<strong>红光</strong>（长波长）的条纹比<strong>蓝光</strong>（短波长）更宽，这正是白光干涉呈彩色条纹的原因。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">拍频效应</div>
+        <div class="formula-expr">两个频率相近的波叠加:
+ψ = A cos(ω₁t) + A cos(ω₂t)
+    = 2A cos(Δωt/2) cos(ω<sub>avg</sub>t)
+
+拍频: f<sub>beat</sub> = |f₁ - f₂|</div>
+        <div class="formula-desc"><strong>拍频</strong>是两个频率略有不同的波叠加后产生的振幅周期性变化。拍频等于两波频率之差。切换到「拍频效应」模式可实时观察此现象。</div>
+        <div class="formula-note">⚠ 本模拟中波的传播速度 v = f·λ，改变频率会自动调整波长以维持波速恒定（或反之，取决于当前锁定模式）。</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<nav class="bottom-bar">
+  <button class="sim-btn primary" id="btnPlay">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+    开始
+  </button>
+  <button class="sim-btn" id="btnPause">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+    暂停
+  </button>
+  <button class="sim-btn" id="btnReset">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    重置
+  </button>
+</nav>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   STATE
+   ================================================================ */
+var state = {
+  wavelength: 40,
+  frequency: 1.0,
+  amplitude: 1.0,
+  decay: 0.003,
+  speed: 40,
+  time: 0,
+  running: false,
+  mode: 'double',
+  sources: [],
+};
+
+/* ================================================================
+   DOM
+   ================================================================ */
+var simCanvas = document.getElementById('simCanvas');
+var ctx = simCanvas.getContext('2d');
+var crossCanvas = document.getElementById('crossCanvas');
+var crossCtx = crossCanvas.getContext('2d');
+var html = document.documentElement;
+
+var sliders = {
+  wavelength: document.getElementById('sliderWavelength'),
+  freq: document.getElementById('sliderFreq'),
+  amp: document.getElementById('sliderAmp'),
+  decay: document.getElementById('sliderDecay'),
+  speed: document.getElementById('sliderSpeed'),
+};
+var vals = {
+  wavelength: document.getElementById('valWavelength'),
+  freq: document.getElementById('valFreq'),
+  amp: document.getElementById('valAmp'),
+  decay: document.getElementById('valDecay'),
+  speed: document.getElementById('valSpeed'),
+};
+var outs = {
+  lambda: document.getElementById('outLambda'),
+  fringe: document.getElementById('outFringe'),
+  sources: document.getElementById('outSources'),
+  maxAmp: document.getElementById('outMaxAmp'),
+};
+var badgeFPS = document.getElementById('badgeFPS');
+var badgeTime = document.getElementById('badgeTime');
+var badgeMode = document.getElementById('badgeMode');
+var canvasHint = document.getElementById('canvasHint');
+
+/* ================================================================
+   THEME SYNC - 响应主题变化重绘
+   ================================================================ */
+var themeObs = new MutationObserver(function(){ drawSim(); drawCrossSection(); });
+themeObs.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ================================================================
+   RESIZE
+   ================================================================ */
+function resizeAll(){
+  var sc = simCanvas.parentElement;
+  simCanvas.width = sc.clientWidth * (window.devicePixelRatio||1);
+  simCanvas.height = sc.clientHeight * (window.devicePixelRatio||1);
+  simCanvas.style.width = sc.clientWidth+'px';
+  simCanvas.style.height = sc.clientHeight+'px';
+  ctx.setTransform(window.devicePixelRatio||1,0,0,window.devicePixelRatio||1,0,0);
+  var pc = crossCanvas.parentElement;
+  crossCanvas.width = pc.clientWidth * (window.devicePixelRatio||1);
+  crossCanvas.height = 160 * (window.devicePixelRatio||1);
+  crossCanvas.style.width = pc.clientWidth+'px';
+  crossCanvas.style.height = '160px';
+  crossCtx.setTransform(window.devicePixelRatio||1,0,0,window.devicePixelRatio||1,0,0);
+  initSources();
+}
+window.addEventListener('resize', resizeAll);
+
+/* ================================================================
+   SOURCE INITIALIZATION
+   ================================================================ */
+function initSources(){
+  var w = simCanvas.clientWidth, h = simCanvas.clientHeight;
+  var cx = w/2, cy = h/2;
+  state.sources = [];
+  if(state.mode === 'double'){
+    var sep = Math.max(20, state.wavelength * 3);
+    state.sources.push({x: cx - sep/2, y: cy});
+    state.sources.push({x: cx + sep/2, y: cy});
+  } else if(state.mode === 'multi'){
+    var n = 5;
+    var totalW = state.wavelength * 4 * (n-1);
+    for(var i=0;i<n;i++){
+      state.sources.push({x: cx - totalW/2 + i * state.wavelength * 4, y: cy});
+    }
+  } else if(state.mode === 'beat'){
+    state.sources.push({x: cx - 80, y: cy});
+    state.sources.push({x: cx + 80, y: cy});
+  }
+  outs.sources.textContent = state.sources.length;
+}
+
+/* ================================================================
+   SLIDER SYNC
+   ================================================================ */
+function syncSliders(){
+  state.wavelength = +sliders.wavelength.value;
+  state.frequency = +sliders.freq.value / 10;
+  state.amplitude = +sliders.amp.value / 10;
+  state.decay = +sliders.decay.value / 1000;
+  state.speed = +sliders.speed.value;
+  vals.wavelength.textContent = state.wavelength+' px';
+  vals.freq.textContent = state.frequency.toFixed(1)+' Hz';
+  vals.amp.textContent = state.amplitude.toFixed(1);
+  vals.decay.textContent = state.decay.toFixed(3);
+  vals.speed.textContent = state.speed+' px/s';
+  outs.lambda.textContent = state.wavelength;
+}
+Object.keys(sliders).forEach(function(k){
+  sliders[k].addEventListener('input', function(){ syncSliders(); });
+});
+
+/* ================================================================
+   MODE SWITCH
+   ================================================================ */
+document.querySelectorAll('.mode-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.mode-btn').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    badgeMode.textContent = btn.textContent;
+    initSources();
+    if(state.mode === 'beat'){
+      sliders.freq.value = 15;
+      syncSliders();
+    }
+  });
+});
+
+/* ================================================================
+   PRESETS
+   ================================================================ */
+document.querySelectorAll('.preset-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var p = btn.dataset.preset;
+    if(p==='classic'){sliders.wavelength.value=40;sliders.freq.value=10;sliders.amp.value=10;sliders.decay.value=3;sliders.speed.value=40;state.mode='double';}
+    if(p==='close'){sliders.wavelength.value=20;sliders.freq.value=10;sliders.amp.value=12;sliders.decay.value=2;sliders.speed.value=40;state.mode='double';}
+    if(p==='distant'){sliders.wavelength.value=60;sliders.freq.value=8;sliders.amp.value=10;sliders.decay.value=1;sliders.speed.value=60;state.mode='double';}
+    if(p==='beat'){sliders.wavelength.value=35;sliders.freq.value=15;sliders.amp.value=10;sliders.decay.value=2;sliders.speed.value=40;state.mode='beat';}
+    syncSliders();
+    document.querySelectorAll('.mode-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.mode === state.mode); });
+    badgeMode.textContent = document.querySelector('.mode-btn[data-mode="'+state.mode+'"]').textContent;
+    initSources();
+    state.time = 0;
+  });
+});
+
+/* ================================================================
+   CANVAS CLICK - Add / Drag source
+   ================================================================ */
+var dragging = null;
+simCanvas.addEventListener('mousedown', function(e){
+  var rect = simCanvas.getBoundingClientRect();
+  var mx = e.clientX - rect.left;
+  var my = e.clientY - rect.top;
+  for(var i=0;i<state.sources.length;i++){
+    var dx = mx - state.sources[i].x;
+    var dy = my - state.sources[i].y;
+    if(Math.sqrt(dx*dx+dy*dy)<15){
+      dragging = i;
+      return;
+    }
+  }
+  if(state.sources.length < 8){
+    state.sources.push({x: mx, y: my});
+    outs.sources.textContent = state.sources.length;
+  }
+});
+simCanvas.addEventListener('mousemove', function(e){
+  if(dragging !== null){
+    var rect = simCanvas.getBoundingClientRect();
+    state.sources[dragging].x = e.clientX - rect.left;
+    state.sources[dragging].y = e.clientY - rect.top;
+  }
+});
+simCanvas.addEventListener('mouseup', function(){ dragging = null; });
+simCanvas.addEventListener('mouseleave', function(){ dragging = null; });
+
+/* ================================================================
+   WAVE COMPUTATION
+   ================================================================ */
+function computeWaveAt(px, py){
+  var total = 0;
+  var k = 2 * Math.PI / state.wavelength;
+  var omega = 2 * Math.PI * state.frequency;
+  var A = state.amplitude;
+  var decayRate = state.decay;
+
+  for(var i=0;i<state.sources.length;i++){
+    var sx = state.sources[i].x;
+    var sy = state.sources[i].y;
+    var dx = px - sx;
+    var dy = py - sy;
+    var r = Math.sqrt(dx*dx + dy*dy);
+    if(r < 2) r = 2;
+
+    var amp = A / Math.sqrt(r);
+    var decayFactor = Math.exp(-decayRate * r);
+    var localFreq = state.frequency;
+    if(state.mode === 'beat' && i % 2 === 1){
+      localFreq = state.frequency * 1.15;
+    }
+    var localOmega = 2 * Math.PI * localFreq;
+    total += amp * decayFactor * Math.cos(k * r - localOmega * state.time);
+  }
+  return total;
+}
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+function getCSSVar(name){
+  return getComputedStyle(html).getPropertyValue(name).trim();
+}
+
+var offscreenCanvas = null;
+var offscreenCtx = null;
+var RENDER_SCALE = 3;
+
+function drawSim(){
+  var w = simCanvas.clientWidth, h = simCanvas.clientHeight;
+  var rw = Math.floor(w / RENDER_SCALE);
+  var rh = Math.floor(h / RENDER_SCALE);
+
+  if(!offscreenCanvas || offscreenCanvas.width !== rw || offscreenCanvas.height !== rh){
+    offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = rw;
+    offscreenCanvas.height = rh;
+    offscreenCtx = offscreenCanvas.getContext('2d');
+  }
+
+  var imageData = offscreenCtx.createImageData(rw, rh);
+  var data = imageData.data;
+  var maxAmp = state.amplitude * state.sources.length;
+  if(maxAmp < 0.01) maxAmp = 1;
+  var invMaxAmp = 1 / maxAmp;
+
+  var posColor = getCSSVar('--w-wave-pos');
+  var negColor = getCSSVar('--w-wave-neg');
+
+  function hexToRGB(hex){
+    hex = hex.replace('#','');
+    if(hex.length===3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
+  }
+  var posRGB = hexToRGB(posColor);
+  var negRGB = hexToRGB(negColor);
+
+  for(var py=0; py<rh; py++){
+    for(var px=0; px<rw; px++){
+      var val = computeWaveAt(px * RENDER_SCALE, py * RENDER_SCALE);
+      var norm = val * invMaxAmp;
+      norm = Math.max(-1, Math.min(1, norm));
+
+      var idx = (py * rw + px) * 4;
+      var r, g, b;
+      if(norm >= 0){
+        r = negRGB[0] + (posRGB[0] - negRGB[0]) * norm;
+        g = negRGB[1] + (posRGB[1] - negRGB[1]) * norm;
+        b = negRGB[2] + (posRGB[2] - negRGB[2]) * norm;
+      } else {
+        var t = -norm;
+        r = negRGB[0] * (1 - t * 0.5);
+        g = negRGB[1] * (1 - t * 0.5);
+        b = negRGB[2] * (1 - t * 0.5);
+      }
+      data[idx]   = r;
+      data[idx+1] = g;
+      data[idx+2] = b;
+      data[idx+3] = 255;
+    }
+  }
+
+  offscreenCtx.putImageData(imageData, 0, 0);
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(offscreenCanvas, 0, 0, w, h);
+
+  var accentStr = getCSSVar('--w-accent');
+  for(var i=0;i<state.sources.length;i++){
+    var s = state.sources[i];
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, 14, 0, Math.PI*2);
+    ctx.fillStyle = accentStr;
+    ctx.globalAlpha = 0.15 + 0.1 * Math.sin(state.time * 3);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, 5, 0, Math.PI*2);
+    ctx.fillStyle = accentStr;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('S'+(i+1), s.x, s.y - 12);
+  }
+
+  var cy = h / 2;
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, cy);
+  ctx.lineTo(w, cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawCrossSection(){
+  var w = crossCanvas.clientWidth, h = 160;
+  var simW = simCanvas.clientWidth;
+  var midY = simCanvas.clientHeight / 2;
+
+  crossCtx.fillStyle = getCSSVar('--w-output-bg');
+  crossCtx.fillRect(0,0,w,h);
+
+  var accent = getCSSVar('--w-accent');
+  var accent2 = getCSSVar('--w-accent2');
+  var rule = getCSSVar('--w-rule');
+
+  crossCtx.strokeStyle = rule;
+  crossCtx.lineWidth = 0.5;
+  crossCtx.beginPath();
+  crossCtx.moveTo(0, h/2);
+  crossCtx.lineTo(w, h/2);
+  crossCtx.stroke();
+
+  crossCtx.beginPath();
+  var maxAmp = state.amplitude * state.sources.length;
+  if(maxAmp < 0.01) maxAmp = 1;
+
+  for(var px=0; px<w; px++){
+    var simX = (px / w) * simW;
+    var val = computeWaveAt(simX, midY);
+    var norm = val / maxAmp;
+    var y = h/2 - norm * (h/2 - 10);
+    if(px === 0) crossCtx.moveTo(px, y);
+    else crossCtx.lineTo(px, y);
+  }
+  crossCtx.strokeStyle = accent;
+  crossCtx.lineWidth = 1.5;
+  crossCtx.stroke();
+
+  crossCtx.setLineDash([3,3]);
+  crossCtx.strokeStyle = accent2;
+  crossCtx.lineWidth = 0.8;
+  crossCtx.globalAlpha = 0.5;
+  crossCtx.beginPath();
+  crossCtx.moveTo(0, 10);
+  crossCtx.lineTo(w, 10);
+  crossCtx.stroke();
+  crossCtx.beginPath();
+  crossCtx.moveTo(0, h-10);
+  crossCtx.lineTo(w, h-10);
+  crossCtx.stroke();
+  crossCtx.globalAlpha = 1;
+  crossCtx.setLineDash([]);
+
+  for(var i=0;i<state.sources.length;i++){
+    var sx = (state.sources[i].x / simW) * w;
+    if(sx >= 0 && sx <= w){
+      crossCtx.beginPath();
+      crossCtx.moveTo(sx, 0);
+      crossCtx.lineTo(sx, h);
+      crossCtx.strokeStyle = accent;
+      crossCtx.lineWidth = 0.5;
+      crossCtx.globalAlpha = 0.3;
+      crossCtx.stroke();
+      crossCtx.globalAlpha = 1;
+    }
+  }
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+document.getElementById('btnPlay').addEventListener('click', function(){ state.running=true; canvasHint.style.display='none'; });
+document.getElementById('btnPause').addEventListener('click', function(){ state.running=false; });
+document.getElementById('btnReset').addEventListener('click', function(){ state.time=0; state.running=false; initSources(); syncSliders(); });
+
+/* ================================================================
+   MAIN LOOP
+   ================================================================ */
+var frameCount=0, lastFpsTime=performance.now(), fps=60;
+var DT = 0.05;
+
+function mainLoop(){
+  if(state.running){
+    state.time += DT;
+    badgeTime.textContent = 't = '+state.time.toFixed(2);
+  }
+
+  drawSim();
+  drawCrossSection();
+
+  if(state.sources.length >= 2 && state.mode !== 'beat'){
+    var d = 0;
+    for(var i=1;i<state.sources.length;i++){
+      var dx = state.sources[i].x - state.sources[0].x;
+      var dy = state.sources[i].y - state.sources[0].y;
+      var dist = Math.sqrt(dx*dx+dy*dy);
+      if(d===0 || dist < d) d = dist;
+    }
+    var D = simCanvas.clientHeight / 2;
+    var fringe = d > 0 ? (state.wavelength * D / d) : 0;
+    outs.fringe.textContent = fringe > 0 ? fringe.toFixed(1)+' px' : '--';
+  } else {
+    outs.fringe.textContent = '--';
+  }
+  outs.maxAmp.textContent = (state.amplitude * Math.min(state.sources.length, 4)).toFixed(2);
+
+  frameCount++;
+  var now = performance.now();
+  if(now-lastFpsTime>=1000){
+    fps=frameCount; frameCount=0; lastFpsTime=now;
+    badgeFPS.textContent = fps+' FPS';
+  }
+
+  requestAnimationFrame(mainLoop);
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+PSUTheme.createSwitcher();
+PSUTheme.createBackButton('index.html');
+
+syncSliders();
+resizeAll();
+requestAnimationFrame(mainLoop);
+
+})();
+</script>
+</body>
+</html>
