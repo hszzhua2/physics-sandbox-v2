@@ -81,11 +81,23 @@
     [data-theme="academic"] .phase-container { background: #f4f5f7; border-color: #e0e0e0; }
     [data-theme="academic"] .formula-block { background: #f8f9fa; border-color: #e0e0e0; }
     [data-theme="academic"] .formula-expr { color: #4a6a8a; }
+    [data-theme="academic"] #theory-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
 
     #ui-panel::-webkit-scrollbar { width: 5px; }
+    #theory-panel::-webkit-scrollbar { width: 5px; }
+    [data-theme="cartoon"] #theory-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+    [data-theme="glass"] #theory-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    [data-theme="cyber"] #theory-panel::-webkit-scrollbar-thumb { background: rgba(189,0,255,0.3); border-radius: 3px; }
+    [data-theme="academic"] #theory-panel::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 0; }
     [data-theme="cartoon"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
     [data-theme="glass"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
     [data-theme="cyber"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(189,0,255,0.3); border-radius: 3px; }
+
+    /* Right-side theory panel */
+    #theory-panel {
+      position: absolute; top: 80px; right: 30px; width: 340px; padding: 20px;
+      z-index: 10; max-height: 85vh; overflow-y: auto;
+    }
 
     /* Ideal mode switch */
     #ideal-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(128,128,128,0.2); border-radius: 26px; transition: .3s; }
@@ -139,8 +151,8 @@
       <input type="range" id="slider-theta2" min="-180" max="180" value="90" step="1">
     </div>
     <div class="slider-group">
-      <label><span>重力加速度 (g)</span><span id="val-g" class="val-display">9.81 m/s²</span></label>
-      <input type="range" id="slider-g" min="1" max="200" value="98" step="1">
+      <label><span>重力加速度 (g)</span><span id="val-g" class="val-display">0.00 m/s²</span></label>
+      <input type="range" id="slider-g" min="0" max="200" value="0" step="1">
     </div>
     <div class="slider-group">
       <label><span>阻尼系数</span><span id="val-damp" class="val-display">0.000</span></label>
@@ -200,13 +212,6 @@
       </div>
     </div>
 
-    <!-- 相空间 -->
-    <div class="section-label">相空间轨迹</div>
-    <div class="phase-container">
-      <span class="phase-label">θ₁ vs θ₂</span>
-      <canvas id="phase-canvas"></canvas>
-    </div>
-
     <!-- 预设 -->
     <div class="param-presets">
       <button class="preset-btn" onclick="applyPreset('chaos')">⚡ 极度混沌</button>
@@ -215,7 +220,22 @@
       <button class="preset-btn" onclick="applyPreset('heavy')">💪 重摆</button>
     </div>
 
-    <!-- 公式讲解 -->
+    <!-- 控制按钮 -->
+    <div class="btn-row">
+      <button class="theme-btn" onclick="releaseAll()">释放</button>
+      <button class="theme-btn" onclick="resetSimulation()">重置</button>
+      <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
+    </div>
+  </div>
+
+  <!-- Right-side Theory Panel -->
+  <div id="theory-panel" class="glass-panel">
+    <div class="section-label">相空间轨迹</div>
+    <div class="phase-container">
+      <span class="phase-label">θ₁ vs θ₂</span>
+      <canvas id="phase-canvas"></canvas>
+    </div>
+
     <div class="section-label">公式讲解</div>
     <div class="formula-block">
       <div class="formula-title">拉格朗日量 (Lagrangian)</div>
@@ -227,27 +247,20 @@ T = ½(m₁+m₂)L₁²θ̇₁²
 
 V = −(m₁+m₂)gL₁cosθ₁
   − m₂gL₂cosθ₂</div>
-      <div class="formula-desc"><strong>T</strong> 为系统动能，<strong>V</strong> 为重力势能。双摆系统的拉格朗日量是两个广义坐标 θ₁ 和 θ₂ 及其时间导数的函数。</div>
+      <div class="formula-desc"><strong>T</strong> 为系统动能，<strong>V</strong> 为重力势能。</div>
     </div>
     <div class="formula-block">
       <div class="formula-title">运动方程 (Euler-Lagrange)</div>
       <div class="formula-expr">d/dt(∂L/∂θ̇ᵢ) − ∂L/∂θᵢ = 0
 
 展开后得到两个耦合二阶非线性微分方程，其中 Δ = θ₁ − θ₂。</div>
-      <div class="formula-desc">这两个方程是<strong>强耦合</strong>的 — θ₁ 的加速度依赖于 θ₂ 的状态，反之亦然。这正是混沌行为的根源。</div>
+      <div class="formula-desc">这两个方程是<strong>强耦合</strong>的 — 这正是混沌行为的根源。</div>
     </div>
     <div class="formula-block">
       <div class="formula-title">数值求解：Verlet + 约束迭代</div>
-      <div class="formula-expr">本模拟使用 Velocity Verlet 积分 + 距离约束迭代，具有 O(h²) 精度。每帧进行 10 次距离约束松弛，保证链式结构稳定。</div>
-      <div class="formula-desc">即使使用高精度数值方法，混沌系统的长期预测仍然是不可行的 —— 这是确定性混沌的本质特征。</div>
+      <div class="formula-expr">本模拟使用 Velocity Verlet 积分 + 距离约束迭代，具有 O(h²) 精度。每帧进行 10 次距离约束松弛。</div>
+      <div class="formula-desc">即使使用高精度数值方法，混沌系统的长期预测仍然是不可行的。</div>
       <div class="formula-note">⚠ N > 2 时系统进入高阶混沌，轨迹复杂度指数增长。</div>
-    </div>
-
-    <!-- 控制按钮 -->
-    <div class="btn-row">
-      <button class="theme-btn" onclick="releaseAll()">释放</button>
-      <button class="theme-btn" onclick="resetSimulation()">重置</button>
-      <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
     </div>
   </div>
 
