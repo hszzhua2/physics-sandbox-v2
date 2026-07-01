@@ -132,6 +132,12 @@
     if (window.parent !== window) {
       listenToParentTheme();
     }
+    // Auto-inject music player (skip if already loaded or in iframe)
+    if (window.parent === window && !document.getElementById('psu-music-player')) {
+      var ms = document.createElement('script');
+      ms.src = 'shared-music.js';
+      document.body.appendChild(ms);
+    }
   });
 
 })();
