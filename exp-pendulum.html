@@ -10,14 +10,8 @@
     #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; cursor: grab; }
     #sim-canvas:active { cursor: grabbing; }
     #ui-panel {
-      position: absolute;
-      top: 80px;
-      left: 30px;
-      width: 330px;
-      padding: 20px;
-      z-index: 10;
-      max-height: 85vh;
-      overflow-y: auto;
+      position: absolute; top: 80px; left: 30px; width: 380px; padding: 20px;
+      z-index: 10; max-height: 85vh; overflow-y: auto;
     }
     h1 { margin: 0; font-size: 1.4rem; transition: var(--theme-transition); }
     p.desc { color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 12px 0; }
@@ -27,11 +21,40 @@
     .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .btn-row .theme-btn { flex: 1; min-width: 80px; padding: 10px 12px; font-size: 0.85rem; }
     .hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 10px; text-align: center; line-height: 1.5; }
-    .hint strong { color: var(--text-color); }
     .stats { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; }
     .stats span { font-family: monospace; font-weight: bold; }
 
-    /* Theme colors */
+    /* Section labels (reference style) */
+    .section-label { font-family: 'Courier New', monospace; font-size: 0.68rem; font-weight: 400; text-transform: uppercase; letter-spacing: 2.5px; color: var(--accent-1); margin: 16px 0 10px 0; display: flex; align-items: center; gap: 8px; }
+    .section-label::before { content: ''; width: 3px; height: 14px; background: var(--accent-1); border-radius: 2px; }
+
+    /* Presets */
+    .param-presets { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .preset-btn { padding: 4px 10px; border: 1px solid var(--panel-border); background: rgba(128,128,128,0.05); color: var(--text-muted); border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; }
+    .preset-btn:hover { border-color: var(--accent-1); color: var(--accent-1); background: rgba(128,128,128,0.1); }
+
+    /* Real-time output */
+    .output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .output-card { background: rgba(128,128,128,0.05); border: 1px solid var(--panel-border); border-radius: 10px; padding: 8px 10px; text-align: center; }
+    .output-num { font-family: 'Courier New', monospace; font-size: 1.05rem; font-weight: 700; color: var(--accent-1); line-height: 1.2; }
+    .output-num.b { color: var(--accent-2); }
+    .output-num.c { color: var(--accent-3); }
+    .output-num.d { color: var(--accent-4); }
+    .output-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Phase space */
+    .phase-container { background: rgba(128,128,128,0.05); border: 1px solid var(--panel-border); border-radius: 10px; overflow: hidden; position: relative; margin-bottom: 10px; }
+    .phase-container canvas { display: block; width: 100%; height: 140px; }
+    .phase-label { position: absolute; top: 6px; left: 8px; font-family: 'Courier New', monospace; font-size: 0.65rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; pointer-events: none; }
+
+    /* Formula blocks */
+    .formula-block { background: rgba(128,128,128,0.04); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; font-size: 0.8rem; line-height: 1.5; }
+    .formula-title { font-size: 0.78rem; font-weight: 700; color: var(--text-color); margin-bottom: 6px; }
+    .formula-expr { font-family: 'Courier New', monospace; font-size: 0.78rem; color: var(--accent-2); line-height: 1.7; white-space: pre-wrap; }
+    .formula-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+    .formula-note { font-size: 0.7rem; color: var(--accent-3); margin-top: 5px; font-style: italic; }
+
+    /* Theme overrides */
     [data-theme="cartoon"] h1 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
     [data-theme="cartoon"] .val-display { color: var(--accent-1); }
     [data-theme="cartoon"] .stats span { color: var(--accent-1); }
@@ -44,15 +67,21 @@
     [data-theme="cyber"] .val-display { color: #00f3ff; }
     [data-theme="cyber"] .stats span { color: #00f3ff; }
 
-    /* Academic theme */
     [data-theme="academic"] h1 { color: #1a1a2e; font-weight: 700; text-shadow: none; }
     [data-theme="academic"] p.desc { color: #7a7a8a; }
     [data-theme="academic"] .val-display { color: #1a1a2e; }
     [data-theme="academic"] .stats span { color: #1a1a2e; }
     [data-theme="academic"] .hint { color: #9a9aa5; }
     [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
+    [data-theme="academic"] .section-label { color: #6b8cae; }
+    [data-theme="academic"] .section-label::before { background: #6b8cae; }
+    [data-theme="academic"] .preset-btn { background: #f4f5f7; border-color: #e0e0e0; color: #666; }
+    [data-theme="academic"] .preset-btn:hover { border-color: #6b8cae; color: #1a1a2e; background: #e8ecf1; }
+    [data-theme="academic"] .output-card { background: #f4f5f7; border-color: #e0e0e0; }
+    [data-theme="academic"] .phase-container { background: #f4f5f7; border-color: #e0e0e0; }
+    [data-theme="academic"] .formula-block { background: #f8f9fa; border-color: #e0e0e0; }
+    [data-theme="academic"] .formula-expr { color: #4a6a8a; }
 
-    /* Scrollbar theming for panel */
     #ui-panel::-webkit-scrollbar { width: 5px; }
     [data-theme="cartoon"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
     [data-theme="glass"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
@@ -60,12 +89,7 @@
 
     /* Ideal mode switch */
     #ideal-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(128,128,128,0.2); border-radius: 26px; transition: .3s; }
-    #ideal-slider::before {
-      position: absolute; content: "";
-      height: 20px; width: 20px; left: 3px; bottom: 3px;
-      background: white; border-radius: 50%; transition: .3s;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    }
+    #ideal-slider::before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
     #ideal-toggle:checked + #ideal-slider { background: #4ecdc4; box-shadow: 0 0 10px rgba(78,205,196,0.5); }
     #ideal-toggle:checked + #ideal-slider::before { transform: translateX(22px); }
   </style>
@@ -83,29 +107,52 @@
       关节数: <span id="joint-count">3</span>
     </div>
 
+    <!-- 实验参数 -->
+    <div class="section-label">实验参数</div>
+
     <div class="slider-group">
       <label><span>摆臂阶数 (N)</span><span id="n-val" class="val-display">3</span></label>
       <input type="range" id="slider-n" min="1" max="8" step="1" value="3">
     </div>
     <div class="slider-group">
-      <label><span>臂长 (px)</span><span id="len-val" class="val-display">110</span></label>
-      <input type="range" id="slider-len" min="40" max="200" step="10" value="110">
+      <label><span>摆臂 1 长度 (L₁)</span><span id="val-l1" class="val-display">150 px</span></label>
+      <input type="range" id="slider-l1" min="50" max="250" value="150" step="1">
     </div>
     <div class="slider-group">
-      <label><span>重力加速度</span><span id="g-val" class="val-display">0</span></label>
-      <input type="range" id="slider-g" min="0" max="2" step="0.05" value="0">
+      <label><span>摆臂 2 长度 (L₂)</span><span id="val-l2" class="val-display">150 px</span></label>
+      <input type="range" id="slider-l2" min="50" max="250" value="150" step="1">
     </div>
     <div class="slider-group">
-      <label><span>阻尼 (空气阻力)</span><span id="damp-val" class="val-display">0</span></label>
-      <input type="range" id="slider-damp" min="0" max="1.0" step="0.001" value="0">
+      <label><span>质量 1 (m₁)</span><span id="val-m1" class="val-display">10 kg</span></label>
+      <input type="range" id="slider-m1" min="1" max="30" value="10" step="1">
     </div>
     <div class="slider-group">
-      <label><span>驱动幅度 (持续摆动)</span><span id="drive-val" class="val-display">0</span></label>
+      <label><span>质量 2 (m₂)</span><span id="val-m2" class="val-display">10 kg</span></label>
+      <input type="range" id="slider-m2" min="1" max="30" value="10" step="1">
+    </div>
+    <div class="slider-group">
+      <label><span>初始角度 θ₁</span><span id="val-theta1" class="val-display">120°</span></label>
+      <input type="range" id="slider-theta1" min="-180" max="180" value="120" step="1">
+    </div>
+    <div class="slider-group">
+      <label><span>初始角度 θ₂</span><span id="val-theta2" class="val-display">90°</span></label>
+      <input type="range" id="slider-theta2" min="-180" max="180" value="90" step="1">
+    </div>
+    <div class="slider-group">
+      <label><span>重力加速度 (g)</span><span id="val-g" class="val-display">9.81 m/s²</span></label>
+      <input type="range" id="slider-g" min="1" max="200" value="98" step="1">
+    </div>
+    <div class="slider-group">
+      <label><span>阻尼系数</span><span id="val-damp" class="val-display">0.000</span></label>
+      <input type="range" id="slider-damp" min="0" max="100" value="0" step="1">
+    </div>
+    <div class="slider-group">
+      <label><span>驱动幅度</span><span id="drive-val" class="val-display">0</span></label>
       <input type="range" id="slider-drive" min="0" max="3" step="0.05" value="0">
     </div>
     <div class="slider-group">
       <label><span>驱动频率</span><span id="freq-val" class="val-display">0.20</span></label>
-      <input type="range" id="slider-freq" min="0.01" max="0.2" step="0.01" value="0.2">
+      <input type="range" id="slider-freq" min="0.01" max="0.5" step="0.01" value="0.2">
     </div>
     <div class="slider-group">
       <label><span>轨迹长度</span><span id="trail-val" class="val-display">1200</span></label>
@@ -124,22 +171,89 @@
       </label>
     </div>
 
+    <!-- 实时输出 -->
+    <div class="section-label">实时输出</div>
+    <div class="output-grid">
+      <div class="output-card">
+        <div class="output-num" id="out-theta1">0.00</div>
+        <div class="output-label">θ₁ (rad)</div>
+      </div>
+      <div class="output-card">
+        <div class="output-num b" id="out-theta2">0.00</div>
+        <div class="output-label">θ₂ (rad)</div>
+      </div>
+      <div class="output-card">
+        <div class="output-num c" id="out-omega1">0.00</div>
+        <div class="output-label">ω₁ (rad/s)</div>
+      </div>
+      <div class="output-card">
+        <div class="output-num d" id="out-omega2">0.00</div>
+        <div class="output-label">ω₂ (rad/s)</div>
+      </div>
+      <div class="output-card">
+        <div class="output-num" id="out-ke">0.00</div>
+        <div class="output-label">动能 (J)</div>
+      </div>
+      <div class="output-card">
+        <div class="output-num b" id="out-pe">0.00</div>
+        <div class="output-label">势能 (J)</div>
+      </div>
+    </div>
+
+    <!-- 相空间 -->
+    <div class="section-label">相空间轨迹</div>
+    <div class="phase-container">
+      <span class="phase-label">θ₁ vs θ₂</span>
+      <canvas id="phase-canvas"></canvas>
+    </div>
+
+    <!-- 预设 -->
+    <div class="param-presets">
+      <button class="preset-btn" onclick="applyPreset('chaos')">⚡ 极度混沌</button>
+      <button class="preset-btn" onclick="applyPreset('gentle')">🌊 轻柔摆动</button>
+      <button class="preset-btn" onclick="applyPreset('symmetric')">⚖ 对称</button>
+      <button class="preset-btn" onclick="applyPreset('heavy')">💪 重摆</button>
+    </div>
+
+    <!-- 公式讲解 -->
+    <div class="section-label">公式讲解</div>
+    <div class="formula-block">
+      <div class="formula-title">拉格朗日量 (Lagrangian)</div>
+      <div class="formula-expr">L = T − V
+
+T = ½(m₁+m₂)L₁²θ̇₁²
+  + ½m₂L₂²θ̇₂²
+  + m₂L₁L₂θ̇₁θ̇₂cos(θ₁−θ₂)
+
+V = −(m₁+m₂)gL₁cosθ₁
+  − m₂gL₂cosθ₂</div>
+      <div class="formula-desc"><strong>T</strong> 为系统动能，<strong>V</strong> 为重力势能。双摆系统的拉格朗日量是两个广义坐标 θ₁ 和 θ₂ 及其时间导数的函数。</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-title">运动方程 (Euler-Lagrange)</div>
+      <div class="formula-expr">d/dt(∂L/∂θ̇ᵢ) − ∂L/∂θᵢ = 0
+
+展开后得到两个耦合二阶非线性微分方程，其中 Δ = θ₁ − θ₂。</div>
+      <div class="formula-desc">这两个方程是<strong>强耦合</strong>的 — θ₁ 的加速度依赖于 θ₂ 的状态，反之亦然。这正是混沌行为的根源。</div>
+    </div>
+    <div class="formula-block">
+      <div class="formula-title">数值求解：Verlet + 约束迭代</div>
+      <div class="formula-expr">本模拟使用 Velocity Verlet 积分 + 距离约束迭代，具有 O(h²) 精度。每帧进行 10 次距离约束松弛，保证链式结构稳定。</div>
+      <div class="formula-desc">即使使用高精度数值方法，混沌系统的长期预测仍然是不可行的 —— 这是确定性混沌的本质特征。</div>
+      <div class="formula-note">⚠ N > 2 时系统进入高阶混沌，轨迹复杂度指数增长。</div>
+    </div>
+
+    <!-- 控制按钮 -->
     <div class="btn-row">
       <button class="theme-btn" onclick="releaseAll()">释放</button>
       <button class="theme-btn" onclick="resetSimulation()">重置</button>
       <button class="theme-btn" onclick="togglePause()" id="pause-btn">暂停</button>
     </div>
-
   </div>
 
   <!-- Entrance hint toast -->
-  <div id="entrance-toast" class="glass-panel" style="
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    z-index:20; padding:24px 36px; text-align:center; pointer-events:none;
-    opacity:1; transition:opacity 0.8s ease;">
-    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:var(--text-color);">
-      交互提示
-    </div>
+  <div id="entrance-toast" class="glass-panel" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:20; padding:24px 36px; text-align:center; pointer-events:none; opacity:1; transition:opacity 0.8s ease;">
+    <div style="font-size:1.2rem; font-weight:bold; margin-bottom:8px; color:var(--text-color);">交互提示</div>
     <div style="font-size:0.95rem; color:var(--text-muted); line-height:1.8;">
       <strong style="color:var(--accent-1);">左键拖拽</strong> 关节甩动摆臂<br>
       <strong style="color:var(--accent-2);">右键拖拽</strong> 平移画布 &nbsp;·&nbsp;
@@ -150,16 +264,9 @@
   <script src="shared-theme.js"></script>
   <script>
     /* ================================================================
-       混沌N阶摆 — 完全重写版
+       混沌N阶摆 — 集成参考参数配置版
        物理引擎: Velocity Verlet + 距离约束迭代
-       修复问题:
-       1. 阻尼语义反转 (0=无阻力, 1=完全停止)
-       2. 初始推动不足导致摆不动
-       3. 系统间差异太小导致26条线重叠
-       4. PAN偏移下鼠标交互坐标错误
-       5. 学术模式可见性极差
-       6. 驱动作为全局水平加速度更合理
-       7. 约束迭代次数增加到10次提高稳定性
+       支持: N阶调节、分段长度、质量、初始角度、能量计算、相空间
        ================================================================ */
 
     PSUTheme.createSwitcher();
@@ -173,9 +280,11 @@
 
     // ---- Parameters ----
     let N_JOINTS = 3;
-    let SEG_LEN = 110;
+    let L1 = 150, L2 = 150;
+    let m1 = 10, m2 = 10;
+    let theta1Deg = 120, theta2Deg = 90;
     let GRAVITY = 0;
-    let DAMPING = 0;      // 0 = no drag, 1.0 = full stop
+    let DAMPING = 0;
     let DRIVE_AMP = 0;
     let DRIVE_FREQ = 0.2;
     let TRAIL_LEN = 1200;
@@ -203,51 +312,60 @@
       H = canvas.height = window.innerHeight;
       cx = W / 2;
       cy = H * 0.25;
-      // Adjust pan offset so the view stays centered relative to the anchor
-      if (oldCx !== undefined) {
-        pan.ox += cx - oldCx;
-        pan.oy += cy - oldCy;
-      }
+      if (oldCx !== undefined) { pan.ox += cx - oldCx; pan.oy += cy - oldCy; }
     }
     window.addEventListener('resize', resize);
-    resize();
 
-    // ---- Build a pendulum system ----
+    function getSegLens() {
+      const lens = [];
+      for (let i = 1; i <= N_JOINTS; i++) {
+        if (i === 1) lens.push(L1);
+        else if (i === 2) lens.push(L2);
+        else lens.push(Math.round((L1 + L2) / 2));
+      }
+      return lens;
+    }
+
     function buildSystem(sysIndex) {
       const nodes = [];
-      // Root anchor
       nodes.push(new Node(cx, cy));
       nodes[0].fixed = true;
+      const segLens = getSegLens();
 
-      // Chain: initial angle ~108deg with tiny per-system variation
-      const baseAngle = Math.PI * 0.6 + sysIndex * 0.001;
-      let angle = baseAngle;
+      const baseAngle1 = theta1Deg * Math.PI / 180 + sysIndex * 0.001;
+      const baseAngle2 = theta2Deg * Math.PI / 180 + sysIndex * 0.001;
+
       for (let i = 1; i <= N_JOINTS; i++) {
-        const x = nodes[i - 1].x + SEG_LEN * Math.sin(angle);
-        const y = nodes[i - 1].y + SEG_LEN * Math.cos(angle);
+        const segLen = segLens[i-1];
+        let angle;
+        if (i === 1) angle = baseAngle1;
+        else if (i === 2) angle = baseAngle2;
+        else angle = baseAngle2 + (Math.random() - 0.5) * 0.3;
+        const x = nodes[i-1].x + segLen * Math.sin(angle);
+        const y = nodes[i-1].y + segLen * Math.cos(angle);
         nodes.push(new Node(x, y));
-        angle += (Math.random() - 0.5) * 0.08;
       }
 
-      // Initial push: each system gets a distinct horizontal velocity
-      // so the butterfly effect is visible immediately
       const pushDir = (sysIndex % 2 === 0) ? 1 : -1;
       const pushStrength = 3 + (Math.random() * 4) + sysIndex * 0.15;
       for (let i = 1; i < nodes.length; i++) {
-        const factor = i / nodes.length; // stronger at tip
+        const factor = i / nodes.length;
         nodes[i].px = nodes[i].x - pushDir * pushStrength * factor;
         nodes[i].py = nodes[i].y + (Math.random() - 0.5) * 1.5;
       }
-      return nodes;
+      return { nodes, segLens };
     }
 
     function initSystems() {
       systems = [];
       for (let i = 0; i < NUM_SYSTEMS; i++) {
+        const sys = buildSystem(i);
         systems.push({
-          nodes: buildSystem(i),
+          nodes: sys.nodes,
+          segLens: sys.segLens,
           color: `hsl(${180 + 180 * (i / Math.max(1, NUM_SYSTEMS - 1))}, 100%, 60%)`,
-          trail: []
+          trail: [],
+          phaseTrail: []
         });
       }
       updateStats();
@@ -260,9 +378,7 @@
 
     function releaseAll() {
       for (let sys of systems) {
-        for (let i = 1; i < sys.nodes.length; i++) {
-          sys.nodes[i].fixed = false;
-        }
+        for (let i = 1; i < sys.nodes.length; i++) sys.nodes[i].fixed = false;
       }
     }
 
@@ -293,11 +409,11 @@
     }
 
     // ---- Physics ----
-    function stepPhysics(nodes) {
+    function stepPhysics(sys) {
+      const nodes = sys.nodes;
       const damp = IDEAL_MODE ? 1.0 : Math.max(0, 1.0 - DAMPING);
       const drive = IDEAL_MODE ? 0 : DRIVE_AMP * Math.sin(driveTime);
 
-      // 1. Velocity Verlet integration with gravity + drive
       for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].fixed) continue;
         const vx = (nodes[i].x - nodes[i].px) * damp;
@@ -308,34 +424,24 @@
         nodes[i].y += vy + GRAVITY;
       }
 
-      // 2. Distance constraints (iterative relaxation)
       const ITERATIONS = 10;
       for (let iter = 0; iter < ITERATIONS; iter++) {
         for (let i = 1; i < nodes.length; i++) {
-          const dx = nodes[i].x - nodes[i - 1].x;
-          const dy = nodes[i].y - nodes[i - 1].y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const diff = dist - SEG_LEN;
+          const dx = nodes[i].x - nodes[i-1].x;
+          const dy = nodes[i].y - nodes[i-1].y;
+          const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+          const diff = dist - sys.segLens[i-1];
           const ratio = diff / dist * 0.5;
           const ox = dx * ratio;
           const oy = dy * ratio;
-
-          if (!nodes[i].fixed) {
-            nodes[i].x -= ox;
-            nodes[i].y -= oy;
-          }
-          if (!nodes[i - 1].fixed) {
-            nodes[i - 1].x += ox;
-            nodes[i - 1].y += oy;
-          }
+          if (!nodes[i].fixed) { nodes[i].x -= ox; nodes[i].y -= oy; }
+          if (!nodes[i-1].fixed) { nodes[i-1].x += ox; nodes[i-1].y += oy; }
         }
-        // Anchor stays at root
-        nodes[0].x = cx;
-        nodes[0].y = cy;
+        nodes[0].x = cx; nodes[0].y = cy;
       }
     }
 
-    // ---- Mouse: screen <-> physics coordinate conversion ----
+    // ---- Coordinate conversion ----
     function screenToPhysics(sx, sy) {
       return { x: (sx - pan.ox) / SCALE, y: (sy - pan.oy) / SCALE };
     }
@@ -347,9 +453,7 @@
         const nodes = systems[s].nodes;
         for (let i = 0; i < nodes.length; i++) {
           const d = Math.hypot(nodes[i].x - p.x, nodes[i].y - p.y);
-          if (d < best.dist && d < 50) {
-            best = { sys: s, joint: i, dist: d };
-          }
+          if (d < best.dist && d < 50) best = { sys: s, joint: i, dist: d };
         }
       }
       return best;
@@ -359,7 +463,6 @@
       const rect = canvas.getBoundingClientRect();
       const sx = e.clientX - rect.left;
       const sy = e.clientY - rect.top;
-
       if (e.button === 2) {
         const nearest = getNearestJoint(sx, sy);
         if (nearest.sys >= 0 && nearest.dist < 25) {
@@ -369,65 +472,152 @@
           if (n.fixed) { n.px = n.x; n.py = n.y; }
         } else {
           e.preventDefault();
-          pan.active = true;
-          pan.sx = sx;
-          pan.sy = sy;
+          pan.active = true; pan.sx = sx; pan.sy = sy;
         }
       } else {
         const nearest = getNearestJoint(sx, sy);
-        if (nearest.sys >= 0) {
-          grab.active = true;
-          grab.sys = nearest.sys;
-          grab.joint = nearest.joint;
-        }
+        if (nearest.sys >= 0) { grab.active = true; grab.sys = nearest.sys; grab.joint = nearest.joint; }
       }
     });
-
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-
     canvas.addEventListener('mousemove', (e) => {
       const rect = canvas.getBoundingClientRect();
       const sx = e.clientX - rect.left;
       const sy = e.clientY - rect.top;
-
       if (grab.active) {
         const p = screenToPhysics(sx, sy);
         const n = systems[grab.sys].nodes[grab.joint];
-        n.x = p.x; n.y = p.y;
-        n.px = p.x; n.py = p.y;
+        n.x = p.x; n.y = p.y; n.px = p.x; n.py = p.y;
       }
-      if (pan.active) {
-        pan.ox += sx - pan.sx;
-        pan.oy += sy - pan.sy;
-        pan.sx = sx;
-        pan.sy = sy;
-      }
+      if (pan.active) { pan.ox += sx - pan.sx; pan.oy += sy - pan.sy; pan.sx = sx; pan.sy = sy; }
     });
+    canvas.addEventListener('mouseup', () => { grab.active = false; grab.sys = -1; grab.joint = -1; pan.active = false; });
 
-    canvas.addEventListener('mouseup', () => {
-      grab.active = false;
-      grab.sys = -1;
-      grab.joint = -1;
-      pan.active = false;
-    });
-
-    // ---- Wheel zoom (centered on mouse) ----
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
-
       const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
       const newScale = Math.max(0.3, Math.min(5.0, SCALE * zoomFactor));
-
-      // Keep the point under the mouse stationary
       const physX = (mx - pan.ox) / SCALE;
       const physY = (my - pan.oy) / SCALE;
       pan.ox = mx - physX * newScale;
       pan.oy = my - physY * newScale;
       SCALE = newScale;
     }, { passive: false });
+
+    // ---- Energy & state computation ----
+    function computeAngles(nodes) {
+      const angles = [];
+      for (let i = 1; i < nodes.length; i++) {
+        const dx = nodes[i].x - nodes[i-1].x;
+        const dy = nodes[i].y - nodes[i-1].y;
+        angles.push(Math.atan2(dx, dy));
+      }
+      return angles;
+    }
+
+    function computeOmegas(nodes) {
+      const omegas = [];
+      for (let i = 1; i < nodes.length; i++) {
+        const vx = nodes[i].x - nodes[i].px;
+        const vy = nodes[i].y - nodes[i].py;
+        const dx = nodes[i].x - nodes[i-1].x;
+        const dy = nodes[i].y - nodes[i-1].y;
+        const len = Math.sqrt(dx*dx + dy*dy) || 1;
+        omegas.push((vx * dy - vy * dx) / (len * len));
+      }
+      return omegas;
+    }
+
+    function computeEnergy(sys) {
+      const nodes = sys.nodes;
+      let KE = 0, PE = 0;
+      const g = GRAVITY * 0.1;
+      for (let i = 1; i < nodes.length; i++) {
+        const vx = nodes[i].x - nodes[i].px;
+        const vy = nodes[i].y - nodes[i].py;
+        const mass = i === 1 ? m1 : (i === 2 ? m2 : (m1 + m2) / 2);
+        KE += 0.5 * mass * (vx * vx + vy * vy);
+        PE += mass * g * (nodes[i].y - cy) / 10;
+      }
+      return { KE, PE, total: KE + PE };
+    }
+
+    function updateOutputs(sys) {
+      const angles = computeAngles(sys.nodes);
+      const omegas = computeOmegas(sys.nodes);
+      const energy = computeEnergy(sys);
+      document.getElementById('out-theta1').textContent = (angles[0] || 0).toFixed(2);
+      document.getElementById('out-theta2').textContent = (angles[1] || 0).toFixed(2);
+      document.getElementById('out-omega1').textContent = (omegas[0] || 0).toFixed(2);
+      document.getElementById('out-omega2').textContent = (omegas[1] || 0).toFixed(2);
+      document.getElementById('out-ke').textContent = energy.KE.toFixed(2);
+      document.getElementById('out-pe').textContent = energy.PE.toFixed(2);
+    }
+
+    // ---- Phase space drawing ----
+    const phaseCanvas = document.getElementById('phase-canvas');
+    const phaseCtx = phaseCanvas.getContext('2d');
+
+    function setupPhaseCanvas() {
+      const pw = phaseCanvas.parentElement ? phaseCanvas.parentElement.clientWidth : 340;
+      const ph = 140;
+      const dpr = window.devicePixelRatio || 1;
+      phaseCanvas.width = pw * dpr;
+      phaseCanvas.height = ph * dpr;
+      phaseCanvas.style.width = pw + 'px';
+      phaseCanvas.style.height = ph + 'px';
+      phaseCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function drawPhase() {
+      if (!phaseCanvas || !phaseCtx) return;
+      const pw = phaseCanvas.clientWidth || 340;
+      const ph = 140;
+
+      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+      let bg, gridCol, trailA, trailB;
+      if (theme === 'academic') { bg = '#f4f5f7'; gridCol = '#d0d0d0'; trailA = '#6b8cae'; trailB = '#8a7ca8'; }
+      else if (theme === 'cartoon') { bg = '#fef6e4'; gridCol = '#e0d8c8'; trailA = '#ff6b6b'; trailB = '#4ecdc4'; }
+      else if (theme === 'glass') { bg = '#1a1a2e'; gridCol = '#333355'; trailA = '#74b9ff'; trailB = '#ff00ea'; }
+      else { bg = '#0a0a14'; gridCol = '#1a1a2a'; trailA = '#00f3ff'; trailB = '#bd00ff'; }
+      phaseCtx.fillStyle = bg;
+      phaseCtx.fillRect(0, 0, pw, ph);
+
+      phaseCtx.strokeStyle = gridCol;
+      phaseCtx.lineWidth = 0.5;
+      phaseCtx.beginPath(); phaseCtx.moveTo(0, ph/2); phaseCtx.lineTo(pw, ph/2); phaseCtx.stroke();
+      phaseCtx.beginPath(); phaseCtx.moveTo(pw/2, 0); phaseCtx.lineTo(pw/2, ph); phaseCtx.stroke();
+
+      const mainSys = systems[0];
+      if (!mainSys || mainSys.phaseTrail.length < 2) return;
+
+      phaseCtx.lineWidth = 0.8;
+      for (let i = 1; i < mainSys.phaseTrail.length; i++) {
+        const alpha = i / mainSys.phaseTrail.length * 0.8;
+        const p = mainSys.phaseTrail[i];
+        const pp = mainSys.phaseTrail[i-1];
+        const px = pw/2 + (p.t1 / Math.PI) * pw/2 * 0.8;
+        const py = ph/2 + (p.t2 / Math.PI) * ph/2 * 0.8;
+        const ppx = pw/2 + (pp.t1 / Math.PI) * pw/2 * 0.8;
+        const ppy = ph/2 + (pp.t2 / Math.PI) * ph/2 * 0.8;
+        phaseCtx.beginPath();
+        phaseCtx.moveTo(ppx, ppy); phaseCtx.lineTo(px, py);
+        phaseCtx.strokeStyle = (i % 2 === 0) ? trailA : trailB;
+        phaseCtx.globalAlpha = alpha;
+        phaseCtx.stroke();
+      }
+      phaseCtx.globalAlpha = 1;
+
+      const cur = mainSys.phaseTrail[mainSys.phaseTrail.length - 1];
+      const cpx = pw/2 + (cur.t1 / Math.PI) * pw/2 * 0.8;
+      const cpy = ph/2 + (cur.t2 / Math.PI) * ph/2 * 0.8;
+      phaseCtx.beginPath(); phaseCtx.arc(cpx, cpy, 3, 0, Math.PI*2);
+      phaseCtx.fillStyle = theme === 'academic' ? '#1a1a2e' : '#fff';
+      phaseCtx.fill();
+    }
 
     // ---- Drawing helpers ----
     function getThemeFade() {
@@ -447,7 +637,6 @@
     }
 
     function draw() {
-      // Fade background
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = getThemeFade();
       ctx.fillRect(0, 0, W, H);
@@ -464,7 +653,7 @@
         const nodes = sys.nodes;
         const drawColor = getSystemColor(sys, isAcademic);
 
-        // -- Draw rods --
+        // Rods
         ctx.globalCompositeOperation = isAcademic ? 'source-over' : 'lighter';
         if (isAcademic) {
           ctx.lineWidth = (s === 0) ? 1.5 : 0.8;
@@ -481,7 +670,7 @@
         for (let i = 1; i < nodes.length; i++) ctx.lineTo(nodes[i].x, nodes[i].y);
         ctx.stroke();
 
-        // -- Draw trail --
+        // Trail
         if (TRAIL_LEN > 0 && sys.trail.length > 1) {
           ctx.beginPath();
           ctx.moveTo(sys.trail[0].x, sys.trail[0].y);
@@ -503,93 +692,60 @@
           ctx.stroke();
         }
 
-        // -- Draw joints (first system only, prominently) --
+        // Joints (first system only)
         if (s === 0) {
           ctx.globalCompositeOperation = 'source-over';
           for (let i = 0; i < nodes.length; i++) {
             const r = i === 0 ? 5 : (i === nodes.length - 1 ? 6 : 3.5);
             const fixed = nodes[i].fixed;
-
             if (isAcademic) {
               ctx.shadowBlur = 0;
-              ctx.beginPath();
-              ctx.arc(nodes[i].x, nodes[i].y, r, 0, Math.PI * 2);
+              ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, r, 0, Math.PI*2);
               ctx.fillStyle = fixed ? '#1a1a2e' : '#ffffff';
               ctx.fill();
-              ctx.lineWidth = 1.5;
-              ctx.strokeStyle = fixed ? '#1a1a2e' : drawColor;
+              ctx.lineWidth = 1.5; ctx.strokeStyle = fixed ? '#1a1a2e' : drawColor;
               ctx.stroke();
             } else {
-              ctx.shadowBlur = fixed ? 20 : 10;
-              ctx.shadowColor = fixed ? '#fbbf24' : sys.color;
-
-              ctx.beginPath();
-              ctx.arc(nodes[i].x, nodes[i].y, r, 0, Math.PI * 2);
-              ctx.fillStyle = fixed ? '#fde68a' : '#fff';
-              ctx.fill();
-
-              ctx.beginPath();
-              ctx.arc(nodes[i].x, nodes[i].y, r - 1, 0, Math.PI * 2);
-              ctx.fillStyle = sys.color;
-              ctx.fill();
-
+              ctx.shadowBlur = fixed ? 20 : 10; ctx.shadowColor = fixed ? '#fbbf24' : sys.color;
+              ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, r, 0, Math.PI*2);
+              ctx.fillStyle = fixed ? '#fde68a' : '#fff'; ctx.fill();
+              ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, r-1, 0, Math.PI*2);
+              ctx.fillStyle = sys.color; ctx.fill();
               ctx.shadowBlur = 0;
-
               if (theme === 'cyber' && fixed) {
-                ctx.beginPath();
-                ctx.arc(nodes[i].x, nodes[i].y, r + 3, 0, Math.PI * 2);
-                ctx.strokeStyle = '#fbbf24';
-                ctx.lineWidth = 1;
-                ctx.shadowColor = '#fbbf24';
-                ctx.shadowBlur = 15;
-                ctx.stroke();
-                ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.arc(nodes[i].x, nodes[i].y, r+3, 0, Math.PI*2);
+                ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1;
+                ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0;
               }
             }
           }
-
-          // End-effector highlight
           const end = nodes[nodes.length - 1];
-          ctx.beginPath();
-          ctx.arc(end.x, end.y, 3, 0, Math.PI * 2);
-          ctx.fillStyle = isAcademic ? drawColor : sys.color;
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(end.x, end.y, 3, 0, Math.PI*2);
+          ctx.fillStyle = isAcademic ? drawColor : sys.color; ctx.fill();
         } else {
-          // Faint end dots for other systems
           const end = nodes[nodes.length - 1];
           if (isAcademic) {
             ctx.globalCompositeOperation = 'source-over';
-            ctx.beginPath();
-            ctx.arc(end.x, end.y, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = drawColor.replace('45%)', '30%)');
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(end.x, end.y, 1.5, 0, Math.PI*2);
+            ctx.fillStyle = drawColor.replace('45%)', '30%)'); ctx.fill();
           } else {
             ctx.globalCompositeOperation = 'lighter';
-            ctx.beginPath();
-            ctx.arc(end.x, end.y, 2, 0, Math.PI * 2);
+            ctx.beginPath(); ctx.arc(end.x, end.y, 2, 0, Math.PI*2);
             const faintAlpha = theme === 'cartoon' ? '25%' : '30%';
-            ctx.fillStyle = sys.color.replace('60%)', faintAlpha).replace('hsl', 'hsla');
-            ctx.fill();
+            ctx.fillStyle = sys.color.replace('60%)', faintAlpha).replace('hsl', 'hsla'); ctx.fill();
           }
         }
       }
 
-      // Anchor pivot
+      // Anchor
       ctx.globalCompositeOperation = 'source-over';
-      ctx.beginPath();
-      ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+      ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI*2);
       if (isAcademic) {
-        ctx.fillStyle = '#e0e0e0';
-        ctx.fill();
-        ctx.strokeStyle = '#a0a0a8';
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        ctx.fillStyle = '#e0e0e0'; ctx.fill();
+        ctx.strokeStyle = '#a0a0a8'; ctx.lineWidth = 1; ctx.stroke();
       } else {
-        ctx.fillStyle = 'rgba(128,128,128,0.3)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(128,128,128,0.5)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.fillStyle = 'rgba(128,128,128,0.3)'; ctx.fill();
+        ctx.strokeStyle = 'rgba(128,128,128,0.5)'; ctx.lineWidth = 2; ctx.stroke();
       }
       ctx.restore();
     }
@@ -599,59 +755,105 @@
       if (!paused) {
         driveTime += DRIVE_FREQ;
         for (let sys of systems) {
-          stepPhysics(sys.nodes);
+          stepPhysics(sys);
           const end = sys.nodes[sys.nodes.length - 1];
           sys.trail.push({ x: end.x, y: end.y });
           if (sys.trail.length > TRAIL_LEN) sys.trail.shift();
+
+          const angles = computeAngles(sys.nodes);
+          if (angles.length >= 2) {
+            sys.phaseTrail.push({ t1: angles[0], t2: angles[1] });
+            if (sys.phaseTrail.length > 500) sys.phaseTrail.shift();
+          }
         }
+        if (systems[0]) updateOutputs(systems[0]);
       }
       draw();
+      drawPhase();
       animId = requestAnimationFrame(loop);
     }
 
+    // ---- Presets ----
+    function applyPreset(name) {
+      const presets = {
+        chaos:    { N: 3, L1: 150, L2: 150, m1: 10, m2: 10, t1: 170, t2: -160, g: 98,  damp: 0,  drive: 0,   freq: 0.2, num: 26, trail: 1200 },
+        gentle:   { N: 3, L1: 180, L2: 180, m1: 15, m2: 15, t1: 30,  t2: 20,   g: 98,  damp: 5,  drive: 0,   freq: 0.2, num: 26, trail: 1200 },
+        symmetric:{ N: 3, L1: 150, L2: 150, m1: 10, m2: 10, t1: 90,  t2: 90,   g: 98,  damp: 0,  drive: 0,   freq: 0.2, num: 26, trail: 1200 },
+        heavy:    { N: 2, L1: 120, L2: 80,  m1: 28, m2: 5,  t1: 140, t2: -60,  g: 150, damp: 0,  drive: 0,   freq: 0.2, num: 26, trail: 1200 },
+      };
+      const p = presets[name];
+      if (!p) return;
+      document.getElementById('slider-n').value = p.N;
+      document.getElementById('slider-l1').value = p.L1;
+      document.getElementById('slider-l2').value = p.L2;
+      document.getElementById('slider-m1').value = p.m1;
+      document.getElementById('slider-m2').value = p.m2;
+      document.getElementById('slider-theta1').value = p.t1;
+      document.getElementById('slider-theta2').value = p.t2;
+      document.getElementById('slider-g').value = p.g;
+      document.getElementById('slider-damp').value = p.damp;
+      document.getElementById('slider-drive').value = p.drive;
+      document.getElementById('slider-freq').value = p.freq;
+      document.getElementById('slider-num').value = p.num;
+      document.getElementById('slider-trail').value = p.trail;
+      syncAllSliders();
+      resetSimulation();
+    }
+
     // ---- Sliders ----
-    document.getElementById('slider-n').addEventListener('input', (e) => {
-      N_JOINTS = parseInt(e.target.value);
+    function syncAllSliders() {
+      N_JOINTS = parseInt(document.getElementById('slider-n').value);
+      L1 = parseInt(document.getElementById('slider-l1').value);
+      L2 = parseInt(document.getElementById('slider-l2').value);
+      m1 = parseInt(document.getElementById('slider-m1').value);
+      m2 = parseInt(document.getElementById('slider-m2').value);
+      theta1Deg = parseInt(document.getElementById('slider-theta1').value);
+      theta2Deg = parseInt(document.getElementById('slider-theta2').value);
+      GRAVITY = parseInt(document.getElementById('slider-g').value) / 10;
+      DAMPING = parseInt(document.getElementById('slider-damp').value) / 10000;
+      DRIVE_AMP = parseFloat(document.getElementById('slider-drive').value);
+      DRIVE_FREQ = parseFloat(document.getElementById('slider-freq').value);
+      NUM_SYSTEMS = parseInt(document.getElementById('slider-num').value);
+      TRAIL_LEN = parseInt(document.getElementById('slider-trail').value);
+
       document.getElementById('n-val').textContent = N_JOINTS;
-      resetSimulation();
-    });
-    document.getElementById('slider-len').addEventListener('input', (e) => {
-      SEG_LEN = parseInt(e.target.value);
-      document.getElementById('len-val').textContent = SEG_LEN;
-    });
-    document.getElementById('slider-g').addEventListener('input', (e) => {
-      GRAVITY = parseFloat(e.target.value);
-      document.getElementById('g-val').textContent = GRAVITY.toFixed(2);
-    });
-    document.getElementById('slider-damp').addEventListener('input', (e) => {
-      DAMPING = parseFloat(e.target.value);
-      document.getElementById('damp-val').textContent = DAMPING.toFixed(3);
-    });
-    document.getElementById('slider-drive').addEventListener('input', (e) => {
-      DRIVE_AMP = parseFloat(e.target.value);
+      document.getElementById('val-l1').textContent = L1 + ' px';
+      document.getElementById('val-l2').textContent = L2 + ' px';
+      document.getElementById('val-m1').textContent = m1 + ' kg';
+      document.getElementById('val-m2').textContent = m2 + ' kg';
+      document.getElementById('val-theta1').textContent = theta1Deg + '\u00B0';
+      document.getElementById('val-theta2').textContent = theta2Deg + '\u00B0';
+      document.getElementById('val-g').textContent = GRAVITY.toFixed(2) + ' m/s\u00B2';
+      document.getElementById('val-damp').textContent = DAMPING.toFixed(3);
       document.getElementById('drive-val').textContent = DRIVE_AMP.toFixed(2);
-    });
-    document.getElementById('slider-freq').addEventListener('input', (e) => {
-      DRIVE_FREQ = parseFloat(e.target.value);
       document.getElementById('freq-val').textContent = DRIVE_FREQ.toFixed(2);
-    });
-    document.getElementById('slider-trail').addEventListener('input', (e) => {
-      TRAIL_LEN = parseInt(e.target.value);
-      document.getElementById('trail-val').textContent = TRAIL_LEN;
-    });
-    document.getElementById('slider-num').addEventListener('input', (e) => {
-      NUM_SYSTEMS = parseInt(e.target.value);
       document.getElementById('num-val').textContent = NUM_SYSTEMS;
-      resetSimulation();
-    });
+      document.getElementById('trail-val').textContent = TRAIL_LEN;
+    }
+
+    document.getElementById('slider-n').addEventListener('input', (e) => { N_JOINTS = parseInt(e.target.value); document.getElementById('n-val').textContent = N_JOINTS; resetSimulation(); });
+    document.getElementById('slider-l1').addEventListener('input', (e) => { L1 = parseInt(e.target.value); document.getElementById('val-l1').textContent = L1 + ' px'; });
+    document.getElementById('slider-l2').addEventListener('input', (e) => { L2 = parseInt(e.target.value); document.getElementById('val-l2').textContent = L2 + ' px'; });
+    document.getElementById('slider-m1').addEventListener('input', (e) => { m1 = parseInt(e.target.value); document.getElementById('val-m1').textContent = m1 + ' kg'; });
+    document.getElementById('slider-m2').addEventListener('input', (e) => { m2 = parseInt(e.target.value); document.getElementById('val-m2').textContent = m2 + ' kg'; });
+    document.getElementById('slider-theta1').addEventListener('input', (e) => { theta1Deg = parseInt(e.target.value); document.getElementById('val-theta1').textContent = theta1Deg + '\u00B0'; resetSimulation(); });
+    document.getElementById('slider-theta2').addEventListener('input', (e) => { theta2Deg = parseInt(e.target.value); document.getElementById('val-theta2').textContent = theta2Deg + '\u00B0'; resetSimulation(); });
+    document.getElementById('slider-g').addEventListener('input', (e) => { GRAVITY = parseInt(e.target.value) / 10; document.getElementById('val-g').textContent = GRAVITY.toFixed(2) + ' m/s\u00B2'; });
+    document.getElementById('slider-damp').addEventListener('input', (e) => { DAMPING = parseInt(e.target.value) / 10000; document.getElementById('val-damp').textContent = DAMPING.toFixed(3); });
+    document.getElementById('slider-drive').addEventListener('input', (e) => { DRIVE_AMP = parseFloat(e.target.value); document.getElementById('drive-val').textContent = DRIVE_AMP.toFixed(2); });
+    document.getElementById('slider-freq').addEventListener('input', (e) => { DRIVE_FREQ = parseFloat(e.target.value); document.getElementById('freq-val').textContent = DRIVE_FREQ.toFixed(2); });
+    document.getElementById('slider-trail').addEventListener('input', (e) => { TRAIL_LEN = parseInt(e.target.value); document.getElementById('trail-val').textContent = TRAIL_LEN; });
+    document.getElementById('slider-num').addEventListener('input', (e) => { NUM_SYSTEMS = parseInt(e.target.value); document.getElementById('num-val').textContent = NUM_SYSTEMS; resetSimulation(); });
 
     // ---- Start ----
+    resize();
+    syncAllSliders();
+    setupPhaseCanvas();
     initSystems();
     toggleIdealMode();
     clearCanvas();
     loop();
 
-    // Entrance toast auto-dismiss
     setTimeout(() => {
       const toast = document.getElementById('entrance-toast');
       if (toast) toast.style.opacity = '0';
