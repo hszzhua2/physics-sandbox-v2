@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弹簧振子 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 五种主题适配
+   ================================================================ */
+[data-theme="glass"]{
+  --sp-bg:#080812;--sp-bg2:#0e0e1c;--sp-surface:rgba(255,255,255,0.04);--sp-surface-hover:rgba(255,255,255,0.08);
+  --sp-ink:#f1f5f9;--sp-ink2:#cbd5e1;--sp-muted:#64748b;--sp-rule:rgba(255,255,255,0.07);
+  --sp-accent:#74b9ff;--sp-accent2:#a29bfe;--sp-accent3:#34d399;--sp-accent4:#fbbf24;
+  --sp-card-bg:rgba(255,255,255,0.03);--sp-card-border:rgba(255,255,255,0.06);
+  --sp-card-shadow:0 6px 24px rgba(0,0,0,0.4);--sp-glow:none;
+  --sp-canvas-bg:#040410;--sp-param-bg:rgba(255,255,255,0.03);--sp-param-border:rgba(255,255,255,0.06);
+  --sp-output-bg:rgba(0,0,0,0.3);--sp-output-border:rgba(255,255,255,0.06);
+  --sp-formula-bg:rgba(116,185,255,0.05);--sp-formula-border:rgba(116,185,255,0.12);
+  --sp-scrollbar-thumb:rgba(116,185,255,0.3);
+  --sp-spring-color:#94a3b8;--sp-mass-a:#74b9ff;--sp-mass-b:#a29bfe;--sp-mass-c:#34d399;
+  --sp-energy-ke:#74b9ff;--sp-energy-pe:#22d3ee;
+}
+[data-theme="cyber"]{
+  --sp-bg:#040410;--sp-bg2:#08081a;--sp-surface:rgba(0,243,255,0.03);--sp-surface-hover:rgba(0,243,255,0.06);
+  --sp-ink:#e0f7fa;--sp-ink2:#b2ebf2;--sp-muted:#4dd0e1;--sp-rule:rgba(0,243,255,0.1);
+  --sp-accent:#00f3ff;--sp-accent2:#ff00ea;--sp-accent3:#39ff14;--sp-accent4:#ffb800;
+  --sp-card-bg:rgba(0,243,255,0.02);--sp-card-border:rgba(0,243,255,0.12);
+  --sp-card-shadow:0 0 16px rgba(0,243,255,0.05);--sp-glow:0 0 8px rgba(0,243,255,0.25);
+  --sp-canvas-bg:#020208;--sp-param-bg:rgba(0,243,255,0.02);--sp-param-border:rgba(0,243,255,0.1);
+  --sp-output-bg:rgba(0,0,0,0.4);--sp-output-border:rgba(0,243,255,0.08);
+  --sp-formula-bg:rgba(0,243,255,0.04);--sp-formula-border:rgba(0,243,255,0.15);
+  --sp-scrollbar-thumb:rgba(0,243,255,0.4);
+  --sp-spring-color:#ff00ea;--sp-mass-a:#00f3ff;--sp-mass-b:#ff00ea;--sp-mass-c:#39ff14;
+  --sp-energy-ke:#00f3ff;--sp-energy-pe:#ff00ea;
+}
+[data-theme="cartoon"]{
+  --sp-bg:#fef6e4;--sp-bg2:#fff8f0;--sp-surface:rgba(255,255,255,0.7);--sp-surface-hover:rgba(255,255,255,0.9);
+  --sp-ink:#2d3436;--sp-ink2:#4a4a4a;--sp-muted:#7a7a7a;--sp-rule:rgba(0,0,0,0.08);
+  --sp-accent:#ff6b6b;--sp-accent2:#4ecdc4;--sp-accent3:#ffe66d;--sp-accent4:#a29bfe;
+  --sp-card-bg:rgba(255,255,255,0.8);--sp-card-border:rgba(0,0,0,0.1);
+  --sp-card-shadow:0 6px 24px rgba(0,0,0,0.08);--sp-glow:none;
+  --sp-canvas-bg:#1a1a2e;--sp-param-bg:rgba(255,255,255,0.5);--sp-param-border:rgba(0,0,0,0.1);
+  --sp-output-bg:rgba(255,255,255,0.6);--sp-output-border:rgba(0,0,0,0.08);
+  --sp-formula-bg:rgba(255,107,107,0.05);--sp-formula-border:rgba(255,107,107,0.15);
+  --sp-scrollbar-thumb:rgba(0,0,0,0.15);
+  --sp-spring-color:#94a3b8;--sp-mass-a:#ff6b6b;--sp-mass-b:#4ecdc4;--sp-mass-c:#ffe66d;
+  --sp-energy-ke:#ff6b6b;--sp-energy-pe:#4ecdc4;
+}
+[data-theme="academic"]{
+  --sp-bg:#f8f9fa;--sp-bg2:#f1f3f5;--sp-surface:rgba(255,255,255,0.9);--sp-surface-hover:#f0f0f0;
+  --sp-ink:#1a1a2e;--sp-ink2:#3d3d5c;--sp-muted:#7a7a8a;--sp-rule:#e0e0e0;
+  --sp-accent:#6b8cae;--sp-accent2:#8a7ca8;--sp-accent3:#c4956a;--sp-accent4:#6a9e8a;
+  --sp-card-bg:#ffffff;--sp-card-border:#e0e0e0;
+  --sp-card-shadow:none;--sp-glow:none;
+  --sp-canvas-bg:#ffffff;--sp-param-bg:#f8f9fa;--sp-param-border:#e0e0e0;
+  --sp-output-bg:#f4f5f7;--sp-output-border:#e0e0e0;
+  --sp-formula-bg:rgba(107,140,174,0.04);--sp-formula-border:rgba(107,140,174,0.2);
+  --sp-scrollbar-thumb:#d0d0d0;
+  --sp-spring-color:#7a8a9a;--sp-mass-a:#6b8cae;--sp-mass-b:#8a7ca8;--sp-mass-c:#c4956a;
+  --sp-energy-ke:#6b8cae;--sp-energy-pe:#c4956a;
+}
+[data-theme="soviet"]{
+  --sp-bg:#f0ebe4;--sp-bg2:#e8e0d8;--sp-surface:rgba(255,250,242,0.9);--sp-surface-hover:#f4f0ea;
+  --sp-ink:#1a1a1a;--sp-ink2:#3d3d5c;--sp-muted:#6a5a4a;--sp-rule:rgba(196,30,30,0.15);
+  --sp-accent:#c41e1e;--sp-accent2:#8b4513;--sp-accent3:#b8860b;--sp-accent4:#556b2f;
+  --sp-card-bg:#fffaf2;--sp-card-border:#d4c4a8;
+  --sp-card-shadow:none;--sp-glow:none;
+  --sp-canvas-bg:#faf6f0;--sp-param-bg:#f4f0ea;--sp-param-border:#d4c4a8;
+  --sp-output-bg:#f4f0ea;--sp-output-border:#d4c4a8;
+  --sp-formula-bg:rgba(196,30,30,0.04);--sp-formula-border:rgba(196,30,30,0.15);
+  --sp-scrollbar-thumb:#c41e1e;
+  --sp-spring-color:#8a7a6a;--sp-mass-a:#c41e1e;--sp-mass-b:#8b4513;--sp-mass-c:#b8860b;
+  --sp-energy-ke:#c41e1e;--sp-energy-pe:#8b4513;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--sp-bg);color:var(--sp-ink);line-height:1.6;overflow-x:hidden;min-height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--sp-bg)}
+::-webkit-scrollbar-thumb{background:var(--sp-scrollbar-thumb);border-radius:999px}
+
+/* TOP BAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--sp-bg2);border-bottom:1px solid var(--sp-rule);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background-color .5s ease,border-color .4s ease}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-logo{font-weight:700;font-size:1.05rem;letter-spacing:1px;text-decoration:none;color:var(--sp-ink)}
+.topbar-title{font-size:0.85rem;color:var(--sp-muted);font-weight:400}
+
+[data-theme="academic"] .topbar{background:#fff;border-bottom:1px solid #e0e0e0;backdrop-filter:none}
+[data-theme="cartoon"] .topbar{background:rgba(255,248,240,0.95);border-bottom:2px solid rgba(255,180,100,0.2)}
+[data-theme="soviet"] .topbar{background:#fffaf2;border-bottom:2px solid #c41e1e;backdrop-filter:none}
+
+/* LAYOUT */
+.app{padding-top:56px;padding-bottom:64px;display:flex;height:calc(100vh - 56px - 64px)}
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.side-panel{width:380px;min-width:340px;border-left:1px solid var(--sp-rule);background:var(--sp-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+
+[data-theme="academic"] .side-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .side-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .side-panel{background:#fffaf2;border-left:2px solid #d4c4a8}
+
+/* CANVAS */
+.canvas-container{flex:1;position:relative;background:var(--sp-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--sp-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--sp-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:0.72rem;color:var(--sp-muted);font-family:monospace;opacity:0.6;pointer-events:none;transition:opacity 0.3s}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #d4c4a8;color:#6a5a4a}
+
+/* BOTTOM BAR */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 24px;background:var(--sp-bg2);border-top:1px solid var(--sp-rule);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(0,0,0,0.15);transition:background-color .5s ease,border-color .4s ease}
+.sim-btn{padding:10px 24px;border:1px solid var(--sp-rule);background:var(--sp-surface);color:var(--sp-ink);border-radius:10px;font-family:var(--font-main);font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease}
+.sim-btn:hover{background:var(--sp-surface-hover);border-color:var(--sp-accent)}
+.sim-btn.primary{background:var(--sp-accent);color:#fff;border-color:var(--sp-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn.danger{border-color:var(--sp-accent2);color:var(--sp-accent2)}
+.sim-btn.danger:hover{background:rgba(196,30,30,0.1)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .bottom-bar{background:#fff;border-top:1px solid #e0e0e0;backdrop-filter:none;box-shadow:none}
+[data-theme="academic"] .sim-btn{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:4px}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae}
+[data-theme="cartoon"] .bottom-bar{background:rgba(255,248,240,0.95);border-top:2px solid rgba(255,180,100,0.2)}
+[data-theme="soviet"] .bottom-bar{background:#fffaf2;border-top:2px solid #d4c4a8;backdrop-filter:none;box-shadow:none}
+[data-theme="soviet"] .sim-btn{background:#f4f0ea;border:2px solid #d4c4a8;border-radius:2px;font-weight:700}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#8b0000}
+
+/* SIDE PANEL SECTIONS */
+.side-section{padding:18px 22px;border-bottom:1px solid var(--sp-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--sp-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-label::before{content:'';width:3px;height:14px;background:var(--sp-accent);border-radius:2px}
+
+/* PARAMS */
+.param-group{margin-bottom:14px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--sp-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--sp-accent);font-weight:400;min-width:45px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--sp-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--sp-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:5px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:0 2px 6px rgba(196,30,30,0.5)}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--sp-param-border);background:var(--sp-param-bg);color:var(--sp-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--sp-accent);color:var(--sp-accent);background:var(--sp-formula-bg)}
+.preset-btn.active{border-color:var(--sp-accent);color:var(--sp-accent);background:var(--sp-formula-bg)}
+
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="academic"] .preset-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#1a1a2a;background:#e8e0d8}
+[data-theme="soviet"] .preset-btn.active{border-color:#c41e1e;color:#1a1a2a;background:#e8e0d8}
+
+/* OUTPUT */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--sp-output-bg);border:1px solid var(--sp-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.1rem;font-weight:700;color:var(--sp-accent);line-height:1.2;transition:color .4s ease}
+.output-num.b{color:var(--sp-accent2)}.output-num.c{color:var(--sp-accent3)}.output-num.d{color:var(--sp-accent4)}
+.output-label{font-size:0.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--sp-muted);margin-top:2px}
+
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ENERGY BAR */
+.energy-bar-wrap{margin-top:10px}
+.energy-bar{height:8px;border-radius:4px;background:var(--sp-param-border);overflow:hidden;display:flex}
+.energy-ke-bar{background:var(--sp-energy-ke);transition:width 0.1s}
+.energy-pe-bar{background:var(--sp-energy-pe);transition:width 0.1s}
+.energy-labels{display:flex;justify-content:space-between;margin-top:4px}
+.energy-labels span{font-size:0.65rem;color:var(--sp-muted)}
+
+/* FORMULA */
+.formula-block{background:var(--sp-formula-bg);border:1px solid var(--sp-formula-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--sp-ink);margin-bottom:8px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.78rem;color:var(--sp-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.75rem;color:var(--sp-muted);margin-top:8px;line-height:1.6}
+.formula-desc strong{color:var(--sp-ink2)}
+.formula-note{font-size:0.7rem;color:var(--sp-accent3);margin-top:6px;font-style:italic}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#faf6f0;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* MASS LIST */
+.mass-list{max-height:140px;overflow-y:auto}
+.mass-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--sp-rule);font-size:0.72rem}
+.mass-item:last-child{border-bottom:none}
+.mass-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mass-name{flex:1;color:var(--sp-ink2);font-weight:600}
+.mass-info{color:var(--sp-muted);font-family:monospace;font-size:0.68rem}
+
+/* RESPONSIVE */
+@media(max-width:900px){.app{flex-direction:column}.side-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--sp-rule);max-height:50vh}}
+@media(max-width:600px){.topbar{padding:10px 14px}.topbar-title{display:none}.sim-btn{padding:8px 16px;font-size:0.78rem}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="topbar-logo" href="index.html">砰！粒子！</a>
+    <span class="topbar-title">/ 弹簧振子系统</span>
+  </div>
+  <div class="topbar-right"></div>
+</header>
+
+<div class="app">
+  <div class="sim-panel">
+    <div class="canvas-container" id="canvasWrap">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeMode">单振子</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">点击质点拖拽 &middot; 拖动设置初始位移</div>
+    </div>
+  </div>
+
+  <aside class="side-panel">
+    <div class="side-section">
+      <div class="section-label">系统配置</div>
+      <div class="param-presets" style="margin-top:0;margin-bottom:14px">
+        <button class="preset-btn active" data-mode="single">&#9898; 单振子</button>
+        <button class="preset-btn" data-mode="coupled">&#9830; 耦合链</button>
+        <button class="preset-btn" data-mode="pendulum">&#9792; 弹簧摆</button>
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">弹簧刚度 k</span><span class="param-value" id="valK">20</span></div>
+        <input type="range" id="sliderK" min="1" max="100" value="20" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">质量 m</span><span class="param-value" id="valM">1.0</span></div>
+        <input type="range" id="sliderM" min="1" max="50" value="10" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">阻尼 b</span><span class="param-value" id="valB">0.00</span></div>
+        <input type="range" id="sliderB" min="0" max="100" value="0" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">重力 g</span><span class="param-value" id="valG">9.8</span></div>
+        <input type="range" id="sliderG" min="0" max="200" value="98" step="1">
+      </div>
+      <div class="param-presets">
+        <button class="preset-btn" data-scene="sineTransform">&#9834; 傅里叶</button>
+        <button class="preset-btn" data-scene="soliton">&#9889; 孤子</button>
+        <button class="preset-btn" data-scene="resonance">&#9876; 共振</button>
+        <button class="preset-btn" data-scene="wave">&#8776; 驻波</button>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">实时统计</div>
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num" id="outKE">0.0</div><div class="output-label">动能 KE</div></div>
+        <div class="output-card"><div class="output-num b" id="outPE">0.0</div><div class="output-label">势能 PE</div></div>
+        <div class="output-card"><div class="output-num c" id="outTotal">0.0</div><div class="output-label">总能量</div></div>
+        <div class="output-card"><div class="output-num d" id="outFreq">0.0</div><div class="output-label">频率 Hz</div></div>
+      </div>
+      <div class="energy-bar-wrap">
+        <div class="energy-bar"><div class="energy-ke-bar" id="keBar" style="width:50%"></div><div class="energy-pe-bar" id="peBar" style="width:50%"></div></div>
+        <div class="energy-labels"><span>&#9679; 动能</span><span>&#9679; 势能</span></div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">质点列表</div>
+      <div class="mass-list" id="massList"></div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">公式讲解</div>
+      <div class="formula-block">
+        <div class="formula-title">胡克定律 (Hooke's Law)</div>
+        <div class="formula-expr">F = -k &middot; x
+
+a = -k/m &middot; x - b/m &middot; v</div>
+        <div class="formula-desc"><strong>F</strong> 是弹簧恢复力，<strong>k</strong> 是弹簧刚度，<strong>x</strong> 是位移。力与位移成正比、方向相反。加入阻尼项 <strong>-bv</strong> 后系统能量逐渐耗散。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">简谐运动 (SHM)</div>
+        <div class="formula-expr">x(t) = A &middot; cos(&#969;t + &#966;)
+
+&#969; = &#8730;(k/m)
+T = 2&#960;/&#969; = 2&#960;&#8730;(m/k)</div>
+        <div class="formula-desc">无阻尼时，弹簧振子做<strong>简谐运动</strong>。<strong>&#969;</strong> 是角频率，<strong>T</strong> 是周期。质量越大振动越慢，刚度越大振动越快。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">耦合振动与波</div>
+        <div class="formula-expr">m&middot;x&#772;&#8345; = -k(x&#8345; - x&#8345;&#8331;) - k(x&#8345; - x&#8345;&#8330;)</div>
+        <div class="formula-desc">多个质点通过弹簧耦合后，系统拥有多个<strong>简正模态</strong>。能量以波的形式沿链传播。傅里叶分解可以分析各模态的贡献。</div>
+        <div class="formula-note">&#128172; 试试「傅里叶」预设，观察单一模态的纯简谐运动。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">弹簧摆 (Spring Pendulum)</div>
+        <div class="formula-expr">径向: m&middot;r&#772; = -k(r-L)&#8331; + m&middot;r&middot;&#952;&#775;&sup2; + mg&middot;cos&#952;
+切向: m&middot;r&middot;&#952;&#772; = -mg&middot;sin&#952; - 2m&middot;r&#775;&middot;&#959;&#775;</div>
+        <div class="formula-desc">弹簧下挂重物在竖直平面内运动，<strong>径向</strong>和<strong>切向</strong>运动耦合。弹簧伸缩与摆动交换能量，产生复杂的<strong>李萨如图形</strong>轨迹。</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<nav class="bottom-bar">
+  <button class="sim-btn primary" id="btnPlay">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+    开始
+  </button>
+  <button class="sim-btn" id="btnPause">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+    暂停
+  </button>
+  <button class="sim-btn danger" id="btnReset">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    清空
+  </button>
+  <button class="sim-btn" id="btnGraph">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    波形图
+  </button>
+</nav>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   CONFIG
+   ================================================================ */
+var CFG = {
+  k: 20, mass: 1.0, damping: 0, gravity: 9.8,
+  dt: 0.02, subSteps: 5, mode: 'single',
+  showGraph: false, naturalLength: 80,
+};
+
+/* ================================================================
+   STATE
+   ================================================================ */
+var S = {
+  running: false, time: 0, bodies: [], trails: [], graphData: [], maxGraph: 400,
+};
+
+/* ================================================================
+   COLORS
+   ================================================================ */
+var BODY_COLORS = ['#f59e0b','#ec4899','#8b5cf6','#22d3ee','#34d399','#fb923c','#f87171','#a3e635'];
+
+/* ================================================================
+   LAYOUT & DOM
+   ================================================================ */
+var simCanvas = document.getElementById('simCanvas');
+var ctx = simCanvas.getContext('2d');
+var canvasWrap = document.getElementById('canvasWrap');
+var html = document.documentElement;
+
+var sliders = {
+  K: document.getElementById('sliderK'), M: document.getElementById('sliderM'),
+  B: document.getElementById('sliderB'), G: document.getElementById('sliderG'),
+};
+var vals = {
+  K: document.getElementById('valK'), M: document.getElementById('valM'),
+  B: document.getElementById('valB'), G: document.getElementById('valG'),
+};
+
+/* ================================================================
+   THEME SYNC
+   ================================================================ */
+var themeObs = new MutationObserver(function(){ draw(); });
+themeObs.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ================================================================
+   RESIZE
+   ================================================================ */
+function resize(){
+  var dpr = window.devicePixelRatio || 1;
+  var w = canvasWrap.clientWidth, h = canvasWrap.clientHeight;
+  simCanvas.width = w * dpr; simCanvas.height = h * dpr;
+  simCanvas.style.width = w + 'px'; simCanvas.style.height = h + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+
+/* ================================================================
+   SLIDER SYNC
+   ================================================================ */
+function syncSliders(){
+  CFG.k = +sliders.K.value;
+  CFG.mass = +sliders.M.value * 0.1;
+  CFG.damping = +sliders.B.value * 0.01;
+  CFG.gravity = +sliders.G.value * 0.1;
+  vals.K.textContent = CFG.k;
+  vals.M.textContent = CFG.mass.toFixed(1);
+  vals.B.textContent = CFG.damping.toFixed(2);
+  vals.G.textContent = CFG.gravity.toFixed(1);
+}
+Object.keys(sliders).forEach(function(k){ sliders[k].addEventListener('input', syncSliders); });
+
+/* ================================================================
+   MODE SWITCHING
+   ================================================================ */
+document.querySelectorAll('[data-mode]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('[data-mode]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    CFG.mode = btn.dataset.mode;
+    resetSim();
+    var labels = { single: '单振子', coupled: '耦合链', pendulum: '弹簧摆' };
+    document.getElementById('badgeMode').textContent = labels[CFG.mode] || CFG.mode;
+  });
+});
+
+/* ================================================================
+   CREATE BODIES
+   ================================================================ */
+function createBody(x, y, vx, vy, mass, fixed, color, name){
+  return { x:x, y:y, vx:vx||0, vy:vy||0, mass:mass||CFG.mass, fixed:fixed||false, color:color||BODY_COLORS[0], name:name||'M', fx:0, fy:0 };
+}
+
+/* ================================================================
+   INIT SYSTEMS
+   ================================================================ */
+function resetSim(){
+  S.time = 0; S.trails = []; S.graphData = [];
+  var w = canvasWrap.clientWidth, h = canvasWrap.clientHeight;
+  var cx = w / 2, cy = h / 2;
+
+  if(CFG.mode === 'single'){
+    S.bodies = [];
+    S.bodies.push(createBody(cx, cy - 80, 0, 0, CFG.mass, true, getCSSVar('--sp-muted', '#64748b'), 'Wall'));
+    S.bodies.push(createBody(cx, cy, 0, 0, CFG.mass, false, BODY_COLORS[0], 'm'));
+    S.naturalLength = 80;
+  } else if(CFG.mode === 'coupled'){
+    var n = 12;
+    var spacing = Math.min(60, (w * 0.7) / n);
+    var startX = cx - (n - 1) * spacing / 2;
+    S.bodies = [];
+    S.bodies.push(createBody(startX - spacing, cy, 0, 0, CFG.mass, true, getCSSVar('--sp-muted', '#64748b'), 'Wall-L'));
+    for(var i = 0; i < n; i++){
+      S.bodies.push(createBody(startX + i * spacing, cy, 0, 0, CFG.mass, false, BODY_COLORS[i % BODY_COLORS.length], 'm'+(i+1)));
+    }
+    S.bodies.push(createBody(startX + n * spacing, cy, 0, 0, CFG.mass, true, getCSSVar('--sp-muted', '#64748b'), 'Wall-R'));
+    S.naturalLength = spacing;
+  } else if(CFG.mode === 'pendulum'){
+    S.bodies = [];
+    var pivotY = cy - 150;
+    S.bodies.push(createBody(cx, pivotY, 0, 0, CFG.mass, true, getCSSVar('--sp-muted', '#64748b'), 'Pivot'));
+    S.bodies.push(createBody(cx, pivotY + 150, 3, 0, CFG.mass, false, BODY_COLORS[0], 'Bob'));
+    S.naturalLength = 150;
+  }
+  updateMassList();
+}
+
+function getCSSVar(n, fallback){
+  try { return getComputedStyle(html).getPropertyValue(n).trim() || fallback; }
+  catch(e){ return fallback; }
+}
+
+/* ================================================================
+   PHYSICS: RK4 Integration
+   ================================================================ */
+function computeForces(bodies, k, damping, gravity, mode){
+  var n = bodies.length;
+  for(var i = 0; i < n; i++) bodies[i].fx = bodies[i].fy = 0;
+
+  if(mode === 'single'){
+    var b0 = bodies[0], b1 = bodies[1];
+    var dx = b1.x - b0.x, dy = b1.y - b0.y;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    var stretch = dist - S.naturalLength;
+    var f = -k * stretch;
+    if(dist > 0.01){
+      b1.fx += f * dx / dist - damping * b1.vx;
+      b1.fy += f * dy / dist - damping * b1.vy + gravity * b1.mass;
+    }
+  } else if(mode === 'coupled'){
+    for(var i = 1; i < n - 1; i++){
+      var bi = bodies[i];
+      var bl = bodies[i-1];
+      var dx = bi.x - bl.x, dy = bi.y - bl.y;
+      var dist = Math.sqrt(dx*dx + dy*dy) || 0.01;
+      var stretch = dist - S.naturalLength;
+      var f = -k * stretch;
+      bi.fx += f * dx / dist;
+      bi.fy += f * dy / dist;
+      if(i + 1 < n){
+        var br = bodies[i+1];
+        dx = bi.x - br.x; dy = bi.y - br.y;
+        dist = Math.sqrt(dx*dx + dy*dy) || 0.01;
+        stretch = dist - S.naturalLength;
+        f = -k * stretch;
+        bi.fx += f * dx / dist;
+        bi.fy += f * dy / dist;
+      }
+      bi.fx -= damping * bi.vx;
+      bi.fy -= damping * bi.vy;
+    }
+  } else if(mode === 'pendulum'){
+    var b0 = bodies[0], b1 = bodies[1];
+    var dx = b1.x - b0.x, dy = b1.y - b0.y;
+    var dist = Math.sqrt(dx*dx + dy*dy) || 0.01;
+    var stretch = dist - S.naturalLength;
+    var fSpring = -k * stretch;
+    var nx = dx / dist, ny = dy / dist;
+    b1.fx = fSpring * nx - damping * b1.vx;
+    b1.fy = fSpring * ny - damping * b1.vy + gravity * b1.mass;
+  }
+}
+
+function physicsStep(dt){
+  var bodies = S.bodies;
+  var k = CFG.k, damping = CFG.damping, gravity = CFG.gravity, mode = CFG.mode;
+  computeForces(bodies, k, damping, gravity, mode);
+  for(var i = 0; i < bodies.length; i++){
+    if(bodies[i].fixed) continue;
+    var b = bodies[i];
+    var ax = b.fx / b.mass, ay = b.fy / b.mass;
+    b.x += b.vx * dt + 0.5 * ax * dt * dt;
+    b.y += b.vy * dt + 0.5 * ay * dt * dt;
+    b.vx += 0.5 * ax * dt;
+    b.vy += 0.5 * ay * dt;
+  }
+  computeForces(bodies, k, damping, gravity, mode);
+  for(var i = 0; i < bodies.length; i++){
+    if(bodies[i].fixed) continue;
+    var b = bodies[i];
+    var ax = b.fx / b.mass, ay = b.fy / b.mass;
+    b.vx += 0.5 * ax * dt;
+    b.vy += 0.5 * ay * dt;
+  }
+}
+
+/* ================================================================
+   ENERGY
+   ================================================================ */
+function calcEnergy(){
+  var ke = 0, pe = 0;
+  var bodies = S.bodies;
+  var n = bodies.length;
+  var mode = CFG.mode;
+
+  if(mode === 'single' || mode === 'pendulum'){
+    var b0 = bodies[0], b1 = bodies[1];
+    var dx = b1.x - b0.x, dy = b1.y - b0.y;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    pe = 0.5 * CFG.k * Math.pow(dist - S.naturalLength, 2);
+    if(mode === 'pendulum') pe += CFG.gravity * CFG.mass * b1.y;
+    ke = 0.5 * CFG.mass * (b1.vx*b1.vx + b1.vy*b1.vy);
+  } else if(mode === 'coupled'){
+    for(var i = 1; i < n - 1; i++){
+      var bi = bodies[i];
+      ke += 0.5 * bi.mass * (bi.vx*bi.vx + bi.vy*bi.vy);
+      var bl = bodies[i-1];
+      var dx = bi.x - bl.x, dy = bi.y - bl.y;
+      var dist = Math.sqrt(dx*dx + dy*dy);
+      pe += 0.5 * CFG.k * Math.pow(dist - S.naturalLength, 2);
+    }
+  }
+  return { ke: ke, pe: pe, total: ke + pe };
+}
+
+/* ================================================================
+   DRAWING HELPERS
+   ================================================================ */
+function drawSpring(x1, y1, x2, y2, coils, amplitude){
+  var dx = x2 - x1, dy = y2 - y1;
+  var dist = Math.sqrt(dx*dx + dy*dy) || 1;
+  var nx = dx / dist, ny = dy / dist;
+  var px = -ny, py = nx;
+  var segLen = dist / (coils * 2 + 2);
+  var amp = Math.min(amplitude, dist * 0.08);
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+
+  var lx = x1 + nx * segLen, ly = y1 + ny * segLen;
+  ctx.lineTo(lx, ly);
+
+  for(var i = 0; i < coils * 2; i++){
+    var t = (i + 1) / (coils * 2 + 1);
+    var cx = x1 + dx * t;
+    var cy = y1 + dy * t;
+    var side = (i % 2 === 0) ? 1 : -1;
+    cx += px * amp * side;
+    cy += py * amp * side;
+    ctx.lineTo(cx, cy);
+  }
+
+  var ex = x2 - nx * segLen, ey = y2 - ny * segLen;
+  ctx.lineTo(ex, ey);
+  ctx.lineTo(x2, y2);
+
+  var springColor = getCSSVar('--sp-spring-color', '#94a3b8');
+  ctx.strokeStyle = springColor;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+}
+
+function drawMass(x, y, radius, color, name, fixed){
+  var glow = ctx.createRadialGradient(x, y, radius * 0.5, x, y, radius * 3);
+  glow.addColorStop(0, hexToRGBA(color, 0.2));
+  glow.addColorStop(1, hexToRGBA(color, 0));
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x, y, radius * 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  var grad = ctx.createRadialGradient(x - radius * 0.3, y - radius * 0.3, radius * 0.1, x, y, radius);
+  grad.addColorStop(0, '#ffffff');
+  grad.addColorStop(0.4, color);
+  grad.addColorStop(1, hexToRGBA(color, 0.6));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  if(fixed){
+    ctx.strokeStyle = hexToRGBA(color, 0.4);
+    ctx.lineWidth = 1.5;
+    for(var i = -2; i <= 2; i++){
+      ctx.beginPath();
+      ctx.moveTo(x + i * 5 - 3, y + radius + 2);
+      ctx.lineTo(x + i * 5 + 3, y + radius + 8);
+      ctx.stroke();
+    }
+  } else {
+    ctx.fillStyle = hexToRGBA(color, 0.7);
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(name, x, y + radius + 16);
+  }
+}
+
+function hexToRGBA(hex, alpha){
+  hex = hex.replace('#','');
+  if(hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
+}
+
+/* ================================================================
+   DRAW
+   ================================================================ */
+function draw(){
+  var w = canvasWrap.clientWidth, h = canvasWrap.clientHeight;
+
+  ctx.fillStyle = getCSSVar('--sp-canvas-bg', '#0a0806');
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = getCSSVar('--sp-rule', 'rgba(255,255,255,0.03)');
+  ctx.lineWidth = 1;
+  for(var gx = 0; gx < w; gx += 40){
+    ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
+  }
+  for(var gy = 0; gy < h; gy += 40){
+    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+  }
+
+  var bodies = S.bodies;
+  if(CFG.mode === 'coupled'){
+    ctx.setLineDash([4, 6]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    for(var i = 1; i < bodies.length - 1; i++){
+      ctx.beginPath();
+      ctx.moveTo(bodies[i].x, 0);
+      ctx.lineTo(bodies[i].x, h);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
+  if(CFG.mode !== 'coupled' && bodies.length >= 2){
+    var b = bodies[1];
+    S.graphData.push(b.x);
+    if(S.graphData.length > S.maxGraph) S.graphData.shift();
+  }
+
+  if(CFG.mode === 'coupled' && bodies.length > 2){
+    for(var i = 1; i < bodies.length - 1; i++){
+      S.trails[i] = S.trails[i] || [];
+      S.trails[i].push(bodies[i].y);
+      if(S.trails[i].length > 80) S.trails[i].shift();
+      var tr = S.trails[i];
+      if(tr.length > 1){
+        ctx.beginPath();
+        for(var t = 0; t < tr.length; t++){
+          if(t === 0) ctx.moveTo(bodies[i].x, tr[t]);
+          else ctx.lineTo(bodies[i].x, tr[t]);
+        }
+        ctx.strokeStyle = hexToRGBA(bodies[i].color, 0.2);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+  }
+
+  var mode = CFG.mode;
+  if(mode === 'single' && bodies.length >= 2){
+    drawSpring(bodies[0].x, bodies[0].y, bodies[1].x, bodies[1].y, 12, 12);
+    drawMass(bodies[0].x, bodies[0].y, 10, bodies[0].color, bodies[0].name, true);
+    drawMass(bodies[1].x, bodies[1].y, 18, bodies[1].color, bodies[1].name, false);
+  } else if(mode === 'coupled'){
+    for(var i = 0; i < bodies.length - 1; i++){
+      drawSpring(bodies[i].x, bodies[i].y, bodies[i+1].x, bodies[i+1].y, 8, 10);
+    }
+    for(var i = 0; i < bodies.length; i++){
+      var r = bodies[i].fixed ? 8 : 12;
+      drawMass(bodies[i].x, bodies[i].y, r, bodies[i].color, bodies[i].name, bodies[i].fixed);
+    }
+  } else if(mode === 'pendulum' && bodies.length >= 2){
+    var px = bodies[0].x, py = bodies[0].y;
+    ctx.strokeStyle = hexToRGBA(bodies[0].color, 0.4);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(px - 40, py); ctx.lineTo(px + 40, py);
+    ctx.stroke();
+
+    drawSpring(bodies[0].x, bodies[0].y, bodies[1].x, bodies[1].y, 15, 14);
+    drawMass(bodies[0].x, bodies[0].y, 8, bodies[0].color, '', true);
+    drawMass(bodies[1].x, bodies[1].y, 20, bodies[1].color, bodies[1].name, false);
+
+    S.trails[1] = S.trails[1] || [];
+    S.trails[1].push({x: bodies[1].x, y: bodies[1].y});
+    if(S.trails[1].length > 200) S.trails[1].shift();
+    if(S.trails[1].length > 2){
+      for(var t = 1; t < S.trails[1].length; t++){
+        var alpha = t / S.trails[1].length;
+        ctx.strokeStyle = hexToRGBA(bodies[1].color, alpha * 0.3);
+        ctx.lineWidth = 1.5 * alpha;
+        ctx.beginPath();
+        ctx.moveTo(S.trails[1][t-1].x, S.trails[1][t-1].y);
+        ctx.lineTo(S.trails[1][t].x, S.trails[1][t].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  if(S.showGraph && CFG.mode !== 'coupled'){
+    var gw = w * 0.4, gh = 100;
+    var gx = w - gw - 20, gy = 20;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.strokeStyle = getCSSVar('--sp-rule', 'rgba(255,255,255,0.1)');
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(gx, gy, gw, gh, 8);
+    else { ctx.rect(gx, gy, gw, gh); }
+    ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = getCSSVar('--sp-muted', '#64748b');
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('x(t) displacement', gx + 8, gy + 14);
+
+    if(S.graphData.length > 1){
+      var data = S.graphData;
+      var minV = Infinity, maxV = -Infinity;
+      for(var i = 0; i < data.length; i++){ if(data[i] < minV) minV = data[i]; if(data[i] > maxV) maxV = data[i]; }
+      var range = Math.max(maxV - minV, 1);
+      var midY = gy + gh / 2;
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath();
+      ctx.moveTo(gx, midY);
+      ctx.lineTo(gx + gw, midY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.beginPath();
+      for(var i = 0; i < data.length; i++){
+        var x = gx + (i / S.maxGraph) * gw;
+        var y = midY - ((data[i] - (minV + maxV) / 2) / range) * (gh * 0.4);
+        if(i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = getCSSVar('--sp-accent', '#f59e0b');
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+
+  if(!S.running){
+    for(var i = 0; i < bodies.length; i++){
+      var b = bodies[i];
+      if(b.fixed || (Math.abs(b.fx) < 0.01 && Math.abs(b.fy) < 0.01)) continue;
+      var scale = 2;
+      ctx.strokeStyle = hexToRGBA('#ef4444', 0.6);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(b.x + b.fx * scale, b.y + b.fy * scale);
+      ctx.stroke();
+    }
+  }
+}
+
+/* ================================================================
+   MOUSE INTERACTION
+   ================================================================ */
+var dragBody = null;
+var dragOffX = 0, dragOffY = 0;
+
+function findBodyAt(mx, my){
+  for(var i = S.bodies.length - 1; i >= 0; i--){
+    var b = S.bodies[i];
+    var dx = mx - b.x, dy = my - b.y;
+    var r = b.fixed ? 20 : 25;
+    if(dx*dx + dy*dy < r*r) return b;
+  }
+  return null;
+}
+
+canvasWrap.addEventListener('mousedown', function(e){
+  var rect = canvasWrap.getBoundingClientRect();
+  var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  var b = findBodyAt(mx, my);
+  if(b && !b.fixed){
+    dragBody = b;
+    dragOffX = b.x - mx;
+    dragOffY = b.y - my;
+    b.vx = 0; b.vy = 0;
+    document.getElementById('canvasHint').style.opacity = '0';
+  }
+});
+canvasWrap.addEventListener('mousemove', function(e){
+  if(!dragBody) return;
+  var rect = canvasWrap.getBoundingClientRect();
+  var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  dragBody.x = mx + dragOffX;
+  dragBody.y = my + dragOffY;
+  dragBody.vx = 0;
+  dragBody.vy = 0;
+});
+canvasWrap.addEventListener('mouseup', function(){ dragBody = null; });
+canvasWrap.addEventListener('mouseleave', function(){ dragBody = null; });
+
+canvasWrap.addEventListener('touchstart', function(e){
+  e.preventDefault();
+  var rect = canvasWrap.getBoundingClientRect();
+  var t = e.touches[0];
+  var mx = t.clientX - rect.left, my = t.clientY - rect.top;
+  var b = findBodyAt(mx, my);
+  if(b && !b.fixed){
+    dragBody = b;
+    dragOffX = b.x - mx;
+    dragOffY = b.y - my;
+    b.vx = 0; b.vy = 0;
+  }
+}, {passive:false});
+canvasWrap.addEventListener('touchmove', function(e){
+  e.preventDefault();
+  if(!dragBody) return;
+  var rect = canvasWrap.getBoundingClientRect();
+  var t = e.touches[0];
+  var mx = t.clientX - rect.left, my = t.clientY - rect.top;
+  dragBody.x = mx + dragOffX;
+  dragBody.y = my + dragOffY;
+  dragBody.vx = 0; dragBody.vy = 0;
+}, {passive:false});
+canvasWrap.addEventListener('touchend', function(){ dragBody = null; });
+
+/* ================================================================
+   SCENE PRESETS
+   ================================================================ */
+document.querySelectorAll('[data-scene]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var scene = btn.dataset.scene;
+    resetSim();
+    S.running = false;
+    var w = canvasWrap.clientWidth, h = canvasWrap.clientHeight;
+    var cx = w / 2, cy = h / 2;
+
+    if(scene === 'sineTransform' && CFG.mode === 'coupled'){
+      if(S.bodies.length > 2){ S.bodies[1].x += 30; }
+    } else if(scene === 'soliton' && CFG.mode === 'coupled'){
+      if(S.bodies.length > 2){ var mid = Math.floor(S.bodies.length / 2); S.bodies[mid].x += 40; }
+    } else if(scene === 'resonance' && CFG.mode === 'single'){
+      if(S.bodies.length >= 2){ S.bodies[1].x += 60; }
+    } else if(scene === 'wave' && CFG.mode === 'coupled'){
+      if(S.bodies.length > 2){
+        for(var i = 1; i < S.bodies.length - 1; i++){
+          var t = (i - 1) / (S.bodies.length - 2);
+          S.bodies[i].x += Math.sin(t * Math.PI * 2) * 25;
+        }
+      }
+    }
+    document.getElementById('canvasHint').style.opacity = '0';
+  });
+});
+
+/* ================================================================
+   UPDATE MASS LIST
+   ================================================================ */
+function updateMassList(){
+  var el = document.getElementById('massList');
+  if(CFG.mode === 'coupled'){
+    var html = '';
+    for(var i = 1; i < S.bodies.length - 1; i++){
+      var b = S.bodies[i];
+      html += '<div class="mass-item"><span class="mass-dot" style="background:'+b.color+'"></span><span class="mass-name">'+b.name+'</span><span class="mass-info">m='+b.mass.toFixed(1)+'</span></div>';
+    }
+    el.innerHTML = html || '<div style="color:var(--sp-muted);font-size:0.75rem;text-align:center;padding:8px">切换模式查看</div>';
+  } else {
+    el.innerHTML = '<div style="color:var(--sp-muted);font-size:0.75rem;text-align:center;padding:8px">'+(S.bodies.length>1?'拖拽质点设置初始位移':'')+'</div>';
+  }
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+document.getElementById('btnPlay').addEventListener('click', function(){ S.running = true; document.getElementById('canvasHint').style.opacity = '0'; });
+document.getElementById('btnPause').addEventListener('click', function(){ S.running = false; });
+document.getElementById('btnReset').addEventListener('click', function(){ resetSim(); document.getElementById('canvasHint').style.opacity = '0.6'; });
+document.getElementById('btnGraph').addEventListener('click', function(){
+  S.showGraph = !S.showGraph;
+  document.getElementById('btnGraph').classList.toggle('primary', S.showGraph);
+  if(S.showGraph) S.graphData = [];
+});
+
+/* ================================================================
+   MAIN LOOP
+   ================================================================ */
+var frameCount = 0, lastFpsTime = performance.now(), fps = 60;
+
+function mainLoop(){
+  if(S.running && !dragBody){
+    var dt = CFG.dt;
+    for(var s = 0; s < CFG.subSteps; s++){
+      physicsStep(dt);
+      S.time += dt;
+    }
+    var energy = calcEnergy();
+    document.getElementById('outKE').textContent = energy.ke.toFixed(1);
+    document.getElementById('outPE').textContent = energy.pe.toFixed(1);
+    document.getElementById('outTotal').textContent = energy.total.toFixed(1);
+
+    if(CFG.mode === 'single'){
+      var omega = Math.sqrt(CFG.k / CFG.mass);
+      document.getElementById('outFreq').textContent = (omega / (2 * Math.PI)).toFixed(2);
+    } else if(CFG.mode === 'pendulum'){
+      var omega = Math.sqrt(CFG.k / CFG.mass);
+      document.getElementById('outFreq').textContent = (omega / (2 * Math.PI)).toFixed(2);
+    } else {
+      document.getElementById('outFreq').textContent = '-';
+    }
+
+    var total = Math.abs(energy.ke) + Math.abs(energy.pe) || 1;
+    document.getElementById('keBar').style.width = (Math.abs(energy.ke) / total * 100) + '%';
+    document.getElementById('peBar').style.width = (Math.abs(energy.pe) / total * 100) + '%';
+  }
+
+  draw();
+
+  frameCount++;
+  var now = performance.now();
+  if(now - lastFpsTime >= 1000){
+    fps = frameCount; frameCount = 0; lastFpsTime = now;
+    document.getElementById('badgeFPS').textContent = fps + ' FPS';
+  }
+
+  requestAnimationFrame(mainLoop);
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+PSUTheme.createSwitcher();
+PSUTheme.createBackButton('index.html');
+
+syncSliders();
+resize();
+resetSim();
+requestAnimationFrame(mainLoop);
+
+})();
+</script>
+</body>
+</html>
