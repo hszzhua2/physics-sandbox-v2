@@ -34,6 +34,10 @@
     [data-theme="cyber"] h1 { color: #ff9d00; text-shadow: 0 0 15px rgba(255,157,0,0.5); }
     [data-theme="cyber"] .stat span { color: #00f3ff; }
     [data-theme="cyber"] .val-display { color: #ff9d00; }
+
+    [data-theme="soviet"] h1 { color: #c41e1e; text-shadow: none; }
+    [data-theme="soviet"] .stat span { color: #c41e1e; }
+    [data-theme="soviet"] .val-display { color: #8b4513; }
   </style>
 </head>
 <body>
@@ -114,6 +118,8 @@
         return { fade: 'rgba(254, 246, 228, 0.3)', peg: 'rgba(78, 205, 196, 0.6)', curve: 'rgba(78, 205, 196, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
       } else if (theme === 'glass') {
         return { fade: 'rgba(15, 17, 23, 0.3)', peg: 'rgba(116, 185, 255, 0.6)', curve: 'rgba(116, 185, 255, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
+      } else if (theme === 'soviet') {
+        return { fade: 'rgba(240, 235, 228, 0.3)', peg: 'rgba(196, 30, 30, 0.6)', curve: 'rgba(196, 30, 30, 0.9)', bin: 'rgba(139, 69, 19, 0.8)' };
       } else {
         return { fade: 'rgba(5, 5, 8, 0.3)', peg: 'rgba(0, 243, 255, 0.6)', curve: 'rgba(0, 243, 255, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
       }

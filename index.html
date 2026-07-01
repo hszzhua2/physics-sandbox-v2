@@ -74,6 +74,17 @@
       text-transform: uppercase;
     }
 
+    [data-theme="soviet"] .header-title h1 {
+      color: #c41e1e;
+      font-weight: 900;
+      text-shadow: none;
+      letter-spacing: 6px;
+    }
+    [data-theme="soviet"] .header-title p {
+      color: #6a5a4a;
+      text-transform: uppercase;
+    }
+
     @keyframes cyberPulse {
       0% { text-shadow: 0 0 10px #bd00ff, 0 0 30px rgba(189,0,255,0.5); }
       100% { text-shadow: 0 0 20px #bd00ff, 0 0 60px rgba(189,0,255,0.6), 0 0 90px rgba(189,0,255,0.3); }
@@ -99,6 +110,7 @@
     [data-theme="cartoon"] #en-title { color: #a0a0a8; }
     [data-theme="glass"] #en-title { color: #5a5a6a; }
     [data-theme="cyber"] #en-title { color: #7060a0; text-shadow: 0 0 6px rgba(189,0,255,0.15); }
+    [data-theme="soviet"] #en-title { color: #8a7a6a; }
     [data-theme="academic"] #en-title { color: #b0b0b8; }
 
     /* Floating decorative particles */
@@ -134,6 +146,9 @@
     [data-theme="cyber"] .bg-particle {
       background: radial-gradient(circle, rgba(189,0,255,0.4) 0%, transparent 70%);
     }
+    [data-theme="soviet"] .bg-particle {
+      background: radial-gradient(circle, rgba(196,30,30,0.35) 0%, transparent 70%);
+    }
 
     /* Hint text at bottom */
     .hint-text {
@@ -152,6 +167,13 @@
     [data-theme="cartoon"] .hint-text { color: #636e72; animation: hintBounce 2s ease-in-out infinite; }
     [data-theme="glass"] .hint-text { color: #8b92a8; animation: hintBounce 2s ease-in-out infinite; }
     [data-theme="cyber"] .hint-text { color: #a080c0; text-shadow: 0 0 10px rgba(189,0,255,0.3); animation: hintBounce 2s ease-in-out infinite; }
+    [data-theme="soviet"] .hint-text {
+      color: #6a5a4a;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      animation: none;
+      opacity: 1;
+    }
     [data-theme="academic"] .hint-text {
       color: #b0b0b8;
       font-size: 0.78rem;

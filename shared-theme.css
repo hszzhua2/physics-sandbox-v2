@@ -76,6 +76,29 @@
   --neon-orange: #ff9d00;
 }
 
+/* ---------- SOVIET (Soviet Industrial) ---------- */
+:root[data-theme="soviet"] {
+  --bg-color: #f0ebe4;
+  --bg-gradient-1: #f0ebe4;
+  --bg-gradient-2: #e8e0d8;
+  --panel-bg: rgba(255, 250, 242, 0.92);
+  --panel-border: #c41e1e;
+  --text-color: #1a1a1a;
+  --text-muted: #6a5a4a;
+  --accent-1: #c41e1e;
+  --accent-2: #8b4513;
+  --accent-3: #b8860b;
+  --accent-4: #556b2f;
+  --glow-color: rgba(196, 30, 30, 0.25);
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --radius: 2px;
+  --font-main: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+  --border-width: 2px;
+  --neon-cyan: #c41e1e;
+  --neon-pink: #8b4513;
+  --neon-orange: #b8860b;
+}
+
 /* ---------- ACADEMIC (Wolfram Minimal) ---------- */
 :root[data-theme="academic"] {
   --bg-color: #f8f9fa;
@@ -165,6 +188,14 @@ body, html {
   backdrop-filter: none;
 }
 
+[data-theme="soviet"] .glass-panel {
+  background: #fffaf2;
+  border: 2px solid #c41e1e;
+  border-radius: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  backdrop-filter: none;
+}
+
 /* Range input styling per theme */
 input[type="range"] {
   -webkit-appearance: none;
@@ -226,6 +257,20 @@ input[type="range"]::-webkit-slider-thumb:hover {
   box-shadow: none;
   width: 14px;
   height: 14px;
+  border-radius: 0;
+}
+
+/* Soviet range */
+[data-theme="soviet"] input[type="range"] {
+  background: #d4c4a8;
+  height: 5px;
+  border-radius: 0;
+}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb {
+  background: #c41e1e;
+  box-shadow: 0 2px 6px rgba(196, 30, 30, 0.5);
+  width: 16px;
+  height: 16px;
   border-radius: 0;
 }
 
@@ -293,6 +338,21 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-color: #1a1a2e;
 }
 
+/* Soviet button */
+[data-theme="soviet"] .theme-btn {
+  background: #c41e1e;
+  color: #ffffff;
+  border: 2px solid #8b0000;
+  border-radius: 2px;
+  box-shadow: none;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+[data-theme="soviet"] .theme-btn:hover {
+  background: #a01818;
+  border-color: #5c0000;
+}
+
 /* Theme switcher floating button styles */
 .theme-switcher {
   position: fixed;
@@ -330,6 +390,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
   box-shadow: none;
   padding: 0;
   gap: 0;
+}
+
+[data-theme="soviet"] .theme-switcher {
+  background: #f0ebe4;
+  border: 2px solid #c41e1e;
+  border-radius: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  padding: 4px;
 }
 
 .theme-switcher button {
@@ -389,6 +457,21 @@ input[type="range"]::-webkit-slider-thumb:hover {
   color: #1a1a2e;
   border: none;
   border-bottom: 2px solid #1a1a2e;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+[data-theme="soviet"] .theme-switcher button {
+  background: transparent;
+  color: #6a5a4a;
+  border: none;
+  border-radius: 0;
+  font-weight: 600;
+}
+[data-theme="soviet"] .theme-switcher button.active {
+  background: #c41e1e;
+  color: #ffffff;
+  border: none;
   box-shadow: none;
   text-shadow: none;
 }
@@ -457,6 +540,21 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-color: #1a1a2e;
 }
 
+[data-theme="soviet"] .back-btn {
+  background: #c41e1e;
+  color: #ffffff;
+  border: 2px solid #8b0000;
+  border-radius: 2px;
+  box-shadow: none;
+  text-shadow: none;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+[data-theme="soviet"] .back-btn:hover {
+  background: #a01818;
+  border-color: #5c0000;
+}
+
 /* Experiment page background gradients */
 .exp-bg {
   position: fixed;
@@ -479,6 +577,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 [data-theme="academic"] .exp-bg {
   background: #f8f9fa;
+}
+
+[data-theme="soviet"] .exp-bg {
+  background: #f0ebe4;
 }
 
 /* Canvas container */
@@ -517,5 +619,10 @@ h1, h2, h3 {
 
 [data-theme="academic"] ::-webkit-scrollbar-thumb {
   background: #d0d0d0;
+  border-radius: 0;
+}
+
+[data-theme="soviet"] ::-webkit-scrollbar-thumb {
+  background: #c41e1e;
   border-radius: 0;
 }

@@ -7,7 +7,7 @@
   'use strict';
 
   const THEME_KEY = 'psu-theme-v1';
-  const VALID_THEMES = ['academic', 'glass', 'cartoon', 'cyber'];
+  const VALID_THEMES = ['academic', 'glass', 'cartoon', 'cyber', 'soviet'];
   const DEFAULT_THEME = 'academic';
 
   // --- Core Theme Functions ---
@@ -61,7 +61,8 @@
       { key: 'academic', label: '📐 学术' },
       { key: 'glass', label: '🧊 玻璃' },
       { key: 'cartoon', label: '🎨 卡通' },
-      { key: 'cyber', label: '👾 赛博' }
+      { key: 'cyber', label: '👾 赛博' },
+      { key: 'soviet', label: '☭ 苏维埃' }
     ];
 
     const current = getCurrentTheme();

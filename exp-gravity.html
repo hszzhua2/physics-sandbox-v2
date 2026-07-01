@@ -35,6 +35,10 @@
     [data-theme="cyber"] h1 { color: #ffeaa7; text-shadow: 0 0 15px rgba(255,234,167,0.5), 0 0 30px rgba(255,157,0,0.3); }
     [data-theme="cyber"] .stat-row span { color: #00f3ff; }
     [data-theme="cyber"] .val-display { color: #ffeaa7; }
+    [data-theme="soviet"] h1 { color: #c41e1e; }
+    [data-theme="soviet"] .stat-row span { color: #c41e1e; }
+    [data-theme="soviet"] .val-display { color: #8b4513; }
+    [data-theme="soviet"] #ui-panel { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; backdrop-filter: none; }
 
     /* Entrance toast */
     #entrance-toast { transition: opacity 0.8s ease; }
@@ -149,6 +153,8 @@
         scene.background = new THREE.Color(0xfef6e4);
       } else if (theme === 'glass') {
         scene.background = new THREE.Color(0x0f1117);
+      } else if (theme === 'soviet') {
+        scene.background = new THREE.Color(0xf0ebe4);
       } else {
         scene.background = new THREE.Color(0x0a0014);
       }

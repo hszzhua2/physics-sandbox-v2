@@ -47,6 +47,20 @@
     [data-theme="cyber"] .q-switch-bg { background: rgba(189,0,255,0.3); }
     [data-theme="cyber"] .q-switch-thumb { background: #bd00ff; box-shadow: 0 0 10px rgba(189,0,255,0.8); }
 
+    [data-theme="soviet"] body { background: var(--bg-color); color: var(--text-color); }
+    [data-theme="soviet"] .q-panel { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; }
+    [data-theme="soviet"] .q-text { color: #1a1a1a; }
+    [data-theme="soviet"] .q-muted { color: #6a5a4a; }
+    [data-theme="soviet"] .q-accent { color: #c41e1e; }
+    [data-theme="soviet"] .q-btn-primary { background: #f4f0ea; color: #c41e1e; border: 2px solid #c41e1e; border-radius: 2px; text-shadow: none; }
+    [data-theme="soviet"] .q-btn-secondary { background: #f4f0ea; color: #6a5a4a; border: 1px solid #d4c4a8; border-radius: 2px; }
+    [data-theme="soviet"] .q-canvas-bg { background: #f0ebe4; border: 2px solid #d4c4a8; box-shadow: none; }
+    [data-theme="soviet"] .q-switch-bg { background: #d4c4a8; }
+    [data-theme="soviet"] .q-switch-thumb { background: #c41e1e; box-shadow: none; }
+    [data-theme="soviet"] input[type="range"] { background: #d4c4a8; }
+    [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb { background: #c41e1e; }
+    [data-theme="soviet"] .grid-bg { background-image: linear-gradient(rgba(196,30,30,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(196,30,30,0.08) 1px, transparent 1px); }
+
     .q-panel { transition: all 0.4s ease; padding: 1.25rem; }
     .q-text, .q-muted, .q-accent { transition: color 0.4s ease; }
     .q-btn-primary, .q-btn-secondary { padding: 0.75rem 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
@@ -245,9 +259,9 @@
 
     function drawScene() {
       const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
-      ctx.fillStyle = theme === 'cartoon' ? 'rgba(255,255,255,0.2)' : (theme === 'glass' ? 'rgba(15,17,23,0.2)' : 'rgba(2, 6, 23, 0.2)');
+      ctx.fillStyle = theme === 'cartoon' ? 'rgba(255,255,255,0.2)' : (theme === 'glass' ? 'rgba(15,17,23,0.2)' : (theme === 'soviet' ? 'rgba(240,235,228,0.2)' : 'rgba(2, 6, 23, 0.2)'));
       ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = theme === 'cartoon' ? '#bbb' : '#475569';
+      ctx.fillStyle = theme === 'cartoon' ? '#bbb' : (theme === 'soviet' ? '#8b7d6b' : '#475569');
       if (isDoubleSlit) {
         ctx.fillRect(wallX, 0, 5, height/2 - slitGap/2 - slitWidth/2);
         ctx.fillRect(wallX, height/2 - slitGap/2 + slitWidth/2, 5, slitGap - slitWidth);
@@ -256,7 +270,7 @@
         ctx.fillRect(wallX, 0, 5, height/2 - slitWidth/2);
         ctx.fillRect(wallX, height/2 + slitWidth/2, 5, height);
       }
-      ctx.strokeStyle = theme === 'cartoon' ? '#ccc' : '#94a3b8';
+      ctx.strokeStyle = theme === 'cartoon' ? '#ccc' : (theme === 'soviet' ? '#a89880' : '#94a3b8');
       ctx.beginPath(); ctx.moveTo(screenX, 0); ctx.lineTo(screenX, height); ctx.stroke();
       ctx.fillStyle = isObserverOn ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.5)';
       ctx.beginPath();
@@ -275,7 +289,7 @@
     function drawIntensityGraph() {
       const graphWidth = intensityCanvas.width, graphHeight = intensityCanvas.height;
       const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
-      intensityCtx.fillStyle = theme === 'cartoon' ? '#f5f5f5' : (theme === 'glass' ? '#0f172a' : '#0f172a');
+      intensityCtx.fillStyle = theme === 'cartoon' ? '#f5f5f5' : (theme === 'glass' ? '#0f172a' : (theme === 'soviet' ? '#f0ebe4' : '#0f172a'));
       intensityCtx.fillRect(0, 0, graphWidth, graphHeight);
       intensityCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)'; intensityCtx.lineWidth = 1;
       for (let y = 0; y <= graphHeight; y += 30) { intensityCtx.beginPath(); intensityCtx.moveTo(0, y); intensityCtx.lineTo(graphWidth, y); intensityCtx.stroke(); }

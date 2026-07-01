@@ -67,6 +67,10 @@
     [data-theme="cyber"] .val-display { color: #00f3ff; }
     [data-theme="cyber"] .stats span { color: #00f3ff; }
 
+    [data-theme="soviet"] h1 { color: #c41e1e; }
+    [data-theme="soviet"] .val-display { color: #c41e1e; }
+    [data-theme="soviet"] .stats span { color: #c41e1e; }
+
     [data-theme="academic"] h1 { color: #1a1a2e; font-weight: 700; text-shadow: none; }
     [data-theme="academic"] p.desc { color: #7a7a8a; }
     [data-theme="academic"] .val-display { color: #1a1a2e; }
@@ -82,6 +86,18 @@
     [data-theme="academic"] .formula-block { background: #f8f9fa; border-color: #e0e0e0; }
     [data-theme="academic"] .formula-expr { color: #4a6a8a; }
     [data-theme="academic"] #theory-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
+    [data-theme="soviet"] #ui-panel { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; backdrop-filter: none; }
+    [data-theme="soviet"] #theory-panel { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; backdrop-filter: none; }
+    [data-theme="soviet"] .section-label { color: #c41e1e; }
+    [data-theme="soviet"] .section-label::before { background: #c41e1e; }
+    [data-theme="soviet"] .preset-btn { background: #f4f0ea; border-color: #d4c4a8; color: #6a5a4a; }
+    [data-theme="soviet"] .preset-btn:hover { border-color: #c41e1e; color: #1a1a1a; background: #e8e0d4; }
+    [data-theme="soviet"] .output-card { background: #f4f0ea; border-color: #d4c4a8; }
+    [data-theme="soviet"] .phase-container { background: #f4f0ea; border-color: #d4c4a8; }
+    [data-theme="soviet"] .formula-block { background: #f8f5f0; border-color: #d4c4a8; }
+    [data-theme="soviet"] .formula-expr { color: #8b4513; }
+    [data-theme="soviet"] p.desc { color: #6a5a4a; }
+    [data-theme="soviet"] .hint { color: #6a5a4a; }
 
     #ui-panel::-webkit-scrollbar { width: 5px; }
     #theory-panel::-webkit-scrollbar { width: 5px; }
@@ -92,6 +108,8 @@
     [data-theme="cartoon"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
     [data-theme="glass"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
     [data-theme="cyber"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(189,0,255,0.3); border-radius: 3px; }
+    [data-theme="soviet"] #theory-panel::-webkit-scrollbar-thumb { background: #c41e1e; border-radius: 0; }
+    [data-theme="soviet"] #ui-panel::-webkit-scrollbar-thumb { background: #c41e1e; border-radius: 0; }
 
     /* Right-side theory panel */
     #theory-panel {
@@ -416,6 +434,7 @@ V = −(m₁+m₂)gL₁cosθ₁
       if (theme === 'cartoon') bg = '#fef6e4';
       else if (theme === 'glass') bg = '#0f1117';
       else if (theme === 'academic') bg = '#f8f9fa';
+      else if (theme === 'soviet') bg = '#f0ebe4';
       else bg = '#050508';
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
@@ -595,6 +614,7 @@ V = −(m₁+m₂)gL₁cosθ₁
       if (theme === 'academic') { bg = '#f4f5f7'; gridCol = '#d0d0d0'; trailA = '#6b8cae'; trailB = '#8a7ca8'; }
       else if (theme === 'cartoon') { bg = '#fef6e4'; gridCol = '#e0d8c8'; trailA = '#ff6b6b'; trailB = '#4ecdc4'; }
       else if (theme === 'glass') { bg = '#1a1a2e'; gridCol = '#333355'; trailA = '#74b9ff'; trailB = '#ff00ea'; }
+      else if (theme === 'soviet') { bg = '#f0ebe4'; gridCol = '#d4c4a8'; trailA = '#c41e1e'; trailB = '#8b4513'; }
       else { bg = '#0a0a14'; gridCol = '#1a1a2a'; trailA = '#00f3ff'; trailB = '#bd00ff'; }
       phaseCtx.fillStyle = bg;
       phaseCtx.fillRect(0, 0, pw, ph);
@@ -628,7 +648,7 @@ V = −(m₁+m₂)gL₁cosθ₁
       const cpx = pw/2 + (cur.t1 / Math.PI) * pw/2 * 0.8;
       const cpy = ph/2 + (cur.t2 / Math.PI) * ph/2 * 0.8;
       phaseCtx.beginPath(); phaseCtx.arc(cpx, cpy, 3, 0, Math.PI*2);
-      phaseCtx.fillStyle = theme === 'academic' ? '#1a1a2e' : '#fff';
+      phaseCtx.fillStyle = (theme === 'academic' || theme === 'soviet') ? '#1a1a1a' : '#fff';
       phaseCtx.fill();
     }
 
@@ -638,6 +658,7 @@ V = −(m₁+m₂)gL₁cosθ₁
       if (theme === 'cartoon') return 'rgba(254, 246, 228, 0.05)';
       if (theme === 'glass') return 'rgba(15, 17, 23, 0.06)';
       if (theme === 'academic') return 'rgba(240, 242, 245, 0.08)';
+      if (theme === 'soviet') return 'rgba(240, 235, 228, 0.08)';
       return 'rgba(5, 5, 8, 0.06)';
     }
 
@@ -659,7 +680,7 @@ V = −(m₁+m₂)gL₁cosθ₁
       ctx.scale(SCALE, SCALE);
 
       const theme = document.documentElement.getAttribute('data-theme') || 'academic';
-      const isAcademic = theme === 'academic';
+      const isAcademic = theme === 'academic' || theme === 'soviet';
 
       for (let s = 0; s < systems.length; s++) {
         const sys = systems[s];

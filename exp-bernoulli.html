@@ -92,6 +92,23 @@
         [data-theme="cyber"] .text-red-400 { color: #ff6b6b; text-shadow: 0 0 4px rgba(255,107,107,0.2); }
         [data-theme="cyber"] .text-green-400 { color: #39ff14; text-shadow: 0 0 4px rgba(57,255,20,0.2); }
         [data-theme="cyber"] .text-blue-400 { color: #74b9ff; text-shadow: 0 0 4px rgba(116,185,255,0.2); }
+
+        [data-theme="soviet"] body { background: #f0ebe4; }
+        [data-theme="soviet"] .side-panel { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; backdrop-filter: none; color: #1a1a1a; }
+        [data-theme="soviet"] .panel-card { background: #f4f0ea; border-color: #d4c4a8; }
+        [data-theme="soviet"] .formula-box { background: #f8f5f0; border-color: #d4c4a8; }
+        [data-theme="soviet"] .formula-title { color: #c41e1e; }
+        [data-theme="soviet"] h2 { color: #c41e1e; border-color: #d4c4a8; }
+        [data-theme="soviet"] label { color: #555; }
+        [data-theme="soviet"] .text-gray-400 { color: #777; }
+        [data-theme="soviet"] .text-gray-500 { color: #999; }
+        [data-theme="soviet"] .text-gray-300 { color: #555; }
+        [data-theme="soviet"] .text-blue-300 { color: #4a6a8a; }
+        [data-theme="soviet"] .text-red-400 { color: #c0392b; }
+        [data-theme="soviet"] .text-red-500 { color: #c0392b; }
+        [data-theme="soviet"] .text-green-400 { color: #27ae60; }
+        [data-theme="soviet"] .text-blue-400 { color: #2980b9; }
+        [data-theme="soviet"] .side-panel::-webkit-scrollbar-thumb { background: #c41e1e; border-radius: 0; }
     </style>
     <script type="importmap">
     {
@@ -466,6 +483,12 @@
                 directionalLight.intensity = 0.8;
                 if (airfoilMesh) airfoilMesh.material.color.setHex(0x556677);
                 particlesMaterial.opacity = 0.7;
+            } else if (theme === 'soviet') {
+                scene.background = new THREE.Color(0xf0ebe4);
+                ambientLight.intensity = 2.5;
+                directionalLight.intensity = 1.2;
+                if (airfoilMesh) airfoilMesh.material.color.setHex(0x6b7a8a);
+                particlesMaterial.opacity = 0.5;
             } else { // cyber
                 scene.background = new THREE.Color(0x050008);
                 ambientLight.intensity = 1.2;
