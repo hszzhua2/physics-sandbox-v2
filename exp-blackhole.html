@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Black Hole Accretion Disk Simulation</title>
+    <title>黑洞吸积盘 - 物理沙盒宇宙</title>
+    <link rel="stylesheet" href="shared-theme.css">
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; }
         #info {
@@ -11,10 +12,52 @@
             font-family: monospace; font-size: 12px; z-index: 100;
             pointer-events: none;
         }
+        #bh-ui {
+            position: absolute; top: 80px; left: 30px; width: 320px; padding: 18px;
+            z-index: 10; font-family: 'Courier New', monospace; color: #ccc;
+        }
+        .bh-slider-group { margin-bottom: 14px; }
+        .bh-slider-group label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px; }
+        .bh-val { color: #60a5fa; font-weight: bold; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: #3b82f6; }
+
+        /* Theme overrides */
+        [data-theme="academic"] #bh-ui { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; color: #1a1a2e; }
+        [data-theme="academic"] .bh-val { color: #1a1a2e; }
+        [data-theme="academic"] input[type=range] { accent-color: #6b8cae; }
+        [data-theme="cartoon"] #bh-ui { background: rgba(254,246,228,0.92); border: 2px solid rgba(255,107,107,0.3); border-radius: 16px; color: #2d3436; }
+        [data-theme="cartoon"] .bh-val { color: #ff6b6b; }
+        [data-theme="glass"] #bh-ui { background: rgba(15,17,23,0.85); border: 1px solid rgba(116,185,255,0.2); border-radius: 12px; color: #e0e6ed; }
+        [data-theme="glass"] .bh-val { color: #74b9ff; }
+        [data-theme="cyber"] #bh-ui { background: rgba(10,0,20,0.9); border: 1px solid rgba(189,0,255,0.3); border-radius: 8px; color: #f0e6ff; box-shadow: 0 0 20px rgba(189,0,255,0.1); }
+        [data-theme="cyber"] .bh-val { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,0.3); }
+        [data-theme="cyber"] input[type=range] { accent-color: #bd00ff; }
     </style>
 </head>
 <body>
-    <div id="info">正在初始化 WebGL 与 GPGPU 计算环境... (待验证 FPS)</div>
+    <div id="info">正在初始化 WebGL 与 GPGPU 计算环境...</div>
+
+    <div id="bh-ui" class="glass-panel">
+        <div style="font-size:1rem; font-weight:bold; margin-bottom:12px; color:inherit;">🌌 黑洞吸积盘</div>
+        <div class="bh-slider-group">
+            <label><span>粒子流速</span><span id="val-speed" class="bh-val">1.00x</span></label>
+            <input type="range" id="slider-speed" min="0.05" max="3.0" step="0.05" value="1.0">
+        </div>
+        <div class="bh-slider-group">
+            <label><span>多普勒强度</span><span id="val-doppler" class="bh-val">1.20</span></label>
+            <input type="range" id="slider-doppler" min="0" max="3.0" step="0.1" value="1.2">
+        </div>
+        <div class="bh-slider-group">
+            <label><span>黑洞质量</span><span id="val-gmass" class="bh-val">2.50</span></label>
+            <input type="range" id="slider-gmass" min="0.5" max="8.0" step="0.1" value="2.5">
+        </div>
+        <div class="bh-slider-group">
+            <label><span>引力透镜</span><span id="val-lensing" class="bh-val">ON</span></label>
+            <input type="range" id="slider-lensing" min="0" max="1" step="1" value="1">
+        </div>
+    </div>
+
+    <script src="shared-theme.js"></script>
     <script type="importmap">
         {
             "imports": {
@@ -99,6 +142,7 @@
             uniform float u_R;
             uniform float u_DiskMin;
             uniform float u_DiskMax;
+            uniform float u_Speed;
             
             float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 
@@ -110,7 +154,7 @@
                 vec4 velData = texture2D(textureVelocity, uv);
                 vec3 vel = velData.xyz;
                 
-                pos += vel * 0.016; // 假设 60fps 对应的 dt = 0.016
+                pos += vel * 0.016 * u_Speed;
                 
                 float r = length(pos);
                 // 粒子落入视界或飞离吸积盘，进行重置
@@ -235,6 +279,36 @@
         init();
         animate();
 
+        // ---- Theme & UI Controls ----
+        PSUTheme.createSwitcher();
+        PSUTheme.createBackButton('index.html');
+
+        const sliderSpeed = document.getElementById('slider-speed');
+        const sliderDoppler = document.getElementById('slider-doppler');
+        const sliderGmass = document.getElementById('slider-gmass');
+        const sliderLensing = document.getElementById('slider-lensing');
+
+        sliderSpeed.addEventListener('input', () => {
+            const v = parseFloat(sliderSpeed.value);
+            document.getElementById('val-speed').textContent = v.toFixed(2) + 'x';
+            if (posVariable) posVariable.material.uniforms.u_Speed.value = v;
+        });
+        sliderDoppler.addEventListener('input', () => {
+            const v = parseFloat(sliderDoppler.value);
+            document.getElementById('val-doppler').textContent = v.toFixed(2);
+            if (particleSystem) particleSystem.material.uniforms.u_dopplerFactor.value = v;
+        });
+        sliderGmass.addEventListener('input', () => {
+            const v = parseFloat(sliderGmass.value);
+            document.getElementById('val-gmass').textContent = v.toFixed(2);
+            if (velVariable) velVariable.material.uniforms.u_GM.value = v;
+        });
+        sliderLensing.addEventListener('input', () => {
+            const v = parseInt(sliderLensing.value);
+            document.getElementById('val-lensing').textContent = v ? 'ON' : 'OFF';
+            if (lensingPass) lensingPass.enabled = !!v;
+        });
+
         function init() {
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -297,6 +371,7 @@
             posVariable.material.uniforms.u_R = { value: PARAMS.BH_RADIUS };
             posVariable.material.uniforms.u_DiskMin = { value: PARAMS.DISK_MIN };
             posVariable.material.uniforms.u_DiskMax = { value: PARAMS.DISK_MAX };
+            posVariable.material.uniforms.u_Speed = { value: 1.0 };
             
             const error = gpuCompute.init();
             if (error !== null) {
