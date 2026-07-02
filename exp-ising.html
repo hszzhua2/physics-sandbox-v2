@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>伊辛模型 — Ising Model | 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    :root {
+      --is-bg: #0f172a; --is-bg2: #1e293b; --is-panel: rgba(30,41,59,0.85);
+      --is-border: rgba(255,255,255,0.08); --is-text: #f8fafc; --is-text2: #94a3b8;
+      --is-accent: #f87171; --is-accent2: #60a5fa; --is-accent3: #fbbf24;
+      --is-grid-bg: #0b1221; --is-bar-bg: rgba(255,255,255,0.06);
+      --is-spin-up: #ef4444; --is-spin-down: #3b82f6;
+    }
+    [data-theme="academic"] {
+      --is-bg: #f5f5f7; --is-bg2: #fff; --is-panel: #fff; --is-border: #e0e0e0;
+      --is-text: #1a1a2e; --is-text2: #666; --is-accent: #c0392b; --is-accent2: #5b7a8a;
+      --is-accent3: #b8860b; --is-grid-bg: #f0f0f2; --is-bar-bg: rgba(0,0,0,0.04);
+      --is-spin-up: #c0392b; --is-spin-down: #5b7a8a;
+    }
+    [data-theme="cartoon"] {
+      --is-bg: #fff8f0; --is-bg2: #fff5e6; --is-panel: rgba(255,248,240,0.95);
+      --is-border: rgba(0,0,0,0.08); --is-text: #2d3436; --is-text2: #636e72;
+      --is-accent: #ff6b6b; --is-accent2: #74b9ff; --is-accent3: #ffeaa7;
+      --is-grid-bg: #fff0e0; --is-bar-bg: rgba(0,0,0,0.04);
+      --is-spin-up: #ff6b6b; --is-spin-down: #74b9ff;
+    }
+    [data-theme="cyber"] {
+      --is-bg: #040410; --is-bg2: #08081a; --is-panel: rgba(8,8,26,0.9);
+      --is-border: rgba(0,243,255,0.12); --is-text: #e0f7fa; --is-text2: #a080c0;
+      --is-accent: #ff00ea; --is-accent2: #00f3ff; --is-accent3: #bd00ff;
+      --is-grid-bg: #020208; --is-bar-bg: rgba(0,243,255,0.05);
+      --is-spin-up: #ff00ea; --is-spin-down: #00f3ff;
+    }
+    [data-theme="soviet"] {
+      --is-bg: #f0ebe4; --is-bg2: #fffaf2; --is-panel: #fffaf2;
+      --is-border: #d4c4a8; --is-text: #1a1a1a; --is-text2: #6a5a4a;
+      --is-accent: #c41e1e; --is-accent2: #5b7a8a; --is-accent3: #b8860b;
+      --is-grid-bg: #eae5de; --is-bar-bg: rgba(0,0,0,0.04);
+      --is-spin-up: #c41e1e; --is-spin-down: #5b7a8a;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: var(--font-main,'Segoe UI','Microsoft YaHei',system-ui,sans-serif);
+      background: var(--is-bg); color: var(--is-text); min-height:100vh; overflow-x:hidden;
+    }
+    .top-bar {
+      position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;
+      justify-content:space-between;padding:10px 20px;background:var(--is-bg2);
+      border-bottom:1px solid var(--is-border);
+    }
+    .top-bar .sub { font-size:0.9rem;font-weight:700;color:var(--is-accent); }
+    .top-bar .desc { font-size:0.7rem;color:var(--is-text2);margin-left:8px; }
+    .back-btn {
+      padding:6px 14px;border-radius:8px;border:1px solid var(--is-border);
+      background:var(--is-bar-bg);color:var(--is-text2);text-decoration:none;
+      font-size:0.8rem;cursor:pointer;transition:all 0.2s;
+    }
+    .back-btn:hover { color:var(--is-accent);border-color:var(--is-accent); }
+
+    .app { padding:72px 16px 16px;display:flex;flex-direction:column;gap:14px;min-height:100vh; }
+
+    .ctrl-panel {
+      background:var(--is-panel);border:1px solid var(--is-border);border-radius:12px;
+      padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;
+      justify-content:space-between;gap:12px;
+    }
+    .ctrl-left { display:flex;flex-direction:column;gap:4px; }
+    .ctrl-left h2 { font-size:1.05rem;font-weight:700; }
+    .ctrl-legend { display:flex;gap:10px;font-size:0.68rem;color:var(--is-text2);flex-wrap:wrap; }
+    .ctrl-legend span { display:flex;align-items:center;gap:4px; }
+    .dot { width:8px;height:8px;border-radius:50%;display:inline-block; }
+
+    .ctrl-right { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+    .ctrl-group { display:flex;flex-direction:column;align-items:flex-end; }
+    .ctrl-group label { font-size:0.62rem;text-transform:uppercase;color:var(--is-text2);letter-spacing:1px; }
+    .ctrl-group .val { font-family:monospace;font-size:0.85rem;color:var(--is-accent);font-weight:600; }
+
+    .btn {
+      padding:7px 16px;border-radius:10px;border:1px solid var(--is-border);
+      background:var(--is-bar-bg);color:var(--is-text);font-size:0.78rem;font-weight:600;
+      cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.2s;
+    }
+    .btn:hover:not(:disabled) { background:var(--is-accent);color:#fff;border-color:var(--is-accent); }
+    .btn:disabled { opacity:0.4;cursor:not-allowed; }
+    .btn-primary { color:var(--is-accent);border-color:var(--is-accent); }
+    .btn-danger { color:var(--is-accent);border-color:var(--is-accent); }
+
+    .content { display:flex;gap:14px;flex:1;min-height:0; }
+    .left-panel {
+      flex:1;background:var(--is-panel);border:1px solid var(--is-border);border-radius:12px;
+      padding:12px;display:flex;flex-direction:column;min-width:0;
+    }
+    .panel-header {
+      display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;
+      font-size:0.82rem;font-weight:600;
+    }
+    .canvas-wrap {
+      flex:1;position:relative;background:var(--is-grid-bg);border-radius:8px;
+      overflow:hidden;min-height:280px;aspect-ratio:1/1;max-height:calc(100vh - 380px);
+    }
+    .canvas-wrap canvas { position:absolute;top:0;left:0;width:100%;height:100%;image-rendering:pixelated; }
+
+    .right-panel {
+      width:360px;min-width:300px;background:var(--is-panel);border:1px solid var(--is-border);
+      border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;
+      overflow-y:auto;max-height:calc(100vh - 200px);
+    }
+    .right-panel h3 {
+      font-size:0.75rem;font-weight:600;color:var(--is-text2);text-transform:uppercase;
+      letter-spacing:1px;border-bottom:1px solid var(--is-border);padding-bottom:6px;
+    }
+
+    .chart-wrap {
+      height:120px;background:var(--is-grid-bg);border-radius:8px;position:relative;
+      overflow:hidden;border:1px solid var(--is-border);
+    }
+    .chart-wrap canvas { position:absolute;top:0;left:0;width:100%;height:100%; }
+    .chart-label { position:absolute;font-size:0.55rem;color:var(--is-text2);pointer-events:none; }
+
+    .stat-card {
+      background:var(--is-bar-bg);border:1px solid var(--is-border);
+      border-radius:8px;padding:10px 12px;
+    }
+    .stat-card .label { font-size:0.65rem;color:var(--is-text2);margin-bottom:3px; }
+    .stat-card .value { font-family:monospace;font-size:1.1rem;font-weight:700;color:var(--is-accent); }
+    .grid-stat { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+    .grid-stat .stat-card .value { font-size:0.9rem; }
+    .conclusion { font-size:0.66rem;color:var(--is-text2);line-height:1.5;font-style:italic;margin-top:4px; }
+
+    .param-slider {
+      display:flex;flex-direction:column;gap:2px;margin-bottom:8px;
+    }
+    .param-slider .header { display:flex;justify-content:space-between;font-size:0.75rem; }
+    .param-slider .header .name { color:var(--is-text);font-weight:600; }
+    .param-slider .header .val { font-family:monospace;color:var(--is-accent);font-size:0.72rem; }
+    input[type=range] {
+      width:100%;height:4px;border-radius:2px;background:var(--is-bar-bg);
+      -webkit-appearance:none;appearance:none;outline:none;cursor:pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+      background:var(--is-accent);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .preset-row { display:flex;gap:6px;flex-wrap:wrap;margin-top:6px; }
+    .preset-btn {
+      padding:4px 10px;border:1px solid var(--is-border);background:var(--is-bar-bg);
+      color:var(--is-text2);border-radius:6px;font-size:0.68rem;font-weight:600;cursor:pointer;
+      font-family:inherit;
+    }
+    .preset-btn:hover { border-color:var(--is-accent);color:var(--is-accent); }
+
+    .formula-block {
+      background:var(--is-bar-bg);border:1px solid var(--is-border);border-radius:8px;
+      padding:10px 12px;font-size:0.72rem;line-height:1.7;
+    }
+    .formula-block .title { font-weight:700;color:var(--is-accent);margin-bottom:4px;font-size:0.75rem; }
+    .formula-block .expr { font-family:monospace;color:var(--is-accent2);font-size:0.78rem; }
+
+    .info-section {
+      background:var(--is-panel);border:1px solid var(--is-border);
+      border-radius:12px;padding:18px 22px;
+    }
+    .info-section h2 {
+      font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;
+      gap:8px;color:var(--is-accent);border-bottom:1px solid var(--is-border);padding-bottom:10px;
+    }
+    .info-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:20px; }
+    .info-col h3 {
+      font-size:0.78rem;font-weight:600;color:var(--is-accent2);margin-bottom:8px;
+      display:flex;align-items:center;gap:6px;
+    }
+    .info-col h3 span {
+      width:18px;height:18px;border-radius:4px;background:var(--is-accent2);color:#fff;
+      font-size:0.65rem;display:flex;align-items:center;justify-content:center;
+    }
+    .info-col p,.info-col li { font-size:0.74rem;color:var(--is-text);line-height:1.6; }
+    .info-col ul { padding-left:16px; }
+    .info-col li { margin-bottom:3px; }
+
+    @media (max-width:900px) {
+      .content { flex-direction:column; }
+      .right-panel { width:100%;max-height:unset; }
+      .canvas-wrap { max-height:60vw; }
+      .info-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <script src="shared-theme.js"></script>
+
+  <div class="top-bar">
+    <div>
+      <span class="sub">伊辛模型</span>
+      <span class="desc">统计物理 / 凝聚态物理</span>
+    </div>
+    <a class="back-btn" href="index.html">&#8592; 返回首页</a>
+  </div>
+
+  <div class="app">
+    <div class="ctrl-panel">
+      <div class="ctrl-left">
+        <h2>二维伊辛模型 — 蒙特卡洛模拟</h2>
+        <div class="ctrl-legend">
+          <span><span class="dot" style="background:var(--is-spin-up)"></span> 自旋 +1 (上)</span>
+          <span><span class="dot" style="background:var(--is-spin-down)"></span> 自旋 -1 (下)</span>
+          <span><span class="dot" style="background:var(--is-accent3)"></span> 磁畴边界</span>
+        </div>
+      </div>
+      <div class="ctrl-right">
+        <div class="ctrl-group">
+          <label>MC 步数</label>
+          <span class="val" id="stat-steps">0</span>
+        </div>
+        <div class="ctrl-group">
+          <label>温度 T / Tc</label>
+          <span class="val" id="stat-tnorm">0.00</span>
+        </div>
+        <button class="btn btn-primary" id="btn-start">&#9654; 运行</button>
+        <button class="btn" id="btn-pause" disabled>&#10074;&#10074; 暂停</button>
+        <button class="btn btn-danger" id="btn-reset">&#8635; 重置</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="left-panel">
+        <div class="panel-header">
+          <span>二维晶格自旋构型</span>
+          <span style="font-size:0.65rem;color:var(--is-text2);" id="lattice-info">128 x 128</span>
+        </div>
+        <div class="canvas-wrap" id="latticeWrap">
+          <canvas id="latticeCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <h3>参数控制</h3>
+        <div class="param-slider">
+          <div class="header"><span class="name">温度 T (J/kB 单位)</span><span class="val" id="val-T">2.27</span></div>
+          <input type="range" id="slider-T" min="0.1" max="5.0" step="0.01" value="2.27">
+        </div>
+        <div class="param-slider">
+          <div class="header"><span class="name">晶格尺寸 N</span><span class="val" id="val-N">128</span></div>
+          <input type="range" id="slider-N" min="32" max="256" step="32" value="128">
+        </div>
+        <div class="param-slider">
+          <div class="header"><span class="name">每帧 MC Sweeps</span><span class="val" id="val-spd">5</span></div>
+          <input type="range" id="slider-spd" min="1" max="20" step="1" value="5">
+        </div>
+        <div class="preset-row">
+          <button class="preset-btn" data-preset="ordered">全部朝上</button>
+          <button class="preset-btn" data-preset="random">随机构型</button>
+          <button class="preset-btn" data-preset="checker">棋盘格</button>
+        </div>
+
+        <h3>实时统计</h3>
+        <div class="grid-stat">
+          <div class="stat-card">
+            <div class="label">磁化强度 m</div>
+            <div class="value" id="stat-mag">0.000</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">能量密度 E/N</div>
+            <div class="value" id="stat-energy" style="color:var(--is-accent2)">-2.000</div>
+          </div>
+        </div>
+
+        <h3>磁化率 vs 温度</h3>
+        <div class="chart-wrap">
+          <canvas id="susceptCanvas"></canvas>
+          <span class="chart-label" style="top:4px;right:8px;">T &rarr;</span>
+          <span class="chart-label" style="top:4px;left:8px;">|m|</span>
+        </div>
+
+        <h3>公式</h3>
+        <div class="formula-block">
+          <div class="title">哈密顿量</div>
+          <div class="expr">H = -J &Sigma; S<sub>i</sub> S<sub>j</sub> &nbsp; (近邻对)</div>
+          <div style="margin-top:4px;font-size:0.68rem;color:var(--is-text2);line-height:1.5;">
+            2D 正方晶格居里温度：T<sub>c</sub> = 2J / ln(1+&radic;2) &asymp; 2.269 J/kB<br>
+            Metropolis 准则：&Delta;E &le; 0 时接受翻转；&Delta;E > 0 时以 e<sup>-&Delta;E/kT</sup> 概率接受
+          </div>
+        </div>
+
+        <div class="conclusion" style="margin-top:6px;">
+          * T &lt; T<sub>c</sub>：自旋有序排列（铁磁相），自发磁化 m &ne; 0<br>
+          * T &gt; T<sub>c</sub>：自旋无序（顺磁相），m &asymp; 0<br>
+          * T = T<sub>c</sub>：临界点，磁畴尺寸发散，幂律行为
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>模型原理</h2>
+      <div class="info-grid">
+        <div class="info-col">
+          <h3><span>1</span> 物理背景</h3>
+          <p><strong>伊辛模型</strong>（Ernst Ising, 1925）是统计物理中最基本的模型之一，描述具有双态自由度的格点系统。二维伊辛模型的精确解（Onsager, 1944）证明了相变的存在，是理解<strong>铁磁性-顺磁性相变</strong>和<strong>临界现象</strong>的基石。</p>
+        </div>
+        <div class="info-col">
+          <h3><span>2</span> 模拟方法</h3>
+          <ul>
+            <li><strong>二维正方晶格：</strong>每个格点自旋 S = +1 或 -1。</li>
+            <li><strong>Metropolis 蒙特卡洛：</strong>随机选取格点，计算翻转能量差 &Delta;E，按 Metropolis 准则决定是否翻转。</li>
+            <li><strong>周期性边界条件：</strong>消除边界效应，模拟无限大系统。</li>
+            <li><strong>每次 MC Sweep = N&sup2; 次翻转尝试。</strong></li>
+          </ul>
+        </div>
+        <div class="info-col">
+          <h3><span>3</span> 观察要点</h3>
+          <ul>
+            <li>将 T 调至 2.27 以下，观察磁畴凝聚为单一有序态。</li>
+            <li>将 T 调至 2.27 以上，观察有序态瓦解为无序态。</li>
+            <li>在 T &asymp; 2.27 附近，可见大小不一的磁畴共存——<strong>临界涨落</strong>。</li>
+            <li>缓慢升温/降温可观察到明显的<strong>滞后效应</strong>。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 2D Ising Model — Metropolis Monte Carlo
+    // ==========================================
+    const TC = 2.0 / Math.log(1 + Math.sqrt(2)); // ~2.269
+
+    function getThemeSpinColors() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+      const s = getComputedStyle(document.documentElement);
+      const up = s.getPropertyValue('--is-spin-up').trim() || '#ef4444';
+      const down = s.getPropertyValue('--is-spin-down').trim() || '#3b82f6';
+      const bg = s.getPropertyValue('--is-grid-bg').trim() || '#0b1221';
+      return { up, down, bg };
+    }
+
+    class IsingModel {
+      constructor() {
+        this.N = 128;
+        this.T = 2.27;
+        this.speed = 5;
+        this.spins = null;
+        this.totalMC = 0;
+        this.running = false;
+        this.rafId = null;
+        this.magHistory = []; // for susceptibility chart
+
+        this.latticeCanvas = document.getElementById('latticeCanvas');
+        this.latticeCtx = this.latticeCanvas.getContext('2d');
+        this.susceptCanvas = document.getElementById('susceptCanvas');
+        this.susceptCtx = this.susceptCanvas.getContext('2d');
+
+        this.ui = {
+          steps: document.getElementById('stat-steps'),
+          tnorm: document.getElementById('stat-tnorm'),
+          mag: document.getElementById('stat-mag'),
+          energy: document.getElementById('stat-energy'),
+          latticeInfo: document.getElementById('lattice-info'),
+          sliderT: document.getElementById('slider-T'),
+          sliderN: document.getElementById('slider-N'),
+          sliderSpd: document.getElementById('slider-spd'),
+          valT: document.getElementById('val-T'),
+          valN: document.getElementById('val-N'),
+          valSpd: document.getElementById('val-spd')
+        };
+
+        document.getElementById('btn-start').addEventListener('click', () => this.start());
+        document.getElementById('btn-pause').addEventListener('click', () => this.pause());
+        document.getElementById('btn-reset').addEventListener('click', () => this.reset());
+
+        this.ui.sliderT.addEventListener('input', () => {
+          this.T = parseFloat(this.ui.sliderT.value);
+          this.ui.valT.textContent = this.T.toFixed(2);
+        });
+        this.ui.sliderN.addEventListener('input', () => {
+          this.N = parseInt(this.ui.sliderN.value);
+          this.ui.valN.textContent = this.N;
+          this.initSpins('random');
+          this.draw();
+        });
+        this.ui.sliderSpd.addEventListener('input', () => {
+          this.speed = parseInt(this.ui.sliderSpd.value);
+          this.ui.valSpd.textContent = this.speed;
+        });
+
+        document.querySelectorAll('[data-preset]').forEach(btn => {
+          btn.addEventListener('click', () => this.initSpins(btn.dataset.preset));
+        });
+
+        window.addEventListener('resize', () => { this.resizeCanvas(); this.draw(); });
+        this.initSpins('random');
+        this.resizeCanvas();
+        this.draw();
+      }
+
+      initSpins(preset) {
+        const N = this.N;
+        this.spins = new Int8Array(N * N);
+        this.totalMC = 0;
+        this.magHistory = [];
+
+        if (preset === 'ordered') {
+          this.spins.fill(1);
+        } else if (preset === 'checker') {
+          for (let y = 0; y < N; y++)
+            for (let x = 0; x < N; x++)
+              this.spins[y * N + x] = (x + y) % 2 === 0 ? 1 : -1;
+        } else {
+          for (let i = 0; i < N * N; i++)
+            this.spins[i] = Math.random() < 0.5 ? 1 : -1;
+        }
+        this.updateStats();
+        this.ui.steps.textContent = '0';
+      }
+
+      resizeCanvas() {
+        const wrap = this.latticeCanvas.parentElement;
+        const r = wrap.getBoundingClientRect();
+        const size = Math.min(r.width, r.height);
+        this.latticeCanvas.width = size;
+        this.latticeCanvas.height = size;
+
+        const sr = this.susceptCanvas.parentElement.getBoundingClientRect();
+        this.susceptCanvas.width = sr.width;
+        this.susceptCanvas.height = sr.height;
+      }
+
+      // Metropolis single spin flip
+      mcSweep() {
+        const N = this.N;
+        const T = this.T;
+        const spins = this.spins;
+        const total = N * N;
+        // Precompute exp table for speed
+        const expTable = new Float64Array(5); // dE in units of 2J: 0,4,8 (indices 0,2,4)
+        for (let i = 0; i < 5; i++) {
+          expTable[i] = Math.exp(-i * 2.0 / Math.max(T, 0.001));
+        }
+
+        for (let step = 0; step < total; step++) {
+          const idx = (Math.random() * total) | 0;
+          const x = idx % N;
+          const y = (idx / N) | 0;
+          const s = spins[idx];
+
+          // Sum of 4 nearest neighbors (periodic BC)
+          const nn = spins[((y - 1 + N) % N) * N + x]
+                   + spins[((y + 1) % N) * N + x]
+                   + spins[y * N + ((x - 1 + N) % N)]
+                   + spins[y * N + ((x + 1) % N)];
+
+          const dE = 2 * s * nn; // in units of J
+          if (dE <= 0) {
+            spins[idx] = -s;
+          } else {
+            const dE2 = dE; // dE is always positive here, even multiples of 2
+            // dE can be 4 or 8
+            const key = dE2 >> 1; // 2 or 4
+            if (key < 5 && Math.random() < expTable[key]) {
+              spins[idx] = -s;
+            }
+          }
+        }
+        this.totalMC++;
+      }
+
+      start() {
+        if (this.running) return;
+        this.running = true;
+        document.getElementById('btn-start').disabled = true;
+        document.getElementById('btn-pause').disabled = false;
+        this.loop();
+      }
+
+      pause() {
+        this.running = false;
+        document.getElementById('btn-start').disabled = false;
+        document.getElementById('btn-pause').disabled = true;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+      }
+
+      reset() {
+        this.pause();
+        this.initSpins('random');
+        this.resizeCanvas();
+        this.draw();
+      }
+
+      loop() {
+        if (!this.running) return;
+        for (let i = 0; i < this.speed; i++) this.mcSweep();
+        this.updateStats();
+        this.draw();
+        this.rafId = requestAnimationFrame(() => this.loop());
+      }
+
+      updateStats() {
+        const spins = this.spins;
+        const N = this.N;
+        const total = N * N;
+
+        // Magnetization
+        let magSum = 0;
+        let energySum = 0;
+        for (let y = 0; y < N; y++) {
+          for (let x = 0; x < N; x++) {
+            const s = spins[y * N + x];
+            magSum += s;
+            // Only count right and down neighbors to avoid double counting
+            energySum -= s * spins[y * N + ((x + 1) % N)];
+            energySum -= s * spins[((y + 1) % N) * N + x];
+          }
+        }
+        const mag = magSum / total;
+        const energy = energySum / total;
+
+        this.ui.steps.textContent = this.totalMC.toLocaleString();
+        this.ui.tnorm.textContent = (this.T / TC).toFixed(3);
+        this.ui.mag.textContent = Math.abs(mag).toFixed(3);
+        this.ui.energy.textContent = energy.toFixed(3);
+
+        // Record for chart (keep last 200 points)
+        this.magHistory.push({ T: this.T, mag: Math.abs(mag) });
+        if (this.magHistory.length > 200) this.magHistory.shift();
+      }
+
+      draw() {
+        this.drawLattice();
+        this.drawSusceptChart();
+      }
+
+      drawLattice() {
+        const ctx = this.latticeCtx;
+        const canvas = this.latticeCanvas;
+        const w = canvas.width, h = canvas.height;
+        const N = this.N;
+        const colors = getThemeSpinColors();
+
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(0, 0, w, h);
+
+        const cellW = w / N;
+        const cellH = h / N;
+
+        // For performance, draw in blocks using ImageData
+        const imgData = ctx.createImageData(w, h);
+        const data = imgData.data;
+
+        // Parse spin colors to RGB
+        const upRGB = this.hexToRGB(colors.up);
+        const dnRGB = this.hexToRGB(colors.down);
+
+        for (let py = 0; py < h; py++) {
+          const gy = Math.min(((py / h) * N) | 0, N - 1);
+          for (let px = 0; px < w; px++) {
+            const gx = Math.min(((px / w) * N) | 0, N - 1);
+            const s = this.spins[gy * N + gx];
+            const rgb = s === 1 ? upRGB : dnRGB;
+            const idx = (py * w + px) * 4;
+            data[idx] = rgb[0];
+            data[idx + 1] = rgb[1];
+            data[idx + 2] = rgb[2];
+            data[idx + 3] = 255;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+      }
+
+      drawSusceptChart() {
+        const ctx = this.susceptCtx;
+        const w = this.susceptCanvas.width;
+        const h = this.susceptCanvas.height;
+        if (w === 0 || h === 0) return;
+
+        ctx.clearRect(0, 0, w, h);
+
+        const ml = 35, mr = 10, mt = 15, mb = 22;
+        const cw = w - ml - mr;
+        const ch = h - mt - mb;
+
+        // Axes
+        const s = getComputedStyle(document.documentElement);
+        ctx.strokeStyle = 'rgba(128,128,128,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ml, mt); ctx.lineTo(ml, mt + ch); ctx.lineTo(ml + cw, mt + ch);
+        ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = s.getPropertyValue('--is-text2').trim() || '#94a3b8';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText('1.0', ml - 4, mt);
+        ctx.fillText('0.5', ml - 4, mt + ch / 2);
+        ctx.fillText('0', ml - 4, mt + ch);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText('0', ml, mt + ch + 4);
+        ctx.fillText((TC).toFixed(1), ml + (TC / 5) * cw, mt + ch + 4);
+        ctx.fillText('5.0', ml + cw, mt + ch + 4);
+
+        // Tc vertical line
+        const tcX = ml + (TC / 5) * cw;
+        ctx.beginPath();
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(tcX, mt); ctx.lineTo(tcX, mt + ch);
+        ctx.strokeStyle = 'rgba(255,200,0,0.4)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(255,200,0,0.6)';
+        ctx.font = '8px monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText('Tc', tcX, mt - 1);
+
+        // Plot magnetization history
+        if (this.magHistory.length < 2) return;
+        ctx.beginPath();
+        ctx.strokeStyle = s.getPropertyValue('--is-accent').trim() || '#f87171';
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < this.magHistory.length; i++) {
+          const p = this.magHistory[i];
+          const x = ml + (p.T / 5) * cw;
+          const y = mt + ch - p.mag * ch;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      hexToRGB(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { new IsingModel(); });
+  </script>
+</body>
+</html>
