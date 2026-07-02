@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生成功的随机性 — Pluchino 模型 | 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    :root {
+      --plt-bg: #0f172a;
+      --plt-bg2: #1e293b;
+      --plt-panel: rgba(30, 41, 59, 0.85);
+      --plt-border: rgba(255, 255, 255, 0.08);
+      --plt-text: #f8fafc;
+      --plt-text2: #94a3b8;
+      --plt-accent: #67e8f9;
+      --plt-accent2: #f87171;
+      --plt-accent3: #a78bfa;
+      --plt-grid-bg: #0b1221;
+      --plt-bar-bg: rgba(255,255,255,0.06);
+    }
+
+    [data-theme="academic"] {
+      --plt-bg: #f5f5f7;
+      --plt-bg2: #ffffff;
+      --plt-panel: #ffffff;
+      --plt-border: #e0e0e0;
+      --plt-text: #1a1a2e;
+      --plt-text2: #666;
+      --plt-accent: #6b8cae;
+      --plt-accent2: #c0392b;
+      --plt-accent3: #8a7ca8;
+      --plt-grid-bg: #f0f0f2;
+      --plt-bar-bg: rgba(0,0,0,0.04);
+    }
+
+    [data-theme="cartoon"] {
+      --plt-bg: #fff8f0;
+      --plt-bg2: #fff5e6;
+      --plt-panel: rgba(255, 248, 240, 0.95);
+      --plt-border: rgba(0,0,0,0.08);
+      --plt-text: #2d3436;
+      --plt-text2: #636e72;
+      --plt-accent: #00b894;
+      --plt-accent2: #e17055;
+      --plt-accent3: #a29bfe;
+      --plt-grid-bg: #fff0e0;
+      --plt-bar-bg: rgba(0,0,0,0.04);
+    }
+
+    [data-theme="cyber"] {
+      --plt-bg: #040410;
+      --plt-bg2: #08081a;
+      --plt-panel: rgba(8, 8, 26, 0.9);
+      --plt-border: rgba(0, 243, 255, 0.12);
+      --plt-text: #e0f7fa;
+      --plt-text2: #a080c0;
+      --plt-accent: #00f3ff;
+      --plt-accent2: #ff00ea;
+      --plt-accent3: #bd00ff;
+      --plt-grid-bg: #020208;
+      --plt-bar-bg: rgba(0, 243, 255, 0.05);
+    }
+
+    [data-theme="soviet"] {
+      --plt-bg: #f0ebe4;
+      --plt-bg2: #fffaf2;
+      --plt-panel: #fffaf2;
+      --plt-border: #d4c4a8;
+      --plt-text: #1a1a1a;
+      --plt-text2: #6a5a4a;
+      --plt-accent: #c41e1e;
+      --plt-accent2: #8b0000;
+      --plt-accent3: #5a4a3a;
+      --plt-grid-bg: #eae5de;
+      --plt-bar-bg: rgba(0,0,0,0.04);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-main, 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif);
+      background: var(--plt-bg);
+      color: var(--plt-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px; background: var(--plt-bg2);
+      border-bottom: 1px solid var(--plt-border);
+    }
+    .top-bar .sub { font-size: 0.9rem; font-weight: 700; color: var(--plt-accent); }
+    .top-bar .desc { font-size: 0.7rem; color: var(--plt-text2); margin-left: 8px; }
+    .back-btn {
+      padding: 6px 14px; border-radius: 8px; border: 1px solid var(--plt-border);
+      background: var(--plt-bar-bg); color: var(--plt-text2);
+      text-decoration: none; font-size: 0.8rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .back-btn:hover { color: var(--plt-accent); border-color: var(--plt-accent); }
+
+    .app {
+      padding: 72px 16px 16px;
+      display: flex; flex-direction: column; gap: 14px; min-height: 100vh;
+    }
+
+    .ctrl-panel {
+      background: var(--plt-panel); border: 1px solid var(--plt-border);
+      border-radius: 12px; padding: 16px 20px;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .ctrl-left { display: flex; flex-direction: column; gap: 4px; }
+    .ctrl-left h2 { font-size: 1.1rem; font-weight: 700; }
+    .ctrl-legend { display: flex; gap: 12px; font-size: 0.7rem; color: var(--plt-text2); flex-wrap: wrap; }
+    .ctrl-legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    .ctrl-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .ctrl-group { display: flex; flex-direction: column; align-items: flex-end; }
+    .ctrl-group label { font-size: 0.65rem; text-transform: uppercase; color: var(--plt-text2); letter-spacing: 1px; }
+    .ctrl-group input[type="number"] {
+      width: 60px; background: var(--plt-grid-bg); border: 1px solid var(--plt-border);
+      color: var(--plt-accent); font-family: monospace; font-size: 0.9rem;
+      padding: 4px 6px; border-radius: 6px; text-align: center;
+    }
+    .ctrl-time { font-family: monospace; font-size: 1.1rem; font-weight: 700; color: var(--plt-accent); }
+
+    .btn {
+      padding: 8px 18px; border-radius: 10px; border: 1px solid var(--plt-border);
+      background: var(--plt-bar-bg); color: var(--plt-text);
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn:hover:not(:disabled) { background: var(--plt-accent); color: #fff; border-color: var(--plt-accent); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary { color: var(--plt-accent); border-color: var(--plt-accent); }
+    .btn-danger { color: var(--plt-accent2); border-color: var(--plt-accent2); }
+
+    .content {
+      display: flex; gap: 14px; flex: 1; min-height: 0;
+    }
+    .left-panel {
+      flex: 1; background: var(--plt-panel); border: 1px solid var(--plt-border);
+      border-radius: 12px; padding: 12px; display: flex; flex-direction: column; min-width: 0;
+    }
+    .panel-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+      font-size: 0.82rem; font-weight: 600;
+    }
+    .panel-header .hint { font-size: 0.65rem; color: var(--plt-text2); }
+
+    .canvas-wrap {
+      flex: 1; position: relative; background: var(--plt-grid-bg);
+      border-radius: 8px; overflow: hidden; min-height: 300px;
+    }
+    .canvas-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    .right-panel {
+      width: 380px; min-width: 300px; background: var(--plt-panel);
+      border: 1px solid var(--plt-border); border-radius: 12px;
+      padding: 12px; display: flex; flex-direction: column; gap: 10px;
+      overflow-y: auto; max-height: calc(100vh - 200px);
+    }
+    .right-panel h3 {
+      font-size: 0.78rem; font-weight: 600; color: var(--plt-text2);
+      text-transform: uppercase; letter-spacing: 1px;
+      border-bottom: 1px solid var(--plt-border); padding-bottom: 6px;
+    }
+
+    .chart-wrap {
+      height: 160px; background: var(--plt-grid-bg); border-radius: 8px;
+      position: relative; overflow: hidden; border: 1px solid var(--plt-border);
+    }
+    .chart-wrap canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .chart-label {
+      position: absolute; font-size: 0.58rem; color: var(--plt-text2); pointer-events: none;
+    }
+
+    .stat-card {
+      background: var(--plt-bar-bg); border: 1px solid var(--plt-border);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .stat-card .label { font-size: 0.65rem; color: var(--plt-text2); margin-bottom: 4px; }
+    .stat-card .value {
+      font-family: monospace; font-size: 1.15rem; font-weight: 700; color: var(--plt-accent);
+    }
+    .stat-bar {
+      width: 100%; height: 6px; background: var(--plt-grid-bg); border-radius: 3px;
+      overflow: hidden; margin-top: 6px;
+    }
+    .stat-bar-fill {
+      height: 100%; background: var(--plt-accent); border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .grid-stat { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid-stat .stat-card .value { font-size: 0.95rem; }
+    .conclusion {
+      font-size: 0.68rem; color: var(--plt-text2); line-height: 1.5; font-style: italic; margin-top: 4px;
+    }
+
+    .info-section {
+      background: var(--plt-panel); border: 1px solid var(--plt-border);
+      border-radius: 12px; padding: 20px 24px;
+    }
+    .info-section h2 {
+      font-size: 1rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px; color: var(--plt-accent);
+      border-bottom: 1px solid var(--plt-border); padding-bottom: 10px;
+    }
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .info-col h3 {
+      font-size: 0.8rem; font-weight: 600; color: var(--plt-accent3); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .info-col h3 span {
+      width: 18px; height: 18px; border-radius: 4px; background: var(--plt-accent3);
+      color: #fff; font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
+    }
+    .info-col p, .info-col li {
+      font-size: 0.76rem; color: var(--plt-text); line-height: 1.6;
+    }
+    .info-col ul { padding-left: 16px; }
+    .info-col li { margin-bottom: 4px; }
+
+    @media (max-width: 900px) {
+      .content { flex-direction: column; }
+      .right-panel { width: 100%; max-height: unset; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <script src="shared-theme.js"></script>
+
+  <div class="top-bar">
+    <div>
+      <span class="sub">人生成功的随机性</span>
+      <span class="desc">Pluchino 模型 (10,000 个体)</span>
+    </div>
+    <a class="back-btn" href="index.html">&#8592; 返回首页</a>
+  </div>
+
+  <div class="app">
+    <div class="ctrl-panel">
+      <div class="ctrl-left">
+        <h2>人生成功的随机性实验</h2>
+        <div class="ctrl-legend">
+          <span><span class="dot" style="background:#94a3b8"></span> 初始资本 10</span>
+          <span><span class="dot" style="background:#34d399"></span> 机遇：天赋% 概率把握，资本 x2</span>
+          <span><span class="dot" style="background:#f87171"></span> 灾难：资本 /2</span>
+        </div>
+      </div>
+      <div class="ctrl-right">
+        <div class="ctrl-group">
+          <label>设定年数</label>
+          <input type="number" id="input-years" value="100" min="10" max="5000" step="10">
+        </div>
+        <div class="ctrl-group">
+          <label>模拟时间 (年)</label>
+          <span class="ctrl-time" id="stat-time">0.0 / 100</span>
+        </div>
+        <button class="btn btn-primary" id="btn-start">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          开始模拟
+        </button>
+        <button class="btn" id="btn-pause" disabled>
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          暂停
+        </button>
+        <button class="btn btn-danger" id="btn-reset">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          重置世界
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="left-panel">
+        <div class="panel-header">
+          <span>社会样本网格 (100 x 100)</span>
+          <span class="hint">亮色 = 成功爆发 · 暗色 = 遭遇不幸</span>
+        </div>
+        <div class="canvas-wrap" id="gridWrap">
+          <canvas id="gridCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <h3>成功值 (财富) 宏观分布</h3>
+        <div class="chart-wrap">
+          <canvas id="chartCanvas"></canvas>
+          <span class="chart-label" style="top:4px;right:8px;">财富规模 (Top 5% 截断) &rarr;</span>
+          <span class="chart-label" style="top:4px;left:8px;">&uarr; 人数</span>
+        </div>
+
+        <h3>实验结论实时追踪</h3>
+
+        <div class="stat-card">
+          <div class="label">结论 1: 财富集中度 (帕累托法则) — Top 20% 掌握总财富比例</div>
+          <div class="value" id="val-pareto">0.0%</div>
+          <div class="stat-bar"><div class="stat-bar-fill" id="bar-pareto" style="width:20%"></div></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">结论 2: 首富的天赋与运气</div>
+          <div class="grid-stat" style="margin-top:6px;">
+            <div>
+              <div class="label">最终成功值</div>
+              <div class="value" id="top1-score">10.0</div>
+            </div>
+            <div>
+              <div class="label">天赋值</div>
+              <div class="value" id="top1-talent">0.0</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--plt-text2);margin-top:6px;">
+            <span>机遇: <b style="color:var(--plt-accent)" id="top1-lucky">0次</b></span>
+            <span>灾难: <b style="color:var(--plt-accent2)" id="top1-unlucky">0次</b></span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">结论 3: 最高天赋者的境遇</div>
+          <div class="grid-stat" style="margin-top:6px;">
+            <div>
+              <div class="label">天赋值 (全场第1)</div>
+              <div class="value" id="maxT-talent" style="color:var(--plt-accent3)">0.0</div>
+            </div>
+            <div>
+              <div class="label">其成功值</div>
+              <div class="value" id="maxT-score">10.0</div>
+            </div>
+          </div>
+          <div class="conclusion">
+            *天赋极高的人，若未获足够的幸运事件，通常只具备平庸的财富。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        实验原理与模型设定
+      </h2>
+      <div class="info-grid">
+        <div class="info-col">
+          <h3><span>1</span> 实验背景与目标</h3>
+          <p>传统观念认为成功主要源于天赋、努力和能力，而随机性（机遇）仅是次要因素。然而，<strong>亚历山德罗·普鲁基尼（Alessandro Pluchino）</strong>团队的计算模型揭示：随机性在成功中可能起到至关重要的作用。</p>
+          <p style="margin-top:6px;"><strong>目标：</strong>验证机遇（幸运）在财富/成功分配中的重要性，并重新审视成功与天赋之间的关系。</p>
+        </div>
+        <div class="info-col">
+          <h3><span>2</span> 模型设计</h3>
+          <ul>
+            <li><strong>人群：</strong>10,000个个体，初始财富均为10。</li>
+            <li><strong>天赋：</strong>正态分布（均值60，标准差15，截断于0-100）。</li>
+            <li><strong>机遇事件：</strong>随机降临。天赋值(%)的概率把握住，资本翻倍(x2)。</li>
+            <li><strong>灾难事件：</strong>随机降临，无法避免，资本减半(/2)。</li>
+            <li><strong>生命周期：</strong>连续模拟设定年数的世代时间。</li>
+          </ul>
+        </div>
+        <div class="info-col">
+          <h3><span>3</span> 预期推演结果</h3>
+          <ul>
+            <li><strong>符合帕累托法则：</strong>80%以上的财富会迅速集中在前20%的人手中。</li>
+            <li><strong>首富通常非最聪明：</strong>排名前列的成功者往往是中等偏上天赋的人，只是碰巧遇到了极多的连续幸运事件。</li>
+            <li><strong>天才若无运，泯然众人：</strong>极高天赋的人若没有遇到足够的幸运事件，财富通常只停留在社会平庸水平。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function randomNormal(mean, stdDev) {
+      let u1 = Math.random();
+      let u2 = Math.random();
+      let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      return z0 * stdDev + mean;
+    }
+
+    function getThemeColors() {
+      const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+      if (theme === 'academic') return {
+        gridBg: '#f0f0f2', text: '#1a1a2e', text2: '#666',
+        accent: '#6b8cae', accent2: '#c0392b', accent3: '#8a7ca8',
+        barColor: (pct) => `hsl(${200 - pct * 30}, ${25 + pct * 35}%, ${45 + pct * 25}%)`,
+        scoreColor: (level, intensity) => {
+          if (level > 0) return `hsl(${180 - intensity * 40}, ${50 + intensity * 30}%, ${40 + intensity * 40}%)`;
+          return `hsl(${340 - intensity * 60}, ${50 + intensity * 20}%, ${30 - intensity * 10}%)`;
+        }
+      };
+      if (theme === 'soviet') return {
+        gridBg: '#eae5de', text: '#1a1a1a', text2: '#6a5a4a',
+        accent: '#c41e1e', accent2: '#8b0000', accent3: '#5a4a3a',
+        barColor: (pct) => `hsl(${5 + pct * 15}, ${60 + pct * 30}%, ${40 + pct * 20}%)`,
+        scoreColor: (level, intensity) => {
+          if (level > 0) return `hsl(${15 + intensity * 10}, ${60 + intensity * 30}%, ${45 + intensity * 30}%)`;
+          return `hsl(${350}, ${50 + intensity * 30}%, ${30 - intensity * 10}%)`;
+        }
+      };
+      if (theme === 'cartoon') return {
+        gridBg: '#fff0e0', text: '#2d3436', text2: '#636e72',
+        accent: '#00b894', accent2: '#e17055', accent3: '#a29bfe',
+        barColor: (pct) => `hsl(${160 - pct * 40}, ${60 + pct * 20}%, ${50 + pct * 20}%)`,
+        scoreColor: (level, intensity) => {
+          if (level > 0) return `hsl(${160 - intensity * 40}, ${60 + intensity * 30}%, ${45 + intensity * 35}%)`;
+          return `hsl(${350}, ${60 + intensity * 20}%, ${40 - intensity * 10}%)`;
+        }
+      };
+      if (theme === 'cyber') return {
+        gridBg: '#020208', text: '#e0f7fa', text2: '#a080c0',
+        accent: '#00f3ff', accent2: '#ff00ea', accent3: '#bd00ff',
+        barColor: (pct) => `hsl(${280 + pct * 60}, ${60 + pct * 30}%, ${40 + pct * 25}%)`,
+        scoreColor: (level, intensity) => {
+          if (level > 0) return `hsl(${180 - intensity * 40}, ${70 + intensity * 30}%, ${40 + intensity * 40}%)`;
+          return `hsl(${330 - intensity * 20}, ${70 + intensity * 20}%, ${35 - intensity * 10}%)`;
+        }
+      };
+      // glass (default dark)
+      return {
+        gridBg: '#0b1221', text: '#f8fafc', text2: '#94a3b8',
+        accent: '#67e8f9', accent2: '#f87171', accent3: '#a78bfa',
+        barColor: (pct) => `hsl(${180 - pct * 40}, ${30 + pct * 50}%, ${40 + pct * 30}%)`,
+        scoreColor: (level, intensity) => {
+          if (level > 0) return `hsl(${180 - intensity * 40}, ${70 + intensity * 30}%, ${40 + intensity * 40}%)`;
+          return `hsl(${340 - intensity * 60}, ${60 + intensity * 20}%, ${30 - intensity * 10}%)`;
+        }
+      };
+    }
+
+    class PluchinoSimulator {
+      constructor() {
+        this.numPoints = 10000;
+        this.gridCols = 100;
+        this.gridRows = 100;
+
+        this.talents = new Float32Array(this.numPoints);
+        this.scores = new Float32Array(this.numPoints);
+        this.luckyHits = new Int32Array(this.numPoints);
+        this.unluckyHits = new Int32Array(this.numPoints);
+
+        this.stepCount = 0;
+        this.isRunning = false;
+        this.animationFrameId = null;
+
+        this.gridCanvas = document.getElementById('gridCanvas');
+        this.gridCtx = this.gridCanvas.getContext('2d', { alpha: false });
+        this.chartCanvas = document.getElementById('chartCanvas');
+        this.chartCtx = this.chartCanvas.getContext('2d');
+
+        this.ui = {
+          time: document.getElementById('stat-time'),
+          inputYears: document.getElementById('input-years'),
+          pareto: document.getElementById('val-pareto'),
+          paretoBar: document.getElementById('bar-pareto'),
+          top1Score: document.getElementById('top1-score'),
+          top1Talent: document.getElementById('top1-talent'),
+          top1Lucky: document.getElementById('top1-lucky'),
+          top1Unlucky: document.getElementById('top1-unlucky'),
+          maxTTalent: document.getElementById('maxT-talent'),
+          maxTScore: document.getElementById('maxT-score')
+        };
+
+        this.btnStart = document.getElementById('btn-start');
+        this.btnPause = document.getElementById('btn-pause');
+        this.btnReset = document.getElementById('btn-reset');
+
+        this.btnStart.addEventListener('click', () => this.start());
+        this.btnPause.addEventListener('click', () => this.pause());
+        this.btnReset.addEventListener('click', () => this.reset());
+
+        this.ui.inputYears.addEventListener('change', () => {
+          let val = parseInt(this.ui.inputYears.value);
+          if (isNaN(val) || val < 1) val = 1;
+          this.ui.inputYears.value = val;
+          this.maxYears = val;
+          this.maxSteps = this.maxYears * 100;
+          this.updateStatsUI();
+        });
+
+        this.maxYears = parseInt(this.ui.inputYears.value) || 100;
+        this.maxSteps = this.maxYears * 100;
+
+        window.addEventListener('resize', () => this.resizeCanvas());
+        this.init();
+      }
+
+      init() {
+        let val = parseInt(this.ui.inputYears.value);
+        if (isNaN(val) || val < 1) val = 100;
+        this.maxYears = val;
+        this.maxSteps = this.maxYears * 100;
+
+        for (let i = 0; i < this.numPoints; i++) {
+          let t = randomNormal(60, 15);
+          if (t < 0) t = 0;
+          if (t > 100) t = 100;
+          this.talents[i] = t;
+          this.scores[i] = 10;
+          this.luckyHits[i] = 0;
+          this.unluckyHits[i] = 0;
+        }
+        this.stepCount = 0;
+        this.updateStatsUI();
+        this.resizeCanvas();
+        this.draw();
+      }
+
+      resizeCanvas() {
+        const gR = this.gridCanvas.parentElement.getBoundingClientRect();
+        this.gridCanvas.width = gR.width;
+        this.gridCanvas.height = gR.height;
+        const cR = this.chartCanvas.parentElement.getBoundingClientRect();
+        this.chartCanvas.width = cR.width;
+        this.chartCanvas.height = cR.height;
+        if (!this.isRunning) this.draw();
+      }
+
+      start() {
+        if (this.isRunning) return;
+        if (this.stepCount >= this.maxSteps) this.init();
+        this.isRunning = true;
+        this.btnStart.disabled = true;
+        this.btnPause.disabled = false;
+        this.loop();
+      }
+
+      pause() {
+        this.isRunning = false;
+        this.btnStart.disabled = false;
+        this.btnPause.disabled = true;
+        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+      }
+
+      reset() { this.pause(); this.init(); }
+
+      simulateStep() {
+        for (let k = 0; k < 5; k++) {
+          let luckyIdx = Math.floor(Math.random() * this.numPoints);
+          this.luckyHits[luckyIdx]++;
+          if (Math.random() * 100 < this.talents[luckyIdx]) {
+            this.scores[luckyIdx] *= 2;
+          }
+          let unluckyIdx = Math.floor(Math.random() * this.numPoints);
+          this.unluckyHits[unluckyIdx]++;
+          this.scores[unluckyIdx] /= 2;
+        }
+        this.stepCount++;
+      }
+
+      loop() {
+        if (!this.isRunning) return;
+        for (let i = 0; i < 10; i++) {
+          if (this.stepCount < this.maxSteps) this.simulateStep();
+        }
+        this.updateStatsUI();
+        this.draw();
+        if (this.stepCount >= this.maxSteps) { this.pause(); return; }
+        this.animationFrameId = requestAnimationFrame(() => this.loop());
+      }
+
+      formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return Math.floor(num).toString();
+      }
+
+      getColorForScore(score, colors) {
+        if (score === 10) return '#475569';
+        const level = Math.log2(score / 10);
+        if (level > 0) {
+          let intensity = Math.min(level / 8, 1);
+          return colors.scoreColor(level, intensity);
+        } else {
+          let intensity = Math.min(Math.abs(level) / 4, 1);
+          return colors.scoreColor(level, intensity);
+        }
+      }
+
+      updateStatsUI() {
+        let currentYear = (this.stepCount / this.maxSteps) * this.maxYears;
+        this.ui.time.innerText = `${currentYear.toFixed(1)} / ${this.maxYears}`;
+
+        let stats = [];
+        let totalWealth = 0;
+        let maxScoreIdx = 0, maxTalentIdx = 0;
+
+        for (let i = 0; i < this.numPoints; i++) {
+          let s = this.scores[i], t = this.talents[i];
+          totalWealth += s;
+          stats.push({ id: i, score: s, talent: t });
+          if (s > this.scores[maxScoreIdx]) maxScoreIdx = i;
+          if (t > this.talents[maxTalentIdx]) maxTalentIdx = i;
+        }
+        stats.sort((a, b) => b.score - a.score);
+
+        let top20Count = Math.floor(this.numPoints * 0.2);
+        let top20Wealth = 0;
+        for (let i = 0; i < top20Count; i++) top20Wealth += stats[i].score;
+        let paretoRatio = totalWealth > 0 ? (top20Wealth / totalWealth) * 100 : 20;
+
+        this.ui.pareto.innerText = `${paretoRatio.toFixed(1)}%`;
+        this.ui.paretoBar.style.width = `${paretoRatio}%`;
+
+        let top1 = stats[0];
+        this.ui.top1Score.innerText = top1.score > 100000 ? top1.score.toExponential(2) : top1.score.toFixed(1);
+        this.ui.top1Talent.innerText = top1.talent.toFixed(1);
+        this.ui.top1Lucky.innerText = `${this.luckyHits[top1.id]}次`;
+        this.ui.top1Unlucky.innerText = `${this.unluckyHits[top1.id]}次`;
+
+        this.ui.maxTTalent.innerText = this.talents[maxTalentIdx].toFixed(1);
+        this.ui.maxTScore.innerText = this.scores[maxTalentIdx] > 100000 ? this.scores[maxTalentIdx].toExponential(2) : this.scores[maxTalentIdx].toFixed(1);
+
+        this.sortedScores = stats.map(s => s.score);
+      }
+
+      draw() { this.drawGrid(); this.drawChart(); }
+
+      drawGrid() {
+        const ctx = this.gridCtx;
+        const width = this.gridCanvas.width;
+        const height = this.gridCanvas.height;
+        const colors = getThemeColors();
+
+        ctx.fillStyle = colors.gridBg;
+        ctx.fillRect(0, 0, width, height);
+
+        const cellW = width / this.gridCols;
+        const cellH = height / this.gridRows;
+        const padding = 1;
+
+        for (let y = 0; y < this.gridRows; y++) {
+          for (let x = 0; x < this.gridCols; x++) {
+            const idx = y * this.gridCols + x;
+            if (idx >= this.numPoints) break;
+            const score = this.scores[idx];
+            ctx.fillStyle = this.getColorForScore(score, colors);
+            if (score > 100) {
+              ctx.shadowBlur = 10;
+              ctx.shadowColor = ctx.fillStyle;
+            } else {
+              ctx.shadowBlur = 0;
+            }
+            ctx.fillRect(x * cellW + padding, y * cellH + padding, cellW - padding * 2, cellH - padding * 2);
+          }
+        }
+        ctx.shadowBlur = 0;
+      }
+
+      drawChart() {
+        const ctx = this.chartCtx;
+        const width = this.chartCanvas.width;
+        const height = this.chartCanvas.height;
+        const colors = getThemeColors();
+
+        ctx.clearRect(0, 0, width, height);
+        if (!this.sortedScores) return;
+
+        const numBins = 40;
+        const bins = new Int32Array(numBins);
+        let min = 0;
+        let p95Idx = Math.floor(this.numPoints * 0.05);
+        let max = Math.max(40, this.sortedScores[p95Idx]);
+        const range = max - min;
+        let maxBinCount = 0;
+
+        for (let i = 0; i < this.numPoints; i++) {
+          let s = this.scores[i];
+          if (s < min) s = min;
+          if (s > max) s = max;
+          let binIdx = Math.floor(((s - min) / range) * numBins);
+          if (binIdx >= numBins) binIdx = numBins - 1;
+          bins[binIdx]++;
+          if (bins[binIdx] > maxBinCount) maxBinCount = bins[binIdx];
+        }
+
+        const marginLeft = 35, marginBottom = 20, marginTop = 20, marginRight = 10;
+        const chartW = width - marginLeft - marginRight;
+        const chartH = height - marginTop - marginBottom;
+        const binWidth = chartW / numBins;
+
+        ctx.strokeStyle = 'rgba(128,128,128,0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(marginLeft, marginTop);
+        ctx.lineTo(marginLeft, height - marginBottom);
+        ctx.lineTo(width - marginRight, height - marginBottom);
+        ctx.stroke();
+
+        ctx.fillStyle = colors.text2;
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.formatNumber(maxBinCount), marginLeft - 5, marginTop);
+        ctx.fillText(this.formatNumber(Math.floor(maxBinCount / 2)), marginLeft - 5, marginTop + chartH / 2);
+        ctx.fillText('0', marginLeft - 5, marginTop + chartH);
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(this.formatNumber(min), marginLeft, height - marginBottom + 5);
+        ctx.fillText(this.formatNumber(min + range / 2), marginLeft + chartW / 2, height - marginBottom + 5);
+        ctx.fillText(this.formatNumber(max), marginLeft + chartW, height - marginBottom + 5);
+
+        for (let i = 0; i < numBins; i++) {
+          const count = bins[i];
+          if (count === 0) continue;
+          const visualH = (Math.pow(count, 0.6) / Math.pow(maxBinCount, 0.6)) * chartH;
+          const x = marginLeft + i * binWidth;
+          const y = marginTop + chartH - visualH;
+          const w = binWidth - 1;
+          const pct = i / numBins;
+          ctx.fillStyle = colors.barColor(pct);
+          ctx.fillRect(x, y, w > 0 ? w : 1, visualH);
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { new PluchinoSimulator(); });
+  </script>
+</body>
+</html>
