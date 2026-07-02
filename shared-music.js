@@ -8,10 +8,7 @@
 
   var MUSIC_KEY = 'psu-music-v2';
   var PLAYLIST = [
-    { name: 'Singapore Lights',       src: 'music/singapore_lights.mp3' },
-    { name: 'How To Drift',          src: 'music/how_to_drift.mp3' },
-    { name: 'Midnight Ink',          src: 'music/midnight_ink.mp3' },
-    { name: 'Rain on the Glass',     src: 'music/rain_on_the_glass.mp3' }
+    { name: 'Rain on the Glass', src: 'music/rain_on_the_glass.mp3' }
   ];
 
   var channel = null;
