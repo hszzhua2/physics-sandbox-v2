@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D 元胞自动机 — Cellular Automata | 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --ca-bg: #0f172a; --ca-bg2: #1e293b; --ca-panel: rgba(30,41,59,0.9);
+      --ca-border: rgba(255,255,255,0.08); --ca-text: #f8fafc; --ca-text2: #94a3b8;
+      --ca-accent: #8b5cf6; --ca-accent2: #22d3ee; --ca-accent3: #f59e0b;
+      --ca-bar-bg: rgba(255,255,255,0.06);
+    }
+    [data-theme="academic"] {
+      --ca-bg: #f5f5f7; --ca-bg2: #fff; --ca-panel: #fff; --ca-border: #e0e0e0;
+      --ca-text: #1a1a2e; --ca-text2: #666; --ca-accent: #6b8cae; --ca-accent2: #8a7ca8; --ca-accent3: #c4956a;
+      --ca-bar-bg: rgba(0,0,0,0.04);
+    }
+    [data-theme="cartoon"] {
+      --ca-bg: #fff8f0; --ca-bg2: #fff5e6; --ca-panel: rgba(255,248,240,0.95);
+      --ca-border: rgba(0,0,0,0.08); --ca-text: #2d3436; --ca-text2: #636e72;
+      --ca-accent: #ff6b6b; --ca-accent2: #74b9ff; --ca-accent3: #ffeaa7;
+      --ca-bar-bg: rgba(0,0,0,0.04);
+    }
+    [data-theme="cyber"] {
+      --ca-bg: #040410; --ca-bg2: #08081a; --ca-panel: rgba(8,8,26,0.92);
+      --ca-border: rgba(0,243,255,0.12); --ca-text: #e0f7fa; --ca-text2: #a080c0;
+      --ca-accent: #00f3ff; --ca-accent2: #ff00ea; --ca-accent3: #bd00ff;
+      --ca-bar-bg: rgba(0,243,255,0.05);
+    }
+    [data-theme="soviet"] {
+      --ca-bg: #f0ebe4; --ca-bg2: #fffaf2; --ca-panel: #fffaf2;
+      --ca-border: #d4c4a8; --ca-text: #1a1a1a; --ca-text2: #6a5a4a;
+      --ca-accent: #c41e1e; --ca-accent2: #5b7a8a; --ca-accent3: #8b6914;
+      --ca-bar-bg: rgba(0,0,0,0.04);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: var(--font-main,'Segoe UI','Microsoft YaHei',system-ui,sans-serif);
+      background: var(--ca-bg); color: var(--ca-text); min-height:100vh; overflow:hidden;
+    }
+    .top-bar {
+      position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;
+      justify-content:space-between;padding:10px 20px;background:var(--ca-bg2);
+      border-bottom:1px solid var(--ca-border);
+    }
+    .top-bar .sub { font-size:0.9rem;font-weight:700;color:var(--ca-accent); }
+    .top-bar .desc { font-size:0.7rem;color:var(--ca-text2);margin-left:8px; }
+    .back-btn {
+      padding:6px 14px;border-radius:8px;border:1px solid var(--ca-border);
+      background:var(--ca-bar-bg);color:var(--ca-text2);text-decoration:none;
+      font-size:0.8rem;cursor:pointer;transition:all 0.2s;
+    }
+    .back-btn:hover { color:var(--ca-accent);border-color:var(--ca-accent); }
+
+    .app { display:flex;height:100vh;padding-top:48px; }
+    .scene-wrap {
+      flex:1;position:relative;min-width:0;
+    }
+    .scene-wrap canvas { display:block;width:100%;height:100%; }
+    .scene-overlay {
+      position:absolute;top:12px;left:12px;display:flex;gap:8px;z-index:5;pointer-events:none;
+    }
+    .ov-badge {
+      padding:4px 10px;background:var(--ca-panel);border:1px solid var(--ca-border);
+      border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--ca-text2);
+    }
+    .scene-hint {
+      position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+      font-size:0.65rem;color:var(--ca-text2);pointer-events:none;opacity:0.6;
+      font-family:monospace;
+    }
+
+    .side-panel {
+      width:340px;min-width:300px;background:var(--ca-panel);border-left:1px solid var(--ca-border);
+      display:flex;flex-direction:column;overflow-y:auto;padding:14px;gap:12px;
+    }
+    .side-panel h3 {
+      font-size:0.72rem;font-weight:600;color:var(--ca-text2);text-transform:uppercase;
+      letter-spacing:1px;border-bottom:1px solid var(--ca-border);padding-bottom:6px;
+    }
+
+    .btn {
+      padding:7px 14px;border-radius:10px;border:1px solid var(--ca-border);
+      background:var(--ca-bar-bg);color:var(--ca-text);font-size:0.78rem;font-weight:600;
+      cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.2s;flex:1;justify-content:center;
+    }
+    .btn:hover:not(:disabled) { background:var(--ca-accent);color:#fff;border-color:var(--ca-accent); }
+    .btn:disabled { opacity:0.4;cursor:not-allowed; }
+    .btn-primary { color:var(--ca-accent);border-color:var(--ca-accent); }
+    .btn-danger { color:var(--ca-accent2);border-color:var(--ca-accent2); }
+
+    .param-slider { display:flex;flex-direction:column;gap:2px;margin-bottom:8px; }
+    .param-slider .header { display:flex;justify-content:space-between;font-size:0.74rem; }
+    .param-slider .header .name { color:var(--ca-text);font-weight:600; }
+    .param-slider .header .val { font-family:monospace;color:var(--ca-accent);font-size:0.72rem; }
+    input[type=range] {
+      width:100%;height:4px;border-radius:2px;background:var(--ca-bar-bg);
+      -webkit-appearance:none;appearance:none;outline:none;cursor:pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+      background:var(--ca-accent);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .preset-row { display:flex;gap:6px;flex-wrap:wrap; }
+    .preset-btn {
+      padding:4px 10px;border:1px solid var(--ca-border);background:var(--ca-bar-bg);
+      color:var(--ca-text2);border-radius:6px;font-size:0.68rem;font-weight:600;cursor:pointer;
+      font-family:inherit;
+    }
+    .preset-btn:hover { border-color:var(--ca-accent);color:var(--ca-accent); }
+
+    .stat-card {
+      background:var(--ca-bar-bg);border:1px solid var(--ca-border);
+      border-radius:8px;padding:10px 12px;
+    }
+    .stat-card .label { font-size:0.65rem;color:var(--ca-text2);margin-bottom:3px; }
+    .stat-card .value { font-family:monospace;font-size:1.05rem;font-weight:700;color:var(--ca-accent); }
+    .grid-stat { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+
+    .rule-display {
+      background:var(--ca-bar-bg);border:1px solid var(--ca-border);border-radius:8px;
+      padding:10px 12px;font-family:monospace;font-size:0.78rem;line-height:1.6;
+    }
+    .rule-display .title { font-weight:700;color:var(--ca-accent);margin-bottom:4px;font-size:0.75rem; }
+
+    .info-block { font-size:0.68rem;color:var(--ca-text2);line-height:1.5; }
+    .info-block strong { color:var(--ca-text); }
+
+    @media (max-width:900px) {
+      .app { flex-direction:column; }
+      .side-panel { width:100%;border-left:none;border-top:1px solid var(--ca-border);max-height:50vh; }
+    }
+  </style>
+</head>
+<body>
+  <script src="shared-theme.js"></script>
+
+  <div class="top-bar">
+    <div>
+      <span class="sub">3D 元胞自动机</span>
+      <span class="desc">多体系统演化与自组织</span>
+    </div>
+    <a class="back-btn" href="index.html">&#8592; 返回首页</a>
+  </div>
+
+  <div class="app">
+    <div class="scene-wrap" id="sceneWrap">
+      <div class="scene-overlay">
+        <span class="ov-badge" id="badge-gen">Gen: 0</span>
+        <span class="ov-badge" id="badge-live">Live: 0</span>
+        <span class="ov-badge" id="badge-density">Density: 0%</span>
+      </div>
+      <div class="scene-hint">[左键] 旋转视角 | [右键] 平移 | [滚轮] 缩放</div>
+    </div>
+
+    <div class="side-panel">
+      <h3>控制</h3>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-primary" id="btn-start">&#9654; 运行</button>
+        <button class="btn" id="btn-pause" disabled>&#10074;&#10074; 暂停</button>
+        <button class="btn btn-danger" id="btn-step">&#10132; 单步</button>
+        <button class="btn btn-danger" id="btn-reset">&#8635; 重置</button>
+      </div>
+
+      <h3>初始构型</h3>
+      <div class="preset-row">
+        <button class="preset-btn" data-init="random">随机噪声</button>
+        <button class="preset-btn" data-init="sphere">中心球体</button>
+        <button class="preset-btn" data-init="shell">空心立方</button>
+        <button class="preset-btn" data-init="cross">十字骨架</button>
+      </div>
+
+      <h3>参数</h3>
+      <div class="param-slider">
+        <div class="header"><span class="name">网格尺寸 N</span><span class="val" id="val-N">32</span></div>
+        <input type="range" id="slider-N" min="16" max="64" step="8" value="32">
+      </div>
+      <div class="param-slider">
+        <div class="header"><span class="name">演化速度 (帧/skip)</span><span class="val" id="val-spd">10</span></div>
+        <input type="range" id="slider-spd" min="1" max="30" step="1" value="10">
+      </div>
+      <div class="param-slider">
+        <div class="header"><span class="name">存活邻居下限</span><span class="val" id="val-survive-min">4</span></div>
+        <input type="range" id="slider-survive-min" min="0" max="26" step="1" value="4">
+      </div>
+      <div class="param-slider">
+        <div class="header"><span class="name">存活邻居上限</span><span class="val" id="val-survive-max">7</span></div>
+        <input type="range" id="slider-survive-max" min="0" max="26" step="1" value="7">
+      </div>
+      <div class="param-slider">
+        <div class="header"><span class="name">出生邻居数</span><span class="val" id="val-born">5</span></div>
+        <input type="range" id="slider-born" min="0" max="26" step="1" value="5">
+      </div>
+
+      <div class="rule-display">
+        <div class="title">当前规则</div>
+        <div id="rule-text">存活: 4~7 | 出生: 5</div>
+        <div style="font-size:0.65rem;color:var(--ca-text2);margin-top:4px;">Moore 邻居 (26 邻域) · 周期性边界</div>
+      </div>
+
+      <h3>实时统计</h3>
+      <div class="grid-stat">
+        <div class="stat-card">
+          <div class="label">代数</div>
+          <div class="value" id="stat-gen">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">存活细胞</div>
+          <div class="value" id="stat-live" style="color:var(--ca-accent2)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">密度</div>
+          <div class="value" id="stat-density" style="color:var(--ca-accent3)">0.0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">变化率</div>
+          <div class="value" id="stat-delta" style="color:var(--ca-accent3)">0</div>
+        </div>
+      </div>
+
+      <div class="info-block">
+        <strong>规则说明：</strong>每个细胞检查周围 26 个 Moore 邻居。若当前存活且邻居数在存活范围内则继续存活；若当前死亡且邻居数恰好等于出生数则复活；其余情况死亡。
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ========== Theme Color Helper ==========
+    function getThemeColors() {
+      const s = getComputedStyle(document.documentElement);
+      const accent = s.getPropertyValue('--ca-accent').trim() || '#8b5cf6';
+      const accent2 = s.getPropertyValue('--ca-accent2').trim() || '#22d3ee';
+      const bg = s.getPropertyValue('--ca-bg').trim() || '#0f172a';
+      const isDark = bg === '#0f172a' || bg === '#040410';
+      return { accent, accent2, bg, isDark };
+    }
+
+    function hexToRGB(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+      return [parseInt(hex.slice(0,2),16)/255, parseInt(hex.slice(2,4),16)/255, parseInt(hex.slice(4,6),16)/255];
+    }
+
+    // ========== 3D CA Engine ==========
+    class CA3DEngine {
+      constructor() {
+        this.N = 32;
+        this.surviveMin = 4;
+        this.surviveMax = 7;
+        this.bornCount = 5;
+        this.speed = 10;
+        this.generation = 0;
+        this.running = false;
+        this.rafId = null;
+        this.lastLiveCount = 0;
+
+        this.gridA = null;
+        this.gridB = null;
+
+        this.setupThree();
+        this.initGrid('random');
+        this.buildInstancedMesh();
+        this.animate();
+      }
+
+      setupThree() {
+        const wrap = document.getElementById('sceneWrap');
+        const w = wrap.clientWidth, h = wrap.clientHeight;
+
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(getThemeColors().bg);
+
+        this.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+        this.camera.position.set(this.N * 1.5, this.N * 1.2, this.N * 1.5);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(w, h);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        wrap.appendChild(this.renderer.domElement);
+
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.1;
+        this.controls.target.set(this.N/2, this.N/2, this.N/2);
+
+        // Lighting
+        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        this.scene.add(ambient);
+        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+        dir.position.set(50, 80, 40);
+        this.scene.add(dir);
+        const dir2 = new THREE.DirectionalLight(0xffffff, 0.3);
+        dir2.position.set(-40, -20, -30);
+        this.scene.add(dir2);
+
+        // Grid helper
+        this.gridHelper = new THREE.GridHelper(this.N, this.N, 0x444444, 0x222222);
+        this.gridHelper.position.set(this.N/2 - 0.5, -0.5, this.N/2 - 0.5);
+        this.scene.add(this.gridHelper);
+
+        window.addEventListener('resize', () => {
+          const rw = wrap.clientWidth, rh = wrap.clientHeight;
+          this.camera.aspect = rw / rh;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(rw, rh);
+        });
+      }
+
+      initGrid(preset) {
+        const N = this.N;
+        const total = N * N * N;
+        this.gridA = new Uint8Array(total);
+        this.gridB = new Uint8Array(total);
+        this.generation = 0;
+
+        if (preset === 'sphere') {
+          const cx = (N-1)/2, cy = (N-1)/2, cz = (N-1)/2;
+          const r = N * 0.35;
+          for (let z=0; z<N; z++) for (let y=0; y<N; y++) for (let x=0; x<N; x++) {
+            const d = Math.sqrt((x-cx)**2 + (y-cy)**2 + (z-cz)**2);
+            this.gridA[(z*N+y)*N+x] = d < r ? 1 : 0;
+          }
+        } else if (preset === 'shell') {
+          const t = 2;
+          for (let z=0; z<N; z++) for (let y=0; y<N; y++) for (let x=0; x<N; x++) {
+            const inShell = x<t || x>=N-t || y<t || y>=N-t || z<t || z>=N-t;
+            this.gridA[(z*N+y)*N+x] = inShell ? 1 : 0;
+          }
+        } else if (preset === 'cross') {
+          const cx = (N-1)/2, cy = (N-1)/2, cz = (N-1)/2;
+          for (let z=0; z<N; z++) for (let y=0; y<N; y++) for (let x=0; x<N; x++) {
+            const onAxis = (Math.abs(x-cx)<2 && Math.abs(y-cy)<2) ||
+                           (Math.abs(x-cx)<2 && Math.abs(z-cz)<2) ||
+                           (Math.abs(y-cy)<2 && Math.abs(z-cz)<2);
+            this.gridA[(z*N+y)*N+x] = onAxis ? 1 : 0;
+          }
+        } else {
+          for (let i=0; i<total; i++) this.gridA[i] = Math.random() < 0.15 ? 1 : 0;
+        }
+        this.lastLiveCount = this.countLive();
+        this.updateUI();
+      }
+
+      buildInstancedMesh() {
+        if (this.mesh) { this.scene.remove(this.mesh); this.mesh.geometry.dispose(); this.mesh.material.dispose(); }
+        const N = this.N;
+        const total = N * N * N;
+        const colors = getThemeColors();
+        const rgb = hexToRGB(colors.accent);
+
+        const geo = new THREE.BoxGeometry(0.85, 0.85, 0.85);
+        const mat = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(rgb[0], rgb[1], rgb[2]),
+          roughness: 0.3, metalness: 0.1,
+          emissive: new THREE.Color(rgb[0]*0.2, rgb[1]*0.2, rgb[2]*0.2),
+        });
+        this.mesh = new THREE.InstancedMesh(geo, mat, total);
+        this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.mesh.count = 0;
+        this.scene.add(this.mesh);
+
+        this.dummy = new THREE.Object3D();
+        this.updateMesh();
+      }
+
+      updateMesh() {
+        const N = this.N;
+        const grid = this.gridA;
+        let idx = 0;
+        for (let z=0; z<N; z++) {
+          for (let y=0; y<N; y++) {
+            for (let x=0; x<N; x++) {
+              if (grid[(z*N+y)*N+x]) {
+                this.dummy.position.set(x, y, z);
+                this.dummy.updateMatrix();
+                this.mesh.setMatrixAt(idx++, this.dummy.matrix);
+              }
+            }
+          }
+        }
+        this.mesh.count = idx;
+        this.mesh.instanceMatrix.needsUpdate = true;
+      }
+
+      countLive() {
+        let c = 0;
+        for (let i=0; i<this.gridA.length; i++) c += this.gridA[i];
+        return c;
+      }
+
+      step() {
+        const N = this.N;
+        const A = this.gridA, B = this.gridB;
+        const smin = this.surviveMin, smax = this.surviveMax, born = this.bornCount;
+        const N2 = N * N;
+
+        for (let z=0; z<N; z++) {
+          const zm = (z - 1 + N) % N, zp = (z + 1) % N;
+          for (let y=0; y<N; y++) {
+            const ym = (y - 1 + N) % N, yp = (y + 1) % N;
+            for (let x=0; x<N; x++) {
+              const xm = (x - 1 + N) % N, xp = (x + 1) % N;
+              // Count 26 Moore neighbors
+              let neighbors = 0;
+              for (let dz of [zm, z, zp])
+                for (let dy of [ym, y, yp])
+                  for (let dx of [xm, x, xp])
+                    if (!(dz===z && dy===y && dx===x))
+                      neighbors += A[dz*N2 + dy*N + dx];
+
+              const cell = A[z*N2 + y*N + x];
+              if (cell) {
+                B[z*N2 + y*N + x] = (neighbors >= smin && neighbors <= smax) ? 1 : 0;
+              } else {
+                B[z*N2 + y*N + x] = (neighbors === born) ? 1 : 0;
+              }
+            }
+          }
+        }
+
+        // Swap
+        const tmp = this.gridA; this.gridA = this.gridB; this.gridB = tmp;
+        this.generation++;
+        this.updateMesh();
+        this.updateUI();
+      }
+
+      updateUI() {
+        const live = this.countLive();
+        const total = this.N * this.N * this.N;
+        const density = total > 0 ? (live / total * 100).toFixed(1) : '0.0';
+        const delta = live - this.lastLiveCount;
+        this.lastLiveCount = live;
+
+        document.getElementById('badge-gen').textContent = 'Gen: ' + this.generation;
+        document.getElementById('badge-live').textContent = 'Live: ' + live.toLocaleString();
+        document.getElementById('badge-density').textContent = 'Density: ' + density + '%';
+        document.getElementById('stat-gen').textContent = this.generation.toLocaleString();
+        document.getElementById('stat-live').textContent = live.toLocaleString();
+        document.getElementById('stat-density').textContent = density + '%';
+        document.getElementById('stat-delta').textContent = (delta >= 0 ? '+' : '') + delta.toLocaleString();
+
+        // Update rule text
+        document.getElementById('rule-text').textContent =
+          `存活: ${this.surviveMin}~${this.surviveMax} | 出生: ${this.bornCount}`;
+      }
+
+      start() {
+        if (this.running) return;
+        this.running = true;
+        document.getElementById('btn-start').disabled = true;
+        document.getElementById('btn-pause').disabled = false;
+      }
+
+      pause() {
+        this.running = false;
+        document.getElementById('btn-start').disabled = false;
+        document.getElementById('btn-pause').disabled = true;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.animate();
+      }
+
+      reset() {
+        this.pause();
+        this.initGrid('random');
+        this.buildInstancedMesh();
+      }
+
+      setSize(N) {
+        this.N = N;
+        this.initGrid('random');
+        this.buildInstancedMesh();
+        this.camera.position.set(N * 1.5, N * 1.2, N * 1.5);
+        this.controls.target.set(N/2, N/2, N/2);
+        this.gridHelper.size = N;
+        this.gridHelper.divisions = N;
+        this.gridHelper.position.set(N/2 - 0.5, -0.5, N/2 - 0.5);
+      }
+
+      animate() {
+        this.controls.update();
+        this.renderer.render(this.scene, this.camera);
+
+        if (this.running) {
+          for (let i=0; i<this.speed; i++) this.step();
+        }
+
+        this.rafId = requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    // ========== Init ==========
+    const engine = new CA3DEngine();
+
+    document.getElementById('btn-start').addEventListener('click', () => engine.start());
+    document.getElementById('btn-pause').addEventListener('click', () => engine.pause());
+    document.getElementById('btn-step').addEventListener('click', () => { engine.step(); });
+    document.getElementById('btn-reset').addEventListener('click', () => engine.reset());
+
+    document.querySelectorAll('[data-init]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        engine.pause();
+        engine.initGrid(btn.dataset.init);
+        engine.buildInstancedMesh();
+      });
+    });
+
+    document.getElementById('slider-N').addEventListener('input', (e) => {
+      const v = parseInt(e.target.value);
+      document.getElementById('val-N').textContent = v;
+      engine.pause();
+      engine.setSize(v);
+    });
+
+    document.getElementById('slider-spd').addEventListener('input', (e) => {
+      engine.speed = parseInt(e.target.value);
+      document.getElementById('val-spd').textContent = engine.speed;
+    });
+
+    document.getElementById('slider-survive-min').addEventListener('input', (e) => {
+      engine.surviveMin = parseInt(e.target.value);
+      document.getElementById('val-survive-min').textContent = engine.surviveMin;
+      engine.updateUI();
+    });
+    document.getElementById('slider-survive-max').addEventListener('input', (e) => {
+      engine.surviveMax = parseInt(e.target.value);
+      document.getElementById('val-survive-max').textContent = engine.surviveMax;
+      engine.updateUI();
+    });
+    document.getElementById('slider-born').addEventListener('input', (e) => {
+      engine.bornCount = parseInt(e.target.value);
+      document.getElementById('val-born').textContent = engine.bornCount;
+      engine.updateUI();
+    });
+  </script>
+</body>
+</html>
