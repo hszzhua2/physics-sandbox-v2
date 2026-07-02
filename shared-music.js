@@ -33,6 +33,9 @@
   audio.loop = false;
   audio.volume = state.volume;
 
+  // Error tracking: prevent infinite skip loop when all tracks fail
+  var errorSkipCount = 0;
+
   // --- BroadcastChannel sync ---
   function broadcast(msg) {
     if (channel) {
@@ -46,12 +49,7 @@
       if (msg.type === 'state' && msg.origin !== window.location.href) {
         // Another page is playing, sync state to our UI but don't duplicate audio
         if (msg.playing !== undefined) state.playing = msg.playing;
-        if (msg.trackIdx !== undefined) {
-          state.trackIdx = msg.trackIdx;
-          if (audio.src !== PLAYLIST[state.trackIdx].src) {
-            audio.src = PLAYLIST[state.trackIdx].src;
-          }
-        }
+        if (msg.trackIdx !== undefined) state.trackIdx = msg.trackIdx;
         if (msg.volume !== undefined) { state.volume = msg.volume; audio.volume = state.volume; }
         if (msg.muted !== undefined) { state.muted = msg.muted; audio.muted = state.muted; }
         if (msg.elapsed !== undefined) state.elapsed = msg.elapsed;
@@ -98,6 +96,7 @@
   });
   audio.addEventListener('loadedmetadata', function() {
     state.duration = audio.duration;
+    errorSkipCount = 0; // Reset error counter on successful load
     updateUI();
   });
   audio.addEventListener('timeupdate', function() {
@@ -119,7 +118,16 @@
     }
   });
   audio.addEventListener('error', function() {
-    // Skip to next track on error
+    errorSkipCount++;
+    if (errorSkipCount >= PLAYLIST.length) {
+      // All tracks failed to load — stop trying, show paused state
+      state.playing = false;
+      audio.pause();
+      errorSkipCount = 0;
+      updateUI();
+      return;
+    }
+    // Skip to next track (error events fire asynchronously, no re-entrancy issue)
     if (state.playing) nextTrack();
   });
 
@@ -410,12 +418,17 @@
       var restored = loadState();
       buildPlayer();
       loadTrack(state.trackIdx, restored.elapsed);
-      // Auto-resume playback from previous page
+      // Auto-resume playback from previous page (errors handled by error listener)
       if (restored.wasPlaying) {
-        audio.play().catch(function(){});
-        state.playing = true;
-        broadcast({ type: 'state', origin: window.location.href, playing: true, trackIdx: state.trackIdx });
-        updateUI();
+        audio.play().then(function() {
+          state.playing = true;
+          broadcast({ type: 'state', origin: window.location.href, playing: true, trackIdx: state.trackIdx });
+          updateUI();
+        }).catch(function() {
+          // play() failed — error listener will handle track skipping
+          state.playing = false;
+          updateUI();
+        });
       }
     },
     togglePlay: togglePlay,
