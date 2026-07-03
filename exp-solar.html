@@ -683,7 +683,7 @@
       }
 
       createPlanets() {
-        PLANET_DATA.forEach((p, idx) => {
+        PLANET_DATA.filter(p => p.type !== '矮行星').forEach((p, idx) => {
           // Orbit ring
           const ring = this.createOrbitRing(p.dist, 0x334466);
           this.scene.add(ring);
@@ -714,7 +714,7 @@
       }
 
       createDwarfPlanets() {
-        const dwarfPlanets = PLANET_DATA.filter(p => p.type === '矮行星');
+        const dwarfPlanets = PLANET_DATA.filter(p => p.type === '矮行星' && p.dist > 450);
         dwarfPlanets.forEach(p => {
           // Orbit ring (dashed style - thinner, more transparent)
           const ring = this.createOrbitRing(p.dist, 0x554466);
@@ -973,7 +973,7 @@
         });
 
         // Dwarf planet chips
-        const dwarfPlanets = PLANET_DATA.filter(p => p.type === '矮行星');
+        const dwarfPlanets = PLANET_DATA.filter(p => p.type === '矮行星' && p.dist > 450);
         const dwl = document.getElementById('dwarfList');
         dwarfPlanets.forEach(p => {
           const chip = document.createElement('button');
