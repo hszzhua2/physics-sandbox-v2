@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>太阳系沙盘 — Solar System | 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --sol-bg: #0a0a14; --sol-bg2: #111122; --sol-panel: rgba(15,15,30,0.92);
+      --sol-border: rgba(255,255,255,0.08); --sol-text: #e0e0f0; --sol-text2: #8899bb;
+      --sol-accent: #f0c060; --sol-accent2: #60a0ff; --sol-accent3: #ff6b6b;
+      --sol-bar-bg: rgba(255,255,255,0.05);
+    }
+    [data-theme="academic"] {
+      --sol-bg: #f5f5f7; --sol-bg2: #ffffff; --sol-panel: #ffffff; --sol-border: #e0e0e0;
+      --sol-text: #1a1a2e; --sol-text2: #666; --sol-accent: #b8860b; --sol-accent2: #6b8cae; --sol-accent3: #c0392b;
+      --sol-bar-bg: rgba(0,0,0,0.04);
+    }
+    [data-theme="cartoon"] {
+      --sol-bg: #fff8f0; --sol-bg2: #fff5e6; --sol-panel: rgba(255,248,240,0.95);
+      --sol-border: rgba(0,0,0,0.08); --sol-text: #2d3436; --sol-text2: #636e72;
+      --sol-accent: #fdcb6e; --sol-accent2: #74b9ff; --sol-accent3: #ff7675;
+      --sol-bar-bg: rgba(0,0,0,0.04);
+    }
+    [data-theme="cyber"] {
+      --sol-bg: #040410; --sol-bg2: #08081a; --sol-panel: rgba(8,8,26,0.92);
+      --sol-border: rgba(0,243,255,0.12); --sol-text: #e0f7fa; --sol-text2: #a080c0;
+      --sol-accent: #ffd700; --sol-accent2: #00f3ff; --sol-accent3: #ff00ea;
+      --sol-bar-bg: rgba(0,243,255,0.05);
+    }
+    [data-theme="soviet"] {
+      --sol-bg: #f0ebe4; --sol-bg2: #fffaf2; --sol-panel: #fffaf2; --sol-border: #d4c4a8;
+      --sol-text: #1a1a1a; --sol-text2: #6a5a4a; --sol-accent: #c41e1e; --sol-accent2: #5b7a8a; --sol-accent3: #e8a020;
+      --sol-bar-bg: rgba(0,0,0,0.04);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: var(--font-main,'Segoe UI','Microsoft YaHei',system-ui,sans-serif);
+      background: var(--sol-bg); color: var(--sol-text); min-height:100vh; overflow:hidden;
+    }
+    .top-bar {
+      position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;
+      justify-content:space-between;padding:10px 20px;background:var(--sol-bg2);
+      border-bottom:1px solid var(--sol-border);
+    }
+    .top-bar .sub { font-size:0.9rem;font-weight:700;color:var(--sol-accent); }
+    .top-bar .desc { font-size:0.7rem;color:var(--sol-text2);margin-left:8px; }
+    .back-btn {
+      padding:6px 14px;border-radius:8px;border:1px solid var(--sol-border);
+      background:var(--sol-bar-bg);color:var(--sol-text2);text-decoration:none;
+      font-size:0.8rem;cursor:pointer;transition:all 0.2s;
+    }
+    .back-btn:hover { color:var(--sol-accent);border-color:var(--sol-accent); }
+
+    .app { display:flex;height:100vh;padding-top:48px; }
+    .scene-wrap { flex:1;position:relative;min-width:0; }
+    .scene-wrap canvas { display:block;width:100%;height:100%; }
+    .scene-hint {
+      position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+      font-size:0.65rem;color:var(--sol-text2);pointer-events:none;opacity:0.5;
+      font-family:monospace;
+    }
+    .scene-controls {
+      position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:5;
+    }
+    .ctrl-btn {
+      padding:5px 10px;background:var(--sol-panel);border:1px solid var(--sol-border);
+      border-radius:6px;font-size:0.7rem;color:var(--sol-text2);cursor:pointer;
+      font-family:inherit;transition:all 0.2s;
+    }
+    .ctrl-btn:hover { color:var(--sol-accent);border-color:var(--sol-accent); }
+    .ctrl-btn.active { color:var(--sol-accent);border-color:var(--sol-accent);background:var(--sol-bar-bg); }
+    .speed-indicator {
+      position:absolute;top:12px;right:12px;z-index:5;padding:4px 10px;
+      background:var(--sol-panel);border:1px solid var(--sol-border);border-radius:6px;
+      font-family:monospace;font-size:0.65rem;color:var(--sol-text2);
+    }
+
+    .side-panel {
+      width:380px;min-width:340px;background:var(--sol-panel);border-left:1px solid var(--sol-border);
+      display:flex;flex-direction:column;overflow-y:auto;padding:14px;gap:10px;
+      transition:all 0.3s ease;
+    }
+    .side-panel h3 {
+      font-size:0.72rem;font-weight:600;color:var(--sol-text2);text-transform:uppercase;
+      letter-spacing:1px;border-bottom:1px solid var(--sol-border);padding-bottom:6px;
+    }
+
+    .planet-card {
+      background:var(--sol-bar-bg);border:1px solid var(--sol-border);border-radius:10px;
+      padding:14px 16px;
+    }
+    .planet-card .planet-name {
+      font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px;
+    }
+    .planet-card .planet-name .dot {
+      width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;
+    }
+    .planet-card .planet-type {
+      font-size:0.65rem;color:var(--sol-text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;
+    }
+    .planet-card .story {
+      font-size:0.74rem;color:var(--sol-text);line-height:1.6;margin-top:8px;
+    }
+    .planet-card .story .highlight { color:var(--sol-accent);font-weight:600; }
+    .planet-stats {
+      display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;
+    }
+    .planet-stat {
+      font-size:0.65rem;color:var(--sol-text2);
+      display:flex;justify-content:space-between;
+    }
+    .planet-stat .val { color:var(--sol-text);font-family:monospace;font-weight:600; }
+
+    .probe-card {
+      background:var(--sol-bar-bg);border:1px solid var(--sol-border);border-radius:10px;
+      padding:12px 14px;
+    }
+    .probe-card .probe-name {
+      font-size:0.85rem;font-weight:700;display:flex;align-items:center;gap:6px;
+    }
+    .probe-card .probe-name .status {
+      width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0;
+    }
+    .probe-card .probe-info {
+      font-size:0.7rem;color:var(--sol-text2);margin-top:4px;line-height:1.5;
+    }
+    .probe-card .probe-instruments {
+      font-size:0.65rem;color:var(--sol-text);margin-top:6px;line-height:1.5;
+      padding:6px 8px;background:var(--sol-bar-bg);border-radius:6px;
+    }
+
+    .planet-list {
+      display:flex;flex-wrap:wrap;gap:4px;
+    }
+    .planet-chip {
+      padding:3px 8px;border:1px solid var(--sol-border);border-radius:6px;
+      font-size:0.65rem;cursor:pointer;color:var(--sol-text2);transition:all 0.2s;
+      background:var(--sol-bar-bg);font-family:inherit;
+    }
+    .planet-chip:hover { border-color:var(--sol-accent);color:var(--sol-accent); }
+    .planet-chip.active { border-color:var(--sol-accent);color:var(--sol-accent);background:rgba(240,192,96,0.1); }
+
+    .probe-list { display:flex;flex-direction:column;gap:4px; }
+    .probe-chip {
+      padding:4px 8px;border:1px solid var(--sol-border);border-radius:6px;
+      font-size:0.65rem;cursor:pointer;color:var(--sol-text2);transition:all 0.2s;
+      background:var(--sol-bar-bg);font-family:inherit;text-align:left;
+      display:flex;align-items:center;gap:6px;
+    }
+    .probe-chip:hover { border-color:var(--sol-accent2);color:var(--sol-accent2); }
+    .probe-chip.active { border-color:var(--sol-accent2);color:var(--sol-accent2);background:rgba(96,160,255,0.1); }
+    .probe-chip .p-dot { width:6px;height:6px;border-radius:50%;background:var(--sol-accent2);flex-shrink:0; }
+
+    .empty-state {
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:40px 20px;text-align:center;color:var(--sol-text2);gap:8px;
+    }
+    .empty-state .icon { font-size:2rem;opacity:0.3; }
+    .empty-state .msg { font-size:0.75rem;line-height:1.5; }
+
+    @media (max-width:900px) {
+      .app { flex-direction:column; }
+      .side-panel { width:100%;border-left:none;border-top:1px solid var(--sol-border);max-height:40vh; }
+    }
+  </style>
+</head>
+<body>
+  <script src="shared-theme.js"></script>
+
+  <div class="top-bar">
+    <div>
+      <span class="sub">太阳系沙盘</span>
+      <span class="desc">行星 · 发现故事 · 深空探测器</span>
+    </div>
+    <a class="back-btn" href="index.html">&#8592; 返回首页</a>
+  </div>
+
+  <div class="app">
+    <div class="scene-wrap" id="sceneWrap">
+      <div class="scene-controls">
+        <button class="ctrl-btn" data-speed="0">&#10074;&#10074; 暂停</button>
+        <button class="ctrl-btn" data-speed="0.5">0.5x</button>
+        <button class="ctrl-btn active" data-speed="1">1x</button>
+        <button class="ctrl-btn" data-speed="2">2x</button>
+        <button class="ctrl-btn" data-speed="5">5x</button>
+      </div>
+      <div class="speed-indicator" id="speedLabel">1x</div>
+      <div class="scene-hint">[左键] 旋转 | [右键] 平移 | [滚轮] 缩放 | [点击星球] 查看详情</div>
+    </div>
+
+    <div class="side-panel" id="sidePanel">
+      <!-- Planet List -->
+      <h3>八大行星</h3>
+      <div class="planet-list" id="planetList"></div>
+
+      <!-- Planet Detail -->
+      <div id="planetDetail">
+        <div class="empty-state">
+          <div class="icon">&#9790;</div>
+          <div class="msg">点击3D场景中的星球<br>或选择上方行星查看详情</div>
+        </div>
+      </div>
+
+      <!-- Probes -->
+      <h3>深空探测器 &#128640;</h3>
+      <div class="probe-list" id="probeList"></div>
+      <div id="probeDetail"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ========== Data ==========
+    const PLANET_DATA = [
+      { key:'mercury', name:'水星', en:'Mercury', type:'类地行星', color:'#b0a899', size:0.38,
+        dist:5.8, orbit:0.24, rot:58.6, temp:'167°C (昼430°C/夜-180°C)', moons:0,
+        gravity:'0.38 g', diameter:'4,878 km',
+        story:'水星是离太阳最近的行星，早在公元前3000年就被苏美尔人观测记录。因其快速绕太阳运行，古罗马人以信使之神墨丘利(Mercurius)命名。由于紧贴太阳，水星极难观测——哥白尼临终前遗憾一辈子未见过水星。1974年水手10号首次飞掠，2011年信使号进入轨道，揭示其表面布满陨石坑，酷似月球。',
+        discoverer:'苏美尔人（约公元前3000年）', year:'古代' },
+      { key:'venus', name:'金星', en:'Venus', type:'类地行星', color:'#e8cda0', size:0.95,
+        dist:10.8, orbit:0.615, rot:243, temp:'462°C', moons:0,
+        gravity:'0.90 g', diameter:'12,104 km',
+        story:'金星是夜空中最亮的行星，中国古代称"启明"或"长庚"。古罗马人以爱与美之神维纳斯命名。金星是太阳系最热的行星，浓厚的二氧化碳大气层产生了极端的温室效应。1962年水手2号成为首个飞掠金星的探测器。苏联的"金星"系列探测器在20世纪70-80年代成功着陆，传回了金星表面灼热荒芜的图像——这是人类首次看到另一个行星表面的景象。',
+        discoverer:'古代文明', year:'古代' },
+      { key:'earth', name:'地球', en:'Earth', type:'类地行星', color:'#4da6ff', size:1.0,
+        dist:15, orbit:1, rot:1, temp:'15°C', moons:1,
+        gravity:'1.00 g', diameter:'12,756 km',
+        story:'我们的家园，目前已知唯一孕育生命的天体。约45.4亿年前形成。从哥白尼1543年提出日心说确认地球是绕太阳运行的行星之一，到阿波罗计划首次将人类送上月球，再到国际空间站常年驻留宇航员——地球始终是人类探索宇宙的起点和归宿。',
+        discoverer:'—', year:'—' },
+      { key:'mars', name:'火星', en:'Mars', type:'类地行星', color:'#e07050', size:0.53,
+        dist:22.8, orbit:1.88, rot:1.03, temp:'-65°C', moons:2,
+        gravity:'0.38 g', diameter:'6,779 km',
+        story:'火星因锈红色而被称为"红色星球"，古罗马人以战神马尔斯(Mars)命名。中国古代称"荧惑"。17世纪开普勒计算了火星椭圆轨道，打破了"完美圆周"的教条。1877年斯基亚帕雷利观测到火星表面"运河"，引发火星生命猜想。1965年水手4号首次飞掠火星。目前已有多个探测器在火星表面工作，包括毅力号、好奇号、祝融号等。',
+        discoverer:'古代文明', year:'古代' },
+      { key:'jupiter', name:'木星', en:'Jupiter', type:'气态巨行星', color:'#c4a882', size:4.0,
+        dist:77.8, orbit:11.86, rot:0.41, temp:'-110°C', moons:95,
+        gravity:'2.53 g', diameter:'139,820 km',
+        story:'太阳系最大的行星，以罗马主神朱庇特命名。1610年伽利略用自制的30倍望远镜发现木星的四颗大卫星——这是人类首次观测到地球之外的天体卫星，直接动摇了"所有天体围绕地球转动"的地心说。木星大红斑是一场持续了至少350年的超级风暴，体积比地球还大。2016年朱诺号探测器抵达木星，正持续揭示这颗巨行星的内部秘密。',
+        discoverer:'古代文明 · 伽利略（1610年发现卫星）', year:'古代' },
+      { key:'saturn', name:'土星', en:'Saturn', type:'气态巨行星', color:'#e8d5a3', size:3.5,
+        dist:143, orbit:29.46, rot:0.44, temp:'-140°C', moons:146,
+        gravity:'1.07 g', diameter:'116,460 km',
+        story:'土星以其壮丽的环系统闻名。1610年伽利略首次用望远镜看到土星环，但因分辨率不足，误以为是土星的"耳朵"或两颗卫星。1655年惠更斯用更强大的望远镜正确识别出土星环。1675年卡西尼发现环中的缝隙（卡西尼缝）。1997年发射的卡西尼-惠更斯号探测器环绕土星13年，于2017年壮丽地坠入土星大气层，完成了史诗般的使命。',
+        discoverer:'古代文明 · 惠更斯（1655年确认环结构）', year:'古代' },
+      { key:'uranus', name:'天王星', en:'Uranus', type:'冰巨行星', color:'#88ccdd', size:2.2,
+        dist:287, orbit:84.01, rot:0.72, temp:'-195°C', moons:27,
+        gravity:'0.89 g', diameter:'50,724 km',
+        story:'1781年3月13日，英国天文学家威廉·赫歇尔在自家花园用自制望远镜巡天时，发现了一颗"彗星"——后来确认这是一颗新行星！这是人类历史上第一次用望远镜发现新行星，将太阳系的已知边界扩大了一倍。赫歇尔原想以国王乔治三世命名，但最终以希腊天空之神乌拉诺斯(Uranus)命名。天王星自转轴倾斜约98°，几乎是"躺着"公转。',
+        discoverer:'威廉·赫歇尔（1781年）', year:'1781' },
+      { key:'neptune', name:'海王星', en:'Neptune', type:'冰巨行星', color:'#4466ff', size:2.1,
+        dist:450, orbit:164.8, rot:0.67, temp:'-200°C', moons:16,
+        gravity:'1.14 g', diameter:'49,244 km',
+        story:'海王星被称为"笔尖上发现的行星"。天文学家发现天王星轨道偏离牛顿引力理论预测，推测存在一颗未知行星的引力扰动。法国数学家勒维耶和英国天文学家亚当斯分别独立通过数学计算预言了这颗行星的位置。1846年9月23日，德国天文学家伽勒在柏林天文台按照勒维耶的预测位置，仅用1小时就找到了海王星——这是牛顿万有引力定律的辉煌胜利。海王星风速高达2100km/h，是太阳系风速最快的行星。',
+        discoverer:'勒维耶/亚当斯（数学预测）· 伽勒（观测确认，1846年）', year:'1846' }
+    ];
+
+    const PROBE_DATA = [
+      { key:'voyager1', name:'旅行者1号', en:'Voyager 1', agency:'NASA', launch:'1977-09-05',
+        location:'星际空间（日球层外）', distance:'约 245 亿 km', status:'运行中（仅剩2台仪器）',
+        instruments:'宇宙射线探测仪、等离子体波探测器、磁力计、低能带电粒子探测器',
+        goal:'飞越木星和土星（已完成）；探测星际空间。携带金唱片，记录人类文明信息。',
+        pos: { x: 120, y: 40, z: 6 } },
+      { key:'voyager2', name:'旅行者2号', en:'Voyager 2', agency:'NASA', launch:'1977-08-20',
+        location:'星际空间（日球层外）', distance:'约 204 亿 km', status:'运行中',
+        instruments:'宇宙射线探测仪、等离子体波探测器、磁力计、低能带电粒子探测器',
+        goal:'唯一飞越天王星和海王星的探测器；探测星际空间。',
+        pos: { x: -80, y: -70, z: -15 } },
+      { key:'newhorizons', name:'新视野号', en:'New Horizons', agency:'NASA', launch:'2006-01-19',
+        location:'柯伊伯带', distance:'约 85 亿 km', status:'运行中',
+        instruments:'远程侦察成像仪(LORRI)、紫外/红外成像光谱仪(Alice/Ralph)、太阳风分析仪(SWAP)、高能粒子谱仪(PEPSSI)、尘埃计数器(SDC)',
+        goal:'2015年飞掠冥王星；2019年飞掠柯伊伯带天体"天涯海角"(Arrokoth)；预计2038年到达日球层边缘。',
+        pos: { x: 60, y: 30, z: 40 } },
+      { key:'parker', name:'帕克太阳探测器', en:'Parker Solar Probe', agency:'NASA', launch:'2018-08-12',
+        location:'绕太阳运行（近日点约610万km）', distance:'距太阳 ~610 万 km', status:'运行中',
+        instruments:'FIELDS（电磁场）、IS☉IS（太阳综合科学调查）、WISPR（广角成像仪）、SWEAP（太阳风探测）',
+        goal:'穿越太阳日冕采样；解开日冕百万度高温之谜；找到太阳风源头。史上最快人造物体(~192km/s)。',
+        pos: { x: 0.8, y: 0.5, z: 0.3 } },
+      { key:'juno', name:'朱诺号', en:'Juno', agency:'NASA', launch:'2011-08-05',
+        location:'木星极地轨道', distance:'距木星 ~5,000 km（近木点）', status:'运行中',
+        instruments:'微波辐射计(MWR)、极光红外成像仪(JIRAM)、磁力计(MAG)、高能粒子探测器(JEDI)、JunoCam',
+        goal:'研究木星内部结构、大气组成、磁场和极光；探测木星卫星。',
+        pos: { x: 77, y: 4, z: 2 } },
+      { key:'psyche', name:'灵神星探测器', en:'Psyche', agency:'NASA', launch:'2023-10-13',
+        location:'飞往小行星带（途中）', distance:'距地球 ~3 亿 km', status:'飞行中',
+        instruments:'多光谱成像仪、伽马射线与中子光谱仪、磁力计、X波段无线电科学实验',
+        goal:'探测富金属型小行星灵神星(16 Psyche)，研究行星核的形成。预计2029年抵达。',
+        pos: { x: 30, y: 15, z: 8 } },
+      { key:'bepi', name:'贝皮科伦坡', en:'BepiColombo', agency:'ESA/JAXA', launch:'2018-10-20',
+        location:'飞往水星（途中，已多次飞掠水星）', distance:'距地球 ~1.5 亿 km', status:'飞行中',
+        instruments:'ESA水星行星轨道器(MPO) 11台仪器；JAXA水星磁层轨道器(MMO) 5台仪器',
+        goal:'全面研究水星的组成、地质、磁场、磁层及内部结构。预计2026年底抵达水星轨道。',
+        pos: { x: 5, y: 2, z: 1 } },
+      { key:'juice', name:'JUICE', en:'Jupiter Icy Moons Explorer', agency:'ESA', launch:'2023-04-14',
+        location:'飞往木星（途中，地球-月球-金星借力）', distance:'距地球 ~2 亿 km', status:'飞行中',
+        instruments:'相机、成像光谱仪、雷达探测仪、激光高度计、磁力计、粒子探测器等10台仪器',
+        goal:'研究木星三大冰卫星（木卫三、木卫二、木卫四）的海洋与宜居性；最终进入木卫三轨道。预计2031年抵达。',
+        pos: { x: 25, y: 10, z: 5 } },
+      { key:'solarorbiter', name:'太阳轨道器', en:'Solar Orbiter', agency:'ESA/NASA', launch:'2020-02-10',
+        location:'绕太阳运行（近日点~0.28 AU）', distance:'距太阳 ~4200 万 km', status:'运行中',
+        instruments:'极紫外成像仪(EUI)、日冕环境光谱仪(SPICE)、磁力计(MAG)、太阳风分析仪(SWA)、高能粒子探测器(EPD)等10台',
+        goal:'首次拍摄太阳两极图像；研究太阳风起源和日冕加热机制。',
+        pos: { x: 8, y: 6, z: -2 } },
+      { key:'osiris', name:'OSIRIS-APEX', en:'OSIRIS-APEX (原OSIRIS-REx)', agency:'NASA', launch:'2016-09-08',
+        location:'飞往小行星阿波菲斯（途中）', distance:'距地球 ~2 亿 km', status:'飞行中',
+        instruments:'相机套件(OCAMS)、激光高度计(OLA)、热发射光谱仪(OTES)、X射线成像光谱仪(REXIS)',
+        goal:'2023年已成功将贝努样本送回地球。探测器更名为OSIRIS-APEX，继续飞往小行星阿波菲斯(Apophis)，预计2029年抵达。',
+        pos: { x: 20, y: -10, z: 12 } }
+    ];
+
+    // ========== Theme Colors ==========
+    function getThemeColors() {
+      const s = getComputedStyle(document.documentElement);
+      const accent = s.getPropertyValue('--sol-accent').trim() || '#f0c060';
+      const accent2 = s.getPropertyValue('--sol-accent2').trim() || '#60a0ff';
+      const bg = s.getPropertyValue('--sol-bg').trim() || '#0a0a14';
+      const text2 = s.getPropertyValue('--sol-text2').trim() || '#8899bb';
+      return { accent, accent2, bg, text2 };
+    }
+
+    // ========== Solar System ==========
+    class SolarSystem {
+      constructor() {
+        this.speed = 1;
+        this.paused = false;
+        this.selectedPlanet = null;
+        this.selectedProbe = null;
+        this.planetMeshes = {};
+        this.probeMeshes = {};
+        this.orbitLines = {};
+
+        this.setupScene();
+        this.createSun();
+        this.createPlanets();
+        this.createProbes();
+        this.createStarfield();
+        this.bindEvents();
+        this.buildSidePanel();
+        this.animate();
+      }
+
+      setupScene() {
+        const wrap = document.getElementById('sceneWrap');
+        const w = wrap.clientWidth, h = wrap.clientHeight;
+
+        this.scene = new THREE.Scene();
+        const colors = getThemeColors();
+        this.scene.background = new THREE.Color(colors.bg);
+
+        this.camera = new THREE.PerspectiveCamera(50, w/h, 0.5, 2000);
+        this.camera.position.set(40, 35, 60);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(w, h);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        wrap.appendChild(this.renderer.domElement);
+
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.08;
+        this.controls.target.set(0, 0, 0);
+        this.controls.minDistance = 3;
+        this.controls.maxDistance = 300;
+
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+
+        const ambient = new THREE.AmbientLight(0x333344, 0.6);
+        this.scene.add(ambient);
+        const sunLight = new THREE.PointLight(0xfff8e0, 200, 500, 0.5);
+        sunLight.position.set(0, 0, 0);
+        this.scene.add(sunLight);
+
+        window.addEventListener('resize', () => {
+          const rw = wrap.clientWidth, rh = wrap.clientHeight;
+          this.camera.aspect = rw/rh;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(rw, rh);
+        });
+      }
+
+      createSun() {
+        const geo = new THREE.SphereGeometry(2.5, 64, 64);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffcc33 });
+        this.sun = new THREE.Mesh(geo, mat);
+        this.scene.add(this.sun);
+
+        // Glow
+        const glowGeo = new THREE.SphereGeometry(3.2, 64, 64);
+        const glowMat = new THREE.ShaderMaterial({
+          uniforms: { time: { value: 0 } },
+          vertexShader: `
+            varying vec3 vNormal; varying vec3 vPosition;
+            void main() { vNormal = normalize(normalMatrix * normal); vPosition = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+          `,
+          fragmentShader: `
+            varying vec3 vNormal; varying vec3 vPosition;
+            void main() {
+              float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 1.8);
+              gl_FragColor = vec4(1.0, 0.75, 0.15, 1.0) * intensity * 0.5;
+            }
+          `,
+          transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        this.sunGlow = new THREE.Mesh(glowGeo, glowMat);
+        this.scene.add(this.sunGlow);
+      }
+
+      createOrbitRing(dist, color) {
+        const pts = [];
+        const segments = 256;
+        for (let i=0; i<=segments; i++) {
+          const angle = (i/segments) * Math.PI * 2;
+          pts.push(new THREE.Vector3(Math.cos(angle)*dist, 0, Math.sin(angle)*dist));
+        }
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        const mat = new THREE.LineBasicMaterial({ color, transparent:true, opacity:0.15, depthTest:true });
+        return new THREE.Line(geo, mat);
+      }
+
+      createPlanets() {
+        PLANET_DATA.forEach((p, idx) => {
+          // Orbit ring
+          const ring = this.createOrbitRing(p.dist, 0x334466);
+          this.scene.add(ring);
+          this.orbitLines[p.key] = ring;
+
+          // Planet
+          const geo = new THREE.SphereGeometry(p.size * 0.45, 48, 48);
+          const mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(p.color),
+            roughness: 0.7, metalness: 0.05
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set(p.dist, 0, 0);
+          mesh.userData = { planetKey: p.key, type:'planet' };
+          mesh.castShadow = true;
+          this.scene.add(mesh);
+          this.planetMeshes[p.key] = mesh;
+
+          // Saturn ring
+          if (p.key === 'saturn') {
+            const ringGeo = new THREE.TorusGeometry(p.size*0.55, p.size*0.12, 16, 64);
+            const ringMat = new THREE.MeshStandardMaterial({ color:0xd4c090, roughness:0.6, metalness:0.2, side:THREE.DoubleSide });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.rotation.x = Math.PI/2.3;
+            mesh.add(ringMesh);
+          }
+        });
+      }
+
+      createProbes() {
+        const geo = new THREE.SphereGeometry(0.25, 16, 16);
+        PROBE_DATA.forEach(probe => {
+          const mat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set(probe.pos.x, probe.pos.y, probe.pos.z);
+          mesh.userData = { probeKey: probe.key, type:'probe' };
+          this.scene.add(mesh);
+          this.probeMeshes[probe.key] = mesh;
+
+          // Line from Sun
+          const pts = [new THREE.Vector3(0,0,0), new THREE.Vector3(probe.pos.x, probe.pos.y, probe.pos.z)];
+          const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+          const lineMat = new THREE.LineBasicMaterial({ color:0x338855, transparent:true, opacity:0.2, depthTest:true });
+          this.scene.add(new THREE.Line(lineGeo, lineMat));
+        });
+      }
+
+      createStarfield() {
+        const starsGeo = new THREE.BufferGeometry();
+        const count = 2000;
+        const positions = new Float32Array(count*3);
+        for (let i=0; i<count*3; i+=3) {
+          positions[i] = (Math.random()-0.5)*600;
+          positions[i+1] = (Math.random()-0.5)*400;
+          positions[i+2] = (Math.random()-0.5)*600;
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+        const starsMat = new THREE.PointsMaterial({ color:0xffffff, size:0.15, transparent:true, opacity:0.7 });
+        this.scene.add(new THREE.Points(starsGeo, starsMat));
+      }
+
+      bindEvents() {
+        this.renderer.domElement.addEventListener('click', (e) => {
+          const rect = this.renderer.domElement.getBoundingClientRect();
+          this.mouse.x = ((e.clientX-rect.left)/rect.width)*2-1;
+          this.mouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
+
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+          const allMeshes = [...Object.values(this.planetMeshes), ...Object.values(this.probeMeshes)];
+          const intersects = this.raycaster.intersectObjects(allMeshes);
+
+          if (intersects.length > 0) {
+            const obj = intersects[0].object;
+            if (obj.userData.type === 'planet') {
+              this.selectPlanet(obj.userData.planetKey);
+            } else if (obj.userData.type === 'probe') {
+              this.selectProbe(obj.userData.probeKey);
+            }
+          }
+        });
+
+        document.querySelectorAll('.ctrl-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const spd = parseFloat(btn.dataset.speed);
+            this.speed = spd;
+            this.paused = spd === 0;
+            document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.toggle('active', b.dataset.speed === String(spd)));
+            document.getElementById('speedLabel').textContent = spd === 0 ? '暂停' : spd + 'x';
+          });
+        });
+      }
+
+      selectPlanet(key) {
+        this.selectedPlanet = key;
+        this.selectedProbe = null;
+        this.updateSidePanel();
+        // Highlight
+        Object.values(this.planetMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        if (this.planetMeshes[key]) {
+          this.planetMeshes[key].material.emissive = new THREE.Color(0xffffff);
+          this.planetMeshes[key].material.emissiveIntensity = 0.3;
+        }
+      }
+
+      selectProbe(key) {
+        this.selectedProbe = key;
+        this.selectedPlanet = null;
+        this.updateSidePanel();
+        Object.values(this.planetMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+      }
+
+      buildSidePanel() {
+        // Planet chips
+        const pl = document.getElementById('planetList');
+        PLANET_DATA.forEach(p => {
+          const chip = document.createElement('button');
+          chip.className = 'planet-chip';
+          chip.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:4px;"></span>${p.name}`;
+          chip.addEventListener('click', () => this.selectPlanet(p.key));
+          chip.dataset.key = p.key;
+          pl.appendChild(chip);
+        });
+
+        // Probe chips
+        const prl = document.getElementById('probeList');
+        PROBE_DATA.forEach(probe => {
+          const chip = document.createElement('button');
+          chip.className = 'probe-chip';
+          chip.innerHTML = `<span class="p-dot"></span>${probe.name}`;
+          chip.addEventListener('click', () => this.selectProbe(probe.key));
+          chip.dataset.key = probe.key;
+          prl.appendChild(chip);
+        });
+      }
+
+      updateSidePanel() {
+        // Update planet chips
+        document.querySelectorAll('#planetList .planet-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.key === this.selectedPlanet);
+        });
+        document.querySelectorAll('#probeList .probe-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.key === this.selectedProbe);
+        });
+
+        const detail = document.getElementById('planetDetail');
+        const probeDetail = document.getElementById('probeDetail');
+
+        if (this.selectedPlanet) {
+          const p = PLANET_DATA.find(pl => pl.key === this.selectedPlanet);
+          detail.innerHTML = `
+            <div class="planet-card">
+              <div class="planet-name"><span class="dot" style="background:${p.color}"></span>${p.name} <span style="font-size:0.7rem;color:var(--sol-text2);font-weight:400;">${p.en}</span></div>
+              <div class="planet-type">${p.type}</div>
+              <div class="planet-stats">
+                <div class="planet-stat"><span>距太阳</span><span class="val">${p.dist} AU</span></div>
+                <div class="planet-stat"><span>公转周期</span><span class="val">${typeof p.orbit==='number'&&p.orbit<10?p.orbit+'年':'约'+p.orbit+'天'}</span></div>
+                <div class="planet-stat"><span>直径</span><span class="val">${p.diameter}</span></div>
+                <div class="planet-stat"><span>温度</span><span class="val">${p.temp}</span></div>
+                <div class="planet-stat"><span>卫星</span><span class="val">${p.moons}颗</span></div>
+                <div class="planet-stat"><span>重力</span><span class="val">${p.gravity}</span></div>
+              </div>
+              <div class="story">
+                <div style="font-size:0.7rem;color:var(--sol-accent);margin-bottom:4px;font-weight:600;">发现历史 · ${p.year}</div>
+                <strong>发现者：</strong>${p.discoverer}<br><br>
+                ${p.story}
+              </div>
+            </div>`;
+          probeDetail.innerHTML = '';
+        } else {
+          detail.innerHTML = `<div class="empty-state"><div class="icon">&#9790;</div><div class="msg">点击3D场景中的星球<br>或选择上方行星查看详情</div></div>`;
+        }
+
+        if (this.selectedProbe) {
+          const pr = PROBE_DATA.find(pb => pb.key === this.selectedProbe);
+          probeDetail.innerHTML = `
+            <div class="probe-card" style="margin-top:8px;">
+              <div class="probe-name"><span class="status"></span>${pr.name} <span style="font-size:0.65rem;color:var(--sol-text2);font-weight:400;">${pr.en}</span></div>
+              <div class="probe-info">
+                <strong>机构：</strong>${pr.agency} &nbsp; <strong>发射：</strong>${pr.launch}<br>
+                <strong>位置：</strong>${pr.location}<br>
+                <strong>距离：</strong>${pr.distance}<br>
+                <strong>状态：</strong>${pr.status}
+              </div>
+              <div class="probe-instruments">
+                <strong>携带仪器：</strong>${pr.instruments}
+              </div>
+              <div class="probe-info" style="margin-top:4px;"><strong>任务目标：</strong>${pr.goal}</div>
+            </div>`;
+        }
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        this.controls.update();
+
+        const time = Date.now() * 0.001;
+        if (!this.paused) {
+          const dt = 0.016 * this.speed;
+          // Update planets
+          PLANET_DATA.forEach(p => {
+            const mesh = this.planetMeshes[p.key];
+            if (!mesh) return;
+            const period = p.orbit;
+            const angSpeed = (2*Math.PI) / (period * 365.25 * 86400) * dt * 10000000;
+            const angle = time * 0.3 / Math.max(period, 0.1) + p.key.charCodeAt(0) * 0.1;
+            mesh.position.x = Math.cos(angle) * p.dist;
+            mesh.position.z = Math.sin(angle) * p.dist;
+            mesh.rotation.y += dt * 2;
+          });
+
+          // Pulse probes
+          Object.values(this.probeMeshes).forEach(m => {
+            m.material.opacity = 0.5 + Math.sin(time*5) * 0.5;
+          });
+        }
+
+        // Sun glow pulse
+        this.sunGlow.material.uniforms.time.value = time;
+        this.sunGlow.scale.setScalar(1 + Math.sin(time*2)*0.03);
+
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      new SolarSystem();
+    });
+  </script>
+</body>
+</html>
