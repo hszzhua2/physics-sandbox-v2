@@ -8,7 +8,7 @@
 
   var MUSIC_KEY = 'psu-music-v2';
   var PLAYLIST = [
-    { name: 'Rain on the Glass', src: 'music/rain_on_the_glass.mp3' }
+    { name: 'Midnight Ink', src: 'music/Midnight_Ink.mp3' }
   ];
 
   var channel = null;
