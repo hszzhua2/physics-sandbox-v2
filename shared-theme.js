@@ -116,6 +116,13 @@
     if (currentPage === 'index.html' || currentPage === '') homeLink.classList.add('active');
     nav.appendChild(homeLink);
 
+    // Knowledge Graph
+    const kgLink = document.createElement('a');
+    kgLink.href = 'knowledge-graph.html';
+    kgLink.textContent = '知识图谱';
+    if (currentPage === 'knowledge-graph.html') kgLink.classList.add('active');
+    nav.appendChild(kgLink);
+
     // Library dropdown
     const libDropdown = document.createElement('div');
     libDropdown.className = 'nav-dropdown';
