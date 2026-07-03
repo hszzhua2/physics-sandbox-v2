@@ -1035,6 +1035,9 @@
       .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
       .cursor-glow { display: none; }
     }
+    .header-title h1 { color: var(--ink); transition: color 0.4s ease; }
+    .header-title p { color: var(--muted); transition: color 0.4s ease; }
+    .hint-text { color: var(--muted); transition: color 0.4s ease; }
   </style>
 </head>
 <body>
@@ -1074,40 +1077,14 @@
     <button class="nav-toggle" id="navToggle">&#9776;</button>
   </nav>
 
-  <!-- ===== HERO ===== -->
-  <section class="hero" id="hero">
-    <canvas id="hero-canvas"></canvas>
-    <div class="hero-waves">
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
+  <!-- Hero Bubble Graph -->
+  <section class="hero-bubble" style="position:relative;width:100%;height:100vh;overflow:hidden;">
+    <canvas id="hero-bubble-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="header-title" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:10;">
+      <h1 style="margin:0;font-size:2.8rem;letter-spacing:6px;font-weight:800;">砰！粒子！</h1>
+      <p style="margin:10px 0 0 0;letter-spacing:2px;font-size:0.95rem;">交互式物理与数学实验平台</p>
     </div>
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="dot"></span>
-        物理交互实验平台 v1.0
-      </div>
-      <h1>
-        <span class="gradient-text">砰！粒子！</span><br>
-        <span style="color: var(--ink);">触手可及</span>
-      </h1>
-      <p class="hero-subtitle">让每一个物理概念都触手可及。从经典力学到量子世界，沉浸式仿真实验带你亲手探索自然法则。</p>
-      <div class="hero-actions">
-        <a href="#" class="btn btn-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          开始探索
-        </a>
-        <a href="#" class="btn btn-ghost">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-          观看演示
-        </a>
-      </div>
-    </div>
-    <div class="hero-scroll">
-      <div class="mouse"></div>
-      <span>SCROLL</span>
-    </div>
+    <div class="hint-text" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:10;font-size:0.85rem;opacity:0.7;pointer-events:none;white-space:nowrap;">点击气泡进入实验 · 拖拽鼠标吸引节点</div>
   </section>
 
   <!-- ===== STATS ===== -->
@@ -1361,8 +1338,8 @@
       }
     };
     const ALL_THEMES = ['classical', 'academic', 'soviet', 'cyber'];
-    function getTheme() { return document.documentElement.getAttribute('data-theme') || 'classical'; }
-    function getThemeConfig() { return THEMES[getTheme()] || THEMES['classical']; }
+    function getTheme() { return document.documentElement.getAttribute('data-theme') || 'academic'; }
+    function getThemeConfig() { return THEMES[getTheme()] || THEMES['academic']; }
     function setTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
@@ -1375,6 +1352,7 @@
     (function initTheme() {
       const saved = localStorage.getItem('theme');
       if (saved && ALL_THEMES.includes(saved)) setTheme(saved);
+      else setTheme('academic');
     })();
 
     /* ===== CURSOR GLOW ===== */
@@ -1771,9 +1749,209 @@
     });
 
     /* ===== SCROLL ===== */
-    document.querySelector('.hero-scroll').addEventListener('click', () => {
-      document.querySelector('.stats').scrollIntoView({ behavior: 'smooth' });
-    });
+    const heroScroll = document.querySelector('.hero-scroll');
+    if (heroScroll) {
+      heroScroll.addEventListener('click', () => {
+        document.querySelector('.stats').scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
+    // ==========================================
+    // Hero Bubble Graph (from original homepage)
+    // ==========================================
+    (function() {
+      const bubbleCanvas = document.getElementById('hero-bubble-canvas');
+      if (!bubbleCanvas) return;
+      const bCtx = bubbleCanvas.getContext('2d');
+      let bw, bh;
+      let bMouseX = -1000, bMouseY = -1000;
+
+      const ACADEMIC_COLORS = {
+        '流体力学': '#6b8cae', '大数定律': '#c4956a', '简谐共振': '#8a7ca8',
+        '声学驻波': '#6b8cae', '蝴蝶效应': '#8a7ca8', '链式反应': '#6a9e8a',
+        '量子物理': '#6b8cae', '量子力学': '#8a7ca8', '三体问题': '#c4956a',
+        '天体物理': '#6b5b8a', '广义相对论': '#5b7a8a', '电磁学': '#8a6b5b',
+        '波动光学': '#5b8a8a', '经典力学': '#8a8a5b', '概率模型': '#6a9e8a',
+        'Pluchino模型': '#8a7ca8', '统计物理': '#c4956a', '多体系统': '#8a7ca8',
+        '行星与探测器': '#c4956a', '混沌理论': '#8a7ca8'
+      };
+      const ACADEMIC_ICONS = {
+        'taylor':'T','galton':'G','lissajous':'L','chladni':'C','pendulum':'P','matter':'M',
+        'quantum':'Q','potential':'V','gravity':'N','lorenz':'Lz','bernoulli':'B',
+        'blackhole':'Bh','blackhole-advanced':'Bh+','wormhole':'W','tesla':'Tc',
+        'wave':'Wi','spring':'Sp','medical':'M','pluchino':'P','ising':'I','ca3d':'C','solar':'S'
+      };
+
+      const bubbleNodes = [
+        { id:'taylor', title:'泰勒-库埃特流', subtitle:'流体力学', color:'#00f3ff', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDF0A' },
+        { id:'galton', title:'高尔顿钉板', subtitle:'大数定律', color:'#ff9d00', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83D\uDCCA' },
+        { id:'lissajous', title:'利萨茹曲线', subtitle:'简谐共振', color:'#ff00ea', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDFB5' },
+        { id:'chladni', title:'克拉尼图形', subtitle:'声学驻波', color:'#00f3ff', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83D\uDD0A' },
+        { id:'pendulum', title:'混沌双摆', subtitle:'蝴蝶效应', color:'#ff00ea', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83E\uDD8B' },
+        { id:'matter', title:'刚体沙盒', subtitle:'链式反应', color:'#39ff14', x:0,y:0,vx:0,vy:0,rad:58,icon:'\u2699\uFE0F' },
+        { id:'quantum', title:'双缝干涉', subtitle:'量子物理', color:'#38bdf8', x:0,y:0,vx:0,vy:0,rad:58,icon:'\u269B\uFE0F' },
+        { id:'potential', title:'一维势阱', subtitle:'量子力学', color:'#d946ef', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83D\uDD2E' },
+        { id:'gravity', title:'万有引力', subtitle:'三体问题', color:'#ffeaa7', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83E\uDE90' },
+        { id:'lorenz', title:'洛伦兹吸引子', subtitle:'混沌理论', color:'#ff6b6b', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83E\uDD8B' },
+        { id:'bernoulli', title:'伯努利原理', subtitle:'流体力学', color:'#38bdf8', x:0,y:0,vx:0,vy:0,rad:58,icon:'\u2708\uFE0F' },
+        { id:'blackhole', title:'黑洞吸积盘', subtitle:'天体物理', color:'#bd00ff', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDF0C' },
+        { id:'blackhole-advanced', title:'黑洞吸积盘(高级)', subtitle:'天体物理', color:'#9d00e0', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDF00' },
+        { id:'wormhole', title:'爱因斯坦-罗森桥', subtitle:'广义相对论', color:'#00f3ff', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDF09' },
+        { id:'tesla', title:'特斯拉线圈', subtitle:'电磁学', color:'#fbbf24', x:0,y:0,vx:0,vy:0,rad:58,icon:'\u26A1' },
+        { id:'wave', title:'波的干涉', subtitle:'波动光学', color:'#00d4ff', x:0,y:0,vx:0,vy:0,rad:58,icon:'\u3030\uFE0F' },
+        { id:'spring', title:'弹簧振子', subtitle:'经典力学', color:'#f59e0b', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDF00' },
+        { id:'medical', title:'名医的诞生', subtitle:'概率模型', color:'#0d9488', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDFE5' },
+        { id:'pluchino', title:'成功随机性', subtitle:'Pluchino模型', color:'#8b5cf6', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83C\uDFB2' },
+        { id:'ising', title:'伊辛模型', subtitle:'统计物理', color:'#ef4444', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83E\uDDF2' },
+        { id:'ca3d', title:'3D元胞自动机', subtitle:'多体系统', color:'#8b5cf6', x:0,y:0,vx:0,vy:0,rad:58,icon:'\uD83E\uDDCA' },
+        { id:'solar', title:'太阳系沙盘', subtitle:'行星与探测器', color:'#f0c060', x:0,y:0,vx:0,vy:0,rad:58,icon:'\u2600\uFE0F' }
+      ];
+
+      function bResize() {
+        bw = bubbleCanvas.width = bubbleCanvas.offsetWidth;
+        bh = bubbleCanvas.height = bubbleCanvas.offsetHeight;
+        bubbleNodes.forEach(node => {
+          if (node.x === 0) {
+            node.x = Math.random() * (bw - 200) + 100;
+            node.y = Math.random() * (bh - 200) + 100;
+            node.vx = (Math.random() - 0.5) * 1.5;
+            node.vy = (Math.random() - 0.5) * 1.5;
+          }
+        });
+      }
+      window.addEventListener('resize', bResize);
+      bResize();
+
+      let bDragged = null, bDragOX = 0, bDragOY = 0, bHasDrag = false;
+      bubbleCanvas.addEventListener('mousedown', e => {
+        const rect = bubbleCanvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+        for (let n of bubbleNodes) {
+          if (Math.hypot(n.x - mx, n.y - my) <= n.rad + 10) {
+            bDragged = n; bDragOX = n.x - mx; bDragOY = n.y - my; bHasDrag = false;
+            n.vx = 0; n.vy = 0; break;
+          }
+        }
+      });
+      bubbleCanvas.addEventListener('mousemove', e => {
+        const rect = bubbleCanvas.getBoundingClientRect();
+        bMouseX = e.clientX - rect.left; bMouseY = e.clientY - rect.top;
+        if (bDragged) { bDragged.x = bMouseX + bDragOX; bDragged.y = bMouseY + bDragOY; bHasDrag = true; }
+      });
+      bubbleCanvas.addEventListener('mouseup', () => {
+        if (bDragged) { bDragged.vx = (Math.random() - 0.5) * 0.2; bDragged.vy = (Math.random() - 0.5) * 0.2; }
+        bDragged = null;
+      });
+      bubbleCanvas.addEventListener('mouseleave', () => { bMouseX = -1000; bMouseY = -1000; bDragged = null; });
+      bubbleCanvas.addEventListener('click', e => {
+        if (bHasDrag) return;
+        const rect = bubbleCanvas.getBoundingClientRect();
+        const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+        for (let n of bubbleNodes) {
+          if (Math.hypot(n.x - cx, n.y - cy) <= n.rad + 10) {
+            window.location.href = 'exp-' + n.id + '.html'; break;
+          }
+        }
+      });
+
+      const TITLE_RX = 220, TITLE_RY = 90;
+      function updateBubbles() {
+        for (let n of bubbleNodes) {
+          if (n === bDragged) continue;
+          n.x += n.vx; n.y += n.vy;
+          const m = n.rad + 20;
+          if (n.x < m) n.vx += 0.003; if (n.x > bw - m) n.vx -= 0.003;
+          if (n.y < m) n.vy += 0.003; if (n.y > bh - m) n.vy -= 0.003;
+          const dx = n.x - bw/2, dy = n.y - bh/2;
+          const de = Math.sqrt((dx*dx)/(TITLE_RX*TITLE_RX) + (dy*dy)/(TITLE_RY*TITLE_RY));
+          if (de < 1.0) {
+            const push = (1.0 - de) * 0.08, ang = Math.atan2(dy, dx);
+            n.vx += Math.cos(ang) * push; n.vy += Math.sin(ang) * push;
+          }
+          const t = performance.now() * 0.0003;
+          n.vx += Math.sin(t + n.id.charCodeAt(0)) * 0.0008;
+          n.vy += Math.cos(t + n.id.charCodeAt(2)) * 0.0008;
+          n.vx *= 0.998; n.vy *= 0.998;
+          const sp = Math.hypot(n.vx, n.vy);
+          if (sp > 0.6) { n.vx = (n.vx/sp)*0.6; n.vy = (n.vy/sp)*0.6; }
+        }
+        for (let i = 0; i < bubbleNodes.length; i++) {
+          for (let j = i+1; j < bubbleNodes.length; j++) {
+            let a = bubbleNodes[i], b = bubbleNodes[j];
+            let dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
+            let minD = a.rad + b.rad + 8;
+            if (dist < minD && dist > 0) {
+              let ov = (minD - dist) * 0.5, nx = dx/dist, ny = dy/dist;
+              if (a !== bDragged) { a.x -= nx*ov; a.y -= ny*ov; }
+              if (b !== bDragged) { b.x += nx*ov; b.y += ny*ov; }
+            }
+          }
+        }
+      }
+
+      function drawBubbles() {
+        const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+        const isAcademic = theme === 'academic' || theme === 'soviet';
+        const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f8f9fa';
+        bCtx.fillStyle = bg; bCtx.fillRect(0, 0, bw, bh);
+
+        let hoverFound = false;
+        for (let n of bubbleNodes) {
+          let isHover = Math.hypot(bMouseX - n.x, bMouseY - n.y) <= n.rad + 10;
+          if (isHover) hoverFound = true;
+          let nodeColor = isAcademic ? (ACADEMIC_COLORS[n.subtitle] || '#6b8cae') : n.color;
+
+          if (isAcademic) {
+            bCtx.shadowBlur = 0;
+            if (isHover) {
+              bCtx.beginPath(); bCtx.arc(n.x, n.y, n.rad + 4, 0, Math.PI*2);
+              bCtx.strokeStyle = 'rgba(26,26,46,0.08)'; bCtx.lineWidth = 1; bCtx.stroke();
+            }
+            bCtx.beginPath(); bCtx.arc(n.x, n.y, n.rad, 0, Math.PI*2);
+            bCtx.fillStyle = '#ffffff'; bCtx.fill();
+            bCtx.lineWidth = 1.5; bCtx.strokeStyle = nodeColor; bCtx.stroke();
+            bCtx.beginPath(); bCtx.arc(n.x, n.y, 3, 0, Math.PI*2);
+            bCtx.fillStyle = nodeColor; bCtx.fill();
+            const ic = ACADEMIC_ICONS[n.id] || '';
+            if (ic) {
+              bCtx.fillStyle = nodeColor;
+              bCtx.font = 'bold 20px "Segoe UI","Microsoft YaHei",sans-serif';
+              bCtx.textAlign = 'center'; bCtx.textBaseline = 'middle';
+              bCtx.globalAlpha = 0.6; bCtx.fillText(ic, n.x, n.y - 12); bCtx.globalAlpha = 1.0;
+            }
+            bCtx.fillStyle = '#1a1a2e'; bCtx.font = '13px "Segoe UI","Microsoft YaHei",sans-serif';
+            bCtx.textAlign = 'center'; bCtx.textBaseline = 'middle';
+            bCtx.fillText(n.title, n.x, n.y + 22);
+            bCtx.fillStyle = '#9a9aa5'; bCtx.font = '10px "Segoe UI","Microsoft YaHei",sans-serif';
+            bCtx.fillText(n.subtitle, n.x, n.y + 38);
+          } else {
+            if (theme === 'cyber') { bCtx.shadowColor = n.color; bCtx.shadowBlur = isHover ? 30 : 15; }
+            else if (theme === 'classical') { bCtx.shadowColor = n.color; bCtx.shadowBlur = isHover ? 20 : 10; }
+            else { bCtx.shadowColor = 'rgba(0,0,0,0.1)'; bCtx.shadowBlur = 8; }
+            bCtx.beginPath(); bCtx.arc(n.x, n.y, n.rad + (isHover?6:0), 0, Math.PI*2);
+            bCtx.fillStyle = theme === 'cyber' ? 'rgba(20,0,40,0.8)' : (theme==='classical'?'rgba(255,255,255,0.06)':'rgba(255,255,255,0.95)');
+            bCtx.fill(); bCtx.shadowBlur = 0;
+            bCtx.lineWidth = theme === 'classical' ? 2 : 4; bCtx.strokeStyle = n.color; bCtx.stroke();
+            if (isHover) { bCtx.fillStyle = n.color; bCtx.globalAlpha = theme==='classical'?0.25:0.15; bCtx.fill(); bCtx.globalAlpha = 1.0; }
+            bCtx.font = '24px sans-serif'; bCtx.textAlign = 'center'; bCtx.textBaseline = 'middle';
+            bCtx.fillText(n.icon, n.x, n.y - 10);
+            bCtx.fillStyle = theme==='cyber'?'#f0e6ff':(theme==='classical'?'#f0e6d2':'#2d3436');
+            bCtx.font = 'bold ' + (theme==='classical'?'13px':'14px') + ' sans-serif';
+            bCtx.fillText(n.title, n.x, n.y + 18);
+            bCtx.fillStyle = theme==='cyber'?'#a080c0':(theme==='classical'?'#8a7a68':'#636e72');
+            bCtx.font = '11px sans-serif'; bCtx.fillText(n.subtitle, n.x, n.y + 34);
+          }
+        }
+        document.body.style.cursor = hoverFound ? 'pointer' : 'default';
+      }
+
+      function bAnimate() {
+        updateBubbles();
+        drawBubbles();
+        requestAnimationFrame(bAnimate);
+      }
+      bAnimate();
+    })();
   </script>
 </body>
 </html>
