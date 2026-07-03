@@ -200,6 +200,10 @@
     </div>
 
     <div class="side-panel" id="sidePanel">
+      <!-- Sun -->
+      <h3>太阳</h3>
+      <div class="planet-list" id="sunList"></div>
+
       <!-- Planet List -->
       <h3>八大行星</h3>
       <div class="planet-list" id="planetList"></div>
@@ -212,13 +216,17 @@
       <h3>主要卫星</h3>
       <div class="planet-list" id="moonList"></div>
 
-      <!-- Planet Detail -->
+      <!-- Detail -->
       <div id="planetDetail">
         <div class="empty-state">
           <div class="icon">&#9790;</div>
-          <div class="msg">点击3D场景中的星球<br>或选择上方行星查看详情</div>
+          <div class="msg">点击3D场景中的天体<br>或选择上方标签查看详情</div>
         </div>
       </div>
+
+      <!-- Historians -->
+      <h3>历史人物 &#128214;</h3>
+      <div class="planet-list" id="historianList"></div>
 
       <!-- Probes -->
       <h3>深空探测器 &#128640;</h3>
@@ -230,6 +238,14 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ========== Sun Data ==========
+    const SUN_DATA = {
+      key:'sun', name:'太阳', en:'Sun', type:'恒星', color:'#ffcc33',
+      dist:0, orbit:0, rot:25.38, temp:'约5,500°C（表面）/ 1,500万°C（核心）',
+      diameter:'139.2万 km', gravity:'274 m/s² (28g)',
+      story:'太阳是太阳系的中心恒星，占整个太阳系质量的99.86%。约46亿年前由分子云坍缩形成。核心温度高达1,500万°C，通过氢核聚变产生能量，每秒消耗约400万吨氢转化为氦。能量以辐射和对流方式传递到表面，最终以光子和中微子辐射到太空。约50亿年后，太阳将耗尽核心氢燃料，膨胀为红巨星，半径可能吞噬地球轨道。太阳每11年左右经历一次磁场活动周期，表现为太阳黑子数量的周期性变化。太阳风是从太阳上层大气持续流出的带电粒子流，影响整个太阳系的空间天气。'
+    };
 
     // ========== Data ==========
     const PLANET_DATA = [
@@ -337,6 +353,65 @@
         discoverer:'威廉·拉塞尔（1846年）', size_display:'约 2,707 km', rotation:'逆行轨道 · 潮汐锁定', gravity: '0.08 g', temp_mean: '-235°C' },
     ];
 
+    // --- Historians ---
+    const HISTORIAN_DATA = [
+      { key:'sumerian', name:'苏美尔人', en:'Sumerians', period:'约公元前3000年', country:'美索不达米亚', role:'古代文明', bio:'最早的天文观测者，通过肉眼观测记录了水星等天体运动。', discoveries:['水星观测'] },
+      { key:'galileo', name:'伽利略·伽利莱', en:'Galileo Galilei', period:'1564-1642', country:'意大利', role:'物理学家、天文学家、数学家', bio:'近代科学之父。通过自制望远镜首次观测到木星四颗卫星、金星相位、土星环和月球陨石坑，为日心说提供了直接观测证据。因支持日心说被宗教裁判所审判。', discoveries:['木星四颗卫星(1610)','金星相位','土星环','月球陨石坑'] },
+      { key:'huygens', name:'克里斯蒂安·惠更斯', en:'Christiaan Huygens', period:'1629-1695', country:'荷兰', role:'物理学家、天文学家、数学家', bio:'正确识别出土星环的结构，发现了土卫六。提出了光的波动说，发现了土星光环的真正本质。', discoveries:['土星环结构(1655)','土卫六(1655)'] },
+      { key:'cassini', name:'乔凡尼·多梅尼科·卡西尼', en:'Giovanni Domenico Cassini', period:'1625-1712', country:'意大利', role:'天文学家', bio:'发现了卡西尼缝（土星环的主要缝隙），精确测量了火星和木星的距离。巴黎天文台的创始人。', discoveries:['卡西尼缝(1675)','精确测量行星距离'] },
+      { key:'herschel', name:'威廉·赫歇尔', en:'William Herschel', period:'1738-1822', country:'英国', role:'天文学家', bio:'发现天王星，以及土卫一和土卫二。制作了当时最大的反射望远镜，进行了系统的星空巡天。', discoveries:['天王星(1781)','土卫二(1789)','土卫一'] },
+      { key:'leverrier', name:'于尔班·勒维耶', en:'Urbain Le Verrier', period:'1811-1877', country:'法国', role:'数学家、天文学家', bio:'通过数学计算预测了海王星的位置，仅凭纸笔和数学就定位了一颗新行星，被誉为"笔尖上发现的行星"。', discoveries:['海王星数学预测(1846)'] },
+      { key:'adams', name:'约翰·柯西·亚当斯', en:'John Couch Adams', period:'1819-1892', country:'英国', role:'数学家', bio:'独立通过数学计算预言了海王星的位置，与勒维耶的预测几乎完全相同。', discoveries:['海王星数学预测(1846)'] },
+      { key:'galle', name:'约翰·伽勒', en:'Johann Galle', period:'1812-1910', country:'德国', role:'天文学家', bio:'根据勒维耶的预测位置，在柏林天文台仅用1小时就观测到海王星，完成了牛顿万有引力定律的辉煌验证。', discoveries:['海王星观测确认(1846)'] },
+      { key:'tombaugh', name:'克莱德·汤博', en:'Clyde Tombaugh', period:'1906-1997', country:'美国', role:'天文学家', bio:'洛厄尔天文台的年轻助理，通过对比星空照片，在1930年发现了冥王星。这是第一颗由美国人发现的行星。', discoveries:['冥王星(1930)'] },
+      { key:'piazzi', name:'朱塞佩·皮亚齐', en:'Giuseppe Piazzi', period:'1746-1826', country:'意大利', role:'天文学家', bio:'在西西里岛巴勒莫天文台发现谷神星。当时它一度失踪，24岁的高斯用新创立的轨道计算方法帮助重新定位。', discoveries:['谷神星(1801)'] },
+      { key:'brown', name:'迈克·布朗', en:'Mike Brown', period:'1965-', country:'美国', role:'天文学家', bio:'加州理工学院教授，发现阋神星、鸟神星、妊神星等多颗外海王星天体。其发现直接导致2006年IAU重新定义行星，冥王星被降级。', discoveries:['阋神星(2005)','鸟神星(2005)','妊神星(2004)'] },
+      { key:'ortiz', name:'奥尔蒂斯团队', en:'José Luis Ortiz et al.', period:'2000s', country:'西班牙', role:'天文学家', bio:'西班牙格拉纳达大学团队，也声称在2003年图像中发现了妊神星，与迈克·布朗团队存在发现权争议。', discoveries:['妊神星争议发现'] },
+      { key:'lassell', name:'威廉·拉塞尔', en:'William Lassell', period:'1799-1880', country:'英国', role:'天文学家', bio:'酿酒商出身的天文爱好者，自制61厘米反射望远镜，在海王星发现仅17天后就发现了海卫一。', discoveries:['海卫一(1846)'] },
+      { key:'gande', name:'甘德', en:'Gan De', period:'约公元前370-310', country:'中国', role:'天文学家', bio:'中国战国时期天文学家，据《开元占经》记载，甘德已用肉眼观测到木卫三，并描述其颜色"呈黄色"，与现代观测一致。这是人类首次用肉眼观测到木星卫星。', discoveries:['木卫三（肉眼观测，公元前364年）'] },
+      { key:'lowell', name:'珀西瓦尔·洛厄尔', en:'Percival Lowell', period:'1855-1916', country:'美国', role:'天文学家', bio:'根据天王星和海王星轨道偏差推测存在"X行星"，建立了洛厄尔天文台。虽然未亲自发现冥王星，但其预言推动了搜寻工作。', discoveries:['"X行星"假说','洛厄尔天文台'] },
+      { key:'schiaparelli', name:'乔凡尼·斯基亚帕雷利', en:'Giovanni Schiaparelli', period:'1835-1910', country:'意大利', role:'天文学家', bio:'观测到火星表面"运河"（canali），引发火星生命猜想。虽然后来被证实是视觉错觉，但极大地推动了火星探索。', discoveries:['火星"运河"观测(1877)'] },
+      { key:'ancient', name:'古代文明', en:'Ancient Civilizations', period:'古代', country:'全球', role:'文明', bio:'古代文明通过肉眼观测记录金星、火星、木星和土星的运动。中国古代称金星为"启明"/"长庚"，火星为"荧惑"。', discoveries:['金星、火星、木星、土星观测'] },
+    ];
+
+    // Name -> key mapping for discoverer tagging
+    const HISTORIAN_MAP = (() => {
+      const map = {};
+      HISTORIAN_DATA.forEach(h => {
+        map[h.name] = h.key;
+        // Also map common short names
+        if (h.key === 'galileo') { map['伽利略'] = h.key; }
+        if (h.key === 'huygens') { map['惠更斯'] = h.key; }
+        if (h.key === 'cassini') { map['卡西尼'] = h.key; }
+        if (h.key === 'herschel') { map['威廉·赫歇尔'] = h.key; map['赫歇尔'] = h.key; }
+        if (h.key === 'leverrier') { map['于尔班·勒维耶'] = h.key; map['勒维耶'] = h.key; }
+        if (h.key === 'adams') { map['约翰·柯西·亚当斯'] = h.key; map['亚当斯'] = h.key; }
+        if (h.key === 'galle') { map['约翰·伽勒'] = h.key; map['伽勒'] = h.key; }
+        if (h.key === 'tombaugh') { map['克莱德·汤博'] = h.key; map['汤博'] = h.key; }
+        if (h.key === 'piazzi') { map['朱塞佩·皮亚齐'] = h.key; map['皮亚齐'] = h.key; }
+        if (h.key === 'brown') { map['迈克·布朗团队'] = h.key; map['迈克·布朗'] = h.key; map['布朗'] = h.key; }
+        if (h.key === 'ortiz') { map['奥尔蒂斯团队'] = h.key; }
+        if (h.key === 'lassell') { map['威廉·拉塞尔'] = h.key; map['拉塞尔'] = h.key; }
+        if (h.key === 'gande') { map['甘德'] = h.key; }
+        if (h.key === 'lowell') { map['珀西瓦尔·洛厄尔'] = h.key; map['洛厄尔'] = h.key; }
+        if (h.key === 'schiaparelli') { map['乔凡尼·斯基亚帕雷利'] = h.key; map['斯基亚帕雷利'] = h.key; }
+        if (h.key === 'sumerian') { map['苏美尔人'] = h.key; }
+        if (h.key === 'ancient') { map['古代文明'] = h.key; }
+      });
+      return map;
+    })();
+
+    function tagDiscoverer(text) {
+      if (!text || text === '—' || text === '自古以来已知') return text;
+      const entries = Object.entries(HISTORIAN_MAP).sort((a, b) => b[0].length - a[0].length);
+      let result = text;
+      entries.forEach(([name, key]) => {
+        const tag = `<span class="historian-tag" data-hkey="${key}" style="cursor:pointer;color:var(--sol-accent);border-bottom:1px dotted var(--sol-accent);">${name}</span>`;
+        result = result.split(name).join(tag);
+      });
+      return result;
+    }
+
     const PROBE_DATA = [
       { key:'voyager1', name:'旅行者1号', en:'Voyager 1', agency:'NASA', launch:'1977-09-05',
         location:'星际空间（日球层外）', distance:'约 245 亿 km', status:'运行中（仅剩2台仪器）',
@@ -407,6 +482,8 @@
         this.paused = false;
         this.selectedPlanet = null;
         this.selectedMoon = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
         this.selectedProbe = null;
         this.planetMeshes = {};
         this.dwarfMeshes = {};
@@ -470,6 +547,7 @@
         const geo = new THREE.SphereGeometry(2.5, 64, 64);
         const mat = new THREE.MeshBasicMaterial({ color: 0xffcc33 });
         this.sun = new THREE.Mesh(geo, mat);
+        this.sun.userData = { type:'sun' };
         this.scene.add(this.sun);
 
         // Glow
@@ -614,6 +692,7 @@
 
           this.raycaster.setFromCamera(this.mouse, this.camera);
           const allMeshes = [
+            this.sun,
             ...Object.values(this.planetMeshes),
             ...Object.values(this.dwarfMeshes),
             ...Object.values(this.moonMeshes),
@@ -623,7 +702,9 @@
 
           if (intersects.length > 0) {
             const obj = intersects[0].object;
-            if (obj.userData.type === 'planet') {
+            if (obj.userData.type === 'sun') {
+              this.selectSun();
+            } else if (obj.userData.type === 'planet') {
               this.selectPlanet(obj.userData.planetKey);
             } else if (obj.userData.type === 'dwarf') {
               this.selectPlanet(obj.userData.planetKey);
@@ -644,11 +725,42 @@
             document.getElementById('speedLabel').textContent = spd === 0 ? '暂停' : spd + 'x';
           });
         });
+
+        // Historian tag click (event delegation on detail panel)
+        document.getElementById('planetDetail').addEventListener('click', (e) => {
+          const tag = e.target.closest('.historian-tag');
+          if (tag && tag.dataset.hkey) {
+            this.selectHistorian(tag.dataset.hkey);
+          }
+        });
+      }
+
+      selectSun() {
+        this.selectedSun = true;
+        this.selectedPlanet = null;
+        this.selectedMoon = null;
+        this.selectedHistorian = null;
+        this.selectedProbe = null;
+        this.updateSidePanel();
+        // Clear all highlights
+        [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        Object.values(this.moonMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        // Pulse sun glow
+        this.sun.material.color.setHex(0xffffaa);
+        setTimeout(() => { this.sun.material.color.setHex(0xffcc33); }, 300);
       }
 
       selectPlanet(key) {
         this.selectedPlanet = key;
         this.selectedMoon = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
         this.selectedProbe = null;
         this.updateSidePanel();
         // Highlight
@@ -670,6 +782,8 @@
       selectMoon(key) {
         this.selectedMoon = key;
         this.selectedPlanet = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
         this.selectedProbe = null;
         this.updateSidePanel();
         [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
@@ -686,10 +800,30 @@
         }
       }
 
+      selectHistorian(key) {
+        this.selectedHistorian = key;
+        this.selectedSun = null;
+        this.selectedPlanet = null;
+        this.selectedMoon = null;
+        this.selectedProbe = null;
+        this.updateSidePanel();
+        // Clear all 3D highlights
+        [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        Object.values(this.moonMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+      }
+
       selectProbe(key) {
         this.selectedProbe = key;
         this.selectedPlanet = null;
         this.selectedMoon = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
         this.updateSidePanel();
         [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
           m.material.emissive = new THREE.Color(0x000000);
@@ -702,6 +836,16 @@
       }
 
       buildSidePanel() {
+        // Sun chip
+        const sl = document.getElementById('sunList');
+        const sunChip = document.createElement('button');
+        sunChip.className = 'planet-chip';
+        sunChip.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${SUN_DATA.color};margin-right:4px;box-shadow:0 0 4px ${SUN_DATA.color};"></span>${SUN_DATA.name}`;
+        sunChip.addEventListener('click', () => this.selectSun());
+        sunChip.dataset.key = 'sun';
+        sunChip.dataset.section = 'sun';
+        sl.appendChild(sunChip);
+
         // Planet chips
         const pl = document.getElementById('planetList');
         const mainPlanets = PLANET_DATA.filter(p => p.type !== '矮行星');
@@ -740,6 +884,18 @@
           ml.appendChild(chip);
         });
 
+        // Historian chips
+        const hl = document.getElementById('historianList');
+        HISTORIAN_DATA.forEach(h => {
+          const chip = document.createElement('button');
+          chip.className = 'planet-chip';
+          chip.innerHTML = `${h.name}`;
+          chip.addEventListener('click', () => this.selectHistorian(h.key));
+          chip.dataset.key = h.key;
+          chip.dataset.section = 'historian';
+          hl.appendChild(chip);
+        });
+
         // Probe chips
         const prl = document.getElementById('probeList');
         PROBE_DATA.forEach(probe => {
@@ -753,15 +909,21 @@
       }
 
       updateSidePanel() {
-        // Update planet chips
+        // Update chips
         document.querySelectorAll('.planet-chip').forEach(c => {
           c.classList.remove('active');
         });
+        if (this.selectedSun) {
+          document.querySelectorAll(`.planet-chip[data-key="sun"]`).forEach(c => c.classList.add('active'));
+        }
         if (this.selectedPlanet) {
           document.querySelectorAll(`.planet-chip[data-key="${this.selectedPlanet}"]`).forEach(c => c.classList.add('active'));
         }
         if (this.selectedMoon) {
           document.querySelectorAll(`.planet-chip[data-key="${this.selectedMoon}"]`).forEach(c => c.classList.add('active'));
+        }
+        if (this.selectedHistorian) {
+          document.querySelectorAll(`.planet-chip[data-key="${this.selectedHistorian}"]`).forEach(c => c.classList.add('active'));
         }
         document.querySelectorAll('#probeList .probe-chip').forEach(c => {
           c.classList.toggle('active', c.dataset.key === this.selectedProbe);
@@ -770,7 +932,26 @@
         const detail = document.getElementById('planetDetail');
         const probeDetail = document.getElementById('probeDetail');
 
-        if (this.selectedPlanet) {
+        if (this.selectedSun) {
+          const s = SUN_DATA;
+          detail.innerHTML = `
+            <div class="planet-card">
+              <div class="planet-name"><span class="dot" style="background:${s.color}"></span>${s.name} <span style="font-size:0.7rem;color:var(--sol-text2);font-weight:400;">${s.en}</span></div>
+              <div class="planet-type">${s.type}</div>
+              <div class="planet-stats">
+                <div class="planet-stat"><span>距太阳</span><span class="val">0 AU（中心）</span></div>
+                <div class="planet-stat"><span>自转周期</span><span class="val">${s.rot}天</span></div>
+                <div class="planet-stat"><span>直径</span><span class="val">${s.diameter}</span></div>
+                <div class="planet-stat"><span>温度</span><span class="val">${s.temp}</span></div>
+                <div class="planet-stat"><span>质量占比</span><span class="val">99.86%</span></div>
+                <div class="planet-stat"><span>表面重力</span><span class="val">${s.gravity}</span></div>
+              </div>
+              <div class="story">
+                ${s.story}
+              </div>
+            </div>`;
+          probeDetail.innerHTML = '';
+        } else if (this.selectedPlanet) {
           const p = PLANET_DATA.find(pl => pl.key === this.selectedPlanet);
           detail.innerHTML = `
             <div class="planet-card">
@@ -786,7 +967,7 @@
               </div>
               <div class="story">
                 <div style="font-size:0.7rem;color:var(--sol-accent);margin-bottom:4px;font-weight:600;">发现历史 · ${p.year}</div>
-                <strong>发现者：</strong>${p.discoverer}<br><br>
+                <strong>发现者：</strong>${tagDiscoverer(p.discoverer)}<br><br>
                 ${p.story}
               </div>
             </div>`;
@@ -807,13 +988,32 @@
               </div>
               <div class="story">
                 <div style="font-size:0.7rem;color:var(--sol-accent);margin-bottom:4px;font-weight:600;">发现历史</div>
-                <strong>发现者：</strong>${m.discoverer}<br><br>
+                <strong>发现者：</strong>${tagDiscoverer(m.discoverer)}<br><br>
                 ${m.story}
               </div>
             </div>`;
           probeDetail.innerHTML = '';
+        } else if (this.selectedHistorian) {
+          const h = HISTORIAN_DATA.find(he => he.key === this.selectedHistorian);
+          detail.innerHTML = `
+            <div class="planet-card">
+              <div class="planet-name"><span class="dot" style="background:var(--sol-accent)"></span>${h.name} <span style="font-size:0.7rem;color:var(--sol-text2);font-weight:400;">${h.en}</span></div>
+              <div class="planet-type">${h.role} · ${h.country}</div>
+              <div class="planet-stats">
+                <div class="planet-stat"><span>生卒</span><span class="val">${h.period}</span></div>
+                <div class="planet-stat"><span>国籍</span><span class="val">${h.country}</span></div>
+              </div>
+              <div class="story">
+                <strong>生平：</strong>${h.bio}
+              </div>
+              <div class="story" style="margin-top:8px;">
+                <div style="font-size:0.7rem;color:var(--sol-accent);margin-bottom:4px;font-weight:600;">主要发现</div>
+                ${h.discoveries.map(d => `• ${d}`).join('<br>')}
+              </div>
+            </div>`;
+          probeDetail.innerHTML = '';
         } else {
-          detail.innerHTML = `<div class="empty-state"><div class="icon">&#9790;</div><div class="msg">点击3D场景中的星球<br>或选择上方行星查看详情</div></div>`;
+          detail.innerHTML = `<div class="empty-state"><div class="icon">&#9790;</div><div class="msg">点击3D场景中的天体<br>或选择上方标签查看详情</div></div>`;
         }
 
         if (this.selectedProbe) {
