@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社会力模型 - 行人流仿真</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        /* ========== Experiment-Specific Variables ========== */
+        :root {
+            --sf-canvas-bg: #f8f9fa;
+            --sf-grid-color: rgba(180, 180, 190, 0.45);
+            --sf-input-bg: #ffffff;
+            --sf-input-border: #e0e0e0;
+            --sf-btn-hover: rgba(0, 0, 0, 0.06);
+            --sf-chart-line: rgba(0, 0, 0, 0.15);
+            --sf-node-card-bg: rgba(0, 0, 0, 0.03);
+            --sf-title-color: #6b8cae;
+            --sf-status-run: #16a34a;
+            --sf-status-pause: #ea580c;
+            --sf-panel-backdrop: none;
+            --sf-panel-shadow: none;
+            --sf-radius: 4px;
+            --sf-border-width: 1px;
+            --sf-agent-color: #4a90d9;
+            --sf-source-color: #d4786e;
+            --sf-waypoint-color: #c4a35a;
+            --sf-dest-color: #6a9e8a;
+            --sf-gumball-x: #d4786e;
+            --sf-gumball-y: #5a9e6a;
+            --sf-obstacle-fill: rgba(180, 70, 60, 0.15);
+            --sf-obstacle-stroke: rgba(180, 70, 60, 0.4);
+        }
+
+        [data-theme="glass"] {
+            --sf-canvas-bg: #0f1117;
+            --sf-grid-color: rgba(74, 144, 226, 0.25);
+            --sf-input-bg: rgba(255,255,255,0.06);
+            --sf-input-border: rgba(255,255,255,0.15);
+            --sf-btn-hover: rgba(255,255,255,0.15);
+            --sf-chart-line: rgba(255,255,255,0.15);
+            --sf-node-card-bg: rgba(255,255,255,0.04);
+            --sf-title-color: #74b9ff;
+            --sf-panel-backdrop: blur(16px);
+            --sf-panel-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --sf-radius: 20px;
+            --sf-border-width: 1px;
+            --sf-agent-color: #00ffff;
+            --sf-source-color: #ef4444;
+            --sf-waypoint-color: #eab308;
+            --sf-dest-color: #3b82f6;
+            --sf-gumball-x: #ef4444;
+            --sf-gumball-y: #22c55e;
+            --sf-obstacle-fill: rgba(239, 68, 68, 0.2);
+            --sf-obstacle-stroke: rgba(239, 68, 68, 0.5);
+        }
+
+        [data-theme="cyber"] {
+            --sf-canvas-bg: #0a0014;
+            --sf-grid-color: rgba(189, 0, 255, 0.25);
+            --sf-input-bg: rgba(20,0,40,0.6);
+            --sf-input-border: rgba(189,0,255,0.4);
+            --sf-btn-hover: rgba(189,0,255,0.25);
+            --sf-chart-line: rgba(255,255,255,0.2);
+            --sf-node-card-bg: rgba(0,0,0,0.3);
+            --sf-title-color: #bd00ff;
+            --sf-panel-backdrop: blur(12px);
+            --sf-panel-shadow: 0 0 30px rgba(189,0,255,0.15);
+            --sf-radius: 8px;
+            --sf-border-width: 1px;
+            --sf-agent-color: #00f3ff;
+            --sf-source-color: #ff00ea;
+            --sf-waypoint-color: #ff9d00;
+            --sf-dest-color: #39ff14;
+            --sf-gumball-x: #ff00ea;
+            --sf-gumball-y: #39ff14;
+            --sf-obstacle-fill: rgba(255, 0, 234, 0.2);
+            --sf-obstacle-stroke: rgba(255, 0, 234, 0.5);
+        }
+
+        [data-theme="cartoon"] {
+            --sf-canvas-bg: #fef6e4;
+            --sf-grid-color: rgba(148, 163, 184, 0.5);
+            --sf-input-bg: rgba(255,255,255,0.7);
+            --sf-input-border: rgba(255,180,100,0.4);
+            --sf-btn-hover: rgba(255,255,255,0.9);
+            --sf-chart-line: rgba(0,0,0,0.2);
+            --sf-node-card-bg: rgba(255,255,255,0.35);
+            --sf-title-color: #ff6b6b;
+            --sf-panel-backdrop: blur(12px);
+            --sf-panel-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            --sf-radius: 24px;
+            --sf-border-width: 3px;
+            --sf-agent-color: #4ecdc4;
+            --sf-source-color: #ff6b6b;
+            --sf-waypoint-color: #ff9f43;
+            --sf-dest-color: #a29bfe;
+            --sf-gumball-x: #ff6b6b;
+            --sf-gumball-y: #4ecdc4;
+            --sf-obstacle-fill: rgba(255, 107, 107, 0.15);
+            --sf-obstacle-stroke: rgba(255, 107, 107, 0.4);
+        }
+
+        [data-theme="soviet"] {
+            --sf-canvas-bg: #f0ebe4;
+            --sf-grid-color: rgba(180, 160, 140, 0.4);
+            --sf-input-bg: #fffaf2;
+            --sf-input-border: #c41e1e;
+            --sf-btn-hover: rgba(196, 30, 30, 0.15);
+            --sf-chart-line: rgba(0,0,0,0.12);
+            --sf-node-card-bg: rgba(0,0,0,0.03);
+            --sf-title-color: #c41e1e;
+            --sf-panel-backdrop: none;
+            --sf-panel-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            --sf-radius: 2px;
+            --sf-border-width: 2px;
+            --sf-agent-color: #8b4513;
+            --sf-source-color: #c41e1e;
+            --sf-waypoint-color: #b8860b;
+            --sf-dest-color: #556b2f;
+            --sf-gumball-x: #c41e1e;
+            --sf-gumball-y: #556b2f;
+            --sf-obstacle-fill: rgba(196, 30, 30, 0.12);
+            --sf-obstacle-stroke: rgba(196, 30, 30, 0.35);
+        }
+
+        /* ========== Layout ========== */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--sf-canvas-bg);
+            overflow: hidden;
+            font-family: var(--font-main);
+            user-select: none;
+            transition: background-color 0.6s ease;
+        }
+
+        #canvas-container { position: absolute; width: 100%; height: 100%; z-index: 1; }
+        canvas { position: absolute; top: 0; left: 0; }
+
+        /* ========== Panel Base ========== */
+        .sf-panel {
+            position: absolute; z-index: 10;
+            background: var(--panel-bg);
+            border: var(--sf-border-width) solid var(--panel-border);
+            color: var(--text-color);
+            padding: 14px; font-size: 12px; pointer-events: auto;
+            backdrop-filter: var(--sf-panel-backdrop);
+            -webkit-backdrop-filter: var(--sf-panel-backdrop);
+            box-shadow: var(--sf-panel-shadow);
+            border-radius: var(--sf-radius);
+            display: flex; flex-direction: column; gap: 8px;
+            transition: all 0.4s ease;
+        }
+
+        [data-theme="academic"] .sf-panel {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        [data-theme="soviet"] .sf-panel {
+            background: #fffaf2;
+            border: 2px solid #c41e1e;
+            border-radius: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            backdrop-filter: none;
+        }
+
+        [data-theme="glass"] .sf-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        [data-theme="cyber"] .sf-panel {
+            background: rgba(20,0,40,0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(189,0,255,0.4);
+        }
+
+        #left-panel { top: 60px; left: 15px; width: 280px; bottom: 15px; overflow-y: auto; }
+
+        #right-panel {
+            top: 60px; right: 15px; width: 260px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 99;
+        }
+        #right-panel.collapsed { transform: translateX(calc(100% - 40px)); }
+        #toggle-panel {
+            position: absolute; left: -12px; top: 20px;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            color: var(--text-color); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; transition: all 0.3s;
+        }
+        #toggle-panel:hover { background: var(--sf-btn-hover); }
+        #right-panel.collapsed #toggle-panel { transform: rotate(180deg); }
+
+        #top-panel {
+            top: 60px; left: 325px;
+            display: flex; flex-direction: row; gap: 12px; align-items: center;
+            border-radius: 50px; padding: 10px 20px;
+        }
+
+        [data-theme="academic"] #top-panel { border-radius: 4px; }
+        [data-theme="soviet"] #top-panel { border-radius: 2px; }
+
+        /* ========== Panel Elements ========== */
+        .panel-title {
+            color: var(--sf-title-color); font-weight: bold; font-size: 14px;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 6px; margin-bottom: 4px;
+        }
+
+        .form-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .form-group label { width: 100px; }
+        .form-group input, .form-group select {
+            background: var(--sf-input-bg); color: var(--text-color);
+            border: 1px solid var(--sf-input-border); border-radius: 6px;
+            padding: 4px 6px; width: 100px; font-family: monospace; outline: none;
+            transition: all 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--sf-title-color); }
+
+        [data-theme="academic"] .form-group input,
+        [data-theme="academic"] .form-group select { border-radius: 2px; }
+        [data-theme="soviet"] .form-group input,
+        [data-theme="soviet"] .form-group select { border-radius: 0; }
+
+        .sf-btn {
+            background: var(--panel-bg); color: var(--text-color);
+            border: 1px solid var(--panel-border); border-radius: 6px;
+            padding: 6px 12px; cursor: pointer; font-family: inherit; font-size: 12px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .sf-btn:hover { background: var(--sf-btn-hover); }
+
+        [data-theme="academic"] .sf-btn { border-radius: 2px; }
+        [data-theme="soviet"] .sf-btn {
+            border-radius: 0; border: 2px solid #c41e1e;
+            background: #c41e1e; color: #ffffff; font-weight: 700;
+        }
+        [data-theme="soviet"] .sf-btn:hover { background: #a01818; }
+
+        .node-card {
+            border: 1px solid var(--panel-border); border-radius: 8px;
+            padding: 10px; margin-bottom: 8px; background: var(--sf-node-card-bg);
+            transition: all 0.2s;
+        }
+        .node-card.selected {
+            border-color: var(--sf-title-color);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="academic"] .node-card { border-radius: 4px; }
+        [data-theme="soviet"] .node-card { border-radius: 2px; }
+
+        /* ========== Stats ========== */
+        .stat-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0;
+        }
+        .stat-card {
+            background: var(--sf-node-card-bg); border-radius: 6px; padding: 8px;
+            border: 1px solid var(--sf-input-border); text-align: center;
+        }
+        .stat-card .label { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+        .stat-card .value {
+            font-size: 16px; font-weight: bold; font-family: monospace;
+            color: var(--sf-title-color);
+        }
+
+        /* ========== Scrollbar ========== */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
+
+        /* ========== Back Button ========== */
+        .back-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            padding: 10px 20px; border-radius: 50px; font-weight: bold;
+            cursor: pointer; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 6px; transition: all 0.3s ease;
+            font-family: var(--font-main); font-size: 0.9rem;
+        }
+        [data-theme="cartoon"] .back-btn {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white; border: none; box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+        }
+        [data-theme="cartoon"] .back-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,107,0.4); }
+        [data-theme="glass"] .back-btn {
+            background: rgba(255,255,255,0.1); color: var(--text-color);
+            border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+        }
+        [data-theme="glass"] .back-btn:hover { background: rgba(255,255,255,0.2); }
+        [data-theme="cyber"] .back-btn {
+            background: rgba(189,0,255,0.15); color: #bd00ff;
+            border: 1px solid rgba(189,0,255,0.5); text-shadow: 0 0 8px rgba(189,0,255,0.3);
+        }
+        [data-theme="cyber"] .back-btn:hover { background: rgba(189,0,255,0.3); box-shadow: 0 0 20px rgba(189,0,255,0.2); }
+        [data-theme="academic"] .back-btn {
+            background: #ffffff; color: #1a1a2e; border: 1px solid #c0c0c0;
+            border-radius: 4px; font-weight: 500;
+        }
+        [data-theme="academic"] .back-btn:hover { background: #f0f0f0; border-color: #1a1a2e; }
+        [data-theme="soviet"] .back-btn {
+            background: #c41e1e; color: #ffffff; border: 2px solid #8b0000;
+            border-radius: 2px; font-weight: 700; letter-spacing: 1px;
+        }
+        [data-theme="soviet"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="layer-static"></canvas>
+        <canvas id="layer-dynamic"></canvas>
+    </div>
+
+    <!-- 左侧：节点与行人流配置 -->
+    <div id="left-panel" class="sf-panel">
+        <div class="panel-title">实体配置管理</div>
+        <div style="display: flex; gap: 5px; justify-content: space-between;">
+            <button class="sf-btn" id="btn-add-source">+ 起点</button>
+            <button class="sf-btn" id="btn-add-wp">+ 途经点</button>
+            <button class="sf-btn" id="btn-add-dest">+ 终点</button>
+        </div>
+        <div id="nodes-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
+    </div>
+
+    <!-- 顶部：全局时间与控制 -->
+    <div id="top-panel" class="sf-panel">
+        <div>仿真时间: <span id="ui-time" style="color:var(--sf-title-color); font-weight:bold; font-family:monospace;">00:00:00</span> / 08:00:00</div>
+        <div>状态: <span id="ui-status" style="font-weight:bold;">已停止</span></div>
+        <div class="form-group" style="margin:0;">
+            <label style="width: auto; margin-right: 5px;">仿真倍速:</label>
+            <input type="number" id="input-speed" value="60" min="1" max="1000" style="width: 60px;">
+        </div>
+        <div style="width: 1px; height: 20px; background: var(--panel-border); margin: 0 5px;"></div>
+        <button class="sf-btn" id="btn-toggle-sim">启动 / 暂停</button>
+        <button class="sf-btn" id="btn-reset-sim">重置仿真</button>
+        <div style="width: 1px; height: 20px; background: var(--panel-border); margin: 0 5px;"></div>
+        <button class="sf-btn" id="btn-reset-camera">重置视角</button>
+    </div>
+
+    <!-- 右侧：可折叠 数据监控面板 -->
+    <div id="right-panel" class="sf-panel">
+        <div id="toggle-panel">←</div>
+
+        <div class="panel-title">控制映射</div>
+        <div style="font-size: 11px; color: var(--text-color); opacity: 0.8; line-height: 1.5;">
+            [左键] 选定节点 / 拖拽轴<br>[右键] 旋转视角<br>[滚轮] 缩放<br>[中键] 平移
+        </div>
+
+        <div class="panel-title" style="margin-top:10px;">全局实时监控</div>
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="label">活跃人数</div>
+                <div class="value" id="stat-active">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">总吞吐量</div>
+                <div class="value" id="stat-throughput">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">地点使用量</div>
+                <div class="value" id="stat-usage">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">已到达</div>
+                <div class="value" id="stat-arrived">0</div>
+            </div>
+        </div>
+
+        <div class="panel-title">趋势图表</div>
+        <canvas id="chart-canvas" width="230" height="140" style="background: var(--sf-node-card-bg); border-radius: 6px;"></canvas>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-btn" id="back-btn">← 返回空间站</a>
+
+    <script src="shared-theme.js"></script>
+    <script>
+        // ==========================================
+        // 初始化主题
+        // ==========================================
+        const theme = PSUTheme.get();
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // 监听主题变化以重绘
+        const themeObserver = new MutationObserver(() => {
+            requestStaticRedraw();
+            drawChart();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // 右侧面板折叠/展开
+        document.getElementById('toggle-panel').onclick = () => {
+            document.getElementById('right-panel').classList.toggle('collapsed');
+        };
+
+        // ==========================================
+        // 核心模型与配置
+        // ==========================================
+        const CONFIG = {
+            grid: { cols: 30, rows: 30, size: 1 },
+            sim: { maxTime: 8 * 3600, speedMultiplier: 60 },
+            colors: {
+                agent: '#00ffff',
+                source: '#ef4444', waypoint: '#eab308', dest: '#3b82f6',
+                gumballX: '#ef4444', gumballY: '#22c55e'
+            }
+        };
+
+        function getSfColors() {
+            const style = getComputedStyle(document.body);
+            return {
+                agent: style.getPropertyValue('--sf-agent-color').trim() || '#00ffff',
+                source: style.getPropertyValue('--sf-source-color').trim() || '#ef4444',
+                waypoint: style.getPropertyValue('--sf-waypoint-color').trim() || '#eab308',
+                dest: style.getPropertyValue('--sf-dest-color').trim() || '#3b82f6',
+                gumballX: style.getPropertyValue('--sf-gumball-x').trim() || '#ef4444',
+                gumballY: style.getPropertyValue('--sf-gumball-y').trim() || '#22c55e',
+                obstacleFill: style.getPropertyValue('--sf-obstacle-fill').trim() || 'rgba(239,68,68,0.2)',
+                obstacleStroke: style.getPropertyValue('--sf-obstacle-stroke').trim() || 'rgba(239,68,68,0.5)'
+            };
+        }
+
+        const TYPE = { SOURCE: 'source', WAYPOINT: 'waypoint', DESTINATION: 'destination' };
+        const TYPE_NAME = { 'source': '起点', 'waypoint': '途经点', 'destination': '终点' };
+
+        let nodes = [
+            { id: 'S1', type: TYPE.SOURCE, x: 2, y: 2, name: '入口 A', rate: 10, speed: 1.2, targetWp: 'P1', targetDest: 'D1', totalVisits: 0, history: [] },
+            { id: 'S2', type: TYPE.SOURCE, x: 2, y: 28, name: '入口 B', rate: 5, speed: 1.5, targetWp: '', targetDest: 'D1', totalVisits: 0, history: [] },
+            { id: 'P1', type: TYPE.WAYPOINT, x: 15, y: 15, name: '中央广场', totalVisits: 0, history: [] },
+            { id: 'D1', type: TYPE.DESTINATION, x: 28, y: 15, name: '主出口', totalVisits: 0, history: [] }
+        ];
+
+        let obstacles = new Set([
+            '10,10', '11,10', '12,10', '13,10', '10,11', '10,12',
+            '20,20', '21,20', '22,20', '23,20', '20,21', '20,22'
+        ]);
+
+        let agents = [];
+        let totalArrived = 0;
+        let totalUsage = 0;
+
+        let state = {
+            isRunning: false,
+            simTime: 0,
+            lastRealTime: 0,
+            selectedNodeId: null,
+            dragMode: null
+        };
+
+        let camera = {
+            yaw: Math.PI / 4, pitch: Math.PI / 4, zoom: 25,
+            panX: window.innerWidth / 2, panY: window.innerHeight / 2
+        };
+
+        const canvasStatic = document.getElementById('layer-static');
+        const ctxStatic = canvasStatic.getContext('2d', { alpha: false });
+        const canvasDynamic = document.getElementById('layer-dynamic');
+        const ctxDyn = canvasDynamic.getContext('2d');
+        const chartCtx = document.getElementById('chart-canvas').getContext('2d');
+
+        let chartData = {
+            throughput: [],
+            usage: [],
+            maxPoints: 50
+        };
+
+        // ==========================================
+        // 数学与投影系统
+        // ==========================================
+        function project(x, y, z) {
+            if (z === undefined) z = 0;
+            const cx = x - CONFIG.grid.cols / 2;
+            const cy = y - CONFIG.grid.rows / 2;
+
+            const x1 = cx * Math.cos(camera.yaw) - cy * Math.sin(camera.yaw);
+            const y1 = cx * Math.sin(camera.yaw) + cy * Math.cos(camera.yaw);
+
+            const y2 = y1 * Math.cos(camera.pitch) - z * Math.sin(camera.pitch);
+            const z2 = y1 * Math.sin(camera.pitch) + z * Math.cos(camera.pitch);
+
+            return {
+                x: x1 * camera.zoom + camera.panX,
+                y: y2 * camera.zoom + camera.panY,
+                depth: z2
+            };
+        }
+
+        function unprojectZeroZ(sx, sy) {
+            const x1 = (sx - camera.panX) / camera.zoom;
+            const y2 = (sy - camera.panY) / camera.zoom;
+            const y1 = y2 / Math.cos(camera.pitch);
+            const cosY = Math.cos(camera.yaw);
+            const sinY = Math.sin(camera.yaw);
+
+            const cx = x1 * cosY + y1 * sinY;
+            const cy = -x1 * sinY + y1 * cosY;
+
+            return {
+                x: cx + CONFIG.grid.cols / 2,
+                y: cy + CONFIG.grid.rows / 2
+            };
+        }
+
+        // ==========================================
+        // A* 算法
+        // ==========================================
+        function findPath(startX, startY, endX, endY) {
+            startX = Math.floor(startX); startY = Math.floor(startY);
+            endX = Math.floor(endX); endY = Math.floor(endY);
+
+            if (startX === endX && startY === endY) return [];
+
+            const openSet = [{ x: startX, y: startY, g: 0, f: 0, parent: null }];
+            const closedSet = new Set();
+
+            const dirs = [
+                {dx: 0, dy: 1, cost: 1}, {dx: 1, dy: 0, cost: 1},
+                {dx: 0, dy: -1, cost: 1}, {dx: -1, dy: 0, cost: 1},
+                {dx: 1, dy: 1, cost: Math.SQRT2}, {dx: 1, dy: -1, cost: Math.SQRT2},
+                {dx: -1, dy: 1, cost: Math.SQRT2}, {dx: -1, dy: -1, cost: Math.SQRT2}
+            ];
+
+            while (openSet.length > 0) {
+                openSet.sort(function(a, b) { return a.f - b.f; });
+                const current = openSet.shift();
+
+                if (current.x === endX && current.y === endY) {
+                    const path = [];
+                    let curr = current;
+                    while (curr.parent) {
+                        path.push({ x: curr.x, y: curr.y });
+                        curr = curr.parent;
+                    }
+                    return path.reverse();
+                }
+
+                closedSet.add(current.x + ',' + current.y);
+
+                for (let i = 0; i < dirs.length; i++) {
+                    const dir = dirs[i];
+                    const nx = current.x + dir.dx;
+                    const ny = current.y + dir.dy;
+
+                    if (nx < 0 || nx > CONFIG.grid.cols || ny < 0 || ny > CONFIG.grid.rows) continue;
+                    if (obstacles.has(nx + ',' + ny)) continue;
+                    if (closedSet.has(nx + ',' + ny)) continue;
+
+                    if (dir.dx !== 0 && dir.dy !== 0) {
+                        if (obstacles.has((current.x + dir.dx) + ',' + current.y) ||
+                            obstacles.has(current.x + ',' + (current.y + dir.dy))) {
+                            continue;
+                        }
+                    }
+
+                    const g = current.g + dir.cost;
+                    const h = Math.abs(nx - endX) + Math.abs(ny - endY);
+
+                    const existingNode = openSet.find(function(n) { return n.x === nx && n.y === ny; });
+                    if (!existingNode) {
+                        openSet.push({ x: nx, y: ny, g: g, f: g + h, parent: current });
+                    } else if (g < existingNode.g) {
+                        existingNode.g = g;
+                        existingNode.f = g + h;
+                        existingNode.parent = current;
+                    }
+                }
+            }
+            return [];
+        }
+
+        // ==========================================
+        // 行人对象
+        // ==========================================
+        class Agent {
+            constructor(source) {
+                this.x = source.x;
+                this.y = source.y;
+                this.speed = source.speed + (Math.random() * 0.2 - 0.1);
+                this.active = true;
+
+                const dest = nodes.find(function(n) { return n.id === source.targetDest; });
+                const wp = nodes.find(function(n) { return n.id === source.targetWp; });
+
+                this.path = [];
+                if (wp) {
+                    this.path = findPath(this.x, this.y, wp.x, wp.y);
+                    if (dest) {
+                        const path2 = findPath(wp.x, wp.y, dest.x, dest.y);
+                        this.path = this.path.concat(path2);
+                    }
+                } else if (dest) {
+                    this.path = findPath(this.x, this.y, dest.x, dest.y);
+                }
+
+                this.targetIndex = 0;
+                this.visitedNodes = new Set();
+            }
+
+            update(dt) {
+                if (!this.active || this.path.length === 0 || this.targetIndex >= this.path.length) {
+                    if (this.active) {
+                        this.active = false;
+                        totalArrived++;
+                    }
+                    return;
+                }
+
+                const target = this.path[this.targetIndex];
+                const dx = target.x - this.x;
+                const dy = target.y - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const moveDist = this.speed * dt;
+
+                if (dist <= moveDist) {
+                    this.x = target.x;
+                    this.y = target.y;
+                    this.targetIndex++;
+                } else {
+                    this.x += (dx / dist) * moveDist;
+                    this.y += (dy / dist) * moveDist;
+                }
+
+                nodes.forEach(function(node) {
+                    if (!this.visitedNodes.has(node.id)) {
+                        const distToNode = Math.sqrt(Math.pow(this.x - node.x, 2) + Math.pow(this.y - node.y, 2));
+                        if (distToNode <= 1.0) {
+                            node.totalVisits++;
+                            totalUsage++;
+                            this.visitedNodes.add(node.id);
+                        }
+                    }
+                }.bind(this));
+            }
+        }
+
+        // ==========================================
+        // 渲染
+        // ==========================================
+        function requestStaticRedraw() {
+            if (!canvasStatic) return;
+            canvasStatic.width = window.innerWidth;
+            canvasStatic.height = window.innerHeight;
+
+            const style = getComputedStyle(document.body);
+            const bgColor = style.getPropertyValue('--sf-canvas-bg').trim();
+            const gridColor = style.getPropertyValue('--sf-grid-color').trim();
+            const sfColors = getSfColors();
+
+            ctxStatic.fillStyle = bgColor;
+            ctxStatic.fillRect(0, 0, canvasStatic.width, canvasStatic.height);
+
+            ctxStatic.strokeStyle = gridColor;
+            ctxStatic.lineWidth = 1;
+
+            for (let i = 0; i <= CONFIG.grid.rows; i++) {
+                const p1 = project(0, i);
+                const p2 = project(CONFIG.grid.cols, i);
+                ctxStatic.beginPath(); ctxStatic.moveTo(p1.x, p1.y); ctxStatic.lineTo(p2.x, p2.y); ctxStatic.stroke();
+            }
+            for (let i = 0; i <= CONFIG.grid.cols; i++) {
+                const p1 = project(i, 0);
+                const p2 = project(i, CONFIG.grid.rows);
+                ctxStatic.beginPath(); ctxStatic.moveTo(p1.x, p1.y); ctxStatic.lineTo(p2.x, p2.y); ctxStatic.stroke();
+            }
+
+            obstacles.forEach(function(obs) {
+                const parts = obs.split(',');
+                const x = Number(parts[0]);
+                const y = Number(parts[1]);
+                const h = 0.5;
+                const t0 = project(x, y, h);
+                const t1 = project(x+1, y, h);
+                const t2 = project(x+1, y+1, h);
+                const t3 = project(x, y+1, h);
+
+                ctxStatic.fillStyle = sfColors.obstacleFill;
+                ctxStatic.strokeStyle = sfColors.obstacleStroke;
+
+                ctxStatic.beginPath();
+                ctxStatic.moveTo(t0.x, t0.y); ctxStatic.lineTo(t1.x, t1.y);
+                ctxStatic.lineTo(t2.x, t2.y); ctxStatic.lineTo(t3.x, t3.y);
+                ctxStatic.closePath();
+                ctxStatic.fill(); ctxStatic.stroke();
+            });
+        }
+
+        function drawDynamic() {
+            if (!canvasDynamic) return;
+            canvasDynamic.width = window.innerWidth;
+            canvasDynamic.height = window.innerHeight;
+            ctxDyn.clearRect(0, 0, canvasDynamic.width, canvasDynamic.height);
+
+            const sfColors = getSfColors();
+            const style = getComputedStyle(document.body);
+            const textColor = style.getPropertyValue('--text-color').trim();
+            const canvasBg = style.getPropertyValue('--sf-canvas-bg').trim();
+
+            let renderList = [];
+
+            agents.forEach(function(a) {
+                const p = project(a.x, a.y, 0.1);
+                renderList.push({ type: 'agent', p: p });
+            });
+
+            nodes.forEach(function(node) {
+                const p = project(node.x, node.y, 0);
+                const color = sfColors[node.type];
+                renderList.push({ type: 'node', node: node, p: p, color: color });
+            });
+
+            renderList.sort(function(a, b) { return b.p.depth - a.p.depth; });
+
+            renderList.forEach(function(item) {
+                if (item.type === 'agent') {
+                    ctxDyn.fillStyle = sfColors.agent;
+                    ctxDyn.shadowColor = sfColors.agent;
+                    ctxDyn.shadowBlur = 8;
+                    ctxDyn.beginPath();
+                    ctxDyn.arc(item.p.x, item.p.y, 2.5, 0, Math.PI * 2);
+                    ctxDyn.fill();
+                    ctxDyn.shadowBlur = 0;
+                }
+                else if (item.type === 'node') {
+                    const node = item.node;
+                    const p = item.p;
+                    const isSelected = state.selectedNodeId === node.id;
+
+                    const h = Math.min(10, node.totalVisits * 0.05 + 0.5);
+                    const top = project(node.x, node.y, h);
+
+                    ctxDyn.strokeStyle = item.color;
+                    ctxDyn.lineWidth = isSelected ? 2 : 1;
+                    ctxDyn.beginPath();
+                    ctxDyn.moveTo(p.x, p.y);
+                    ctxDyn.lineTo(top.x, top.y);
+                    ctxDyn.stroke();
+
+                    ctxDyn.font = isSelected ? 'bold 12px monospace' : '10px monospace';
+                    const text = node.name + ' (' + node.totalVisits + ')';
+                    const tw = ctxDyn.measureText(text).width;
+                    ctxDyn.fillStyle = canvasBg;
+                    ctxDyn.globalAlpha = 0.7;
+                    ctxDyn.fillRect(top.x - tw/2 - 2, top.y - 19, tw + 4, 12);
+                    ctxDyn.globalAlpha = 1.0;
+
+                    ctxDyn.fillStyle = isSelected ? item.color : textColor;
+                    ctxDyn.textAlign = 'center';
+                    ctxDyn.fillText(text, top.x, top.y - 10);
+
+                    if (isSelected) drawGumball(node, p);
+                }
+            });
+        }
+
+        function drawGumball(node, centerPos) {
+            const sfColors = getSfColors();
+            const axisLen = 2.5;
+            const pX = project(node.x + axisLen, node.y, 0);
+            const pY = project(node.x, node.y + axisLen, 0);
+
+            ctxDyn.lineWidth = 3;
+            ctxDyn.strokeStyle = sfColors.gumballX;
+            ctxDyn.beginPath(); ctxDyn.moveTo(centerPos.x, centerPos.y); ctxDyn.lineTo(pX.x, pX.y); ctxDyn.stroke();
+            ctxDyn.fillStyle = sfColors.gumballX;
+            ctxDyn.beginPath(); ctxDyn.arc(pX.x, pX.y, 5, 0, Math.PI * 2); ctxDyn.fill();
+
+            ctxDyn.strokeStyle = sfColors.gumballY;
+            ctxDyn.beginPath(); ctxDyn.moveTo(centerPos.x, centerPos.y); ctxDyn.lineTo(pY.x, pY.y); ctxDyn.stroke();
+            ctxDyn.fillStyle = sfColors.gumballY;
+            ctxDyn.beginPath(); ctxDyn.arc(pY.x, pY.y, 5, 0, Math.PI * 2); ctxDyn.fill();
+        }
+
+        // ==========================================
+        // 双折线图表
+        // ==========================================
+        function drawChart() {
+            if (!chartCtx) return;
+            const w = chartCtx.canvas.width;
+            const h = chartCtx.canvas.height;
+            chartCtx.clearRect(0, 0, w, h);
+
+            const style = getComputedStyle(document.body);
+            chartCtx.strokeStyle = style.getPropertyValue('--sf-chart-line').trim();
+            chartCtx.beginPath();
+            chartCtx.moveTo(0, h-1); chartCtx.lineTo(w, h-1); chartCtx.stroke();
+
+            const maxVal = Math.max(
+                Math.max.apply(null, chartData.throughput.concat([1])),
+                Math.max.apply(null, chartData.usage.concat([1]))
+            );
+            const stepX = w / (chartData.maxPoints - 1);
+
+            chartCtx.strokeStyle = '#00ffff';
+            chartCtx.lineWidth = 2;
+            chartCtx.beginPath();
+            chartData.throughput.forEach(function(v, i) {
+                const x = i * stepX;
+                const y = h - (v / maxVal) * (h - 10);
+                i === 0 ? chartCtx.moveTo(x, y) : chartCtx.lineTo(x, y);
+            });
+            chartCtx.stroke();
+
+            chartCtx.strokeStyle = '#eab308';
+            chartCtx.lineWidth = 2;
+            chartCtx.beginPath();
+            chartData.usage.forEach(function(v, i) {
+                const x = i * stepX;
+                const y = h - (v / maxVal) * (h - 10);
+                i === 0 ? chartCtx.moveTo(x, y) : chartCtx.lineTo(x, y);
+            });
+            chartCtx.stroke();
+        }
+
+        // ==========================================
+        // UI 面板
+        // ==========================================
+        function getOptionsHTML(nodesList, selectedId, typeFilter) {
+            let html = '<option value="">无</option>';
+            nodesList.filter(function(n) { return n.type === typeFilter; }).forEach(function(n) {
+                html += '<option value="' + n.id + '" ' + (n.id === selectedId ? 'selected' : '') + '>' + n.name + '</option>';
+            });
+            return html;
+        }
+
+        function updateUIPanel() {
+            const list = document.getElementById('nodes-list');
+            list.innerHTML = '';
+
+            const sfColors = getSfColors();
+
+            nodes.forEach(function(node) {
+                const isSelected = state.selectedNodeId === node.id;
+                const div = document.createElement('div');
+                div.className = 'node-card' + (isSelected ? ' selected' : '');
+
+                let content = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">' +
+                    '<strong style="color:' + sfColors[node.type] + '">[' + TYPE_NAME[node.type] + '] ' + node.name + '</strong>' +
+                    '<button onclick="deleteNode(\'' + node.id + '\')" style="padding:2px 6px; border:1px solid #ef4444; color:#ef4444; background:transparent; border-radius:4px; cursor:pointer;">删除</button>' +
+                    '</div>' +
+                    '<div class="form-group"><label>坐标 (X,Y):</label> <span>' + node.x.toFixed(1) + ', ' + node.y.toFixed(1) + '</span></div>';
+
+                if (node.type === TYPE.SOURCE) {
+                    content += '<div class="form-group"><label>生成率(人/分):</label>' +
+                        '<input type="number" value="' + node.rate + '" onchange="updateNodeAttr(\'' + node.id + '\', \'rate\', this.value)"></div>' +
+                        '<div class="form-group"><label>移速(米/秒):</label>' +
+                        '<input type="number" step="0.1" value="' + node.speed + '" onchange="updateNodeAttr(\'' + node.id + '\', \'speed\', this.value)"></div>' +
+                        '<div class="form-group"><label>途经点:</label>' +
+                        '<select onchange="updateNodeAttr(\'' + node.id + '\', \'targetWp\', this.value)">' +
+                        getOptionsHTML(nodes, node.targetWp, TYPE.WAYPOINT) + '</select></div>' +
+                        '<div class="form-group"><label>终点:</label>' +
+                        '<select onchange="updateNodeAttr(\'' + node.id + '\', \'targetDest\', this.value)">' +
+                        getOptionsHTML(nodes, node.targetDest, TYPE.DESTINATION) + '</select></div>';
+                }
+
+                div.innerHTML = content;
+                div.onclick = function(e) {
+                    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'BUTTON') {
+                        state.selectedNodeId = node.id;
+                        updateUIPanel();
+                        drawDynamic();
+                    }
+                };
+                list.appendChild(div);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('stat-active').innerText = agents.length;
+            document.getElementById('stat-throughput').innerText = totalArrived;
+            document.getElementById('stat-usage').innerText = totalUsage;
+            document.getElementById('stat-arrived').innerText = totalArrived;
+        }
+
+        window.updateNodeAttr = function(id, attr, val) {
+            const node = nodes.find(function(n) { return n.id === id; });
+            if (node) node[attr] = attr === 'targetWp' || attr === 'targetDest' ? val : Number(val);
+        };
+
+        window.deleteNode = function(id) {
+            nodes = nodes.filter(function(n) { return n.id !== id; });
+            if (state.selectedNodeId === id) state.selectedNodeId = null;
+            nodes.forEach(function(n) {
+                if (n.targetWp === id) n.targetWp = '';
+                if (n.targetDest === id) n.targetDest = '';
+            });
+            updateUIPanel();
+        };
+
+        function generateId() { return Math.random().toString(36).substr(2, 5); }
+
+        document.getElementById('btn-add-source').onclick = function() {
+            nodes.push({ id: generateId(), type: TYPE.SOURCE, x: 5, y: 5, name: '新起点', rate: 5, speed: 1.2, targetWp: '', targetDest: '', totalVisits: 0, history: [], nextSpawnTime: state.simTime });
+            updateUIPanel();
+        };
+        document.getElementById('btn-add-wp').onclick = function() {
+            nodes.push({ id: generateId(), type: TYPE.WAYPOINT, x: 15, y: 15, name: '新途经点', totalVisits: 0, history: [] });
+            updateUIPanel();
+        };
+        document.getElementById('btn-add-dest').onclick = function() {
+            nodes.push({ id: generateId(), type: TYPE.DESTINATION, x: 25, y: 25, name: '新终点', totalVisits: 0, history: [] });
+            updateUIPanel();
+        };
+
+        // ==========================================
+        // 相机交互
+        // ==========================================
+        let mouseState = { isDown: false, button: -1, lastX: 0, lastY: 0 };
+
+        window.addEventListener('contextmenu', function(e) {
+            if (e.target === canvasDynamic || e.target === canvasStatic) e.preventDefault();
+        });
+
+        window.addEventListener('mousedown', function(e) {
+            if (e.target !== canvasDynamic && e.target !== canvasStatic) return;
+            mouseState.isDown = true;
+            mouseState.button = e.button;
+            mouseState.lastX = e.clientX;
+            mouseState.lastY = e.clientY;
+
+            if (e.button === 0) {
+                const node = nodes.find(function(n) { return n.id === state.selectedNodeId; });
+                let hitGumball = false;
+
+                if (node) {
+                    const axisLen = 2.5;
+                    const pX = project(node.x + axisLen, node.y, 0);
+                    const pY = project(node.x, node.y + axisLen, 0);
+
+                    if (Math.hypot(e.clientX - pX.x, e.clientY - pX.y) < 12) {
+                        state.dragMode = 'X'; hitGumball = true;
+                    } else if (Math.hypot(e.clientX - pY.x, e.clientY - pY.y) < 12) {
+                        state.dragMode = 'Y'; hitGumball = true;
+                    }
+                }
+
+                if (!hitGumball) {
+                    let hitNode = null;
+                    let minDist = 20;
+                    nodes.forEach(function(n) {
+                        const p = project(n.x, n.y, 0);
+                        const dist = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+                        if (dist < minDist) { minDist = dist; hitNode = n; }
+                    });
+
+                    state.selectedNodeId = hitNode ? hitNode.id : null;
+                    state.dragMode = null;
+                    updateUIPanel();
+                }
+            }
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (!mouseState.isDown) return;
+            const dx = e.clientX - mouseState.lastX;
+            const dy = e.clientY - mouseState.lastY;
+
+            if (mouseState.button === 2) {
+                camera.yaw -= dx * 0.01;
+                camera.pitch -= dy * 0.01;
+                camera.pitch = Math.max(0.1, Math.min(Math.PI / 2 - 0.1, camera.pitch));
+                requestStaticRedraw();
+            }
+            else if (mouseState.button === 1) {
+                camera.panX += dx;
+                camera.panY += dy;
+                requestStaticRedraw();
+            }
+            else if (mouseState.button === 0 && state.dragMode && state.selectedNodeId) {
+                const node = nodes.find(function(n) { return n.id === state.selectedNodeId; });
+                const unproj = unprojectZeroZ(e.clientX, e.clientY);
+
+                if (state.dragMode === 'X') {
+                    node.x = Math.max(0, Math.min(CONFIG.grid.cols, unproj.x));
+                } else if (state.dragMode === 'Y') {
+                    node.y = Math.max(0, Math.min(CONFIG.grid.rows, unproj.y));
+                }
+                updateUIPanel();
+            }
+
+            mouseState.lastX = e.clientX;
+            mouseState.lastY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', function() {
+            mouseState.isDown = false;
+            state.dragMode = null;
+        });
+
+        window.addEventListener('wheel', function(e) {
+            if (e.target !== canvasDynamic && e.target !== canvasStatic) return;
+            camera.zoom -= e.deltaY * 0.05;
+            camera.zoom = Math.max(5, Math.min(100, camera.zoom));
+            requestStaticRedraw();
+        });
+
+        document.getElementById('btn-reset-camera').onclick = function() {
+            camera = {
+                yaw: Math.PI / 4, pitch: Math.PI / 4, zoom: 25,
+                panX: window.innerWidth / 2, panY: window.innerHeight / 2
+            };
+            requestStaticRedraw();
+        };
+
+        // ==========================================
+        // 主循环
+        // ==========================================
+        function formatTime(secs) {
+            const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+            const s = Math.floor(secs % 60).toString().padStart(2, '0');
+            return h + ':' + m + ':' + s;
+        }
+
+        function loop(timestamp) {
+            if (!state.lastRealTime) state.lastRealTime = timestamp;
+            const realDt = (timestamp - state.lastRealTime) / 1000;
+            state.lastRealTime = timestamp;
+
+            if (state.isRunning && state.simTime < CONFIG.sim.maxTime) {
+                const simDt = realDt * CONFIG.sim.speedMultiplier;
+                state.simTime += simDt;
+
+                nodes.filter(function(n) { return n.type === TYPE.SOURCE; }).forEach(function(source) {
+                    if (source.nextSpawnTime === undefined) source.nextSpawnTime = state.simTime;
+
+                    if (state.simTime >= source.nextSpawnTime) {
+                        if (source.targetDest || source.targetWp) {
+                            agents.push(new Agent(source));
+                        }
+                        const intervalSecs = 60 / (source.rate || 1);
+                        source.nextSpawnTime = state.simTime + intervalSecs;
+                    }
+                });
+
+                agents.forEach(function(a) { a.update(simDt); });
+                agents = agents.filter(function(a) { return a.active; });
+
+                if (Math.floor(state.simTime) % 1 === 0 && Math.abs(state.simTime - (state.lastSampleTime || 0)) > 0.5) {
+                    state.lastSampleTime = state.simTime;
+
+                    chartData.throughput.push(totalArrived);
+                    chartData.usage.push(totalUsage);
+
+                    if (chartData.throughput.length > chartData.maxPoints) chartData.throughput.shift();
+                    if (chartData.usage.length > chartData.maxPoints) chartData.usage.shift();
+
+                    drawChart();
+                }
+
+                if (state.simTime >= CONFIG.sim.maxTime) {
+                    state.isRunning = false;
+                    const uiStatus = document.getElementById('ui-status');
+                    uiStatus.innerText = '仿真结束 (8小时)';
+                    uiStatus.style.color = getComputedStyle(document.body).getPropertyValue('--sf-status-pause').trim();
+                }
+            }
+
+            document.getElementById('ui-time').innerText = formatTime(state.simTime);
+            updateStats();
+            drawDynamic();
+            requestAnimationFrame(loop);
+        }
+
+        // ==========================================
+        // 控制按钮
+        // ==========================================
+        document.getElementById('btn-toggle-sim').onclick = function() {
+            if (state.simTime >= CONFIG.sim.maxTime) return;
+            state.isRunning = !state.isRunning;
+            const uiStatus = document.getElementById('ui-status');
+            const style = getComputedStyle(document.body);
+            uiStatus.innerText = state.isRunning ? '运行中' : '已暂停';
+            uiStatus.style.color = style.getPropertyValue(state.isRunning ? '--sf-status-run' : '--sf-status-pause').trim();
+            state.lastRealTime = performance.now();
+        };
+
+        document.getElementById('btn-reset-sim').onclick = function() {
+            state.isRunning = false;
+            state.simTime = 0;
+            agents = [];
+            totalArrived = 0;
+            totalUsage = 0;
+            chartData.throughput = [];
+            chartData.usage = [];
+
+            nodes.forEach(function(n) {
+                n.totalVisits = 0;
+                n.history = [];
+                n.nextSpawnTime = 0;
+            });
+
+            const uiStatus = document.getElementById('ui-status');
+            uiStatus.innerText = '已重置';
+            uiStatus.style.color = getComputedStyle(document.body).getPropertyValue('--text-color').trim();
+            updateStats();
+            drawChart();
+        };
+
+        document.getElementById('input-speed').onchange = function(e) {
+            CONFIG.sim.speedMultiplier = Number(e.target.value);
+        };
+
+        // ==========================================
+        // 初始化
+        // ==========================================
+        window.addEventListener('resize', function() {
+            camera.panX = window.innerWidth / 2;
+            camera.panY = window.innerHeight / 2;
+            requestStaticRedraw();
+        });
+
+        updateUIPanel();
+        updateStats();
+        drawChart();
+        requestStaticRedraw();
+        requestAnimationFrame(loop);
+    </script>
+</body>
+</html>
