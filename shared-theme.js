@@ -101,6 +101,77 @@
     document.body.appendChild(a);
   }
 
+  function createTopNav() {
+    if (document.getElementById('top-nav')) return;
+    const nav = document.createElement('nav');
+    nav.id = 'top-nav';
+    nav.className = 'top-nav';
+
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    // Home
+    const homeLink = document.createElement('a');
+    homeLink.href = 'index.html';
+    homeLink.textContent = '首页';
+    if (currentPage === 'index.html' || currentPage === '') homeLink.classList.add('active');
+    nav.appendChild(homeLink);
+
+    // Library dropdown
+    const libDropdown = document.createElement('div');
+    libDropdown.className = 'nav-dropdown';
+    const libLink = document.createElement('a');
+    libLink.href = '#';
+    libLink.textContent = '图书馆 ▾';
+    libDropdown.appendChild(libLink);
+
+    const libMenu = document.createElement('div');
+    libMenu.className = 'nav-dropdown-menu';
+    const libItems = [
+      { text: 'arXiv', href: 'https://arxiv.org/', target: '_blank' },
+      { text: 'ChinaXiv', href: 'http://chinaxiv.org/home.htm', target: '_blank' },
+      { text: 'Sci-Hub', href: 'https://sci-hub.sg/', target: '_blank' },
+      { text: 'bioRxiv', href: 'https://www.biorxiv.org/', target: '_blank' },
+      { text: 'medRxiv', href: 'https://www.medrxiv.org/', target: '_blank' }
+    ];
+    libItems.forEach(item => {
+      const a = document.createElement('a');
+      a.href = item.href;
+      a.textContent = item.text;
+      if (item.target) a.target = item.target;
+      libMenu.appendChild(a);
+    });
+    libDropdown.appendChild(libMenu);
+    nav.appendChild(libDropdown);
+
+    // About dropdown
+    const aboutDropdown = document.createElement('div');
+    aboutDropdown.className = 'nav-dropdown';
+    const aboutLink = document.createElement('a');
+    aboutLink.href = '#';
+    aboutLink.textContent = '关于 ▾';
+    aboutDropdown.appendChild(aboutLink);
+
+    const aboutMenu = document.createElement('div');
+    aboutMenu.className = 'nav-dropdown-menu';
+    const aboutItems = [
+      { text: '📷 Instagram', href: 'https://www.instagram.com/zf_zhuang/', target: '_blank' },
+      { text: '💼 LinkedIn', href: 'https://www.linkedin.com/in/zefeng-zhuang-266a9b204/', target: '_blank' },
+      { text: '🚀 飞书', href: 'https://www.feishu.cn/invitation/page/add_contact/?token=f9bg037f-c9e4-4455-9dc0-724176121788&unique_id=XuGE2TPEcoSXmTb6i3Q9Gg==', target: '_blank' },
+      { text: '🐙 GitHub', href: 'https://github.com/hszzhua2', target: '_blank' }
+    ];
+    aboutItems.forEach(item => {
+      const a = document.createElement('a');
+      a.href = item.href;
+      a.textContent = item.text;
+      if (item.target) a.target = item.target;
+      aboutMenu.appendChild(a);
+    });
+    aboutDropdown.appendChild(aboutMenu);
+    nav.appendChild(aboutDropdown);
+
+    document.body.insertBefore(nav, document.body.firstChild);
+  }
+
   // --- Cross-frame Sync ---
 
   function listenToParentTheme() {
@@ -119,6 +190,7 @@
     cycle: cycleTheme,
     createSwitcher: createThemeSwitcher,
     createBackButton: createBackButton,
+    createTopNav: createTopNav,
     listenToParent: listenToParentTheme,
     themes: VALID_THEMES
   };
@@ -131,6 +203,10 @@
     // If inside iframe, listen to parent
     if (window.parent !== window) {
       listenToParentTheme();
+    }
+    // Auto-create top nav on all pages
+    if (window.parent === window) {
+      createTopNav();
     }
     // Auto-inject music player (skip if already loaded or in iframe)
     if (window.parent === window && !document.getElementById('psu-music-player')) {

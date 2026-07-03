@@ -353,10 +353,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-color: #5c0000;
 }
 
-/* Theme switcher floating button styles */
+/* Theme switcher floating button styles — bottom-left attached */
 .theme-switcher {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   left: 20px;
   z-index: 1000;
   display: flex;
@@ -626,3 +626,193 @@ h1, h2, h3 {
   background: #c41e1e;
   border-radius: 0;
 }
+
+/* ---------- Top Navigation Bar ---------- */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 20px;
+  transition: var(--theme-transition);
+}
+
+/* Cartoon nav */
+[data-theme="cartoon"] .top-nav {
+  background: rgba(254, 246, 228, 0.92);
+  border-bottom: 3px solid rgba(255, 180, 100, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+/* Glass nav */
+[data-theme="glass"] .top-nav {
+  background: rgba(15, 17, 23, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+}
+
+/* Cyber nav */
+[data-theme="cyber"] .top-nav {
+  background: rgba(10, 0, 20, 0.9);
+  border-bottom: 1px solid rgba(189, 0, 255, 0.3);
+  box-shadow: 0 0 20px rgba(189, 0, 255, 0.1);
+}
+
+/* Academic nav */
+[data-theme="academic"] .top-nav {
+  background: rgba(248, 249, 250, 0.95);
+  border-bottom: 1px solid #e0e0e0;
+  backdrop-filter: blur(12px);
+}
+
+/* Soviet nav */
+[data-theme="soviet"] .top-nav {
+  background: rgba(240, 235, 228, 0.95);
+  border-bottom: 2px solid #c41e1e;
+}
+
+.top-nav a {
+  padding: 8px 20px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  font-family: var(--font-main);
+}
+
+/* Cartoon nav links */
+[data-theme="cartoon"] .top-nav a {
+  color: var(--text-muted);
+}
+[data-theme="cartoon"] .top-nav a:hover,
+[data-theme="cartoon"] .top-nav a.active {
+  color: var(--accent-1);
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* Glass nav links */
+[data-theme="glass"] .top-nav a {
+  color: var(--text-muted);
+}
+[data-theme="glass"] .top-nav a:hover,
+[data-theme="glass"] .top-nav a.active {
+  color: #74b9ff;
+  background: rgba(116, 185, 255, 0.1);
+}
+
+/* Cyber nav links */
+[data-theme="cyber"] .top-nav a {
+  color: var(--text-muted);
+}
+[data-theme="cyber"] .top-nav a:hover,
+[data-theme="cyber"] .top-nav a.active {
+  color: #00f3ff;
+  background: rgba(0, 243, 255, 0.1);
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+}
+
+/* Academic nav links */
+[data-theme="academic"] .top-nav a {
+  color: #7a7a8a;
+  border-radius: 4px;
+}
+[data-theme="academic"] .top-nav a:hover,
+[data-theme="academic"] .top-nav a.active {
+  color: #1a1a2e;
+  background: rgba(26, 26, 46, 0.06);
+}
+
+/* Soviet nav links */
+[data-theme="soviet"] .top-nav a {
+  color: #6a5a4a;
+  border-radius: 2px;
+}
+[data-theme="soviet"] .top-nav a:hover,
+[data-theme="soviet"] .top-nav a.active {
+  color: #c41e1e;
+  background: rgba(196, 30, 30, 0.08);
+}
+
+/* Nav dropdown for Library & About */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  transform-origin: top center;
+  opacity: 0;
+  pointer-events: none;
+  padding: 8px 0;
+  border-radius: var(--radius);
+  min-width: 220px;
+  transition: all 0.25s ease;
+  z-index: 1001;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown-menu:hover {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-theme="cartoon"] .nav-dropdown-menu {
+  background: rgba(255, 255, 255, 0.95);
+  border: 3px solid rgba(255, 180, 100, 0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+[data-theme="glass"] .nav-dropdown-menu {
+  background: rgba(26, 29, 38, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+[data-theme="cyber"] .nav-dropdown-menu {
+  background: rgba(20, 0, 40, 0.95);
+  border: 1px solid rgba(189, 0, 255, 0.4);
+  box-shadow: 0 0 30px rgba(189, 0, 255, 0.15);
+}
+[data-theme="academic"] .nav-dropdown-menu {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+[data-theme="soviet"] .nav-dropdown-menu {
+  background: #fffaf2;
+  border: 2px solid #c41e1e;
+  border-radius: 2px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.nav-dropdown-menu a {
+  display: block;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+[data-theme="cartoon"] .nav-dropdown-menu a { color: var(--text-muted); }
+[data-theme="cartoon"] .nav-dropdown-menu a:hover { color: var(--accent-1); background: rgba(255, 107, 107, 0.08) !important; }
+[data-theme="glass"] .nav-dropdown-menu a { color: var(--text-muted); }
+[data-theme="glass"] .nav-dropdown-menu a:hover { color: #74b9ff; background: rgba(116, 185, 255, 0.08) !important; }
+[data-theme="cyber"] .nav-dropdown-menu a { color: var(--text-muted); }
+[data-theme="cyber"] .nav-dropdown-menu a:hover { color: #00f3ff; background: rgba(0, 243, 255, 0.08) !important; text-shadow: 0 0 6px rgba(0, 243, 255, 0.3); }
+[data-theme="academic"] .nav-dropdown-menu a { color: #7a7a8a; }
+[data-theme="academic"] .nav-dropdown-menu a:hover { color: #1a1a2e; background: #f5f5f5 !important; }
+[data-theme="soviet"] .nav-dropdown-menu a { color: #6a5a4a; }
+[data-theme="soviet"] .nav-dropdown-menu a:hover { color: #c41e1e; background: rgba(196, 30, 30, 0.06) !important; }
