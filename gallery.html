@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实验展厅 — 砰！粒子！</title>
+<style>
+/* ===== 4主题CSS变量系统 ===== */
+:root {
+  --bg: #0a0705; --bg2: #120e0a; --bg3: #1e1810; --bg4: #2a2018;
+  --ink: #f0e6d2; --muted: #8a7a68; --rule: #2a2018;
+  --accent: #d4960c; --accent-rgb: 212,150,12;
+  --wave: #e8a838; --wave-rgb: 232,168,56;
+  --quantum: #f0c060; --quantum-rgb: 240,192,96;
+  --font: SimSun, 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
+  --font-mono: 'GeistMono', monospace;
+  --radius: 14px; --transition: 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+[data-theme="academic"] {
+  --bg: #f8f9fa; --bg2: #ffffff; --bg3: #f0f0f0; --bg4: #e8e8e8;
+  --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb;
+  --accent: #4a6fa5; --accent-rgb: 74,111,165;
+  --wave: #6b8cae; --wave-rgb: 107,140,174;
+  --quantum: #8fa8c8; --quantum-rgb: 143,168,200;
+}
+[data-theme="soviet"] {
+  --bg: #f0e6d0; --bg2: #e8dcc8; --bg3: #f5ecd8; --bg4: #e0d4bc;
+  --ink: #1a1a1a; --muted: #7a6b5a; --rule: #d4c8b8;
+  --accent: #e31b23; --accent-rgb: 227,27,35;
+  --wave: #ff4d2e; --wave-rgb: 255,77,46;
+  --quantum: #f5a020; --quantum-rgb: 245,160,32;
+}
+[data-theme="cyber"] {
+  --bg: #0a0014; --bg2: #120024; --bg3: #1a0034; --bg4: #220044;
+  --ink: #e0e6ed; --muted: #8b7aa8; --rule: #2a1050;
+  --accent: #00f3ff; --accent-rgb: 0,243,255;
+  --wave: #bd00ff; --wave-rgb: 189,0,255;
+  --quantum: #ff00ea; --quantum-rgb: 255,0,234;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+  line-height: 1.7;
+}
+
+/* ===== 导航栏 ===== */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2.5rem; height: 64px;
+  background: rgba(var(--bg-rgb, 10,7,5), 0.75);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid var(--rule);
+  transition: background var(--transition), border-color var(--transition);
+}
+.nav-logo { font-size: 1.3rem; font-weight: 700; color: var(--accent); text-decoration: none; letter-spacing: 2px; }
+.nav-links { display: flex; gap: 1.6rem; list-style: none; }
+.nav-links a {
+  color: var(--muted); text-decoration: none; font-size: 0.95rem;
+  transition: color var(--transition); position: relative;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--accent); }
+.nav-links a.active::after {
+  content: ''; position: absolute; bottom: -6px; left: 0; right: 0;
+  height: 2px; background: var(--accent); border-radius: 1px;
+}
+.nav-right { display: flex; align-items: center; gap: 1rem; }
+.theme-toggle {
+  background: transparent; border: 1.5px solid var(--rule); color: var(--ink);
+  width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+  font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); transform: rotate(15deg); }
+
+/* ===== 页脚 ===== */
+.footer {
+  background: var(--bg2); border-top: 1px solid var(--rule);
+  padding: 3rem 2.5rem 1.5rem; margin-top: 4rem;
+  transition: background var(--transition), border-color var(--transition);
+}
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2.5rem; margin-bottom: 2rem;
+}
+.brand-name { font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; }
+.brand-desc { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+.social-links { display: flex; gap: 0.8rem; }
+.social-links a { color: var(--muted); text-decoration: none; font-size: 1.2rem; transition: color var(--transition); }
+.social-links a:hover { color: var(--accent); }
+.footer-col h4 { font-size: 1rem; color: var(--ink); margin-bottom: 1rem; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 0.4rem; }
+.footer-col a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color var(--transition); }
+.footer-col a:hover { color: var(--accent); }
+.footer-bottom {
+  text-align: center; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+  color: var(--muted); font-size: 0.85rem;
+}
+
+/* ===== 页面内容 ===== */
+main { padding-top: 64px; }
+.hero {
+  text-align: center; padding: 5rem 2rem 3rem;
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+}
+.hero h1 {
+  font-size: 3.2rem; font-weight: 700; color: var(--ink);
+  margin-bottom: 0.8rem; letter-spacing: 4px;
+}
+.hero p { font-size: 1.25rem; color: var(--muted); }
+
+/* 实验卡片网格 */
+.gallery-section { max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.6rem;
+}
+
+.exp-card {
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: all var(--transition);
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+}
+.exp-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--wave));
+  opacity: 0; transition: opacity var(--transition);
+}
+.exp-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 40px rgba(var(--accent-rgb), 0.12);
+}
+.exp-card:hover::before { opacity: 1; }
+
+.exp-tag {
+  display: inline-block;
+  font-size: 0.7rem; font-weight: 600;
+  padding: 0.25rem 0.6rem; border-radius: 20px;
+  margin-bottom: 0.8rem; align-self: flex-start;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* 分类标签颜色 */
+.tag-fluid { background: rgba(74,144,217,0.15); color: #4a90d9; }
+.tag-chaos { background: rgba(212,150,12,0.15); color: #d4960c; }
+.tag-quantum { background: rgba(0,243,255,0.15); color: #00c8d4; }
+.tag-electromagnetism { background: rgba(155,89,182,0.15); color: #9b59b6; }
+.tag-astro { background: rgba(46,204,113,0.15); color: #2ecc71; }
+.tag-statistical { background: rgba(232,93,117,0.15); color: #e85d75; }
+.tag-classical { background: rgba(108,140,174,0.15); color: #6b8cae; }
+.tag-optics { background: rgba(255,160,32,0.15); color: #f5a020; }
+.tag-bio { background: rgba(39,174,96,0.15); color: #27ae60; }
+.tag-social { background: rgba(241,196,15,0.15); color: #f1c40f; }
+.tag-computation { background: rgba(155,89,182,0.15); color: #9b59b6; }
+
+.exp-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--ink); }
+.exp-card .exp-desc {
+  color: var(--muted); font-size: 0.9rem;
+  line-height: 1.6; margin-bottom: 1.2rem; flex-grow: 1;
+}
+.exp-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, var(--accent), var(--wave));
+  color: #fff; text-decoration: none;
+  border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+  transition: all var(--transition);
+  align-self: flex-start;
+}
+.exp-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 24px rgba(var(--accent-rgb), 0.35);
+}
+
+@media (max-width: 768px) {
+  .navbar { padding: 0 1rem; }
+  .nav-links { display: none; }
+  .hero h1 { font-size: 2rem; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><span>砰！粒子！</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">首页</a></li>
+    <li><a href="physics-world.html">物理世界</a></li>
+    <li><a href="knowledge.html">知识体系</a></li>
+    <li><a href="gallery.html" class="active">实验展厅</a></li>
+    <li><a href="simulation.html">仿真实验室</a></li>
+    <li><a href="data-lab.html">数据实验室</a></li>
+    <li><a href="teacher.html">教师中心</a></li>
+    <li><a href="about.html">关于</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="theme-toggle" id="themeToggle" title="切换主题">🎨</button>
+  </div>
+</nav>
+
+<main>
+  <section class="hero">
+    <h1>实验展厅</h1>
+    <p>22个沉浸式物理仿真实验</p>
+  </section>
+
+  <section class="gallery-section">
+    <div class="gallery-grid">
+      <div class="exp-card">
+        <span class="exp-tag tag-fluid">流体力学</span>
+        <h3>泰勒-库埃特流</h3>
+        <p class="exp-desc">观察两旋转圆柱间流体的层流与湍流转变，探索流体力学中的失稳现象。</p>
+        <a href="exp-taylor.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-statistical">统计</span>
+        <h3>高尔顿钉板</h3>
+        <p class="exp-desc">经典的高斯分布演示，小球经过多层钉板后形成正态分布曲线。</p>
+        <a href="exp-galton.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-classical">经典</span>
+        <h3>利萨茹曲线</h3>
+        <p class="exp-desc">两个相互垂直简谐运动的合成轨迹，探索频率比对图形的影响。</p>
+        <a href="exp-lissajous.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-classical">经典</span>
+        <h3>克拉尼图形</h3>
+        <p class="exp-desc">金属板振动时沙粒形成的驻波图案，直观展示二维振动模态。</p>
+        <a href="exp-chladni.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-chaos">混沌</span>
+        <h3>混沌双摆</h3>
+        <p class="exp-desc">双摆系统的混沌运动，微小初值差异导致截然不同的轨迹。</p>
+        <a href="exp-pendulum.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-classical">经典</span>
+        <h3>刚体沙盒</h3>
+        <p class="exp-desc">多刚体碰撞与运动的物理沙盒，自由搭建力学实验场景。</p>
+        <a href="exp-matter.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-quantum">量子</span>
+        <h3>双缝干涉</h3>
+        <p class="exp-desc">电子/光子通过双缝的干涉图样，揭示波粒二象性的核心实验。</p>
+        <a href="exp-quantum.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-quantum">量子</span>
+        <h3>一维势阱</h3>
+        <p class="exp-desc">粒子在无限深方势阱中的量子态与能级，可视化波函数演化。</p>
+        <a href="exp-potential.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-astro">天体</span>
+        <h3>万有引力</h3>
+        <p class="exp-desc">多体引力系统的轨道演化，构建你自己的行星系统。</p>
+        <a href="exp-gravity.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-chaos">混沌</span>
+        <h3>洛伦兹吸引子</h3>
+        <p class="exp-desc">三变量微分方程组产生的奇异吸引子，混沌理论的标志性图形。</p>
+        <a href="exp-lorenz.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-fluid">流体力学</span>
+        <h3>伯努利原理</h3>
+        <p class="exp-desc">流体速度与压强的关系演示，理解升力与喷雾器的工作原理。</p>
+        <a href="exp-bernoulli.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-astro">天体</span>
+        <h3>黑洞吸积盘</h3>
+        <p class="exp-desc">物质落入黑洞时形成的吸积盘结构，探索极端引力场中的物理过程。</p>
+        <a href="exp-blackhole.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-astro">天体</span>
+        <h3>黑洞吸积盘（高级）</h3>
+        <p class="exp-desc">更精细的吸积盘模拟，包含相对论性射束与多波段辐射。</p>
+        <a href="exp-blackhole-advanced.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-astro">天体</span>
+        <h3>爱因斯坦-罗森桥</h3>
+        <p class="exp-desc">虫洞的几何结构与时空穿越的可视化，连接两个遥远时空区域的桥梁。</p>
+        <a href="exp-wormhole.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-electromagnetism">电磁</span>
+        <h3>特斯拉线圈</h3>
+        <p class="exp-desc">高频谐振变压器的放电演示，探索电磁感应与高压放电的壮观现象。</p>
+        <a href="exp-tesla.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-optics">光学</span>
+        <h3>波的干涉</h3>
+        <p class="exp-desc">两列波的叠加与干涉图样，探索相长干涉与相消干涉的条件。</p>
+        <a href="exp-wave.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-classical">经典</span>
+        <h3>弹簧振子</h3>
+        <p class="exp-desc">简谐振动的理想模型，观察位移、速度与加速度的相位关系。</p>
+        <a href="exp-spring.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-bio">生物</span>
+        <h3>名医的诞生</h3>
+        <p class="exp-desc">基于统计规律的医疗决策模拟，探索诊断准确率与样本量的关系。</p>
+        <a href="exp-medical.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-social">社会</span>
+        <h3>成功随机性</h3>
+        <p class="exp-desc">Pluchino 等人的才能与运气模型，揭示成功背后的随机因素作用。</p>
+        <a href="exp-pluchino.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-statistical">统计</span>
+        <h3>伊辛模型</h3>
+        <p class="exp-desc">二维格点自旋系统的相变模拟，观察铁磁-顺磁转变的临界行为。</p>
+        <a href="exp-ising.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-computation">计算</span>
+        <h3>3D元胞自动机</h3>
+        <p class="exp-desc">三维空间中的细胞自动机演化，探索复杂系统的涌现行为。</p>
+        <a href="exp-ca3d.html" class="exp-btn">立即体验 →</a>
+      </div>
+
+      <div class="exp-card">
+        <span class="exp-tag tag-astro">天体</span>
+        <h3>太阳系沙盘</h3>
+        <p class="exp-desc">太阳系行星轨道的N体模拟，调整参数观察轨道共振与摄动效应。</p>
+        <a href="exp-solar.html" class="exp-btn">立即体验 →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand-name">砰！粒子！</div>
+        <p class="brand-desc">让每一个物理概念都触手可及。</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/zf_zhuang/" target="_blank" title="Instagram">📷</a>
+          <a href="https://www.linkedin.com/in/zefeng-zhuang-266a9b204/" target="_blank" title="LinkedIn">💼</a>
+          <a href="https://www.feishu.cn/invitation/page/add_contact/?token=f9bg037f-c9e4-4455-9dc0-724176121788&unique_id=XuGE2TPEcoSXmTb6i3Q9Gg==" target="_blank" title="飞书">🚀</a>
+          <a href="https://github.com/hszzhua2" target="_blank" title="GitHub">🐙</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>探索</h4>
+        <ul>
+          <li><a href="physics-world.html">物理世界</a></li>
+          <li><a href="knowledge.html">知识体系</a></li>
+          <li><a href="gallery.html">实验展厅</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>体验</h4>
+        <ul>
+          <li><a href="simulation.html">仿真实验室</a></li>
+          <li><a href="data-lab.html">数据实验室</a></li>
+          <li><a href="gallery.html">互动实验</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>联系</h4>
+        <ul>
+          <li><a href="teacher.html">教师中心</a></li>
+          <li><a href="about.html">关于我们</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>&copy; 2026 砰！粒子！</span></div>
+  </div>
+</footer>
+
+<script>
+const THEMES = ['classical', 'academic', 'soviet', 'cyber'];
+function getTheme() { return document.documentElement.getAttribute('data-theme') || 'classical'; }
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const idx = THEMES.indexOf(getTheme());
+  setTheme(THEMES[(idx + 1) % THEMES.length]);
+});
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved && THEMES.includes(saved)) setTheme(saved);
+})();
+</script>
+</body>
+</html>

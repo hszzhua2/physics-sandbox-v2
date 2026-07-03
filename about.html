@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="classical">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>关于我们 - 砰！粒子！</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <style>
+    /* ========== 4主题CSS变量系统 ========== */
+    :root {
+      --bg: #0a0705; --bg2: #120e0a; --bg3: #1e1810; --bg4: #2a2018;
+      --ink: #f0e6d2; --muted: #8a7a68; --rule: #2a2018;
+      --accent: #d4960c; --accent-rgb: 212,150,12;
+      --wave: #e8a838; --wave-rgb: 232,168,56;
+      --quantum: #f0c060; --quantum-rgb: 240,192,96;
+      --font: SimSun, 'Songti SC', 'Noto Serif CJK SC', Georgia, serif;
+      --font-mono: 'GeistMono', monospace;
+      --radius: 14px; --transition: 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    [data-theme="academic"] {
+      --bg: #f8f9fa; --bg2: #ffffff; --bg3: #f0f0f0; --bg4: #e8e8e8;
+      --ink: #1a1a2e; --muted: #6b7280; --rule: #e5e7eb;
+      --accent: #4a6fa5; --accent-rgb: 74,111,165;
+      --wave: #6b8cae; --wave-rgb: 107,140,174;
+      --quantum: #8fa8c8; --quantum-rgb: 143,168,200;
+    }
+
+    [data-theme="soviet"] {
+      --bg: #f0e6d0; --bg2: #e8dcc8; --bg3: #f5ecd8; --bg4: #e0d4bc;
+      --ink: #1a1a1a; --muted: #7a6b5a; --rule: #d4c8b8;
+      --accent: #e31b23; --accent-rgb: 227,27,35;
+      --wave: #ff4d2e; --wave-rgb: 255,77,46;
+      --quantum: #f5a020; --quantum-rgb: 245,160,32;
+    }
+
+    [data-theme="cyber"] {
+      --bg: #0a0014; --bg2: #120024; --bg3: #1a0034; --bg4: #220044;
+      --ink: #e0e6ed; --muted: #8b7aa8; --rule: #2a1050;
+      --accent: #00f3ff; --accent-rgb: 0,243,255;
+      --wave: #bd00ff; --wave-rgb: 189,0,255;
+      --quantum: #ff00ea; --quantum-rgb: 255,0,234;
+    }
+
+    /* ========== 基础重置与字体 ========== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.8;
+      transition: background var(--transition), color var(--transition);
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+
+    /* ========== 导航栏 ========== */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 64px;
+      background: rgba(var(--bg-rgb, 10,7,5), 0.75);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid rgba(var(--accent-rgb), 0.1);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    [data-theme="academic"] .navbar {
+      background: rgba(248,249,250,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+      box-shadow: none;
+    }
+    [data-theme="soviet"] .navbar {
+      background: rgba(240,230,208,0.95);
+      backdrop-filter: none;
+      border-bottom: 2px solid var(--accent);
+      border-radius: 0;
+    }
+    [data-theme="cyber"] .navbar {
+      background: rgba(10,0,20,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,243,255,0.2);
+      box-shadow: 0 0 20px rgba(0,243,255,0.05);
+    }
+    .nav-logo {
+      font-size: 1.3rem; font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+      transition: color var(--transition);
+    }
+    .nav-logo span { position: relative; }
+    .nav-logo span::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+      height: 2px; background: var(--wave);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform var(--transition);
+    }
+    .nav-logo:hover span::after { transform: scaleX(1); }
+    .nav-links {
+      display: flex; gap: 28px;
+      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-links a {
+      font-size: 0.92rem; color: var(--muted);
+      position: relative; padding: 4px 0;
+      transition: color var(--transition);
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px; background: var(--accent);
+      transform: scaleX(0); transform-origin: center;
+      transition: transform var(--transition);
+    }
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--ink);
+    }
+    .nav-links a:hover::after, .nav-links a.active::after {
+      transform: scaleX(1);
+    }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .theme-toggle {
+      background: transparent; border: 1px solid rgba(var(--accent-rgb), 0.3);
+      color: var(--accent); font-size: 1.1rem;
+      width: 38px; height: 38px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+    }
+    .theme-toggle:hover {
+      background: rgba(var(--accent-rgb), 0.15);
+      transform: rotate(15deg) scale(1.1);
+      box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
+    }
+    [data-theme="soviet"] .theme-toggle {
+      border-radius: 0; border-width: 2px;
+    }
+    [data-theme="cyber"] .theme-toggle {
+      border-color: var(--accent);
+      box-shadow: 0 0 8px rgba(0,243,255,0.2);
+    }
+    [data-theme="cyber"] .theme-toggle:hover {
+      box-shadow: 0 0 20px rgba(0,243,255,0.5), 0 0 40px rgba(189,0,255,0.2);
+    }
+
+    /* 移动端菜单按钮 */
+    .mobile-menu-btn {
+      display: none; background: none; border: none;
+      color: var(--ink); font-size: 1.5rem; cursor: pointer;
+    }
+
+    /* ========== 主内容区 ========== */
+    main { padding-top: 64px; }
+
+    /* ========== Hero区域 ========== */
+    .hero {
+      min-height: 45vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 80px 24px 60px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 20%, rgba(var(--accent-rgb), 0.08) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 80%, rgba(var(--wave-rgb), 0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700; letter-spacing: 8px;
+      color: var(--ink);
+      margin-bottom: 16px;
+      position: relative; z-index: 1;
+      opacity: 0; transform: translateY(30px);
+      animation: fadeInUp 0.8s ease forwards;
+    }
+    .hero .subtitle {
+      font-size: clamp(1rem, 2.2vw, 1.3rem);
+      color: var(--muted);
+      max-width: 600px;
+      position: relative; z-index: 1;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeInUp 0.8s ease 0.2s forwards;
+    }
+    [data-theme="cyber"] .hero h1 {
+      text-shadow: 0 0 20px rgba(var(--accent-rgb), 0.5), 0 0 40px rgba(var(--wave-rgb), 0.3);
+    }
+
+    /* ========== 容器 ========== */
+    .container {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 24px;
+    }
+    .section {
+      padding: 60px 0;
+      opacity: 0; transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .section.revealed {
+      opacity: 1; transform: translateY(0);
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 700; text-align: center;
+      margin-bottom: 48px; letter-spacing: 4px;
+      position: relative; display: inline-block;
+      left: 50%; transform: translateX(-50%);
+    }
+    .section-title::after {
+      content: ''; position: absolute; bottom: -8px; left: 25%; right: 25%;
+      height: 2px; background: var(--accent);
+      border-radius: 1px;
+    }
+
+    /* ========== 平台介绍卡片 ========== */
+    .intro-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .glass-card {
+      background: rgba(var(--bg2-rgb, 18,14,10), 0.6);
+      backdrop-filter: blur(16px) saturate(1.2);
+      -webkit-backdrop-filter: blur(16px) saturate(1.2);
+      border: 1px solid rgba(var(--accent-rgb), 0.12);
+      border-radius: var(--radius);
+      padding: 40px;
+      transition: all var(--transition);
+    }
+    .glass-card:hover {
+      border-color: rgba(var(--accent-rgb), 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    [data-theme="academic"] .glass-card {
+      background: #ffffff;
+      border: 1px solid var(--rule);
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+    [data-theme="academic"] .glass-card:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+      border-color: var(--accent);
+    }
+    [data-theme="soviet"] .glass-card {
+      background: var(--bg2);
+      border: 2px solid var(--rule);
+      border-radius: 0;
+      backdrop-filter: none;
+      box-shadow: 4px 4px 0 var(--accent);
+    }
+    [data-theme="soviet"] .glass-card:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--accent);
+    }
+    [data-theme="cyber"] .glass-card {
+      background: rgba(18,0,36,0.7);
+      border: 1px solid rgba(0,243,255,0.15);
+      box-shadow: 0 0 20px rgba(0,243,255,0.05);
+    }
+    [data-theme="cyber"] .glass-card:hover {
+      border-color: rgba(0,243,255,0.4);
+      box-shadow: 0 0 30px rgba(0,243,255,0.15), 0 0 60px rgba(189,0,255,0.08);
+    }
+    .card-title {
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--accent); margin-bottom: 16px;
+      letter-spacing: 2px;
+    }
+    .card-body {
+      font-size: 1rem; color: var(--muted);
+      line-height: 2;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .stat-item {
+      text-align: center; padding: 16px;
+      background: rgba(var(--accent-rgb), 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(var(--accent-rgb), 0.08);
+      transition: all var(--transition);
+    }
+    .stat-item:hover {
+      background: rgba(var(--accent-rgb), 0.1);
+      transform: scale(1.03);
+    }
+    [data-theme="soviet"] .stat-item {
+      border-radius: 0;
+      border: 1px solid var(--rule);
+    }
+    .stat-number {
+      font-size: 2rem; font-weight: 700;
+      color: var(--accent); line-height: 1;
+      margin-bottom: 6px;
+      font-family: var(--font-mono);
+    }
+    .stat-label {
+      font-size: 0.85rem; color: var(--muted);
+    }
+
+    /* ========== 团队成员区域 ========== */
+    .creator-card {
+      max-width: 640px; margin: 0 auto;
+      text-align: center;
+      padding: 48px;
+    }
+    .creator-avatar {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--wave));
+      margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; color: #fff;
+      box-shadow: 0 8px 32px rgba(var(--accent-rgb), 0.3);
+      position: relative;
+    }
+    .creator-avatar::before {
+      content: '庄';
+      font-family: var(--font);
+      font-weight: 700;
+    }
+    [data-theme="soviet"] .creator-avatar {
+      border-radius: 0;
+      box-shadow: 4px 4px 0 var(--accent);
+    }
+    [data-theme="cyber"] .creator-avatar {
+      box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.4), 0 0 40px rgba(var(--wave-rgb), 0.2);
+      animation: cyberPulse 3s ease-in-out infinite;
+    }
+    @keyframes cyberPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.4), 0 0 40px rgba(var(--wave-rgb), 0.2); }
+      50% { box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.6), 0 0 60px rgba(var(--wave-rgb), 0.3); }
+    }
+    .creator-name {
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--ink); margin-bottom: 4px;
+    }
+    .creator-role {
+      font-size: 0.95rem; color: var(--accent);
+      margin-bottom: 16px; letter-spacing: 2px;
+    }
+    .creator-bio {
+      font-size: 1rem; color: var(--muted);
+      margin-bottom: 28px; line-height: 1.9;
+    }
+    .social-links {
+      display: flex; flex-wrap: wrap;
+      gap: 12px; justify-content: center;
+    }
+    .social-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      background: rgba(var(--accent-rgb), 0.08);
+      border: 1px solid rgba(var(--accent-rgb), 0.2);
+      border-radius: 100px;
+      color: var(--ink); font-size: 0.9rem;
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+    .social-btn:hover {
+      background: rgba(var(--accent-rgb), 0.2);
+      border-color: var(--accent);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.2);
+    }
+    [data-theme="soviet"] .social-btn {
+      border-radius: 0;
+      border-width: 2px;
+    }
+    [data-theme="soviet"] .social-btn:hover {
+      box-shadow: 3px 3px 0 var(--accent);
+      transform: translate(-1px, -1px);
+    }
+    [data-theme="cyber"] .social-btn {
+      border-color: rgba(0,243,255,0.3);
+      background: rgba(0,243,255,0.05);
+    }
+    [data-theme="cyber"] .social-btn:hover {
+      box-shadow: 0 0 20px rgba(0,243,255,0.3), 0 0 40px rgba(189,0,255,0.1);
+      border-color: var(--accent);
+    }
+    .social-btn .icon { font-size: 1.1rem; }
+
+    /* ========== 技术栈区域 ========== */
+    .tech-cloud {
+      display: flex; flex-wrap: wrap;
+      gap: 14px; justify-content: center;
+      max-width: 800px; margin: 0 auto;
+    }
+    .tech-tag {
+      padding: 10px 22px;
+      background: rgba(var(--accent-rgb), 0.06);
+      border: 1px solid rgba(var(--accent-rgb), 0.15);
+      border-radius: 100px;
+      color: var(--ink); font-size: 0.95rem;
+      font-family: var(--font-mono);
+      transition: all var(--transition);
+      cursor: default;
+    }
+    .tech-tag:hover {
+      background: rgba(var(--accent-rgb), 0.18);
+      border-color: var(--accent);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.15);
+    }
+    [data-theme="soviet"] .tech-tag {
+      border-radius: 0;
+      border-width: 2px;
+    }
+    [data-theme="soviet"] .tech-tag:hover {
+      box-shadow: 3px 3px 0 var(--accent);
+      transform: translate(-1px, -3px);
+    }
+    [data-theme="cyber"] .tech-tag {
+      border-color: rgba(0,243,255,0.2);
+      background: rgba(0,243,255,0.04);
+    }
+    [data-theme="cyber"] .tech-tag:hover {
+      box-shadow: 0 0 15px rgba(0,243,255,0.2);
+    }
+
+    /* ========== 开源声明 ========== */
+    .opensource-section {
+      text-align: center; padding: 40px 0 60px;
+    }
+    .opensource-section p {
+      font-size: 1.05rem; color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .github-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 36px;
+      background: var(--accent); color: var(--bg);
+      border-radius: 100px; font-size: 1rem; font-weight: 600;
+      transition: all var(--transition);
+    }
+    .github-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      filter: brightness(1.15);
+      box-shadow: 0 12px 36px rgba(var(--accent-rgb), 0.35);
+    }
+    [data-theme="soviet"] .github-btn {
+      border-radius: 0;
+    }
+    [data-theme="soviet"] .github-btn:hover {
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+      transform: translate(-2px, -2px);
+    }
+    [data-theme="cyber"] .github-btn {
+      box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.3);
+    }
+    [data-theme="cyber"] .github-btn:hover {
+      box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.5), 0 0 60px rgba(var(--wave-rgb), 0.2);
+    }
+
+    /* ========== 页脚 ========== */
+    footer {
+      border-top: 1px solid rgba(var(--accent-rgb), 0.1);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    [data-theme="soviet"] footer {
+      border-top: 2px solid var(--accent);
+    }
+    .footer-social {
+      display: flex; justify-content: center; gap: 16px;
+      margin-bottom: 20px;
+    }
+    .footer-social a {
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      border: 1px solid rgba(var(--accent-rgb), 0.2);
+      color: var(--muted); font-size: 1.2rem;
+      transition: all var(--transition);
+    }
+    .footer-social a:hover {
+      background: rgba(var(--accent-rgb), 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-3px) scale(1.1);
+    }
+    [data-theme="soviet"] .footer-social a {
+      border-radius: 0; border-width: 2px;
+    }
+    [data-theme="soviet"] .footer-social a:hover {
+      box-shadow: 2px 2px 0 var(--accent);
+      transform: translate(-1px, -1px);
+    }
+    [data-theme="cyber"] .footer-social a {
+      border-color: rgba(0,243,255,0.2);
+    }
+    [data-theme="cyber"] .footer-social a:hover {
+      box-shadow: 0 0 15px rgba(0,243,255,0.3);
+    }
+    .footer-copy {
+      font-size: 0.85rem; color: var(--muted);
+    }
+
+    /* ========== 动画 ========== */
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== 响应式 ========== */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      .intro-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .creator-card { padding: 32px 24px; }
+    }
+    @media (max-width: 600px) {
+      .navbar { padding: 0 16px; }
+      .hero { padding: 60px 16px 40px; min-height: 35vh; }
+      .section { padding: 40px 0; }
+      .glass-card { padding: 28px 20px; }
+      .social-links { flex-direction: column; align-items: center; }
+      .social-btn { width: 100%; max-width: 280px; justify-content: center; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .tech-cloud { gap: 10px; }
+      .tech-tag { padding: 8px 16px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo"><span>砰！粒子！</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">首页</a></li>
+      <li><a href="physics-world.html">物理世界</a></li>
+      <li><a href="knowledge.html">知识体系</a></li>
+      <li><a href="gallery.html">实验展厅</a></li>
+      <li><a href="simulation.html">仿真实验室</a></li>
+      <li><a href="data-lab.html">数据实验室</a></li>
+      <li><a href="teacher.html">教师中心</a></li>
+      <li><a href="about.html" class="active">关于</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" title="切换主题">&#127912;</button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">&#9776;</button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero区域 -->
+    <section class="hero">
+      <h1>关于我们</h1>
+      <p class="subtitle">让物理学习变得直观、有趣、触手可及</p>
+    </section>
+
+    <!-- 平台介绍 -->
+    <section class="section" id="intro">
+      <div class="container">
+        <div class="intro-grid">
+          <div class="glass-card">
+            <h3 class="card-title">平台故事</h3>
+            <p class="card-body">
+              砰！粒子！诞生于对物理教育的热爱。我们相信，每一个物理概念都值得被亲手触摸、亲眼观察。通过沉浸式Web仿真实验，我们致力于打破物理学习的抽象壁垒，让从初中生到研究生的每一位学习者，都能在自己的屏幕上搭建属于自己的物理实验室。
+            </p>
+          </div>
+          <div class="glass-card">
+            <h3 class="card-title">核心数据</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-number">22</div>
+                <div class="stat-label">个实验</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">6</div>
+                <div class="stat-label">大学科领域</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">4</div>
+                <div class="stat-label">种视觉主题</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">&#8734;</div>
+                <div class="stat-label">开源代码</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 团队成员 -->
+    <section class="section" id="creator">
+      <div class="container">
+        <h2 class="section-title">创作者</h2>
+        <div class="glass-card creator-card">
+          <div class="creator-avatar"></div>
+          <div class="creator-name">庄泽峰</div>
+          <div class="creator-role" style="font-family: var(--font-mono);">Zefeng Zhuang</div>
+          <div class="creator-role">创始人 & 开发者</div>
+          <p class="creator-bio">
+            物理爱好者，前端工程师，致力于用代码还原自然法则。
+          </p>
+          <div class="social-links">
+            <a href="https://www.instagram.com/zf_zhuang/" target="_blank" rel="noopener" class="social-btn">
+              <span class="icon">&#128247;</span> Instagram
+            </a>
+            <a href="https://www.linkedin.com/in/zefeng-zhuang-266a9b204/" target="_blank" rel="noopener" class="social-btn">
+              <span class="icon">&#128188;</span> LinkedIn
+            </a>
+            <a href="https://www.feishu.cn/invitation/page/add_contact/?token=f9bg037f-c9e4-4455-9dc0-724176121788&unique_id=XuGE2TPEcoSXmTb6i3Q9Gg==" target="_blank" rel="noopener" class="social-btn">
+              <span class="icon">&#128640;</span> 飞书
+            </a>
+            <a href="https://github.com/hszzhua2" target="_blank" rel="noopener" class="social-btn">
+              <span class="icon">&#128025;</span> GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 技术栈 -->
+    <section class="section" id="tech">
+      <div class="container">
+        <h2 class="section-title">技术栈</h2>
+        <div class="tech-cloud">
+          <span class="tech-tag">HTML5 Canvas</span>
+          <span class="tech-tag">WebGL</span>
+          <span class="tech-tag">Three.js</span>
+          <span class="tech-tag">D3.js</span>
+          <span class="tech-tag">Web Audio</span>
+          <span class="tech-tag">ES6+</span>
+          <span class="tech-tag">GitHub Pages</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 开源声明 -->
+    <section class="section opensource-section" id="opensource">
+      <div class="container">
+        <p>项目完全开源，代码托管于 GitHub</p>
+        <a href="https://github.com/hszzhua2" target="_blank" rel="noopener" class="github-btn">
+          <span>&#128025;</span> 查看 GitHub 仓库
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer>
+    <div class="footer-social">
+      <a href="https://www.instagram.com/zf_zhuang/" target="_blank" rel="noopener" title="Instagram">&#128247;</a>
+      <a href="https://www.linkedin.com/in/zefeng-zhuang-266a9b204/" target="_blank" rel="noopener" title="LinkedIn">&#128188;</a>
+      <a href="https://www.feishu.cn/invitation/page/add_contact/?token=f9bg037f-c9e4-4455-9dc0-724176121788&unique_id=XuGE2TPEcoSXmTb6i3Q9Gg==" target="_blank" rel="noopener" title="飞书">&#128640;</a>
+      <a href="https://github.com/hszzhua2" target="_blank" rel="noopener" title="GitHub">&#128025;</a>
+    </div>
+    <p class="footer-copy">&#169; 2024 砰！粒子！物理仿真实验室</p>
+  </footer>
+
+  <script>
+    // ========== 主题切换 ==========
+    const THEMES = ['classical', 'academic', 'soviet', 'cyber'];
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+    }
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'classical';
+      const idx = THEMES.indexOf(current);
+      setTheme(THEMES[(idx + 1) % THEMES.length]);
+    });
+    (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved && THEMES.includes(saved)) setTheme(saved);
+    })();
+
+    // ========== 滚动Reveal动画 ==========
+    const revealSections = document.querySelectorAll('.section');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealSections.forEach(sec => revealObserver.observe(sec));
+
+    // 第一个section直接显示
+    setTimeout(() => {
+      const first = document.querySelector('.section');
+      if (first) first.classList.add('revealed');
+    }, 300);
+
+    // ========== 移动端菜单（预留） ==========
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+      alert('移动端菜单功能待实现');
+    });
+  </script>
+
+</body>
+</html>
