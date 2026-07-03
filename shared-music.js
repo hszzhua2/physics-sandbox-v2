@@ -115,9 +115,10 @@
     }
   });
   audio.addEventListener('error', function() {
+    console.error('Music player load error:', audio.error);
     errorSkipCount++;
-    if (errorSkipCount >= PLAYLIST.length) {
-      // All tracks failed to load — stop trying, show paused state
+    if (errorSkipCount >= 4) {
+      // Too many consecutive load errors — stop trying, show paused state
       state.playing = false;
       audio.pause();
       errorSkipCount = 0;
@@ -150,13 +151,20 @@
       audio.pause();
       state.playing = false;
       broadcast({ type: 'state', origin: window.location.href, playing: false, trackIdx: state.trackIdx });
+      saveState();
+      updateUI();
     } else {
-      audio.play().catch(function(){});
-      state.playing = true;
-      broadcast({ type: 'state', origin: window.location.href, playing: true, trackIdx: state.trackIdx });
+      audio.play().then(function() {
+        state.playing = true;
+        broadcast({ type: 'state', origin: window.location.href, playing: true, trackIdx: state.trackIdx });
+        saveState();
+        updateUI();
+      }).catch(function(err) {
+        state.playing = false;
+        saveState();
+        updateUI();
+      });
     }
-    saveState();
-    updateUI();
   }
 
   function nextTrack() {
@@ -164,12 +172,21 @@
     var idx = (state.trackIdx + 1) % PLAYLIST.length;
     loadTrack(idx);
     if (wasPlaying) {
-      audio.play().catch(function(){});
-      state.playing = true;
+      audio.play().then(function() {
+        state.playing = true;
+        broadcast({ type: 'state', origin: window.location.href, playing: true, trackIdx: state.trackIdx });
+        saveState();
+        updateUI();
+      }).catch(function() {
+        state.playing = false;
+        saveState();
+        updateUI();
+      });
+    } else {
+      broadcast({ type: 'state', origin: window.location.href, playing: false, trackIdx: state.trackIdx });
+      saveState();
+      updateUI();
     }
-    broadcast({ type: 'state', origin: window.location.href, playing: state.playing, trackIdx: state.trackIdx });
-    saveState();
-    updateUI();
   }
 
   function prevTrack() {
@@ -181,12 +198,21 @@
     var idx = (state.trackIdx - 1 + PLAYLIST.length) % PLAYLIST.length;
     loadTrack(idx);
     if (wasPlaying) {
-      audio.play().catch(function(){});
-      state.playing = true;
+      audio.play().then(function() {
+        state.playing = true;
+        broadcast({ type: 'state', origin: window.location.href, playing: true, trackIdx: state.trackIdx });
+        saveState();
+        updateUI();
+      }).catch(function() {
+        state.playing = false;
+        saveState();
+        updateUI();
+      });
+    } else {
+      broadcast({ type: 'state', origin: window.location.href, playing: false, trackIdx: state.trackIdx });
+      saveState();
+      updateUI();
     }
-    broadcast({ type: 'state', origin: window.location.href, playing: state.playing, trackIdx: state.trackIdx });
-    saveState();
-    updateUI();
   }
 
   function setVolume(v) {
