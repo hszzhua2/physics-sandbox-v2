@@ -16,6 +16,82 @@
       padding: 20px;
       z-index: 10;
     }
+    #edu-panel {
+      position: absolute;
+      top: 80px;
+      right: 30px;
+      width: 360px;
+      max-height: calc(100vh - 100px);
+      padding: 20px;
+      z-index: 10;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    #edu-panel h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.15rem;
+      transition: var(--theme-transition);
+    }
+    #edu-panel h3 {
+      margin: 16px 0 8px 0;
+      font-size: 0.95rem;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 4px;
+      transition: var(--theme-transition);
+    }
+    #edu-panel .timeline-item {
+      margin: 8px 0;
+      padding-left: 12px;
+      border-left: 2px solid var(--panel-border);
+    }
+    #edu-panel .timeline-year {
+      font-weight: bold;
+      font-family: monospace;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+    #edu-panel .formula {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      margin: 8px 0;
+      font-family: 'Times New Roman', Georgia, serif;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    #edu-panel .concept-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--panel-border);
+      font-size: 0.75rem;
+      margin: 2px 4px 2px 0;
+      background: var(--panel-bg);
+    }
+    #edu-panel p { margin: 6px 0; color: var(--text-muted); }
+    #edu-panel ul { margin: 6px 0; padding-left: 18px; }
+    #edu-panel li { margin: 4px 0; color: var(--text-muted); }
+
+    [data-theme="cartoon"] #edu-panel h2 { color: var(--accent-2); }
+    [data-theme="cartoon"] #edu-panel h3 { color: var(--accent-1); }
+    [data-theme="glass"] #edu-panel h2 { color: #74b9ff; }
+    [data-theme="glass"] #edu-panel h3 { color: #a29bfe; }
+    [data-theme="cyber"] #edu-panel h2 { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,0.3); }
+    [data-theme="cyber"] #edu-panel h3 { color: #bd00ff; text-shadow: 0 0 6px rgba(189,0,255,0.2); }
+    [data-theme="soviet"] #edu-panel h2 { color: #c41e1e; }
+    [data-theme="soviet"] #edu-panel h3 { color: #8b4513; }
+    [data-theme="academic"] #edu-panel .formula {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+    [data-theme="academic"] #edu-panel .concept-tag {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 2px;
+    }
     h1 { margin: 0; font-size: 1.5rem; transition: var(--theme-transition); }
     p.desc { color: var(--text-muted); font-size: 0.85rem; margin: 8px 0 15px 0; }
     .slider-group label { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 15px 0 5px; font-weight: bold; }
@@ -50,6 +126,56 @@
       <input type="range" id="sm" min="1" max="10" value="5">
     </div>
     <button class="theme-btn" onclick="scatter()">重新撒沙</button>
+  </div>
+
+  <div id="edu-panel" class="glass-panel">
+    <h2>声学科学史</h2>
+
+    <div class="timeline-item">
+      <div class="timeline-year">1787 · 克拉尼实验</div>
+      <p>德国物理学家、音乐家<strong>恩斯特·克拉尼</strong>（Ernst Chladni）用弓摩擦金属板边缘使其振动，在板上撒细沙后发现：沙粒会聚集在不振动的区域，形成规则而美丽的几何图案。他将结果著成《声学理论中的新发现》，被尊为"声学之父"。</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1809 · 拿破仑悬赏</div>
+      <p>法国科学院悬赏解释克拉尼图形背后的数学原理。这一难题激励了多位数学家投身薄板振动理论研究。</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1816 · 热尔曼的突破</div>
+      <p>法国女数学家<strong>索菲·热尔曼</strong>（Sophie Germain）克服性别歧视，提交了薄板振动偏微分方程的开创性论文，成功解释了节点线形成的数学机制，奠定了弹性薄板理论的基础。</p>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1909 · 瑞利完善</div>
+      <p>英国物理学家<strong>瑞利勋爵</strong>（Lord Rayleigh）在《声学理论》中系统完善了薄板振动理论，提出了瑞利-里兹法，至今仍是计算板振动模态的重要数值方法。</p>
+    </div>
+
+    <h3>核心公式</h3>
+    <div class="formula">∇⁴w + (ρh/D) · ∂²w/∂t² = 0</div>
+    <p style="font-size:0.75rem;text-align:center;">薄板振动控制方程（Kirchhoff-Love 方程）</p>
+
+    <div class="formula">w<sub>nm</sub>(x,y) = cos(nπx/L) · cos(mπy/L) − cos(mπx/L) · cos(nπy/L)</div>
+    <p style="font-size:0.75rem;text-align:center;">方板自由边界本征模态函数（对边简支）</p>
+
+    <div class="formula">f<sub>nm</sub> ∝ √(n² + m²)</div>
+    <p style="font-size:0.75rem;text-align:center;">共振频率与模态数的关系</p>
+
+    <h3>教学知识点</h3>
+    <span class="concept-tag">驻波</span>
+    <span class="concept-tag">节点线</span>
+    <span class="concept-tag">反节点</span>
+    <span class="concept-tag">本征模态</span>
+    <span class="concept-tag">简正模式</span>
+    <span class="concept-tag">边界条件</span>
+
+    <ul>
+      <li><strong>驻波</strong>：两列相向传播、频率和振幅相同的波叠加形成的空间固定波形，波节处振幅为零，波腹处振幅最大。</li>
+      <li><strong>节点线（Nodal Lines）</strong>：二维板上位移恒为零的曲线。细沙颗粒因惯性被抛离振动剧烈区域（反节点），最终堆积在节点线上，形成可视化的克拉尼图案。</li>
+      <li><strong>模态 (n, m)</strong>：整数对表示板在两个正交方向上的半波数目。调节 N 和 M 可激发不同的简正模式，每种模式对应独特的节点线拓扑结构。</li>
+      <li><strong>简正模式正交性</strong>：不同模态之间相互独立，板的任意振动状态均可表示为各简正模式的线性叠加。</li>
+      <li><strong>边界条件</strong>：本模拟采用"对边简支"边界（Dirichlet 条件），即板边缘位移为零。实际实验中，夹持方式和边界条件会显著影响节点线形态。</li>
+    </ul>
+
+    <h3>现代应用</h3>
+    <p>克拉尼图形的原理已延伸至<strong>声悬浮</strong>、<strong>超声无损检测</strong>、<strong>MEMS 谐振器设计</strong>和<strong>乐器音质分析</strong>等领域。NASA 甚至利用类似原理分析航天器结构的振动模态，确保其在发射过程中的结构完整性。</p>
   </div>
 
   <script src="shared-theme.js"></script>
