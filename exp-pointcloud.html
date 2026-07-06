@@ -590,11 +590,37 @@
             } : { r: 0, g: 0, b: 0 };
         }
 
+        function isLightTheme() {
+            const t = document.documentElement.getAttribute('data-theme');
+            return t === 'academic' || t === 'cartoon' || t === 'soviet';
+        }
+
+        function getParticleMaterial() {
+            const light = isLightTheme();
+            return new THREE.PointsMaterial({
+                size: light ? CONFIG.size * 2.5 : CONFIG.size,
+                vertexColors: true,
+                transparent: true,
+                opacity: light ? 1.0 : 0.8,
+                blending: light ? THREE.NormalBlending : THREE.AdditiveBlending,
+                depthWrite: light ? true : false
+            });
+        }
+
         function applyThemeToScene() {
             const colors = getThemeColors();
             const rgb = hexToRgb(colors.fog);
             scene.background = new THREE.Color(rgb.r, rgb.g, rgb.b);
             scene.fog = new THREE.FogExp2(rgb.r, rgb.g, rgb.b, 0.05);
+
+            if (particles) {
+                const light = isLightTheme();
+                particles.material.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
+                particles.material.opacity = light ? 1.0 : 0.8;
+                particles.material.size = light ? CONFIG.size * 2.5 : CONFIG.size;
+                particles.material.depthWrite = light ? true : false;
+                particles.material.needsUpdate = true;
+            }
         }
 
         const themeObserver = new MutationObserver(() => {
@@ -744,6 +770,10 @@
                 mixedColor.r += (x / 10) * 0.2;
                 mixedColor.b += (y / 10) * 0.2;
 
+                if (isLightTheme()) {
+                    mixedColor.multiplyScalar(0.55);
+                }
+
                 colorArray[i * 3] = mixedColor.r;
                 colorArray[i * 3 + 1] = mixedColor.g;
                 colorArray[i * 3 + 2] = mixedColor.b;
@@ -752,14 +782,7 @@
             geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
             geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
 
-            const material = new THREE.PointsMaterial({
-                size: CONFIG.size,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.8,
-                blending: THREE.AdditiveBlending,
-                depthWrite: false
-            });
+            const material = getParticleMaterial();
 
             particles = new THREE.Points(geometry, material);
             scene.add(particles);
@@ -896,7 +919,7 @@
             uiElements.size.addEventListener('input', (e) => {
                 CONFIG.size = parseFloat(e.target.value);
                 uiElements.valSize.innerText = CONFIG.size;
-                if (particles) particles.material.size = CONFIG.size;
+                if (particles) particles.material.size = isLightTheme() ? CONFIG.size * 2.5 : CONFIG.size;
             });
 
             uiElements.radius.addEventListener('input', (e) => {
