@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>布朗运动 - 三维模拟分析</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        /* ========== Brownian-specific theme variables ========== */
+        :root {
+            --br-canvas-bg: #050505;
+            --br-panel-border: #333;
+            --br-title-color: #3b82f6;
+            --br-accent-red: #ef4444;
+            --br-accent-blue: #3b82f6;
+            --br-text-muted: #9ca3af;
+            --br-input-track: #4b5563;
+            --br-input-thumb: #3b82f6;
+            --br-math-bg: #1f2937;
+            --br-math-color: #60a5fa;
+            --br-scroll-track: #1a1a1a;
+            --br-scroll-thumb: #444;
+            --br-fog-color: #050505;
+            --br-molecule-color: #3b82f6;
+            --br-particle-color: #ef4444;
+            --br-line-color: #fca5a5;
+        }
+
+        [data-theme="academic"] {
+            --br-canvas-bg: #f8f9fa;
+            --br-panel-border: #e0e0e0;
+            --br-title-color: #6b8cae;
+            --br-accent-red: #c45a4a;
+            --br-accent-blue: #4a7ab8;
+            --br-text-muted: #7a7a8a;
+            --br-input-track: #e0e0e0;
+            --br-input-thumb: #6b8cae;
+            --br-math-bg: #f0f0f5;
+            --br-math-color: #4a5a7a;
+            --br-scroll-track: transparent;
+            --br-scroll-thumb: #ccc;
+            --br-fog-color: #f8f9fa;
+            --br-molecule-color: #4a7ab8;
+            --br-particle-color: #c45a4a;
+            --br-line-color: #d4a0a0;
+        }
+
+        [data-theme="glass"] {
+            --br-canvas-bg: #0f1117;
+            --br-panel-border: rgba(255,255,255,0.1);
+            --br-title-color: #74b9ff;
+            --br-accent-red: #fd79a8;
+            --br-accent-blue: #74b9ff;
+            --br-text-muted: #8b92a8;
+            --br-input-track: rgba(255,255,255,0.1);
+            --br-input-thumb: #74b9ff;
+            --br-math-bg: rgba(255,255,255,0.05);
+            --br-math-color: #74b9ff;
+            --br-scroll-track: transparent;
+            --br-scroll-thumb: rgba(255,255,255,0.2);
+            --br-fog-color: #0f1117;
+            --br-molecule-color: #74b9ff;
+            --br-particle-color: #fd79a8;
+            --br-line-color: #fab1a0;
+        }
+
+        [data-theme="cyber"] {
+            --br-canvas-bg: #0a0014;
+            --br-panel-border: rgba(189,0,255,0.3);
+            --br-title-color: #00f3ff;
+            --br-accent-red: #ff00ea;
+            --br-accent-blue: #00f3ff;
+            --br-text-muted: #a080c0;
+            --br-input-track: rgba(189,0,255,0.2);
+            --br-input-thumb: #bd00ff;
+            --br-math-bg: rgba(20,0,40,0.6);
+            --br-math-color: #00f3ff;
+            --br-scroll-track: transparent;
+            --br-scroll-thumb: rgba(189,0,255,0.3);
+            --br-fog-color: #0a0014;
+            --br-molecule-color: #00f3ff;
+            --br-particle-color: #ff00ea;
+            --br-line-color: #ff80ea;
+        }
+
+        [data-theme="cartoon"] {
+            --br-canvas-bg: #fef6e4;
+            --br-panel-border: rgba(255,180,100,0.4);
+            --br-title-color: #ff6b6b;
+            --br-accent-red: #ff6b6b;
+            --br-accent-blue: #4ecdc4;
+            --br-text-muted: #636e72;
+            --br-input-track: rgba(0,0,0,0.1);
+            --br-input-thumb: #ff6b6b;
+            --br-math-bg: rgba(255,255,255,0.7);
+            --br-math-color: #2d3436;
+            --br-scroll-track: transparent;
+            --br-scroll-thumb: rgba(255,180,100,0.4);
+            --br-fog-color: #fef6e4;
+            --br-molecule-color: #4ecdc4;
+            --br-particle-color: #ff6b6b;
+            --br-line-color: #ffb3b3;
+        }
+
+        [data-theme="soviet"] {
+            --br-canvas-bg: #f0ebe4;
+            --br-panel-border: #c41e1e;
+            --br-title-color: #c41e1e;
+            --br-accent-red: #c41e1e;
+            --br-accent-blue: #556b2f;
+            --br-text-muted: #6a5a4a;
+            --br-input-track: #d4c4a8;
+            --br-input-thumb: #c41e1e;
+            --br-math-bg: #fffaf2;
+            --br-math-color: #1a1a1a;
+            --br-scroll-track: transparent;
+            --br-scroll-thumb: #c4a080;
+            --br-fog-color: #f0ebe4;
+            --br-molecule-color: #556b2f;
+            --br-particle-color: #c41e1e;
+            --br-line-color: #d4a0a0;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--br-canvas-bg);
+            overflow: hidden;
+            font-family: var(--font-main);
+            transition: background-color 0.6s ease;
+        }
+
+        #canvas-container {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0;
+        }
+
+        /* ========== Panel Base ========== */
+        .br-panel {
+            position: absolute; top: 60px; bottom: 20px;
+            background: var(--panel-bg);
+            border: var(--border-width) solid var(--panel-border);
+            color: var(--text-color);
+            padding: 18px;
+            z-index: 10;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            transition: all 0.4s ease;
+            border-radius: var(--radius);
+        }
+
+        [data-theme="academic"] .br-panel {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        [data-theme="soviet"] .br-panel {
+            background: #fffaf2;
+            border: 2px solid #c41e1e;
+            border-radius: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            backdrop-filter: none;
+        }
+        [data-theme="glass"] .br-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        [data-theme="cyber"] .br-panel {
+            background: rgba(20,0,40,0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(189,0,255,0.4);
+        }
+
+        .left-panel { left: 15px; width: 300px; }
+        .right-panel { right: 15px; width: 380px; }
+
+        .br-panel h2 {
+            margin: 0 0 12px 0;
+            font-size: 1.1rem;
+            color: var(--br-title-color);
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 8px;
+            transition: var(--theme-transition);
+        }
+        .br-panel h3 {
+            margin: 16px 0 8px 0;
+            font-size: 0.95rem;
+            color: var(--text-color);
+            transition: var(--theme-transition);
+        }
+        .br-panel p { margin: 6px 0; color: var(--text-muted); font-size: 0.8rem; }
+        .br-panel ul { margin: 6px 0; padding-left: 18px; color: var(--text-muted); font-size: 0.8rem; }
+        .br-panel li { margin: 4px 0; }
+        .br-panel strong { color: var(--text-color); }
+
+        /* Control group */
+        .control-group { margin-bottom: 16px; }
+        .control-label {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 4px;
+        }
+        .control-label label { font-size: 0.82rem; font-weight: 600; color: var(--text-color); }
+        .control-label span { font-size: 0.8rem; color: var(--text-muted); font-family: monospace; }
+        .control-desc {
+            font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4;
+        }
+
+        /* Range input */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
+            background: var(--br-input-thumb); cursor: pointer; margin-top: -5px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer;
+            background: var(--br-input-track); border-radius: 2px;
+        }
+
+        [data-theme="academic"] input[type=range]::-webkit-slider-thumb {
+            border-radius: 0; width: 12px; height: 12px; background: #1a1a2e;
+        }
+        [data-theme="soviet"] input[type=range]::-webkit-slider-thumb {
+            border-radius: 0; width: 14px; height: 14px; background: #c41e1e;
+        }
+
+        /* Math block */
+        .math-block {
+            background: var(--br-math-bg);
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-family: 'Times New Roman', Georgia, serif;
+            font-size: 0.95rem;
+            margin: 8px 0;
+            color: var(--br-math-color);
+            text-align: center;
+            border: 1px solid var(--panel-border);
+        }
+
+        [data-theme="academic"] .math-block { border-radius: 4px; }
+        [data-theme="soviet"] .math-block { border-radius: 0; }
+
+        /* Reset button */
+        .reset-btn {
+            width: 100%; padding: 8px;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--br-accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .reset-btn:hover { background: rgba(239, 68, 68, 0.3); }
+
+        [data-theme="soviet"] .reset-btn {
+            border-radius: 0; border: 2px solid #c41e1e;
+            background: #c41e1e; color: #ffffff; font-weight: 700;
+        }
+        [data-theme="soviet"] .reset-btn:hover { background: #a01818; }
+
+        /* Stats grid */
+        .stat-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            margin-top: 8px; padding-top: 12px;
+            border-top: 1px solid var(--panel-border);
+        }
+        .stat-item { text-align: center; }
+        .stat-item .label { font-size: 0.75rem; color: var(--text-muted); }
+        .stat-item .value {
+            font-size: 1.1rem; font-weight: bold; font-family: monospace;
+            color: var(--br-title-color);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--br-scroll-track); }
+        ::-webkit-scrollbar-thumb { background: var(--br-scroll-thumb); border-radius: 3px; }
+
+        /* Back button override for this page */
+        .back-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            padding: 10px 20px; border-radius: 50px; font-weight: bold;
+            cursor: pointer; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 6px; transition: all 0.3s ease;
+            font-family: var(--font-main); font-size: 0.9rem;
+        }
+        [data-theme="cartoon"] .back-btn {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white; border: none; box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+        }
+        [data-theme="cartoon"] .back-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,107,0.4); }
+        [data-theme="glass"] .back-btn {
+            background: rgba(255,255,255,0.1); color: var(--text-color);
+            border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+        }
+        [data-theme="glass"] .back-btn:hover { background: rgba(255,255,255,0.2); }
+        [data-theme="cyber"] .back-btn {
+            background: rgba(189,0,255,0.15); color: #bd00ff;
+            border: 1px solid rgba(189,0,255,0.5); text-shadow: 0 0 8px rgba(189,0,255,0.3);
+        }
+        [data-theme="cyber"] .back-btn:hover { background: rgba(189,0,255,0.3); box-shadow: 0 0 20px rgba(189,0,255,0.2); }
+        [data-theme="academic"] .back-btn {
+            background: #ffffff; color: #1a1a2e; border: 1px solid #c0c0c0;
+            border-radius: 4px; font-weight: 500;
+        }
+        [data-theme="academic"] .back-btn:hover { background: #f0f0f0; border-color: #1a1a2e; }
+        [data-theme="soviet"] .back-btn {
+            background: #c41e1e; color: #ffffff; border: 2px solid #8b0000;
+            border-radius: 2px; font-weight: 700; letter-spacing: 1px;
+        }
+        [data-theme="soviet"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+    </style>
+</head>
+<body>
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- 左侧参数控制面板 -->
+    <div class="br-panel left-panel">
+        <h2>系统参数控制</h2>
+
+        <div class="control-group">
+            <div class="control-label">
+                <label>系统温度 (T)</label>
+                <span id="val-temp">300 K</span>
+            </div>
+            <input type="range" id="param-temp" min="10" max="1000" value="300" step="10">
+            <p class="control-desc">控制热涨落强度。T越高，布朗粒子受到的随机力方差越大。</p>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <label>布朗粒子质量 (M)</label>
+                <span id="val-mass">100</span>
+            </div>
+            <input type="range" id="param-mass" min="10" max="500" value="100" step="10">
+            <p class="control-desc">控制惯性。M越大，速度改变需要更长的时间（弛豫时间增加）。</p>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <label>流体阻尼系数 (&gamma;)</label>
+                <span id="val-gamma">5.0</span>
+            </div>
+            <input type="range" id="param-gamma" min="0.5" max="20" value="5.0" step="0.5">
+            <p class="control-desc">宏观粘性阻力。影响粒子的扩散系数，满足爱因斯坦关系式。</p>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <label>背景分子数量 (N)</label>
+                <span id="val-count">2000</span>
+            </div>
+            <input type="range" id="param-count" min="0" max="10000" value="2000" step="100">
+            <p class="control-desc">仅用于视觉渲染。不参与物理引擎碰撞计算以维持帧率。</p>
+        </div>
+
+        <div class="control-group">
+            <button class="reset-btn" id="btn-reset">重置粒子位置与轨迹</button>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="label">均方位移</div>
+                <div class="value" id="data-msd">0.00</div>
+            </div>
+            <div class="stat-item">
+                <div class="label">瞬时速度</div>
+                <div class="value" id="data-vel">0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧知识点面板 -->
+    <div class="br-panel right-panel">
+        <h2>科学原理与历史</h2>
+
+        <section>
+            <h3>历史沿革</h3>
+            <ul>
+                <li><strong>1827年 - 罗伯特·布朗：</strong>植物学家，首次观察到悬浮在水中的花粉微粒进行无规则运动。当时机制未知，排除生命力假说。</li>
+                <li><strong>1905年 - 阿尔伯特·爱因斯坦：</strong>发表关于布朗运动的论文。通过统计力学推导出微粒的均方位移与时间成正比，为原子/分子的离散本质提供了理论依据。</li>
+                <li><strong>1908年 - 让·佩兰：</strong>通过实验证实了爱因斯坦的理论，并精确测定了阿伏伽德罗常数，确立了原子论的客观有效性。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h3>物理模型 (Langevin方程)</h3>
+            <p>布朗粒子的运动可由引入随机力项的牛顿第二定律描述：</p>
+            <div class="math-block">m(dv/dt) = -&gamma;v + R(t)</div>
+            <ul>
+                <li><strong>m:</strong> 粒子质量</li>
+                <li><strong>-&gamma;v:</strong> 斯托克斯流体阻力</li>
+                <li><strong>R(t):</strong> 表示周围分子碰撞产生的随机波动力，假定为高斯白噪声。</li>
+            </ul>
+        </section>
+
+        <section>
+            <h3>爱因斯坦关系式</h3>
+            <p>将微观随机性与宏观扩散建立联系的定理。扩散系数 D 满足：</p>
+            <div class="math-block">D = (k<sub>B</sub> &middot; T) / &gamma;</div>
+            <p>其中均方位移 &lang;x&sup2;&rang; = 6Dt（在三维空间中）。</p>
+        </section>
+
+        <section style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--panel-border);">
+            <h3 style="color: var(--br-accent-red);">模型局限性与前提声明</h3>
+            <p style="font-size: 0.75rem; line-height: 1.6;">
+                1. <strong>解耦计算：</strong>由于算力限制（O(N&sup2;)复杂度），背景小分子的运动与中心大粒子的动力学在程序中是解耦的。随机力由伪随机数生成器产生，而非实际物理碰撞。<br><br>
+                2. <strong>数值积分截断误差：</strong>本系统采用一阶Euler-Maruyama方法求解随机微分方程。在参数极端（如高T、低M）或时间步长较大时，轨迹精度会下降。<br><br>
+                3. <strong>理想化前提：</strong>假定流体为牛顿流体且不可压缩，随机力严格符合高斯分布且无时间相关性（马尔可夫过程），忽略流体力学记忆效应（Basset力）。
+            </p>
+        </section>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-btn" id="back-btn">&larr; 返回空间站</a>
+
+    <script src="shared-theme.js"></script>
+    <script>
+        // Initialize theme
+        const theme = PSUTheme.get();
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // --- Theme color helpers for Three.js ---
+        function getThemeColors() {
+            const style = getComputedStyle(document.body);
+            return {
+                canvasBg: style.getPropertyValue('--br-canvas-bg').trim() || '#050505',
+                fogColor: style.getPropertyValue('--br-fog-color').trim() || '#050505',
+                moleculeColor: style.getPropertyValue('--br-molecule-color').trim() || '#3b82f6',
+                particleColor: style.getPropertyValue('--br-particle-color').trim() || '#ef4444',
+                lineColor: style.getPropertyValue('--br-line-color').trim() || '#fca5a5'
+            };
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16) / 255,
+                g: parseInt(result[2], 16) / 255,
+                b: parseInt(result[3], 16) / 255
+            } : { r: 0, g: 0, b: 0 };
+        }
+
+        function applyThemeToScene() {
+            const colors = getThemeColors();
+            const rgb = hexToRgb(colors.canvasBg);
+            scene.background = new THREE.Color(rgb.r, rgb.g, rgb.b);
+            scene.fog = new THREE.FogExp2(rgb.r, rgb.g, rgb.b, 0.015);
+
+            const molRgb = hexToRgb(colors.moleculeColor);
+            molMat.color = new THREE.Color(molRgb.r, molRgb.g, molRgb.b);
+
+            const partRgb = hexToRgb(colors.particleColor);
+            bigMat.color = new THREE.Color(partRgb.r, partRgb.g, partRgb.b);
+
+            const lineRgb = hexToRgb(colors.lineColor);
+            lineMat.color = new THREE.Color(lineRgb.r, lineRgb.g, lineRgb.b);
+        }
+
+        // Listen for theme changes
+        const themeObserver = new MutationObserver(() => {
+            applyThemeToScene();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // --- UI Elements ---
+        const uiTemp = document.getElementById('param-temp');
+        const uiMass = document.getElementById('param-mass');
+        const uiGamma = document.getElementById('param-gamma');
+        const uiCount = document.getElementById('param-count');
+
+        const valTemp = document.getElementById('val-temp');
+        const valMass = document.getElementById('val-mass');
+        const valGamma = document.getElementById('val-gamma');
+        const valCount = document.getElementById('val-count');
+
+        const dataMSD = document.getElementById('data-msd');
+        const dataVel = document.getElementById('data-vel');
+        const btnReset = document.getElementById('btn-reset');
+
+        // --- Physics Parameters ---
+        let params = {
+            T: parseFloat(uiTemp.value),
+            m: parseFloat(uiMass.value),
+            gamma: parseFloat(uiGamma.value),
+            dt: 0.016,
+            k_B: 1.0
+        };
+
+        let molCount = parseInt(uiCount.value);
+
+        function updateParams() {
+            params.T = parseFloat(uiTemp.value);
+            params.m = parseFloat(uiMass.value);
+            params.gamma = parseFloat(uiGamma.value);
+
+            valTemp.innerText = params.T + ' K';
+            valMass.innerText = params.m;
+            valGamma.innerText = params.gamma.toFixed(1);
+
+            let newMolCount = parseInt(uiCount.value);
+            if (newMolCount !== molCount) {
+                molCount = newMolCount;
+                valCount.innerText = molCount;
+                updateMoleculeCount();
+            }
+        }
+
+        uiTemp.addEventListener('input', updateParams);
+        uiMass.addEventListener('input', updateParams);
+        uiGamma.addEventListener('input', updateParams);
+        uiCount.addEventListener('input', updateParams);
+
+        // --- Three.js Initialization ---
+        const scene = new THREE.Scene();
+        const colors = getThemeColors();
+        const bgRgb = hexToRgb(colors.canvasBg);
+        scene.background = new THREE.Color(bgRgb.r, bgRgb.g, bgRgb.b);
+        scene.fog = new THREE.FogExp2(bgRgb.r, bgRgb.g, bgRgb.b, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 80);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- OrbitControls Setup ---
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.mouseButtons = {
+            LEFT: THREE.MOUSE.PAN,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.ROTATE
+        };
+
+        // --- Objects Creation ---
+        const bounds = 60;
+
+        // 1. Big Brownian Particle
+        const bigGeo = new THREE.SphereGeometry(2, 32, 32);
+        const bigMat = new THREE.MeshBasicMaterial({ color: hexToRgb(colors.particleColor) });
+        const bigParticle = new THREE.Mesh(bigGeo, bigMat);
+        scene.add(bigParticle);
+
+        let bpState = {
+            pos: new THREE.Vector3(0, 0, 0),
+            vel: new THREE.Vector3(0, 0, 0),
+            startPos: new THREE.Vector3(0, 0, 0)
+        };
+
+        // 2. Trajectory Line
+        const maxPoints = 2000;
+        const lineGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(maxPoints * 3);
+        lineGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const lineMat = new THREE.LineBasicMaterial({
+            color: hexToRgb(colors.lineColor),
+            opacity: 0.6, transparent: true
+        });
+        const line = new THREE.Line(lineGeo, lineMat);
+        scene.add(line);
+
+        let pathIndex = 0;
+        let updateCounter = 0;
+
+        function recordPath(vec) {
+            updateCounter++;
+            if (updateCounter % 3 !== 0) return;
+
+            const posAttribute = lineGeo.attributes.position;
+
+            if (pathIndex < maxPoints) {
+                posAttribute.setXYZ(pathIndex, vec.x, vec.y, vec.z);
+                pathIndex++;
+                lineGeo.setDrawRange(0, pathIndex);
+            } else {
+                const arr = posAttribute.array;
+                for (let i = 0; i < (maxPoints - 1) * 3; i++) {
+                    arr[i] = arr[i + 3];
+                }
+                arr[(maxPoints - 1) * 3] = vec.x;
+                arr[(maxPoints - 1) * 3 + 1] = vec.y;
+                arr[(maxPoints - 1) * 3 + 2] = vec.z;
+            }
+            posAttribute.needsUpdate = true;
+        }
+
+        function resetSimulation() {
+            bpState.pos.set(0, 0, 0);
+            bpState.vel.set(0, 0, 0);
+            bigParticle.position.copy(bpState.pos);
+            pathIndex = 0;
+            updateCounter = 0;
+            lineGeo.setDrawRange(0, 0);
+            dataMSD.innerText = '0.00';
+            dataVel.innerText = '0.00';
+        }
+        btnReset.addEventListener('click', resetSimulation);
+
+        // 3. Background Molecules (Points for performance)
+        const maxMolecules = 10000;
+        const molGeo = new THREE.BufferGeometry();
+        const molPositions = new Float32Array(maxMolecules * 3);
+        const molVelocities = new Float32Array(maxMolecules * 3);
+
+        for (let i = 0; i < maxMolecules; i++) {
+            molPositions[i * 3] = (Math.random() - 0.5) * bounds * 2;
+            molPositions[i * 3 + 1] = (Math.random() - 0.5) * bounds * 2;
+            molPositions[i * 3 + 2] = (Math.random() - 0.5) * bounds * 2;
+
+            let vx = Math.random() - 0.5;
+            let vy = Math.random() - 0.5;
+            let vz = Math.random() - 0.5;
+            let mag = Math.sqrt(vx * vx + vy * vy + vz * vz);
+            molVelocities[i * 3] = vx / mag;
+            molVelocities[i * 3 + 1] = vy / mag;
+            molVelocities[i * 3 + 2] = vz / mag;
+        }
+
+        molGeo.setAttribute('position', new THREE.BufferAttribute(molPositions, 3));
+        const molMat = new THREE.PointsMaterial({
+            color: hexToRgb(colors.moleculeColor),
+            size: 0.6, transparent: true, opacity: 0.8
+        });
+        const molecules = new THREE.Points(molGeo, molMat);
+        scene.add(molecules);
+
+        function updateMoleculeCount() {
+            molGeo.setDrawRange(0, molCount);
+        }
+        updateMoleculeCount();
+
+        // --- Math / Physics Helpers ---
+        function randn_bm() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        // --- Main Simulation Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = params.dt;
+
+            const frictionTerm = params.gamma / params.m;
+            const noiseAmplitude = (Math.sqrt(2 * params.gamma * params.k_B * params.T) / params.m) * 10.0;
+            const sqrtDt = Math.sqrt(dt);
+
+            let dvx = -frictionTerm * bpState.vel.x * dt + noiseAmplitude * randn_bm() * sqrtDt;
+            bpState.vel.x += dvx;
+            bpState.pos.x += bpState.vel.x * dt;
+
+            let dvy = -frictionTerm * bpState.vel.y * dt + noiseAmplitude * randn_bm() * sqrtDt;
+            bpState.vel.y += dvy;
+            bpState.pos.y += bpState.vel.y * dt;
+
+            let dvz = -frictionTerm * bpState.vel.z * dt + noiseAmplitude * randn_bm() * sqrtDt;
+            bpState.vel.z += dvz;
+            bpState.pos.z += bpState.vel.z * dt;
+
+            const bBound = bounds * 0.8;
+            if (bpState.pos.x > bBound) { bpState.pos.x = bBound; bpState.vel.x *= -0.5; }
+            if (bpState.pos.x < -bBound) { bpState.pos.x = -bBound; bpState.vel.x *= -0.5; }
+            if (bpState.pos.y > bBound) { bpState.pos.y = bBound; bpState.vel.y *= -0.5; }
+            if (bpState.pos.y < -bBound) { bpState.pos.y = -bBound; bpState.vel.y *= -0.5; }
+            if (bpState.pos.z > bBound) { bpState.pos.z = bBound; bpState.vel.z *= -0.5; }
+            if (bpState.pos.z < -bBound) { bpState.pos.z = -bBound; bpState.vel.z *= -0.5; }
+
+            bigParticle.position.copy(bpState.pos);
+            recordPath(bpState.pos);
+
+            if (updateCounter % 5 === 0) {
+                const msd = bpState.pos.distanceToSquared(bpState.startPos);
+                const velMag = bpState.vel.length();
+                dataMSD.innerText = msd.toFixed(2);
+                dataVel.innerText = velMag.toFixed(2);
+            }
+
+            const posAttr = molGeo.attributes.position;
+            const molSpeed = Math.sqrt(params.T) * 0.8;
+
+            for (let i = 0; i < molCount; i++) {
+                let px = posAttr.getX(i);
+                let py = posAttr.getY(i);
+                let pz = posAttr.getZ(i);
+
+                let vx = molVelocities[i * 3] * molSpeed;
+                let vy = molVelocities[i * 3 + 1] * molSpeed;
+                let vz = molVelocities[i * 3 + 2] * molSpeed;
+
+                px += vx * dt;
+                py += vy * dt;
+                pz += vz * dt;
+
+                if (px > bounds) { px = bounds; molVelocities[i * 3] *= -1; }
+                if (px < -bounds) { px = -bounds; molVelocities[i * 3] *= -1; }
+                if (py > bounds) { py = bounds; molVelocities[i * 3 + 1] *= -1; }
+                if (py < -bounds) { py = -bounds; molVelocities[i * 3 + 1] *= -1; }
+                if (pz > bounds) { pz = bounds; molVelocities[i * 3 + 2] *= -1; }
+                if (pz < -bounds) { pz = -bounds; molVelocities[i * 3 + 2] *= -1; }
+
+                posAttr.setXYZ(i, px, py, pz);
+            }
+            posAttr.needsUpdate = true;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.onload = animate;
+    </script>
+</body>
+</html>
