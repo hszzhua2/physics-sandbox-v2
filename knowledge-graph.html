@@ -304,6 +304,122 @@
     }
     [data-theme="soviet"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
 
+    /* ---------- Experiment Catalog Panel ---------- */
+    .catalog-panel {
+      position: fixed; top: 70px; right: 20px; bottom: 80px;
+      width: 280px; z-index: 100;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex; flex-direction: column;
+      transition: all 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+    }
+    .catalog-panel.collapsed {
+      transform: translateX(calc(100% + 20px));
+    }
+    .catalog-toggle {
+      position: absolute; left: -16px; top: 20px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      color: var(--text-color);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; transition: all 0.3s;
+      z-index: 10;
+    }
+    .catalog-toggle:hover { background: var(--panel-border); }
+    .catalog-panel.collapsed .catalog-toggle { transform: rotate(180deg); }
+
+    .catalog-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+    .catalog-header h3 {
+      margin: 0; font-size: 0.95rem; color: var(--text-color);
+    }
+    .catalog-count {
+      font-size: 0.75rem; color: var(--text-muted);
+      background: var(--panel-border); padding: 2px 8px;
+      border-radius: 50px;
+    }
+    .catalog-body {
+      overflow-y: auto; flex: 1;
+      padding-right: 4px;
+    }
+    .catalog-section { margin-bottom: 8px; }
+    .catalog-section-title {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px; cursor: pointer;
+      border-radius: var(--radius);
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--text-color);
+      background: transparent;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .catalog-section-title:hover { background: var(--panel-border); }
+    .catalog-section-title .arrow {
+      font-size: 0.7rem; transition: transform 0.2s;
+      color: var(--text-muted);
+    }
+    .catalog-section.collapsed .catalog-section-title .arrow {
+      transform: rotate(-90deg);
+    }
+    .catalog-section-items {
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      max-height: 500px;
+    }
+    .catalog-section.collapsed .catalog-section-items {
+      max-height: 0;
+    }
+    .catalog-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 10px 5px 24px;
+      cursor: pointer;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .catalog-item:hover {
+      background: var(--panel-border);
+      color: var(--text-color);
+    }
+    .catalog-item .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .catalog-item .name { flex: 1; }
+    .catalog-item .ext-link {
+      font-size: 0.7rem; opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .catalog-item:hover .ext-link { opacity: 1; }
+
+    [data-theme="academic"] .catalog-panel { border-radius: 4px; }
+    [data-theme="soviet"] .catalog-panel { border-radius: 2px; border-width: 2px; }
+    [data-theme="glass"] .catalog-panel {
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      backdrop-filter: blur(20px) saturate(1.2);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    [data-theme="cyber"] .catalog-panel {
+      background: rgba(20,0,40,0.6); backdrop-filter: blur(12px);
+      border: 1px solid rgba(189,0,255,0.4);
+    }
+    [data-theme="academic"] .catalog-toggle { border-radius: 2px; }
+    [data-theme="soviet"] .catalog-toggle { border-radius: 0; }
+    [data-theme="academic"] .catalog-section-title { border-radius: 4px; }
+    [data-theme="soviet"] .catalog-section-title { border-radius: 0; }
+    [data-theme="academic"] .catalog-item { border-radius: 4px; }
+    [data-theme="soviet"] .catalog-item { border-radius: 0; }
+
     /* ---------- Theme Switcher ---------- */
     .theme-switcher {
       position: fixed; bottom: 20px; left: 20px; z-index: 1000;
@@ -412,6 +528,16 @@
 
   <!-- Tooltip -->
   <div class="tooltip" id="tooltip"></div>
+
+  <!-- Experiment Catalog Panel -->
+  <div class="catalog-panel" id="catalog-panel">
+    <div class="catalog-toggle" id="catalog-toggle">&#9664;</div>
+    <div class="catalog-header">
+      <h3>&#128214; 实验目录</h3>
+      <span class="catalog-count" id="catalog-count">0 个实验</span>
+    </div>
+    <div class="catalog-body" id="catalog-body"></div>
+  </div>
 
   <!-- Back Button -->
   <a href="index.html" class="back-btn" id="back-btn">← 返回首页</a>
@@ -827,6 +953,88 @@
     }
 
     // ==========================================
+    // Experiment Catalog
+    // ==========================================
+    function buildCatalog() {
+      const categoryMap = {};
+      const categoryNodes = nodes.filter(n => n.group === 6);
+      const experimentNodes = nodes.filter(n => n.group === 7);
+
+      experimentNodes.forEach(exp => {
+        const cat = categoryNodes.find(c => c.id === exp.parent);
+        const catName = cat ? cat.name : '未分类';
+        const catColor = cat ? cat.color : '#999';
+        if (!categoryMap[catName]) {
+          categoryMap[catName] = { color: catColor, items: [] };
+        }
+        categoryMap[catName].items.push(exp);
+      });
+
+      const body = document.getElementById('catalog-body');
+      const countEl = document.getElementById('catalog-count');
+      countEl.textContent = experimentNodes.length + ' 个实验';
+
+      Object.keys(categoryMap).forEach((catName, idx) => {
+        const section = document.createElement('div');
+        section.className = 'catalog-section';
+        if (idx > 2) section.classList.add('collapsed');
+
+        const items = categoryMap[catName].items;
+        const color = categoryMap[catName].color;
+
+        const title = document.createElement('div');
+        title.className = 'catalog-section-title';
+        title.innerHTML = '<span>' + catName + ' (' + items.length + ')</span><span class="arrow">&#9660;</span>';
+        title.addEventListener('click', () => {
+          section.classList.toggle('collapsed');
+        });
+
+        const itemsContainer = document.createElement('div');
+        itemsContainer.className = 'catalog-section-items';
+
+        items.forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'catalog-item';
+          el.innerHTML = '<span class="dot" style="background:' + color + '"></span><span class="name">' + item.name + '</span>' + (item.target ? '<span class="ext-link">&#8599;</span>' : '');
+          el.addEventListener('click', () => {
+            highlightNode(item.id);
+            if (item.target) {
+              const theme = getCurrentTheme();
+              window.open(item.target + '?theme=' + theme, '_blank');
+            }
+          });
+          itemsContainer.appendChild(el);
+        });
+
+        section.appendChild(title);
+        section.appendChild(itemsContainer);
+        body.appendChild(section);
+      });
+    }
+
+    function highlightNode(nodeId) {
+      const targetNode = nodes.find(n => n.id === nodeId);
+      if (!targetNode) return;
+
+      node.selectAll('circle')
+        .transition().duration(300)
+        .attr('stroke-width', d => d.id === nodeId ? getNodeStrokeWidth(d) + 4 : getNodeStrokeWidth(d))
+        .attr('r', d => d.id === nodeId ? getNodeRadius(d) + 8 : getNodeRadius(d));
+
+      setTimeout(() => {
+        node.selectAll('circle')
+          .transition().duration(500)
+          .attr('stroke-width', d => getNodeStrokeWidth(d))
+          .attr('r', d => getNodeRadius(d));
+      }, 1500);
+    }
+
+    // Catalog toggle
+    document.getElementById('catalog-toggle').addEventListener('click', () => {
+      document.getElementById('catalog-panel').classList.toggle('collapsed');
+    });
+
+    // ==========================================
     // Init
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
@@ -834,6 +1042,7 @@
       document.documentElement.setAttribute('data-theme', theme);
       createThemeSwitcher();
       updateGraphTheme();
+      buildCatalog();
     });
 
     // Responsive resize
