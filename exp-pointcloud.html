@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点云探索 - 三维交互教学</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        /* ========== Point Cloud Theme Variables ========== */
+        :root {
+            --pc-bg: #050505;
+            --pc-panel-bg: rgba(15, 23, 42, 0.7);
+            --pc-panel-border: rgba(255,255,255,0.1);
+            --pc-text: #e2e8f0;
+            --pc-text-muted: #94a3b8;
+            --pc-accent: #38bdf8;
+            --pc-accent-2: #818cf8;
+            --pc-btn-bg: #334155;
+            --pc-btn-hover: #475569;
+            --pc-shape-btn-bg: #1e293b;
+            --pc-shape-btn-hover: #334155;
+            --pc-status-bg: rgba(30,41,59,0.8);
+            --pc-status-border: #475569;
+            --pc-tag-bg: rgba(30,41,59,0.6);
+            --pc-tag-border: #334155;
+            --pc-fog: #050505;
+            --pc-dot-yellow: #facc15;
+            --pc-dot-green: #4ade80;
+            --pc-dot-red: #f87171;
+        }
+
+        [data-theme="academic"] {
+            --pc-bg: #f8f9fa;
+            --pc-panel-bg: #ffffff;
+            --pc-panel-border: #e0e0e0;
+            --pc-text: #1a1a2e;
+            --pc-text-muted: #7a7a8a;
+            --pc-accent: #6b8cae;
+            --pc-accent-2: #8a7ca8;
+            --pc-btn-bg: #f0f0f5;
+            --pc-btn-hover: #e8e8f0;
+            --pc-shape-btn-bg: #f8f9fa;
+            --pc-shape-btn-hover: #f0f0f5;
+            --pc-status-bg: #ffffff;
+            --pc-status-border: #e0e0e0;
+            --pc-tag-bg: #f8f9fa;
+            --pc-tag-border: #e0e0e0;
+            --pc-fog: #f8f9fa;
+            --pc-dot-yellow: #c4a000;
+            --pc-dot-green: #4a9e6a;
+            --pc-dot-red: #c45a4a;
+        }
+
+        [data-theme="glass"] {
+            --pc-bg: #0f1117;
+            --pc-panel-bg: rgba(255,255,255,0.06);
+            --pc-panel-border: rgba(255,255,255,0.12);
+            --pc-text: #e0e6ed;
+            --pc-text-muted: #8b92a8;
+            --pc-accent: #74b9ff;
+            --pc-accent-2: #a29bfe;
+            --pc-btn-bg: rgba(255,255,255,0.08);
+            --pc-btn-hover: rgba(255,255,255,0.15);
+            --pc-shape-btn-bg: rgba(255,255,255,0.04);
+            --pc-shape-btn-hover: rgba(255,255,255,0.1);
+            --pc-status-bg: rgba(255,255,255,0.06);
+            --pc-status-border: rgba(255,255,255,0.15);
+            --pc-tag-bg: rgba(255,255,255,0.04);
+            --pc-tag-border: rgba(255,255,255,0.12);
+            --pc-fog: #0f1117;
+            --pc-dot-yellow: #facc15;
+            --pc-dot-green: #55efc4;
+            --pc-dot-red: #ff7675;
+        }
+
+        [data-theme="cyber"] {
+            --pc-bg: #0a0014;
+            --pc-panel-bg: rgba(20,0,40,0.6);
+            --pc-panel-border: rgba(189,0,255,0.4);
+            --pc-text: #f0e6ff;
+            --pc-text-muted: #a080c0;
+            --pc-accent: #bd00ff;
+            --pc-accent-2: #00f3ff;
+            --pc-btn-bg: rgba(189,0,255,0.15);
+            --pc-btn-hover: rgba(189,0,255,0.3);
+            --pc-shape-btn-bg: rgba(189,0,255,0.1);
+            --pc-shape-btn-hover: rgba(189,0,255,0.2);
+            --pc-status-bg: rgba(20,0,40,0.7);
+            --pc-status-border: rgba(189,0,255,0.4);
+            --pc-tag-bg: rgba(189,0,255,0.1);
+            --pc-tag-border: rgba(189,0,255,0.3);
+            --pc-fog: #0a0014;
+            --pc-dot-yellow: #ff9d00;
+            --pc-dot-green: #39ff14;
+            --pc-dot-red: #ff00ea;
+        }
+
+        [data-theme="cartoon"] {
+            --pc-bg: #fef6e4;
+            --pc-panel-bg: rgba(255,255,255,0.9);
+            --pc-panel-border: rgba(255,180,100,0.4);
+            --pc-text: #2d3436;
+            --pc-text-muted: #636e72;
+            --pc-accent: #ff6b6b;
+            --pc-accent-2: #4ecdc4;
+            --pc-btn-bg: rgba(255,255,255,0.7);
+            --pc-btn-hover: rgba(255,255,255,0.9);
+            --pc-shape-btn-bg: #fef6e4;
+            --pc-shape-btn-hover: #f0e8d4;
+            --pc-status-bg: rgba(255,255,255,0.9);
+            --pc-status-border: rgba(255,180,100,0.3);
+            --pc-tag-bg: rgba(255,255,255,0.6);
+            --pc-tag-border: rgba(255,180,100,0.3);
+            --pc-fog: #fef6e4;
+            --pc-dot-yellow: #f0c060;
+            --pc-dot-green: #4ecdc4;
+            --pc-dot-red: #ff6b6b;
+        }
+
+        [data-theme="soviet"] {
+            --pc-bg: #f0ebe4;
+            --pc-panel-bg: #fffaf2;
+            --pc-panel-border: #c41e1e;
+            --pc-text: #1a1a1a;
+            --pc-text-muted: #6a5a4a;
+            --pc-accent: #c41e1e;
+            --pc-accent-2: #8b4513;
+            --pc-btn-bg: #f0ebe4;
+            --pc-btn-hover: #e8e0d8;
+            --pc-shape-btn-bg: #fffaf2;
+            --pc-shape-btn-hover: #f0ebe4;
+            --pc-status-bg: #fffaf2;
+            --pc-status-border: #c41e1e;
+            --pc-tag-bg: #fffaf2;
+            --pc-tag-border: #c41e1e;
+            --pc-fog: #f0ebe4;
+            --pc-dot-yellow: #b8860b;
+            --pc-dot-green: #556b2f;
+            --pc-dot-red: #c41e1e;
+        }
+
+        /* ========== Layout ========== */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--pc-bg);
+            overflow: hidden;
+            font-family: var(--font-main);
+            transition: background-color 0.6s ease;
+        }
+        #canvas-container {
+            position: absolute; top: 0; left: 0;
+            width: 100vw; height: 100vh; z-index: 1;
+        }
+        canvas { user-select: none; -webkit-user-select: none; }
+
+        /* ========== Status Bar ========== */
+        #status-bar {
+            position: absolute; top: 0; left: 0; width: 100%;
+            padding: 14px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            pointer-events: none; z-index: 20;
+            box-sizing: border-box;
+        }
+        #status-bar h1 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--pc-accent);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+            transition: color 0.4s ease;
+        }
+        #status-indicator {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 50px;
+            background: var(--pc-status-bg);
+            border: 1px solid var(--pc-status-border);
+            color: var(--pc-text-muted);
+            pointer-events: auto;
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.4s ease;
+        }
+        #status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--pc-dot-yellow);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ========== Panels ========== */
+        .pc-panel {
+            position: absolute; top: 60px; bottom: 20px;
+            background: var(--pc-panel-bg);
+            border: var(--border-width) solid var(--pc-panel-border);
+            color: var(--pc-text);
+            padding: 18px;
+            z-index: 10;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            border-radius: var(--radius);
+            transition: all 0.4s ease;
+            display: flex; flex-direction: column;
+        }
+
+        [data-theme="academic"] .pc-panel {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        [data-theme="soviet"] .pc-panel {
+            background: #fffaf2;
+            border: 2px solid #c41e1e;
+            border-radius: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            backdrop-filter: none;
+        }
+        [data-theme="glass"] .pc-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        [data-theme="cyber"] .pc-panel {
+            background: rgba(20,0,40,0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(189,0,255,0.4);
+        }
+
+        .left-panel { left: 15px; width: 280px; }
+        .right-panel { right: 15px; width: 340px; }
+
+        .pc-panel h2 {
+            margin: 0 0 14px 0;
+            font-size: 1.05rem;
+            color: var(--pc-accent);
+            border-bottom: 1px solid var(--pc-panel-border);
+            padding-bottom: 8px;
+            transition: color 0.4s ease;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .pc-panel h3 {
+            margin: 14px 0 6px 0;
+            font-size: 0.92rem;
+            color: var(--pc-text);
+            border-left: 3px solid var(--pc-accent);
+            padding-left: 8px;
+            transition: all 0.4s ease;
+        }
+        .pc-panel p {
+            margin: 6px 0; color: var(--pc-text-muted);
+            font-size: 0.8rem; line-height: 1.6;
+        }
+        .pc-panel ul {
+            margin: 6px 0; padding-left: 18px;
+            color: var(--pc-text-muted); font-size: 0.8rem;
+        }
+        .pc-panel li { margin: 4px 0; }
+        .pc-panel strong { color: var(--pc-text); }
+
+        /* ========== Controls ========== */
+        .control-group { margin-bottom: 14px; }
+        .control-label {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 4px;
+        }
+        .control-label label { font-size: 0.82rem; color: var(--pc-text); }
+        .control-label span { font-size: 0.8rem; color: var(--pc-accent); font-family: monospace; }
+        .control-desc {
+            font-size: 0.72rem; color: var(--pc-text-muted);
+            margin-top: 3px; line-height: 1.4;
+        }
+        .hint-box {
+            background: var(--pc-shape-btn-bg);
+            border: 1px solid var(--pc-panel-border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            font-size: 0.78rem;
+            color: var(--pc-text-muted);
+            margin-bottom: 14px;
+        }
+        .hint-box b { color: var(--pc-accent); }
+
+        /* Range input */
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
+            background: var(--pc-accent); cursor: pointer; margin-top: -5px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer;
+            background: var(--pc-panel-border); border-radius: 2px;
+        }
+        [data-theme="academic"] input[type=range]::-webkit-slider-thumb {
+            border-radius: 0; width: 12px; height: 12px; background: #1a1a2e;
+        }
+        [data-theme="soviet"] input[type=range]::-webkit-slider-thumb {
+            border-radius: 0; width: 14px; height: 14px; background: #c41e1e;
+        }
+
+        /* Buttons */
+        .pc-btn {
+            width: 100%; padding: 8px;
+            background: var(--pc-btn-bg);
+            color: var(--pc-text);
+            border: 1px solid var(--pc-panel-border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .pc-btn:hover { background: var(--pc-btn-hover); }
+
+        [data-theme="soviet"] .pc-btn {
+            border-radius: 0; border: 2px solid #c41e1e;
+            background: #c41e1e; color: #ffffff; font-weight: 700;
+        }
+        [data-theme="soviet"] .pc-btn:hover { background: #a01818; }
+
+        .shape-btn {
+            background: var(--pc-shape-btn-bg);
+            color: var(--pc-text);
+            border: 1px solid var(--pc-panel-border);
+            border-radius: var(--radius);
+            padding: 6px 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.78rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .shape-btn:hover { background: var(--pc-shape-btn-hover); border-color: var(--pc-accent); }
+
+        [data-theme="academic"] .shape-btn { border-radius: 4px; }
+        [data-theme="soviet"] .shape-btn { border-radius: 0; }
+
+        .shape-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+        }
+
+        /* Tag grid */
+        .tag-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+            margin-top: 8px;
+        }
+        .tag-item {
+            background: var(--pc-tag-bg);
+            border: 1px solid var(--pc-tag-border);
+            border-radius: var(--radius);
+            padding: 6px 4px;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--pc-text);
+            transition: all 0.2s;
+        }
+        .tag-item:hover { border-color: var(--pc-accent); }
+
+        [data-theme="academic"] .tag-item { border-radius: 4px; }
+        [data-theme="soviet"] .tag-item { border-radius: 0; }
+
+        /* Divider */
+        .divider {
+            border: none; border-top: 1px solid var(--pc-panel-border);
+            margin: 12px 0;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--pc-panel-border); border-radius: 3px; }
+
+        /* Back button */
+        .back-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            padding: 10px 20px; border-radius: 50px; font-weight: bold;
+            cursor: pointer; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 6px; transition: all 0.3s ease;
+            font-family: var(--font-main); font-size: 0.9rem;
+        }
+        [data-theme="cartoon"] .back-btn {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white; border: none; box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+        }
+        [data-theme="cartoon"] .back-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,107,0.4); }
+        [data-theme="glass"] .back-btn {
+            background: rgba(255,255,255,0.1); color: var(--text-color);
+            border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+        }
+        [data-theme="glass"] .back-btn:hover { background: rgba(255,255,255,0.2); }
+        [data-theme="cyber"] .back-btn {
+            background: rgba(189,0,255,0.15); color: #bd00ff;
+            border: 1px solid rgba(189,0,255,0.5); text-shadow: 0 0 8px rgba(189,0,255,0.3);
+        }
+        [data-theme="cyber"] .back-btn:hover { background: rgba(189,0,255,0.3); box-shadow: 0 0 20px rgba(189,0,255,0.2); }
+        [data-theme="academic"] .back-btn {
+            background: #ffffff; color: #1a1a2e; border: 1px solid #c0c0c0;
+            border-radius: 4px; font-weight: 500;
+        }
+        [data-theme="academic"] .back-btn:hover { background: #f0f0f0; border-color: #1a1a2e; }
+        [data-theme="soviet"] .back-btn {
+            background: #c41e1e; color: #ffffff; border: 2px solid #8b0000;
+            border-radius: 2px; font-weight: 700; letter-spacing: 1px;
+        }
+        [data-theme="soviet"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- 顶部状态栏 -->
+    <div id="status-bar">
+        <h1>POINT CLOUD // 点云交互教学系统</h1>
+        <div id="status-indicator">
+            <span id="status-dot"></span>
+            <span id="status-text">系统就绪，等待交互</span>
+        </div>
+    </div>
+
+    <!-- 左侧参数面板 -->
+    <div class="pc-panel left-panel">
+        <h2>
+            <span style="font-size:1.1rem;">&#9881;</span>
+            控制台 (Parameters)
+        </h2>
+
+        <div class="hint-box">
+            <b>&#128433; 鼠标操作：</b><br>
+            左键旋转，滚轮缩放。<br>
+            <b style="color:var(--pc-accent)">长按右键移动</b>可与点云产生引力/斥力交互。
+        </div>
+
+        <!-- 摄像头控制 -->
+        <div class="control-group">
+            <label style="font-size:0.82rem; color:var(--pc-text-muted); font-weight:600;">手势控制 (Hand Tracking)</label>
+            <button class="pc-btn" id="toggle-webcam-btn" style="margin-top:6px;">
+                &#127909; 开启摄像头获取手势
+            </button>
+            <video id="webcam-video" style="display:none;" autoplay playsinline></video>
+            <p class="control-desc" id="webcam-status"></p>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 参数滑块 -->
+        <div class="control-group">
+            <div class="control-label">
+                <label>粒子数量 (Count)</label>
+                <span id="val-count">20000</span>
+            </div>
+            <input type="range" id="param-count" min="5000" max="80000" step="5000" value="20000">
+            <p class="control-desc">* 调整后需点击重置形状</p>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <label>点大小 (Point Size)</label>
+                <span id="val-size">0.03</span>
+            </div>
+            <input type="range" id="param-size" min="0.01" max="0.15" step="0.01" value="0.03">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <label>交互半径 (Radius)</label>
+                <span id="val-radius">1.5</span>
+            </div>
+            <input type="range" id="param-radius" min="0.5" max="4.0" step="0.1" value="1.5">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <label>扰动力度 (Force)</label>
+                <span id="val-force">0.8</span>
+            </div>
+            <input type="range" id="param-force" min="0.1" max="2.0" step="0.1" value="0.8">
+        </div>
+
+        <hr class="divider">
+
+        <!-- 形状切换 -->
+        <div class="control-group">
+            <label style="font-size:0.82rem; color:var(--pc-text-muted); font-weight:600;">重置形状 (Shape)</label>
+            <div class="shape-grid" style="margin-top:6px;">
+                <button class="shape-btn" data-shape="sphere">球体扫描</button>
+                <button class="shape-btn" data-shape="torus">拓扑圆环</button>
+                <button class="shape-btn" data-shape="cube">矩阵立方</button>
+                <button class="shape-btn" data-shape="random">无序噪点</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧教学面板 -->
+    <div class="pc-panel right-panel">
+        <div style="border-bottom:1px solid var(--pc-panel-border); padding-bottom:10px; margin-bottom:10px;">
+            <h2>
+                <span style="font-size:1.1rem;">&#128214;</span>
+                知识百科
+            </h2>
+        </div>
+
+        <div style="overflow-y:auto;">
+            <section>
+                <h3>什么是点云 (Point Cloud)？</h3>
+                <p>
+                    点云是空间中数据点的集合。这些点通常代表3D对象的表面形状。每个点不仅包含三维坐标 (X, Y, Z)，还可能包含颜色(RGB)、反射强度等附加信息。
+                </p>
+                <p>
+                    你可以把它想象成数字世界中的"沙子"，无数颗微小的沙粒在三维空间中排列，最终构成了我们看到的宏观立体轮廓。
+                </p>
+            </section>
+
+            <section>
+                <h3>历史与发展</h3>
+                <p>
+                    点云的概念最早可以追溯到早期的计算机图形学和三维几何建模。20世纪60年代，随着<strong>激光雷达 (LiDAR)</strong> 技术的诞生，人类首次拥有了快速获取大范围三维空间数据的能力。
+                </p>
+                <p>
+                    到了近现代，随着计算机算力的飞跃，处理百万级甚至十亿级的点云数据成为可能，点云技术迎来了爆炸式的发展。
+                </p>
+            </section>
+
+            <section>
+                <h3>数据是如何获取的？</h3>
+                <ul>
+                    <li><strong>激光扫描 (LiDAR)：</strong>发射激光并计算反射时间，精度极高，常用于自动驾驶和地形测绘。</li>
+                    <li><strong>摄影测量：</strong>通过不同角度拍摄的多张2D照片，利用算法反推重构出3D点云。</li>
+                    <li><strong>深度相机 (RGB-D)：</strong>如微软 Kinect 或苹果设备的 FaceID，通过红外结构光获取深度信息。</li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>主要应用领域</h3>
+                <div class="tag-grid">
+                    <div class="tag-item">&#128663; 自动驾驶</div>
+                    <div class="tag-item">&#127963; 文物数字化</div>
+                    <div class="tag-item">&#127981; 逆向工程</div>
+                    <div class="tag-item">&#127918; 电影与游戏</div>
+                </div>
+            </section>
+
+            <p style="font-size:0.72rem; text-align:center; margin-top:14px;">
+                尝试使用左侧控制面板，或长按鼠标右键、开启摄像头手势，亲手"触摸"这些数据点吧。
+            </p>
+        </div>
+    </div>
+
+    <!-- 返回按钮 -->
+    <a href="index.html" class="back-btn" id="back-btn">&larr; 返回空间站</a>
+
+    <script src="shared-theme.js"></script>
+    <script>
+        // Initialize theme
+        const theme = PSUTheme.get();
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // --- Theme color helpers for Three.js ---
+        function getThemeColors() {
+            const style = getComputedStyle(document.body);
+            return {
+                fog: style.getPropertyValue('--pc-fog').trim() || '#050505',
+                accent: style.getPropertyValue('--pc-accent').trim() || '#38bdf8',
+                accent2: style.getPropertyValue('--pc-accent-2').trim() || '#818cf8'
+            };
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16) / 255,
+                g: parseInt(result[2], 16) / 255,
+                b: parseInt(result[3], 16) / 255
+            } : { r: 0, g: 0, b: 0 };
+        }
+
+        function applyThemeToScene() {
+            const colors = getThemeColors();
+            const rgb = hexToRgb(colors.fog);
+            scene.background = new THREE.Color(rgb.r, rgb.g, rgb.b);
+            scene.fog = new THREE.FogExp2(rgb.r, rgb.g, rgb.b, 0.05);
+        }
+
+        const themeObserver = new MutationObserver(() => {
+            applyThemeToScene();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // --- Core Config ---
+        const CONFIG = {
+            count: 20000,
+            size: 0.03,
+            interactionRadius: 1.5,
+            force: 0.8,
+            returnSpeed: 0.05,
+            friction: 0.92
+        };
+
+        let scene, camera, renderer, controls;
+        let particles, geometry, posArray, originalPosArray, velArray, colorArray;
+        let isInteracting = false;
+        let interactionPoint = new THREE.Vector3(9999, 9999, 9999);
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        let interactionPlane;
+
+        const uiElements = {
+            count: document.getElementById('param-count'),
+            size: document.getElementById('param-size'),
+            radius: document.getElementById('param-radius'),
+            force: document.getElementById('param-force'),
+            valCount: document.getElementById('val-count'),
+            valSize: document.getElementById('val-size'),
+            valRadius: document.getElementById('val-radius'),
+            valForce: document.getElementById('val-force'),
+            statusText: document.getElementById('status-text'),
+            statusDot: document.getElementById('status-dot')
+        };
+
+        initThreeJS();
+        animate();
+        setupUI();
+        setupInteraction();
+
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            const colors = getThemeColors();
+            const rgb = hexToRgb(colors.fog);
+            scene.background = new THREE.Color(rgb.r, rgb.g, rgb.b);
+            scene.fog = new THREE.FogExp2(rgb.r, rgb.g, rgb.b, 0.05);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 0, 8);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.5;
+            controls.enablePan = false;
+            controls.mouseButtons = {
+                LEFT: THREE.MOUSE.ROTATE,
+                MIDDLE: THREE.MOUSE.DOLLY,
+                RIGHT: null
+            };
+
+            const planeGeo = new THREE.PlaneGeometry(100, 100);
+            const planeMat = new THREE.MeshBasicMaterial({ visible: false });
+            interactionPlane = new THREE.Mesh(planeGeo, planeMat);
+            scene.add(interactionPlane);
+
+            generatePointCloud('torus');
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function generatePointCloud(shape) {
+            if (particles) {
+                scene.remove(particles);
+                geometry.dispose();
+            }
+
+            CONFIG.count = parseInt(uiElements.count.value);
+
+            geometry = new THREE.BufferGeometry();
+            posArray = new Float32Array(CONFIG.count * 3);
+            originalPosArray = new Float32Array(CONFIG.count * 3);
+            velArray = new Float32Array(CONFIG.count * 3);
+            colorArray = new Float32Array(CONFIG.count * 3);
+
+            const colors = getThemeColors();
+            const color1 = new THREE.Color(hexToRgb(colors.accent));
+            const color2 = new THREE.Color(hexToRgb(colors.accent2));
+
+            for (let i = 0; i < CONFIG.count; i++) {
+                let x, y, z;
+
+                if (shape === 'sphere') {
+                    const r = 3;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos((Math.random() * 2) - 1);
+                    x = r * Math.sin(phi) * Math.cos(theta);
+                    y = r * Math.sin(phi) * Math.sin(theta);
+                    z = r * Math.cos(phi);
+                    x += (Math.random() - 0.5) * 0.2;
+                    y += (Math.random() - 0.5) * 0.2;
+                    z += (Math.random() - 0.5) * 0.2;
+                } else if (shape === 'cube') {
+                    const s = 4;
+                    x = (Math.random() - 0.5) * s;
+                    y = (Math.random() - 0.5) * s;
+                    z = (Math.random() - 0.5) * s;
+                    if (Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(z) < 1) {
+                        x *= 2; y *= 2; z *= 2;
+                    }
+                } else if (shape === 'torus') {
+                    const R = 2.5;
+                    const r = 1.0;
+                    const u = Math.random() * Math.PI * 2;
+                    const v = Math.random() * Math.PI * 2;
+                    x = (R + r * Math.cos(v)) * Math.cos(u);
+                    y = (R + r * Math.cos(v)) * Math.sin(u);
+                    z = r * Math.sin(v);
+                    const noise = Math.random() * 0.3;
+                    x += x * noise; y += y * noise; z += z * noise;
+                } else {
+                    x = (Math.random() - 0.5) * 10;
+                    y = (Math.random() - 0.5) * 10;
+                    z = (Math.random() - 0.5) * 10;
+                }
+
+                posArray[i * 3] = x;
+                posArray[i * 3 + 1] = y;
+                posArray[i * 3 + 2] = z;
+
+                originalPosArray[i * 3] = x;
+                originalPosArray[i * 3 + 1] = y;
+                originalPosArray[i * 3 + 2] = z;
+
+                const mixedColor = color1.clone().lerp(color2, Math.random());
+                mixedColor.r += (x / 10) * 0.2;
+                mixedColor.b += (y / 10) * 0.2;
+
+                colorArray[i * 3] = mixedColor.r;
+                colorArray[i * 3 + 1] = mixedColor.g;
+                colorArray[i * 3 + 2] = mixedColor.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: CONFIG.size,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            updateStatus('生成新点云模型完成');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const positions = geometry.attributes.position.array;
+
+            for (let i = 0; i < CONFIG.count; i++) {
+                const ix = i * 3;
+                const iy = ix + 1;
+                const iz = ix + 2;
+
+                let px = positions[ix];
+                let py = positions[iy];
+                let pz = positions[iz];
+
+                const ox = originalPosArray[ix];
+                const oy = originalPosArray[iy];
+                const oz = originalPosArray[iz];
+
+                let vx = velArray[ix];
+                let vy = velArray[iy];
+                let vz = velArray[iz];
+
+                if (isInteracting) {
+                    const dx = px - interactionPoint.x;
+                    const dy = py - interactionPoint.y;
+                    const dz = pz - interactionPoint.z;
+                    const distSq = dx * dx + dy * dy + dz * dz;
+                    const radiusSq = CONFIG.interactionRadius * CONFIG.interactionRadius;
+
+                    if (distSq < radiusSq) {
+                        const dist = Math.sqrt(distSq);
+                        const force = (CONFIG.interactionRadius - dist) / CONFIG.interactionRadius * CONFIG.force;
+                        vx += (dx / dist) * force;
+                        vy += (dy / dist) * force;
+                        vz += (dz / dist) * force;
+                    }
+                }
+
+                vx += (ox - px) * CONFIG.returnSpeed;
+                vy += (oy - py) * CONFIG.returnSpeed;
+                vz += (oz - pz) * CONFIG.returnSpeed;
+
+                vx *= CONFIG.friction;
+                vy *= CONFIG.friction;
+                vz *= CONFIG.friction;
+
+                velArray[ix] = vx;
+                velArray[iy] = vy;
+                velArray[iz] = vz;
+
+                positions[ix] += vx;
+                positions[iy] += vy;
+                positions[iz] += vz;
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+            controls.update();
+            interactionPlane.quaternion.copy(camera.quaternion);
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function setupInteraction() {
+            window.addEventListener('mousemove', (event) => {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                if (isInteracting) updateInteractionPoint();
+            });
+
+            window.addEventListener('mousedown', (event) => {
+                if (event.button === 2) {
+                    isInteracting = true;
+                    updateInteractionPoint();
+                    controls.autoRotate = false;
+                    updateStatus('鼠标右键交互中', 'green');
+                }
+            });
+
+            window.addEventListener('mouseup', (event) => {
+                if (event.button === 2) {
+                    isInteracting = false;
+                    controls.autoRotate = true;
+                    updateStatus('系统就绪，等待交互');
+                }
+            });
+
+            window.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    mouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+                    isInteracting = true;
+                    updateInteractionPoint();
+                    controls.autoRotate = false;
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchmove', (e) => {
+                if (isInteracting && e.touches.length === 1) {
+                    mouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+                    updateInteractionPoint();
+                }
+            }, { passive: false });
+
+            window.addEventListener('touchend', () => {
+                isInteracting = false;
+                controls.autoRotate = true;
+            });
+        }
+
+        function updateInteractionPoint() {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(interactionPlane);
+            if (intersects.length > 0) {
+                interactionPoint.copy(intersects[0].point);
+            }
+        }
+
+        function setupUI() {
+            uiElements.count.addEventListener('input', (e) => uiElements.valCount.innerText = e.target.value);
+
+            uiElements.size.addEventListener('input', (e) => {
+                CONFIG.size = parseFloat(e.target.value);
+                uiElements.valSize.innerText = CONFIG.size;
+                if (particles) particles.material.size = CONFIG.size;
+            });
+
+            uiElements.radius.addEventListener('input', (e) => {
+                CONFIG.interactionRadius = parseFloat(e.target.value);
+                uiElements.valRadius.innerText = CONFIG.interactionRadius;
+            });
+
+            uiElements.force.addEventListener('input', (e) => {
+                CONFIG.force = parseFloat(e.target.value);
+                uiElements.valForce.innerText = CONFIG.force;
+            });
+
+            const shapeBtns = document.querySelectorAll('.shape-btn');
+            shapeBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const shape = e.target.getAttribute('data-shape');
+                    generatePointCloud(shape);
+                });
+            });
+
+            document.getElementById('toggle-webcam-btn').addEventListener('click', initHandTracking);
+        }
+
+        function updateStatus(msg, colorType) {
+            uiElements.statusText.innerText = msg;
+            const dot = uiElements.statusDot;
+            const style = getComputedStyle(document.body);
+            if (colorType === 'green') {
+                dot.style.background = style.getPropertyValue('--pc-dot-green').trim();
+            } else if (colorType === 'red') {
+                dot.style.background = style.getPropertyValue('--pc-dot-red').trim();
+            } else {
+                dot.style.background = style.getPropertyValue('--pc-dot-yellow').trim();
+            }
+        }
+
+        // ==========================================
+        // MediaPipe Hand Tracking
+        // ==========================================
+        let handsTracker = null;
+        let cameraUtils = null;
+        let isWebcamActive = false;
+
+        async function initHandTracking() {
+            const btn = document.getElementById('toggle-webcam-btn');
+            const statusLabel = document.getElementById('webcam-status');
+            const videoElement = document.getElementById('webcam-video');
+
+            if (isWebcamActive) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '&#9200; 正在加载AI模型...';
+            statusLabel.innerText = '首次加载模型需要数秒，请允许浏览器摄像头权限。';
+            updateStatus('正在初始化手势识别网络...', 'yellow');
+
+            try {
+                handsTracker = new Hands({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                    }
+                });
+
+                handsTracker.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.6,
+                    minTrackingConfidence: 0.6
+                });
+
+                handsTracker.onResults(onHandResults);
+
+                cameraUtils = new Camera(videoElement, {
+                    onFrame: async () => {
+                        await handsTracker.send({ image: videoElement });
+                    },
+                    width: 640,
+                    height: 480
+                });
+
+                await cameraUtils.start();
+
+                isWebcamActive = true;
+                btn.innerHTML = '<span style="color:var(--pc-dot-green); font-weight:bold;">&#10003; 手势控制已开启</span>';
+                statusLabel.innerText = '举起单手，使用食指操控点云';
+                updateStatus('摄像头已开启，等待捕捉手势', 'green');
+                controls.autoRotate = false;
+
+            } catch (err) {
+                console.error('Camera init failed:', err);
+                btn.innerHTML = '开启失败，请重试';
+                btn.disabled = false;
+                statusLabel.innerText = '错误：无法访问摄像头或网络加载失败。';
+                updateStatus('手势识别初始化失败', 'red');
+            }
+        }
+
+        function onHandResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                const indexFingerTip = landmarks[8];
+
+                mouse.x = -(indexFingerTip.x * 2 - 1);
+                mouse.y = -(indexFingerTip.y * 2 - 1);
+
+                isInteracting = true;
+                updateInteractionPoint();
+
+                if (Math.random() < 0.1) updateStatus('手势已捕捉，正在交互', 'green');
+            } else {
+                if (isInteracting && isWebcamActive) {
+                    isInteracting = false;
+                    updateStatus('等待捕捉手势', 'green');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
