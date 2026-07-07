@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>社会力模型 - 行人流仿真</title>
     <link rel="stylesheet" href="shared-theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         /* ========== Experiment-Specific Variables ========== */
         :root {
@@ -30,6 +31,11 @@
             --sf-gumball-y: #5a9e6a;
             --sf-obstacle-fill: rgba(180, 70, 60, 0.15);
             --sf-obstacle-stroke: rgba(180, 70, 60, 0.4);
+            --sf-tab-active-bg: rgba(107, 140, 174, 0.12);
+            --sf-tab-inactive-bg: transparent;
+            --sf-flow-card-bg: rgba(0, 0, 0, 0.03);
+            --sf-flow-arrow: #94a3b8;
+            --sf-echarts-text: #1e293b;
         }
 
         [data-theme="glass"] {
@@ -53,6 +59,11 @@
             --sf-gumball-y: #22c55e;
             --sf-obstacle-fill: rgba(239, 68, 68, 0.2);
             --sf-obstacle-stroke: rgba(239, 68, 68, 0.5);
+            --sf-tab-active-bg: rgba(116, 185, 255, 0.15);
+            --sf-tab-inactive-bg: transparent;
+            --sf-flow-card-bg: rgba(255,255,255,0.04);
+            --sf-flow-arrow: #4a5568;
+            --sf-echarts-text: #88ccff;
         }
 
         [data-theme="cyber"] {
@@ -76,6 +87,11 @@
             --sf-gumball-y: #39ff14;
             --sf-obstacle-fill: rgba(255, 0, 234, 0.2);
             --sf-obstacle-stroke: rgba(255, 0, 234, 0.5);
+            --sf-tab-active-bg: rgba(189, 0, 255, 0.2);
+            --sf-tab-inactive-bg: transparent;
+            --sf-flow-card-bg: rgba(0,0,0,0.3);
+            --sf-flow-arrow: #4a5568;
+            --sf-echarts-text: #cc88ff;
         }
 
         [data-theme="cartoon"] {
@@ -99,6 +115,11 @@
             --sf-gumball-y: #4ecdc4;
             --sf-obstacle-fill: rgba(255, 107, 107, 0.15);
             --sf-obstacle-stroke: rgba(255, 107, 107, 0.4);
+            --sf-tab-active-bg: rgba(255, 107, 107, 0.15);
+            --sf-tab-inactive-bg: transparent;
+            --sf-flow-card-bg: rgba(255,255,255,0.35);
+            --sf-flow-arrow: #94a3b8;
+            --sf-echarts-text: #2d3436;
         }
 
         [data-theme="soviet"] {
@@ -122,6 +143,11 @@
             --sf-gumball-y: #556b2f;
             --sf-obstacle-fill: rgba(196, 30, 30, 0.12);
             --sf-obstacle-stroke: rgba(196, 30, 30, 0.35);
+            --sf-tab-active-bg: rgba(196, 30, 30, 0.12);
+            --sf-tab-inactive-bg: transparent;
+            --sf-flow-card-bg: rgba(0,0,0,0.03);
+            --sf-flow-arrow: #94a3b8;
+            --sf-echarts-text: #1a1a2e;
         }
 
         /* ========== Layout ========== */
@@ -181,12 +207,15 @@
             border: 1px solid rgba(189,0,255,0.4);
         }
 
-        #left-panel { top: 60px; left: 15px; width: 280px; bottom: 15px; overflow-y: auto; }
+        #left-panel { top: 60px; left: 15px; width: 300px; bottom: 15px; overflow: hidden; }
 
+        /* 右侧面板 */
         #right-panel {
-            top: 60px; right: 15px; width: 260px;
+            top: 60px; right: 15px; width: 270px; bottom: 15px;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 99;
+            padding: 0;
+            overflow: hidden;
         }
         #right-panel.collapsed { transform: translateX(calc(100% - 40px)); }
         #toggle-panel {
@@ -200,14 +229,45 @@
         #toggle-panel:hover { background: var(--sf-btn-hover); }
         #right-panel.collapsed #toggle-panel { transform: rotate(180deg); }
 
+        .right-content {
+            display: flex; flex-direction: column;
+            height: 100%; overflow-y: auto;
+            padding: 14px; gap: 10px;
+        }
+
         #top-panel {
-            top: 60px; left: 325px;
+            top: 60px; left: 335px;
             display: flex; flex-direction: row; gap: 12px; align-items: center;
             border-radius: 50px; padding: 10px 20px;
         }
 
         [data-theme="academic"] #top-panel { border-radius: 4px; }
         [data-theme="soviet"] #top-panel { border-radius: 2px; }
+
+        /* ========== Tab Navigation ========== */
+        .tab-nav {
+            display: flex; gap: 0; border-bottom: 1px solid var(--panel-border);
+            margin-bottom: 8px; flex-shrink: 0;
+        }
+        .tab-btn {
+            flex: 1; padding: 8px 12px; border: none;
+            background: var(--sf-tab-inactive-bg);
+            color: var(--text-color); cursor: pointer; font-size: 13px; font-weight: 600;
+            font-family: inherit; transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            opacity: 0.7;
+        }
+        .tab-btn:first-child { border-radius: var(--sf-radius) 0 0 0; }
+        .tab-btn:last-child { border-radius: 0 var(--sf-radius) 0 0; }
+        .tab-btn.active {
+            background: var(--sf-tab-active-bg);
+            border-bottom: 2px solid var(--sf-title-color);
+            opacity: 1;
+        }
+        .tab-btn:hover { opacity: 1; }
+
+        .tab-content { display: none; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; }
+        .tab-content.active { display: flex; }
 
         /* ========== Panel Elements ========== */
         .panel-title {
@@ -217,7 +277,7 @@
         }
 
         .form-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .form-group label { width: 100px; }
+        .form-group label { width: 100px; flex-shrink: 0; }
         .form-group input, .form-group select {
             background: var(--sf-input-bg); color: var(--text-color);
             border: 1px solid var(--sf-input-border); border-radius: 6px;
@@ -250,7 +310,7 @@
         .node-card {
             border: 1px solid var(--panel-border); border-radius: 8px;
             padding: 10px; margin-bottom: 8px; background: var(--sf-node-card-bg);
-            transition: all 0.2s;
+            transition: all 0.2s; flex-shrink: 0;
         }
         .node-card.selected {
             border-color: var(--sf-title-color);
@@ -260,7 +320,82 @@
         [data-theme="academic"] .node-card { border-radius: 4px; }
         [data-theme="soviet"] .node-card { border-radius: 2px; }
 
+        .node-type-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 10px;
+            font-size: 10px; font-weight: bold; margin-right: 4px;
+        }
+        .node-type-badge.src { background: rgba(212, 120, 110, 0.15); color: var(--sf-source-color); }
+        .node-type-badge.wp { background: rgba(196, 163, 90, 0.15); color: var(--sf-waypoint-color); }
+        .node-type-badge.dst { background: rgba(106, 158, 138, 0.15); color: var(--sf-dest-color); }
+
+        /* ========== Flow Card ========== */
+        .flow-card {
+            border: 1px solid var(--panel-border); border-radius: 8px;
+            padding: 12px; margin-bottom: 8px; background: var(--sf-flow-card-bg);
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .flow-card.selected {
+            border-color: var(--sf-title-color);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+        }
+        .flow-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+        }
+        .flow-name { font-weight: bold; font-size: 13px; color: var(--sf-title-color); }
+        .flow-route {
+            display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-bottom: 8px;
+            padding: 5px 6px; background: var(--sf-node-card-bg); border-radius: 6px;
+            font-size: 10px;
+        }
+        .flow-node-badge {
+            padding: 2px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;
+            white-space: nowrap;
+        }
+        .flow-arrow-icon { color: var(--sf-flow-arrow); font-size: 12px; font-weight: bold; }
+        .flow-node-badge.source { background: rgba(212, 120, 110, 0.15); color: var(--sf-source-color); border: 1px solid rgba(212, 120, 110, 0.4); }
+        .flow-node-badge.waypoint { background: rgba(196, 163, 90, 0.15); color: var(--sf-waypoint-color); border: 1px solid rgba(196, 163, 90, 0.4); }
+        .flow-node-badge.destination { background: rgba(106, 158, 138, 0.15); color: var(--sf-dest-color); border: 1px solid rgba(106, 158, 138, 0.4); }
+
+        .flow-config-row {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;
+        }
+        .flow-config-row label { font-size: 11px; width: 80px; flex-shrink: 0; opacity: 0.8; }
+        .flow-config-row select, .flow-config-row input {
+            background: var(--sf-input-bg); color: var(--text-color);
+            border: 1px solid var(--sf-input-border); border-radius: 4px;
+            padding: 3px 5px; font-family: monospace; font-size: 11px; outline: none;
+            flex: 1; max-width: 140px;
+        }
+        .flow-wp-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+        .flow-wp-item {
+            display: flex; align-items: center; gap: 4px; padding: 2px 5px;
+            background: var(--sf-input-bg); border-radius: 4px; font-size: 11px;
+        }
+        .flow-wp-item select { flex: 1; font-size: 11px; }
+        .flow-wp-item .btn-remove-wp {
+            padding: 1px 5px; font-size: 10px; border: 1px solid #ef4444; color: #ef4444;
+            background: transparent; border-radius: 3px; cursor: pointer;
+        }
+
+        .btn-add-flow {
+            width: 100%; padding: 8px; border: 1px dashed var(--panel-border);
+            background: transparent; color: var(--sf-title-color); font-weight: bold;
+            font-size: 13px; cursor: pointer; border-radius: 8px; transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-add-flow:hover { background: var(--sf-btn-hover); border-style: solid; }
+
+        .btn-row { display: flex; gap: 6px; justify-content: space-between; flex-wrap: wrap; flex-shrink: 0; }
+        .btn-row .sf-btn { flex: 1; min-width: 60px; }
+
         /* ========== Stats ========== */
+        .section-title {
+            color: var(--sf-title-color); font-weight: bold; font-size: 13px;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 5px; margin-bottom: 2px;
+            flex-shrink: 0;
+        }
+
         .stat-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 6px 0;
         }
@@ -320,15 +455,29 @@
         <canvas id="layer-dynamic"></canvas>
     </div>
 
-    <!-- 左侧：节点与行人流配置 -->
+    <!-- 左侧：Tab 切换面板 -->
     <div id="left-panel" class="sf-panel">
-        <div class="panel-title">实体配置管理</div>
-        <div style="display: flex; gap: 5px; justify-content: space-between;">
-            <button class="sf-btn" id="btn-add-source">+ 起点</button>
-            <button class="sf-btn" id="btn-add-wp">+ 途经点</button>
-            <button class="sf-btn" id="btn-add-dest">+ 终点</button>
+        <div class="tab-nav">
+            <div class="tab-btn active" data-tab="flow">流程</div>
+            <div class="tab-btn" data-tab="entity">实体</div>
         </div>
-        <div id="nodes-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px;"></div>
+
+        <div id="tab-flow" class="tab-content active">
+            <div class="panel-title">流程配置管理</div>
+            <div style="font-size:11px; opacity:0.7; margin-bottom:4px;">定义完整行人路径：起点 → 途径点 → 终点</div>
+            <div id="flows-list" style="flex:1; overflow-y:auto;"></div>
+            <button class="btn-add-flow sf-btn" id="btn-add-flow">+ 添加流程</button>
+        </div>
+
+        <div id="tab-entity" class="tab-content">
+            <div class="panel-title">实体节点管理</div>
+            <div class="btn-row">
+                <button class="sf-btn" id="btn-add-source">+ 起点</button>
+                <button class="sf-btn" id="btn-add-wp">+ 途经点</button>
+                <button class="sf-btn" id="btn-add-dest">+ 终点</button>
+            </div>
+            <div id="nodes-list" style="flex:1; overflow-y:auto;"></div>
+        </div>
     </div>
 
     <!-- 顶部：全局时间与控制 -->
@@ -348,66 +497,80 @@
 
     <!-- 右侧：可折叠 数据监控面板 -->
     <div id="right-panel" class="sf-panel">
-        <div id="toggle-panel">←</div>
+        <div id="toggle-panel">&#8592;</div>
+        <div class="right-content">
+            <!-- 控制映射提示 -->
+            <div class="section-title">控制映射</div>
+            <div style="font-size: 11px; color: var(--text-color); opacity: 0.8; line-height: 1.5; flex-shrink:0;">
+                [左键] 选定节点 / 拖拽轴<br>[右键] 旋转视角<br>[滚轮] 缩放<br>[中键] 平移
+            </div>
 
-        <div class="panel-title">控制映射</div>
-        <div style="font-size: 11px; color: var(--text-color); opacity: 0.8; line-height: 1.5;">
-            [左键] 选定节点 / 拖拽轴<br>[右键] 旋转视角<br>[滚轮] 缩放<br>[中键] 平移
+            <!-- 实时监控仪表盘 -->
+            <div class="section-title" style="margin-top:6px;">全局实时监控</div>
+            <div id="gauge-active" style="width:100%;height:90px;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+                <div id="stat-throughput-card" style="height:70px;background:var(--sf-node-card-bg);border-radius:6px;border:1px solid var(--sf-input-border);"></div>
+                <div id="stat-usage-card" style="height:70px;background:var(--sf-node-card-bg);border-radius:6px;border:1px solid var(--sf-input-border);"></div>
+                <div id="stat-arrived-card" style="height:70px;background:var(--sf-node-card-bg);border-radius:6px;border:1px solid var(--sf-input-border);"></div>
+                <div id="stat-rate-card" style="height:70px;background:var(--sf-node-card-bg);border-radius:6px;border:1px solid var(--sf-input-border);"></div>
+            </div>
+
+            <!-- 趋势图表 -->
+            <div class="section-title">趋势图表</div>
+            <div id="trend-chart" style="width:100%;height:140px;min-height:130px;"></div>
+
+            <!-- 节点访问量 -->
+            <div class="section-title">节点访问量</div>
+            <div id="node-bar-chart" style="width:100%;height:120px;min-height:110px;"></div>
         </div>
-
-        <div class="panel-title" style="margin-top:10px;">全局实时监控</div>
-        <div class="stat-grid">
-            <div class="stat-card">
-                <div class="label">活跃人数</div>
-                <div class="value" id="stat-active">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">总吞吐量</div>
-                <div class="value" id="stat-throughput">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">地点使用量</div>
-                <div class="value" id="stat-usage">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">已到达</div>
-                <div class="value" id="stat-arrived">0</div>
-            </div>
-        </div>
-
-        <div class="panel-title">趋势图表</div>
-        <canvas id="chart-canvas" width="230" height="140" style="background: var(--sf-node-card-bg); border-radius: 6px;"></canvas>
     </div>
 
     <!-- 返回按钮 -->
-    <a href="index.html" class="back-btn" id="back-btn">← 返回空间站</a>
+    <a href="index.html" class="back-btn" id="back-btn">&larr; 返回空间站</a>
 
     <script src="shared-theme.js"></script>
     <script>
         // ==========================================
-        // 初始化主题
+        // 初始化主题 (保留 shared-theme.js 集成)
         // ==========================================
         const theme = PSUTheme.get();
         document.documentElement.setAttribute('data-theme', theme);
 
-        // 监听主题变化以重绘
-        const themeObserver = new MutationObserver(() => {
-            requestStaticRedraw();
-            drawChart();
-        });
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
         // 右侧面板折叠/展开
-        document.getElementById('toggle-panel').onclick = () => {
+        document.getElementById('toggle-panel').onclick = function() {
             document.getElementById('right-panel').classList.toggle('collapsed');
         };
 
+        // Tab 切换
+        document.querySelectorAll('.tab-btn').forEach(function(btn) {
+            btn.onclick = function() {
+                document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            };
+        });
+
+        // 监听主题变化以重绘 + 刷新 ECharts
+        const themeObserver = new MutationObserver(function() {
+            requestStaticRedraw();
+            refreshEChartsTheme();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
         // ==========================================
-        // 核心模型与配置
+        // 核心配置 -- 0.5m/格
         // ==========================================
-        const CONFIG = {
-            grid: { cols: 30, rows: 30, size: 1 },
+        var CELL_SIZE = 0.5;
+        var MAP_WIDTH = 30;
+        var MAP_HEIGHT = 30;
+        var GRID_COLS = Math.round(MAP_WIDTH / CELL_SIZE);  // 60
+        var GRID_ROWS = Math.round(MAP_HEIGHT / CELL_SIZE); // 60
+
+        var CONFIG = {
+            grid: { cols: GRID_COLS, rows: GRID_ROWS, cellSize: CELL_SIZE },
             sim: { maxTime: 8 * 3600, speedMultiplier: 60 },
+            agent: { radius: 0.5 },
             colors: {
                 agent: '#00ffff',
                 source: '#ef4444', waypoint: '#eab308', dest: '#3b82f6',
@@ -416,7 +579,7 @@
         };
 
         function getSfColors() {
-            const style = getComputedStyle(document.body);
+            var style = getComputedStyle(document.body);
             return {
                 agent: style.getPropertyValue('--sf-agent-color').trim() || '#00ffff',
                 source: style.getPropertyValue('--sf-source-color').trim() || '#ef4444',
@@ -429,26 +592,28 @@
             };
         }
 
-        const TYPE = { SOURCE: 'source', WAYPOINT: 'waypoint', DESTINATION: 'destination' };
-        const TYPE_NAME = { 'source': '起点', 'waypoint': '途经点', 'destination': '终点' };
+        var TYPE = { SOURCE: 'source', WAYPOINT: 'waypoint', DESTINATION: 'destination' };
+        var TYPE_NAME = { 'source': '起点', 'waypoint': '途经点', 'destination': '终点' };
 
-        let nodes = [
-            { id: 'S1', type: TYPE.SOURCE, x: 2, y: 2, name: '入口 A', rate: 10, speed: 1.2, targetWp: 'P1', targetDest: 'D1', totalVisits: 0, history: [] },
-            { id: 'S2', type: TYPE.SOURCE, x: 2, y: 28, name: '入口 B', rate: 5, speed: 1.5, targetWp: '', targetDest: 'D1', totalVisits: 0, history: [] },
-            { id: 'P1', type: TYPE.WAYPOINT, x: 15, y: 15, name: '中央广场', totalVisits: 0, history: [] },
-            { id: 'D1', type: TYPE.DESTINATION, x: 28, y: 15, name: '主出口', totalVisits: 0, history: [] }
+        var nodes = [
+            { id: 'S1', type: TYPE.SOURCE, x: 4, y: 4, name: '入口 A', rate: 10, speed: 1.2,
+              waypoints: ['P1'], targetDest: 'D1', waitTime: 5, totalVisits: 0, history: [] },
+            { id: 'S2', type: TYPE.SOURCE, x: 4, y: 56, name: '入口 B', rate: 5, speed: 1.5,
+              waypoints: [], targetDest: 'D1', waitTime: 3, totalVisits: 0, history: [] },
+            { id: 'P1', type: TYPE.WAYPOINT, x: 30, y: 30, name: '中央广场', totalVisits: 0, history: [] },
+            { id: 'D1', type: TYPE.DESTINATION, x: 56, y: 30, name: '主出口', totalVisits: 0, history: [] }
         ];
 
-        let obstacles = new Set([
-            '10,10', '11,10', '12,10', '13,10', '10,11', '10,12',
-            '20,20', '21,20', '22,20', '23,20', '20,21', '20,22'
+        var obstacles = new Set([
+            '20,20', '21,20', '22,20', '23,20', '20,21', '20,22',
+            '40,40', '41,40', '42,40', '43,40', '40,41', '40,42'
         ]);
 
-        let agents = [];
-        let totalArrived = 0;
-        let totalUsage = 0;
+        var agents = [];
+        var totalArrived = 0;
+        var totalUsage = 0;
 
-        let state = {
+        var state = {
             isRunning: false,
             simTime: 0,
             lastRealTime: 0,
@@ -456,36 +621,276 @@
             dragMode: null
         };
 
-        let camera = {
-            yaw: Math.PI / 4, pitch: Math.PI / 4, zoom: 25,
+        var camera = {
+            yaw: Math.PI / 4, pitch: Math.PI / 4, zoom: 12,
             panX: window.innerWidth / 2, panY: window.innerHeight / 2
         };
 
-        const canvasStatic = document.getElementById('layer-static');
-        const ctxStatic = canvasStatic.getContext('2d', { alpha: false });
-        const canvasDynamic = document.getElementById('layer-dynamic');
-        const ctxDyn = canvasDynamic.getContext('2d');
-        const chartCtx = document.getElementById('chart-canvas').getContext('2d');
+        var canvasStatic = document.getElementById('layer-static');
+        var ctxStatic = canvasStatic.getContext('2d', { alpha: false });
+        var canvasDynamic = document.getElementById('layer-dynamic');
+        var ctxDyn = canvasDynamic.getContext('2d');
 
-        let chartData = {
-            throughput: [],
-            usage: [],
-            maxPoints: 50
-        };
+        var chartData = { throughput: [], usage: [], maxPoints: 50 };
+
+        // ==========================================
+        // 空间网格 -- 碰撞检测加速
+        // ==========================================
+        var SpatialGrid = (function() {
+            function SpatialGrid(cellSize, worldW, worldH) {
+                this.cellSize = cellSize;
+                this.cols = Math.ceil(worldW / cellSize);
+                this.rows = Math.ceil(worldH / cellSize);
+                this.grid = null;
+            }
+            SpatialGrid.prototype.clear = function() {
+                var n = this.cols * this.rows;
+                if (!this.grid || this.grid.length !== n) {
+                    this.grid = new Array(n);
+                }
+                for (var i = 0; i < n; i++) this.grid[i] = null;
+            };
+            SpatialGrid.prototype._key = function(x, y) {
+                var c = Math.floor(x / this.cellSize);
+                var r = Math.floor(y / this.cellSize);
+                if (c < 0 || c >= this.cols || r < 0 || r >= this.rows) return -1;
+                return r * this.cols + c;
+            };
+            SpatialGrid.prototype.add = function(agent) {
+                var k = this._key(agent.x, agent.y);
+                if (k < 0) return;
+                if (!this.grid[k]) this.grid[k] = [];
+                this.grid[k].push(agent);
+            };
+            SpatialGrid.prototype.forEachNearby = function(agent, callback) {
+                var cs = Math.floor(agent.x / this.cellSize);
+                var rs = Math.floor(agent.y / this.cellSize);
+                for (var dc = -1; dc <= 1; dc++) {
+                    var c = cs + dc;
+                    if (c < 0 || c >= this.cols) continue;
+                    for (var dr = -1; dr <= 1; dr++) {
+                        var r = rs + dr;
+                        if (r < 0 || r >= this.rows) continue;
+                        var bucket = this.grid[r * this.cols + c];
+                        if (!bucket) continue;
+                        for (var i = 0; i < bucket.length; i++) {
+                            var other = bucket[i];
+                            if (other === agent) continue;
+                            callback(other);
+                        }
+                    }
+                }
+            };
+            return SpatialGrid;
+        })();
+
+        var spatialGrid = new SpatialGrid(2.0, GRID_COLS, GRID_ROWS);
+
+        // ==========================================
+        // ECharts 可视化
+        // ==========================================
+        var echartsInstances = {};
+
+        function getEChartsColors() {
+            var style = getComputedStyle(document.body);
+            return {
+                text: style.getPropertyValue('--sf-echarts-text').trim() || style.getPropertyValue('--text-color').trim() || '#1e293b',
+                title: style.getPropertyValue('--sf-title-color').trim() || '#0369a1',
+                line: style.getPropertyValue('--sf-chart-line').trim() || 'rgba(0,0,0,0.15)',
+                grid: style.getPropertyValue('--sf-grid-color').trim() || 'rgba(148,163,184,0.6)'
+            };
+        }
+
+        function initECharts() {
+            var c = getEChartsColors();
+            var sfC = getSfColors();
+            var common = {
+                textStyle: { fontSize: 10, fontFamily: 'monospace' },
+                grid: { top: 8, bottom: 18, left: 28, right: 8 },
+                tooltip: { trigger: 'axis', textStyle: { fontSize: 10 } }
+            };
+
+            // 活跃人数仪表盘
+            echartsInstances.gauge = echarts.init(document.getElementById('gauge-active'));
+            echartsInstances.gauge.setOption({
+                series: [{
+                    type: 'gauge',
+                    radius: '95%',
+                    center: ['50%', '55%'],
+                    min: 0, max: 200,
+                    startAngle: 200, endAngle: -20,
+                    splitNumber: 4,
+                    axisLine: { lineStyle: { width: 6, color: [[1, c.title]] } },
+                    pointer: { length: '50%', width: 3 },
+                    axisTick: { show: false },
+                    splitLine: { length: 6, lineStyle: { width: 1, color: c.line } },
+                    axisLabel: { distance: 8, fontSize: 8, color: c.text },
+                    detail: { fontSize: 16, fontWeight: 'bold', color: c.title, offsetCenter: [0, '60%'], formatter: '{value}' },
+                    title: { offsetCenter: [0, '82%'], fontSize: 9, color: c.text },
+                    data: [{ value: 0, name: '活跃人数' }]
+                }]
+            });
+
+            // 4 个迷你指标卡片
+            function miniCard(id, name, color) {
+                var inst = echarts.init(document.getElementById(id));
+                inst.setOption({
+                    grid: { top: 2, bottom: 2, left: 2, right: 2 },
+                    xAxis: { show: false, type: 'category', data: [''] },
+                    yAxis: { show: false, type: 'value' },
+                    series: [{
+                        type: 'bar', data: [0], barWidth: '60%',
+                        itemStyle: { color: color, borderRadius: [3, 3, 0, 0] },
+                        label: { show: true, position: 'inside', formatter: '{c}', fontSize: 11, fontWeight: 'bold', color: '#fff' }
+                    }],
+                    graphic: [{
+                        type: 'text', left: 'center', top: '78%',
+                        style: { text: name, fontSize: 9, fill: c.text, textAlign: 'center' }
+                    }]
+                });
+                return inst;
+            }
+            echartsInstances.throughput = miniCard('stat-throughput-card', '吞吐量', sfC.agent);
+            echartsInstances.usage = miniCard('stat-usage-card', '地点使用', sfC.waypoint);
+            echartsInstances.arrived = miniCard('stat-arrived-card', '已到达', sfC.dest);
+            echartsInstances.rate = miniCard('stat-rate-card', '生成率', sfC.gumballY);
+
+            // 趋势折线图
+            echartsInstances.trend = echarts.init(document.getElementById('trend-chart'));
+            echartsInstances.trend.setOption({
+                textStyle: { fontSize: 10, fontFamily: 'monospace' },
+                grid: { top: 8, bottom: 18, left: 28, right: 8 },
+                tooltip: { trigger: 'axis', textStyle: { fontSize: 10 } },
+                legend: { data: ['吞吐量', '使用量'], textStyle: { color: c.text, fontSize: 9 }, top: 0, itemWidth: 10, itemHeight: 6 },
+                xAxis: { type: 'category', show: false, boundaryGap: false },
+                yAxis: { type: 'value', splitLine: { lineStyle: { color: c.line, type: 'dashed' } }, axisLabel: { fontSize: 8, color: c.text } },
+                series: [
+                    { name: '吞吐量', type: 'line', smooth: true, showSymbol: false, data: [], lineStyle: { color: sfC.agent, width: 1.5 }, areaStyle: { color: 'rgba(0,255,255,0.08)' } },
+                    { name: '使用量', type: 'line', smooth: true, showSymbol: false, data: [], lineStyle: { color: sfC.waypoint, width: 1.5 }, areaStyle: { color: 'rgba(234,179,8,0.08)' } }
+                ],
+                animation: false
+            });
+
+            // 节点访问量柱状图
+            echartsInstances.nodes = echarts.init(document.getElementById('node-bar-chart'));
+            echartsInstances.nodes.setOption({
+                textStyle: { fontSize: 10, fontFamily: 'monospace' },
+                grid: { top: 5, bottom: 28, left: 28, right: 5 },
+                tooltip: { trigger: 'axis', textStyle: { fontSize: 10 } },
+                xAxis: { type: 'category', axisLabel: { fontSize: 8, color: c.text, rotate: 30 }, axisLine: { lineStyle: { color: c.line } } },
+                yAxis: { type: 'value', splitLine: { lineStyle: { color: c.line, type: 'dashed' } }, axisLabel: { fontSize: 8, color: c.text } },
+                series: [{ type: 'bar', barWidth: '50%', data: [], itemStyle: { borderRadius: [2, 2, 0, 0], color: c.title } }],
+                animation: false
+            });
+
+            window.addEventListener('resize', function() {
+                var keys = Object.keys(echartsInstances);
+                for (var i = 0; i < keys.length; i++) {
+                    var inst = echartsInstances[keys[i]];
+                    if (inst) inst.resize();
+                }
+            });
+        }
+
+        function updateECharts() {
+            var c = getEChartsColors();
+            var sfC = getSfColors();
+            // 活跃人数仪表盘
+            if (echartsInstances.gauge) {
+                echartsInstances.gauge.setOption({
+                    series: [{ data: [{ value: agents.length, name: '活跃人数' }] }]
+                });
+            }
+            // 迷你指标
+            if (echartsInstances.throughput) echartsInstances.throughput.setOption({ series: [{ data: [totalArrived] }] });
+            if (echartsInstances.usage) echartsInstances.usage.setOption({ series: [{ data: [totalUsage] }] });
+            if (echartsInstances.arrived) echartsInstances.arrived.setOption({ series: [{ data: [totalArrived] }] });
+            var totalRate = 0;
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].type === TYPE.SOURCE) totalRate += (nodes[i].rate || 0);
+            }
+            if (echartsInstances.rate) echartsInstances.rate.setOption({ series: [{ data: [totalRate] }] });
+
+            // 趋势折线图
+            if (echartsInstances.trend) {
+                echartsInstances.trend.setOption({
+                    series: [
+                        { data: chartData.throughput },
+                        { data: chartData.usage }
+                    ]
+                });
+            }
+
+            // 节点访问量柱状图
+            if (echartsInstances.nodes) {
+                var nodeNames = [];
+                var nodeVisits = [];
+                for (var i = 0; i < nodes.length; i++) {
+                    nodeNames.push(nodes[i].name);
+                    nodeVisits.push(nodes[i].totalVisits);
+                }
+                echartsInstances.nodes.setOption({
+                    xAxis: { data: nodeNames },
+                    series: [{ data: nodeVisits }]
+                });
+            }
+        }
+
+        function refreshEChartsTheme() {
+            var c = getEChartsColors();
+            var sfC = getSfColors();
+            var commonAxis = {
+                splitLine: { lineStyle: { color: c.line, type: 'dashed' } },
+                axisLabel: { color: c.text }
+            };
+            if (echartsInstances.gauge) {
+                echartsInstances.gauge.setOption({
+                    series: [{
+                        axisLine: { lineStyle: { color: [[1, c.title]] } },
+                        splitLine: { lineStyle: { color: c.line } },
+                        axisLabel: { color: c.text },
+                        detail: { color: c.title },
+                        title: { color: c.text }
+                    }]
+                });
+            }
+            var miniKeys = ['throughput', 'usage', 'arrived', 'rate'];
+            for (var i = 0; i < miniKeys.length; i++) {
+                var inst = echartsInstances[miniKeys[i]];
+                if (inst) inst.setOption({ graphic: [{ style: { fill: c.text } }] });
+            }
+            if (echartsInstances.trend) {
+                echartsInstances.trend.setOption({
+                    legend: { textStyle: { color: c.text } },
+                    yAxis: commonAxis,
+                    series: [
+                        { lineStyle: { color: sfC.agent } },
+                        { lineStyle: { color: sfC.waypoint } }
+                    ]
+                });
+            }
+            if (echartsInstances.nodes) {
+                echartsInstances.nodes.setOption({
+                    xAxis: { axisLabel: { color: c.text }, axisLine: { lineStyle: { color: c.line } } },
+                    yAxis: commonAxis,
+                    series: [{ itemStyle: { color: c.title } }]
+                });
+            }
+        }
 
         // ==========================================
         // 数学与投影系统
         // ==========================================
         function project(x, y, z) {
             if (z === undefined) z = 0;
-            const cx = x - CONFIG.grid.cols / 2;
-            const cy = y - CONFIG.grid.rows / 2;
+            var cx = x - CONFIG.grid.cols / 2;
+            var cy = y - CONFIG.grid.rows / 2;
 
-            const x1 = cx * Math.cos(camera.yaw) - cy * Math.sin(camera.yaw);
-            const y1 = cx * Math.sin(camera.yaw) + cy * Math.cos(camera.yaw);
+            var x1 = cx * Math.cos(camera.yaw) - cy * Math.sin(camera.yaw);
+            var y1 = cx * Math.sin(camera.yaw) + cy * Math.cos(camera.yaw);
 
-            const y2 = y1 * Math.cos(camera.pitch) - z * Math.sin(camera.pitch);
-            const z2 = y1 * Math.sin(camera.pitch) + z * Math.cos(camera.pitch);
+            var y2 = y1 * Math.cos(camera.pitch) - z * Math.sin(camera.pitch);
+            var z2 = y1 * Math.sin(camera.pitch) + z * Math.cos(camera.pitch);
 
             return {
                 x: x1 * camera.zoom + camera.panX,
@@ -495,14 +900,14 @@
         }
 
         function unprojectZeroZ(sx, sy) {
-            const x1 = (sx - camera.panX) / camera.zoom;
-            const y2 = (sy - camera.panY) / camera.zoom;
-            const y1 = y2 / Math.cos(camera.pitch);
-            const cosY = Math.cos(camera.yaw);
-            const sinY = Math.sin(camera.yaw);
+            var x1 = (sx - camera.panX) / camera.zoom;
+            var y2 = (sy - camera.panY) / camera.zoom;
+            var y1 = y2 / Math.cos(camera.pitch);
+            var cosY = Math.cos(camera.yaw);
+            var sinY = Math.sin(camera.yaw);
 
-            const cx = x1 * cosY + y1 * sinY;
-            const cy = -x1 * sinY + y1 * cosY;
+            var cx = x1 * cosY + y1 * sinY;
+            var cy = -x1 * sinY + y1 * cosY;
 
             return {
                 x: cx + CONFIG.grid.cols / 2,
@@ -511,7 +916,7 @@
         }
 
         // ==========================================
-        // A* 算法
+        // A* 寻路 -- 0.5m 网格
         // ==========================================
         function findPath(startX, startY, endX, endY) {
             startX = Math.floor(startX); startY = Math.floor(startY);
@@ -519,10 +924,10 @@
 
             if (startX === endX && startY === endY) return [];
 
-            const openSet = [{ x: startX, y: startY, g: 0, f: 0, parent: null }];
-            const closedSet = new Set();
+            var openSet = [{ x: startX, y: startY, g: 0, f: 0, parent: null }];
+            var closedSet = new Set();
 
-            const dirs = [
+            var dirs = [
                 {dx: 0, dy: 1, cost: 1}, {dx: 1, dy: 0, cost: 1},
                 {dx: 0, dy: -1, cost: 1}, {dx: -1, dy: 0, cost: 1},
                 {dx: 1, dy: 1, cost: Math.SQRT2}, {dx: 1, dy: -1, cost: Math.SQRT2},
@@ -531,11 +936,11 @@
 
             while (openSet.length > 0) {
                 openSet.sort(function(a, b) { return a.f - b.f; });
-                const current = openSet.shift();
+                var current = openSet.shift();
 
                 if (current.x === endX && current.y === endY) {
-                    const path = [];
-                    let curr = current;
+                    var path = [];
+                    var curr = current;
                     while (curr.parent) {
                         path.push({ x: curr.x, y: curr.y });
                         curr = curr.parent;
@@ -545,12 +950,12 @@
 
                 closedSet.add(current.x + ',' + current.y);
 
-                for (let i = 0; i < dirs.length; i++) {
-                    const dir = dirs[i];
-                    const nx = current.x + dir.dx;
-                    const ny = current.y + dir.dy;
+                for (var i = 0; i < dirs.length; i++) {
+                    var dir = dirs[i];
+                    var nx = current.x + dir.dx;
+                    var ny = current.y + dir.dy;
 
-                    if (nx < 0 || nx > CONFIG.grid.cols || ny < 0 || ny > CONFIG.grid.rows) continue;
+                    if (nx < 0 || nx >= CONFIG.grid.cols || ny < 0 || ny >= CONFIG.grid.rows) continue;
                     if (obstacles.has(nx + ',' + ny)) continue;
                     if (closedSet.has(nx + ',' + ny)) continue;
 
@@ -561,10 +966,13 @@
                         }
                     }
 
-                    const g = current.g + dir.cost;
-                    const h = Math.abs(nx - endX) + Math.abs(ny - endY);
+                    var g = current.g + dir.cost;
+                    var h = Math.abs(nx - endX) + Math.abs(ny - endY);
 
-                    const existingNode = openSet.find(function(n) { return n.x === nx && n.y === ny; });
+                    var existingNode = null;
+                    for (var j = 0; j < openSet.length; j++) {
+                        if (openSet[j].x === nx && openSet[j].y === ny) { existingNode = openSet[j]; break; }
+                    }
                     if (!existingNode) {
                         openSet.push({ x: nx, y: ny, g: g, f: g + h, parent: current });
                     } else if (g < existingNode.g) {
@@ -578,109 +986,174 @@
         }
 
         // ==========================================
-        // 行人对象
+        // 行人对象 -- 多途径点 + 碰撞避让 + 等待计时
         // ==========================================
-        class Agent {
-            constructor(source) {
-                this.x = source.x;
-                this.y = source.y;
-                this.speed = source.speed + (Math.random() * 0.2 - 0.1);
-                this.active = true;
+        var AGENT_RADIUS = 1.0;
+        var COLLISION_DIST = AGENT_RADIUS * 2;
 
-                const dest = nodes.find(function(n) { return n.id === source.targetDest; });
-                const wp = nodes.find(function(n) { return n.id === source.targetWp; });
+        function Agent(source) {
+            this.x = source.x;
+            this.y = source.y;
+            this.speed = source.speed + (Math.random() * 0.2 - 0.1);
+            this.active = true;
+            this.path = [];
+            this.waypointIndices = [];
+            this.waitTime = source.waitTime || 0;
+            this.waitTimer = 0;
+            this.isWaiting = false;
+            this.targetIndex = 0;
+            this.visitedNodes = new Set();
+            this.vx = 0;
+            this.vy = 0;
 
-                this.path = [];
+            var wpIds = source.waypoints || [];
+            var destId = source.targetDest;
+            var dest = null;
+            for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === destId) { dest = nodes[i]; break; } }
+
+            var currentPos = { x: this.x, y: this.y };
+
+            for (var i = 0; i < wpIds.length; i++) {
+                var wp = null;
+                for (var j = 0; j < nodes.length; j++) { if (nodes[j].id === wpIds[i]) { wp = nodes[j]; break; } }
                 if (wp) {
-                    this.path = findPath(this.x, this.y, wp.x, wp.y);
-                    if (dest) {
-                        const path2 = findPath(wp.x, wp.y, dest.x, dest.y);
-                        this.path = this.path.concat(path2);
+                    var segment = findPath(Math.floor(currentPos.x), Math.floor(currentPos.y),
+                                              Math.floor(wp.x), Math.floor(wp.y));
+                    if (segment.length > 0) {
+                        for (var s = 0; s < segment.length; s++) this.path.push(segment[s]);
+                        this.waypointIndices.push(this.path.length - 1);
                     }
-                } else if (dest) {
-                    this.path = findPath(this.x, this.y, dest.x, dest.y);
+                    currentPos = { x: wp.x, y: wp.y };
                 }
-
-                this.targetIndex = 0;
-                this.visitedNodes = new Set();
             }
-
-            update(dt) {
-                if (!this.active || this.path.length === 0 || this.targetIndex >= this.path.length) {
-                    if (this.active) {
-                        this.active = false;
-                        totalArrived++;
-                    }
-                    return;
-                }
-
-                const target = this.path[this.targetIndex];
-                const dx = target.x - this.x;
-                const dy = target.y - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const moveDist = this.speed * dt;
-
-                if (dist <= moveDist) {
-                    this.x = target.x;
-                    this.y = target.y;
-                    this.targetIndex++;
-                } else {
-                    this.x += (dx / dist) * moveDist;
-                    this.y += (dy / dist) * moveDist;
-                }
-
-                nodes.forEach(function(node) {
-                    if (!this.visitedNodes.has(node.id)) {
-                        const distToNode = Math.sqrt(Math.pow(this.x - node.x, 2) + Math.pow(this.y - node.y, 2));
-                        if (distToNode <= 1.0) {
-                            node.totalVisits++;
-                            totalUsage++;
-                            this.visitedNodes.add(node.id);
-                        }
-                    }
-                }.bind(this));
+            if (dest) {
+                var segment = findPath(Math.floor(currentPos.x), Math.floor(currentPos.y),
+                                          Math.floor(dest.x), Math.floor(dest.y));
+                for (var s = 0; s < segment.length; s++) this.path.push(segment[s]);
             }
         }
 
+        Agent.prototype.update = function(dt) {
+            if (!this.active || this.path.length === 0 || this.targetIndex >= this.path.length) {
+                if (this.active) {
+                    this.active = false;
+                    totalArrived++;
+                }
+                return;
+            }
+
+            // 等待逻辑
+            if (this.isWaiting) {
+                this.waitTimer -= dt;
+                if (this.waitTimer <= 0) this.isWaiting = false;
+                else return;
+            }
+
+            // 1. 沿路径方向
+            var target = this.path[this.targetIndex];
+            var dx = target.x - this.x;
+            var dy = target.y - this.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            var moveDist = this.speed * dt * (1 / CELL_SIZE);
+
+            var nx = this.x, ny = this.y;
+            if (dist <= moveDist) {
+                nx = target.x; ny = target.y;
+                this.targetIndex++;
+                // 检查是否到达途径点，触发等待
+                for (var wi = 0; wi < this.waypointIndices.length; wi++) {
+                    if (this.waypointIndices[wi] === this.targetIndex - 1 && this.waitTime > 0) {
+                        this.isWaiting = true;
+                        this.waitTimer = this.waitTime;
+                        break;
+                    }
+                }
+            } else {
+                nx = this.x + (dx / dist) * moveDist;
+                ny = this.y + (dy / dist) * moveDist;
+            }
+
+            // 2. 碰撞避让 -- 空间网格查询
+            this.vx = 0; this.vy = 0;
+            var repelCount = 0;
+            spatialGrid.forEachNearby(this, function(other) {
+                var rdx = other.x - this.x;
+                var rdy = other.y - this.y;
+                var rDist = Math.sqrt(rdx * rdx + rdy * rdy);
+                if (rDist < COLLISION_DIST && rDist > 0.01) {
+                    var overlap = COLLISION_DIST - rDist;
+                    var force = overlap * 0.15;
+                    this.vx -= (rdx / rDist) * force;
+                    this.vy -= (rdy / rDist) * force;
+                    repelCount++;
+                }
+            }.bind(this));
+
+            // 3. 融合位移
+            nx += this.vx;
+            ny += this.vy;
+
+            // 4. 边界约束
+            nx = Math.max(AGENT_RADIUS, Math.min(CONFIG.grid.cols - AGENT_RADIUS, nx));
+            ny = Math.max(AGENT_RADIUS, Math.min(CONFIG.grid.rows - AGENT_RADIUS, ny));
+
+            this.x = nx; this.y = ny;
+
+            // 5. 访问计数
+            for (var i = 0; i < nodes.length; i++) {
+                var node = nodes[i];
+                if (!this.visitedNodes.has(node.id)) {
+                    var d2 = (this.x - node.x) * (this.x - node.x) + (this.y - node.y) * (this.y - node.y);
+                    if (d2 <= 4.0) {
+                        node.totalVisits++;
+                        totalUsage++;
+                        this.visitedNodes.add(node.id);
+                    }
+                }
+            }
+        };
+
         // ==========================================
-        // 渲染
+        // 渲染系统
         // ==========================================
         function requestStaticRedraw() {
             if (!canvasStatic) return;
             canvasStatic.width = window.innerWidth;
             canvasStatic.height = window.innerHeight;
 
-            const style = getComputedStyle(document.body);
-            const bgColor = style.getPropertyValue('--sf-canvas-bg').trim();
-            const gridColor = style.getPropertyValue('--sf-grid-color').trim();
-            const sfColors = getSfColors();
+            var style = getComputedStyle(document.body);
+            var bgColor = style.getPropertyValue('--sf-canvas-bg').trim();
+            var gridColor = style.getPropertyValue('--sf-grid-color').trim();
+            var sfColors = getSfColors();
 
             ctxStatic.fillStyle = bgColor;
             ctxStatic.fillRect(0, 0, canvasStatic.width, canvasStatic.height);
 
             ctxStatic.strokeStyle = gridColor;
-            ctxStatic.lineWidth = 1;
+            ctxStatic.lineWidth = 0.5;
 
-            for (let i = 0; i <= CONFIG.grid.rows; i++) {
-                const p1 = project(0, i);
-                const p2 = project(CONFIG.grid.cols, i);
+            // 稀疏绘制网格线（每 5 格一条，减少视觉噪点）
+            var step = 5;
+            for (var i = 0; i <= CONFIG.grid.rows; i += step) {
+                var p1 = project(0, i);
+                var p2 = project(CONFIG.grid.cols, i);
                 ctxStatic.beginPath(); ctxStatic.moveTo(p1.x, p1.y); ctxStatic.lineTo(p2.x, p2.y); ctxStatic.stroke();
             }
-            for (let i = 0; i <= CONFIG.grid.cols; i++) {
-                const p1 = project(i, 0);
-                const p2 = project(i, CONFIG.grid.rows);
+            for (var i = 0; i <= CONFIG.grid.cols; i += step) {
+                var p1 = project(i, 0);
+                var p2 = project(i, CONFIG.grid.rows);
                 ctxStatic.beginPath(); ctxStatic.moveTo(p1.x, p1.y); ctxStatic.lineTo(p2.x, p2.y); ctxStatic.stroke();
             }
 
+            // 障碍物 3D 方块 (固定 0.5 高度)
             obstacles.forEach(function(obs) {
-                const parts = obs.split(',');
-                const x = Number(parts[0]);
-                const y = Number(parts[1]);
-                const h = 0.5;
-                const t0 = project(x, y, h);
-                const t1 = project(x+1, y, h);
-                const t2 = project(x+1, y+1, h);
-                const t3 = project(x, y+1, h);
+                var parts = obs.split(',');
+                var x = Number(parts[0]);
+                var y = Number(parts[1]);
+                var t0 = project(x, y, 0.5);
+                var t1 = project(x + 1, y, 0.5);
+                var t2 = project(x + 1, y + 1, 0.5);
+                var t3 = project(x, y + 1, 0.5);
 
                 ctxStatic.fillStyle = sfColors.obstacleFill;
                 ctxStatic.strokeStyle = sfColors.obstacleStroke;
@@ -699,221 +1172,364 @@
             canvasDynamic.height = window.innerHeight;
             ctxDyn.clearRect(0, 0, canvasDynamic.width, canvasDynamic.height);
 
-            const sfColors = getSfColors();
-            const style = getComputedStyle(document.body);
-            const textColor = style.getPropertyValue('--text-color').trim();
-            const canvasBg = style.getPropertyValue('--sf-canvas-bg').trim();
+            var sfColors = getSfColors();
+            var style = getComputedStyle(document.body);
+            var textColor = style.getPropertyValue('--text-color').trim();
+            var canvasBg = style.getPropertyValue('--sf-canvas-bg').trim();
 
-            let renderList = [];
+            // 批量绘制行人（减少状态切换）
+            var pRef = project(0, 0);
+            var pRef2 = project(1, 0);
+            var screenCellSize = Math.abs(pRef2.x - pRef.x);
+            var r = Math.max(1.5, screenCellSize * AGENT_RADIUS * 0.5);
 
-            agents.forEach(function(a) {
-                const p = project(a.x, a.y, 0.1);
+            // 构建渲染列表并按深度排序
+            var renderList = [];
+
+            for (var i = 0; i < agents.length; i++) {
+                var a = agents[i];
+                var p = project(a.x, a.y, 0.2);
                 renderList.push({ type: 'agent', p: p });
-            });
+            }
 
-            nodes.forEach(function(node) {
-                const p = project(node.x, node.y, 0);
-                const color = sfColors[node.type];
+            for (var i = 0; i < nodes.length; i++) {
+                var node = nodes[i];
+                var p = project(node.x, node.y, 0);
+                var color = sfColors[node.type];
                 renderList.push({ type: 'node', node: node, p: p, color: color });
-            });
+            }
 
             renderList.sort(function(a, b) { return b.p.depth - a.p.depth; });
 
-            renderList.forEach(function(item) {
+            // 先画所有 agent（批量绘制减少状态切换）
+            ctxDyn.fillStyle = sfColors.agent;
+            ctxDyn.shadowColor = sfColors.agent;
+            ctxDyn.shadowBlur = 4;
+            ctxDyn.beginPath();
+            for (var i = 0; i < renderList.length; i++) {
+                var item = renderList[i];
                 if (item.type === 'agent') {
-                    ctxDyn.fillStyle = sfColors.agent;
-                    ctxDyn.shadowColor = sfColors.agent;
-                    ctxDyn.shadowBlur = 8;
-                    ctxDyn.beginPath();
-                    ctxDyn.arc(item.p.x, item.p.y, 2.5, 0, Math.PI * 2);
-                    ctxDyn.fill();
-                    ctxDyn.shadowBlur = 0;
+                    ctxDyn.moveTo(item.p.x + r, item.p.y);
+                    ctxDyn.arc(item.p.x, item.p.y, r, 0, Math.PI * 2);
                 }
-                else if (item.type === 'node') {
-                    const node = item.node;
-                    const p = item.p;
-                    const isSelected = state.selectedNodeId === node.id;
+            }
+            ctxDyn.fill();
 
-                    const h = Math.min(10, node.totalVisits * 0.05 + 0.5);
-                    const top = project(node.x, node.y, h);
+            // 再画所有节点
+            ctxDyn.shadowBlur = 0;
+            for (var i = 0; i < renderList.length; i++) {
+                var item = renderList[i];
+                if (item.type !== 'node') continue;
 
-                    ctxDyn.strokeStyle = item.color;
-                    ctxDyn.lineWidth = isSelected ? 2 : 1;
-                    ctxDyn.beginPath();
-                    ctxDyn.moveTo(p.x, p.y);
-                    ctxDyn.lineTo(top.x, top.y);
-                    ctxDyn.stroke();
+                var node = item.node;
+                var p = item.p;
+                var isSelected = state.selectedNodeId === node.id;
 
-                    ctxDyn.font = isSelected ? 'bold 12px monospace' : '10px monospace';
-                    const text = node.name + ' (' + node.totalVisits + ')';
-                    const tw = ctxDyn.measureText(text).width;
-                    ctxDyn.fillStyle = canvasBg;
-                    ctxDyn.globalAlpha = 0.7;
-                    ctxDyn.fillRect(top.x - tw/2 - 2, top.y - 19, tw + 4, 12);
-                    ctxDyn.globalAlpha = 1.0;
+                var h = Math.min(10, node.totalVisits * 0.02 + 0.5);
+                var top = project(node.x, node.y, h);
 
-                    ctxDyn.fillStyle = isSelected ? item.color : textColor;
-                    ctxDyn.textAlign = 'center';
-                    ctxDyn.fillText(text, top.x, top.y - 10);
+                ctxDyn.strokeStyle = item.color;
+                ctxDyn.lineWidth = isSelected ? 2 : 1;
+                ctxDyn.beginPath();
+                ctxDyn.moveTo(p.x, p.y);
+                ctxDyn.lineTo(top.x, top.y);
+                ctxDyn.stroke();
 
-                    if (isSelected) drawGumball(node, p);
-                }
-            });
+                ctxDyn.font = isSelected ? 'bold 11px monospace' : '9px monospace';
+                var text = node.name + ' (' + node.totalVisits + ')';
+                var tw = ctxDyn.measureText(text).width;
+                ctxDyn.fillStyle = canvasBg;
+                ctxDyn.globalAlpha = 0.7;
+                ctxDyn.fillRect(top.x - tw / 2 - 2, top.y - 17, tw + 4, 11);
+                ctxDyn.globalAlpha = 1.0;
+
+                ctxDyn.fillStyle = isSelected ? item.color : textColor;
+                ctxDyn.textAlign = 'center';
+                ctxDyn.fillText(text, top.x, top.y - 9);
+
+                if (isSelected) drawGumball(node, p);
+            }
         }
 
         function drawGumball(node, centerPos) {
-            const sfColors = getSfColors();
-            const axisLen = 2.5;
-            const pX = project(node.x + axisLen, node.y, 0);
-            const pY = project(node.x, node.y + axisLen, 0);
+            var sfColors = getSfColors();
+            var axisLen = 2.5;
+            var pX = project(node.x + axisLen, node.y, 0);
+            var pY = project(node.x, node.y + axisLen, 0);
 
-            ctxDyn.lineWidth = 3;
+            ctxDyn.lineWidth = 2;
             ctxDyn.strokeStyle = sfColors.gumballX;
             ctxDyn.beginPath(); ctxDyn.moveTo(centerPos.x, centerPos.y); ctxDyn.lineTo(pX.x, pX.y); ctxDyn.stroke();
             ctxDyn.fillStyle = sfColors.gumballX;
-            ctxDyn.beginPath(); ctxDyn.arc(pX.x, pX.y, 5, 0, Math.PI * 2); ctxDyn.fill();
+            ctxDyn.beginPath(); ctxDyn.arc(pX.x, pX.y, 4, 0, Math.PI * 2); ctxDyn.fill();
 
             ctxDyn.strokeStyle = sfColors.gumballY;
             ctxDyn.beginPath(); ctxDyn.moveTo(centerPos.x, centerPos.y); ctxDyn.lineTo(pY.x, pY.y); ctxDyn.stroke();
             ctxDyn.fillStyle = sfColors.gumballY;
-            ctxDyn.beginPath(); ctxDyn.arc(pY.x, pY.y, 5, 0, Math.PI * 2); ctxDyn.fill();
+            ctxDyn.beginPath(); ctxDyn.arc(pY.x, pY.y, 4, 0, Math.PI * 2); ctxDyn.fill();
         }
 
         // ==========================================
-        // 双折线图表
+        // 流程 Panel UI
         // ==========================================
-        function drawChart() {
-            if (!chartCtx) return;
-            const w = chartCtx.canvas.width;
-            const h = chartCtx.canvas.height;
-            chartCtx.clearRect(0, 0, w, h);
-
-            const style = getComputedStyle(document.body);
-            chartCtx.strokeStyle = style.getPropertyValue('--sf-chart-line').trim();
-            chartCtx.beginPath();
-            chartCtx.moveTo(0, h-1); chartCtx.lineTo(w, h-1); chartCtx.stroke();
-
-            const maxVal = Math.max(
-                Math.max.apply(null, chartData.throughput.concat([1])),
-                Math.max.apply(null, chartData.usage.concat([1]))
-            );
-            const stepX = w / (chartData.maxPoints - 1);
-
-            chartCtx.strokeStyle = '#00ffff';
-            chartCtx.lineWidth = 2;
-            chartCtx.beginPath();
-            chartData.throughput.forEach(function(v, i) {
-                const x = i * stepX;
-                const y = h - (v / maxVal) * (h - 10);
-                i === 0 ? chartCtx.moveTo(x, y) : chartCtx.lineTo(x, y);
-            });
-            chartCtx.stroke();
-
-            chartCtx.strokeStyle = '#eab308';
-            chartCtx.lineWidth = 2;
-            chartCtx.beginPath();
-            chartData.usage.forEach(function(v, i) {
-                const x = i * stepX;
-                const y = h - (v / maxVal) * (h - 10);
-                i === 0 ? chartCtx.moveTo(x, y) : chartCtx.lineTo(x, y);
-            });
-            chartCtx.stroke();
-        }
-
-        // ==========================================
-        // UI 面板
-        // ==========================================
-        function getOptionsHTML(nodesList, selectedId, typeFilter) {
-            let html = '<option value="">无</option>';
-            nodesList.filter(function(n) { return n.type === typeFilter; }).forEach(function(n) {
-                html += '<option value="' + n.id + '" ' + (n.id === selectedId ? 'selected' : '') + '>' + n.name + '</option>';
-            });
+        function getFlowOptionsHTMLWithSelected(typeFilter, selectedId) {
+            var html = '<option value="">-- 选择 --</option>';
+            for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                if (n.type === typeFilter) {
+                    html += '<option value="' + n.id + '"' + (n.id === selectedId ? ' selected' : '') + '>' + n.name + '</option>';
+                }
+            }
             return html;
         }
 
-        function updateUIPanel() {
-            const list = document.getElementById('nodes-list');
+        function updateFlowPanel() {
+            var list = document.getElementById('flows-list');
             list.innerHTML = '';
 
-            const sfColors = getSfColors();
+            for (var si = 0; si < nodes.length; si++) {
+                var source = nodes[si];
+                if (source.type !== TYPE.SOURCE) continue;
 
-            nodes.forEach(function(node) {
-                const isSelected = state.selectedNodeId === node.id;
-                const div = document.createElement('div');
+                var div = document.createElement('div');
+                div.className = 'flow-card';
+
+                var wpNames = [];
+                var wpIds = source.waypoints || [];
+                for (var wi = 0; wi < wpIds.length; wi++) {
+                    var wp = null;
+                    for (var nj = 0; nj < nodes.length; nj++) { if (nodes[nj].id === wpIds[wi]) { wp = nodes[nj]; break; } }
+                    wpNames.push(wp ? wp.name : '(已删除)');
+                }
+
+                var dest = null;
+                for (var di = 0; di < nodes.length; di++) { if (nodes[di].id === source.targetDest) { dest = nodes[di]; break; } }
+
+                var routeHTML = '<span class="flow-node-badge source">' + source.name + '</span>';
+                for (var wi = 0; wi < wpNames.length; wi++) {
+                    routeHTML += '<span class="flow-arrow-icon">&rarr;</span><span class="flow-node-badge waypoint">' + wpNames[wi] + '</span>';
+                }
+                if (dest) {
+                    routeHTML += '<span class="flow-arrow-icon">&rarr;</span><span class="flow-node-badge destination">' + dest.name + '</span>';
+                } else {
+                    routeHTML += '<span class="flow-arrow-icon">&rarr;</span><span class="flow-node-badge destination" style="opacity:0.5;">未设置</span>';
+                }
+
+                var wpListHTML = '';
+                for (var idx = 0; idx < wpIds.length; idx++) {
+                    wpListHTML += '<div class="flow-wp-item">' +
+                        '<span style="font-size:10px; opacity:0.6;">途径' + (idx + 1) + ':</span>' +
+                        '<select onchange="updateFlowWaypoint(\'' + source.id + '\', ' + idx + ', this.value)"' +
+                        ' style="flex:1; font-size:11px; background:var(--sf-input-bg); color:var(--text-color); border:1px solid var(--sf-input-border); border-radius:4px; padding:2px 4px;">' +
+                        '<option value="">-- 移除 --</option>' +
+                        getFlowOptionsHTMLWithSelected(TYPE.WAYPOINT, wpIds[idx]) +
+                        '</select>' +
+                        '<button class="btn-remove-wp" onclick="removeFlowWaypoint(\'' + source.id + '\', ' + idx + ')">&times;</button>' +
+                        '</div>';
+                }
+
+                div.innerHTML =
+                    '<div class="flow-header">' +
+                        '<span class="flow-name">流程: ' + source.name + '</span>' +
+                        '<div style="display:flex; gap:4px;">' +
+                            '<button onclick="addFlowWaypoint(\'' + source.id + '\')" class="sf-btn" style="padding:2px 8px; font-size:10px;">+ 途径点</button>' +
+                            '<button onclick="deleteFlow(\'' + source.id + '\')" class="sf-btn" style="padding:2px 6px; font-size:10px;">删除</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flow-route">' + routeHTML + '</div>' +
+                    '<div class="flow-config-row"><label>起点:</label><span style="font-size:11px;">' + source.name + '</span></div>' +
+                    '<div class="flow-config-row"><label>途径点:</label>' +
+                        '<div style="flex:1; display:flex; flex-direction:column; gap:2px;">' + (wpListHTML || '<span style="font-size:10px; opacity:0.5;">无途径点</span>') + '</div>' +
+                    '</div>' +
+                    '<div class="flow-config-row"><label>终点:</label>' +
+                        '<select onchange="updateFlowDest(\'' + source.id + '\', this.value)">' +
+                            getFlowOptionsHTMLWithSelected(TYPE.DESTINATION, source.targetDest) +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="flow-config-row"><label>等待时间(秒):</label>' +
+                        '<input type="number" value="' + (source.waitTime || 0) + '" min="0" max="300"' +
+                        ' onchange="updateFlowWaitTime(\'' + source.id + '\', this.value)">' +
+                    '</div>' +
+                    '<div class="flow-config-row"><label>生成率(人/分):</label>' +
+                        '<input type="number" value="' + source.rate + '" min="1" max="100"' +
+                        ' onchange="updateNodeAttr(\'' + source.id + '\', \'rate\', this.value)">' +
+                    '</div>' +
+                    '<div class="flow-config-row"><label>移速(米/秒):</label>' +
+                        '<input type="number" step="0.1" value="' + source.speed + '" min="0.5" max="5"' +
+                        ' onchange="updateNodeAttr(\'' + source.id + '\', \'speed\', this.value)">' +
+                    '</div>';
+
+                list.appendChild(div);
+            }
+        }
+
+        window.addFlowWaypoint = function(sourceId) {
+            var source = null;
+            for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === sourceId) { source = nodes[i]; break; } }
+            if (!source) return;
+            if (!source.waypoints) source.waypoints = [];
+            var wpNodes = nodes.filter(function(n) { return n.type === TYPE.WAYPOINT; });
+            if (wpNodes.length > 0) source.waypoints.push(wpNodes[0].id);
+            updateFlowPanel();
+        };
+        window.removeFlowWaypoint = function(sourceId, index) {
+            var source = null;
+            for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === sourceId) { source = nodes[i]; break; } }
+            if (!source || !source.waypoints) return;
+            source.waypoints.splice(index, 1);
+            updateFlowPanel();
+        };
+        window.updateFlowWaypoint = function(sourceId, index, newWpId) {
+            var source = null;
+            for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === sourceId) { source = nodes[i]; break; } }
+            if (!source || !source.waypoints) return;
+            if (newWpId === '') source.waypoints.splice(index, 1);
+            else source.waypoints[index] = newWpId;
+            updateFlowPanel();
+        };
+        window.updateFlowDest = function(sourceId, destId) {
+            var source = null;
+            for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === sourceId) { source = nodes[i]; break; } }
+            if (!source) return;
+            source.targetDest = destId;
+            updateFlowPanel();
+        };
+        window.updateFlowWaitTime = function(sourceId, val) {
+            var source = null;
+            for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === sourceId) { source = nodes[i]; break; } }
+            if (!source) return;
+            source.waitTime = Number(val);
+        };
+        window.deleteFlow = function(sourceId) {
+            nodes = nodes.filter(function(n) { return n.id !== sourceId; });
+            if (state.selectedNodeId === sourceId) state.selectedNodeId = null;
+            nodes.forEach(function(n) {
+                if (n.targetDest === sourceId) n.targetDest = '';
+                if (n.waypoints) n.waypoints = n.waypoints.filter(function(wid) { return wid !== sourceId; });
+            });
+            updateFlowPanel();
+            updateEntityPanel();
+        };
+        document.getElementById('btn-add-flow').onclick = function() {
+            var newId = generateId();
+            nodes.push({
+                id: newId, type: TYPE.SOURCE, x: 10, y: 10, name: '新流程',
+                rate: 5, speed: 1.2, waypoints: [], targetDest: '', waitTime: 5,
+                totalVisits: 0, history: [], nextSpawnTime: state.simTime
+            });
+            updateFlowPanel();
+            updateEntityPanel();
+        };
+
+        // ==========================================
+        // 实体 Panel UI
+        // ==========================================
+        function getOptionsHTML(selectedId, typeFilter) {
+            var html = '<option value="">无</option>';
+            for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                if (n.type === typeFilter) {
+                    html += '<option value="' + n.id + '"' + (n.id === selectedId ? ' selected' : '') + '>' + n.name + '</option>';
+                }
+            }
+            return html;
+        }
+
+        function updateEntityPanel() {
+            var list = document.getElementById('nodes-list');
+            list.innerHTML = '';
+            var sfColors = getSfColors();
+
+            for (var i = 0; i < nodes.length; i++) {
+                var node = nodes[i];
+                var isSelected = state.selectedNodeId === node.id;
+                var div = document.createElement('div');
                 div.className = 'node-card' + (isSelected ? ' selected' : '');
 
-                let content = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">' +
-                    '<strong style="color:' + sfColors[node.type] + '">[' + TYPE_NAME[node.type] + '] ' + node.name + '</strong>' +
-                    '<button onclick="deleteNode(\'' + node.id + '\')" style="padding:2px 6px; border:1px solid #ef4444; color:#ef4444; background:transparent; border-radius:4px; cursor:pointer;">删除</button>' +
+                var typeClass = node.type === TYPE.SOURCE ? 'src' : node.type === TYPE.WAYPOINT ? 'wp' : 'dst';
+                var content =
+                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">' +
+                        '<strong><span class="node-type-badge ' + typeClass + '">[' + TYPE_NAME[node.type] + ']</span> ' + node.name + '</strong>' +
+                        '<button onclick="deleteNode(\'' + node.id + '\')" class="sf-btn" style="padding:2px 6px; font-size:10px;">删除</button>' +
                     '</div>' +
                     '<div class="form-group"><label>坐标 (X,Y):</label> <span>' + node.x.toFixed(1) + ', ' + node.y.toFixed(1) + '</span></div>';
 
                 if (node.type === TYPE.SOURCE) {
-                    content += '<div class="form-group"><label>生成率(人/分):</label>' +
-                        '<input type="number" value="' + node.rate + '" onchange="updateNodeAttr(\'' + node.id + '\', \'rate\', this.value)"></div>' +
+                    content +=
+                        '<div class="form-group"><label>生成率(人/分):</label>' +
+                            '<input type="number" value="' + node.rate + '" onchange="updateNodeAttr(\'' + node.id + '\', \'rate\', this.value)"></div>' +
                         '<div class="form-group"><label>移速(米/秒):</label>' +
-                        '<input type="number" step="0.1" value="' + node.speed + '" onchange="updateNodeAttr(\'' + node.id + '\', \'speed\', this.value)"></div>' +
-                        '<div class="form-group"><label>途经点:</label>' +
-                        '<select onchange="updateNodeAttr(\'' + node.id + '\', \'targetWp\', this.value)">' +
-                        getOptionsHTML(nodes, node.targetWp, TYPE.WAYPOINT) + '</select></div>' +
+                            '<input type="number" step="0.1" value="' + node.speed + '" onchange="updateNodeAttr(\'' + node.id + '\', \'speed\', this.value)"></div>' +
+                        '<div class="form-group"><label>等待时间(秒):</label>' +
+                            '<input type="number" value="' + (node.waitTime || 0) + '" min="0" onchange="updateNodeAttr(\'' + node.id + '\', \'waitTime\', this.value)"></div>' +
                         '<div class="form-group"><label>终点:</label>' +
-                        '<select onchange="updateNodeAttr(\'' + node.id + '\', \'targetDest\', this.value)">' +
-                        getOptionsHTML(nodes, node.targetDest, TYPE.DESTINATION) + '</select></div>';
+                            '<select onchange="updateNodeAttr(\'' + node.id + '\', \'targetDest\', this.value)">' +
+                                getOptionsHTML(node.targetDest, TYPE.DESTINATION) +
+                            '</select></div>';
                 }
 
                 div.innerHTML = content;
-                div.onclick = function(e) {
-                    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'BUTTON') {
-                        state.selectedNodeId = node.id;
-                        updateUIPanel();
-                        drawDynamic();
-                    }
-                };
+                (function(nodeRef) {
+                    div.onclick = function(e) {
+                        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'BUTTON') {
+                            state.selectedNodeId = nodeRef.id;
+                            updateEntityPanel();
+                            drawDynamic();
+                        }
+                    };
+                })(node);
                 list.appendChild(div);
-            });
+            }
         }
 
         function updateStats() {
-            document.getElementById('stat-active').innerText = agents.length;
-            document.getElementById('stat-throughput').innerText = totalArrived;
-            document.getElementById('stat-usage').innerText = totalUsage;
-            document.getElementById('stat-arrived').innerText = totalArrived;
+            updateECharts();
         }
 
         window.updateNodeAttr = function(id, attr, val) {
-            const node = nodes.find(function(n) { return n.id === id; });
-            if (node) node[attr] = attr === 'targetWp' || attr === 'targetDest' ? val : Number(val);
+            var node = null;
+            for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === id) { node = nodes[i]; break; } }
+            if (node) {
+                if (attr === 'targetDest') node[attr] = val;
+                else node[attr] = Number(val);
+                updateFlowPanel();
+            }
         };
 
         window.deleteNode = function(id) {
             nodes = nodes.filter(function(n) { return n.id !== id; });
             if (state.selectedNodeId === id) state.selectedNodeId = null;
             nodes.forEach(function(n) {
-                if (n.targetWp === id) n.targetWp = '';
                 if (n.targetDest === id) n.targetDest = '';
+                if (n.waypoints) n.waypoints = n.waypoints.filter(function(wid) { return wid !== id; });
             });
-            updateUIPanel();
+            updateEntityPanel();
+            updateFlowPanel();
         };
 
         function generateId() { return Math.random().toString(36).substr(2, 5); }
 
         document.getElementById('btn-add-source').onclick = function() {
-            nodes.push({ id: generateId(), type: TYPE.SOURCE, x: 5, y: 5, name: '新起点', rate: 5, speed: 1.2, targetWp: '', targetDest: '', totalVisits: 0, history: [], nextSpawnTime: state.simTime });
-            updateUIPanel();
+            nodes.push({
+                id: generateId(), type: TYPE.SOURCE, x: 10, y: 10, name: '新起点',
+                rate: 5, speed: 1.2, waypoints: [], targetDest: '', waitTime: 5,
+                totalVisits: 0, history: [], nextSpawnTime: state.simTime
+            });
+            updateEntityPanel(); updateFlowPanel();
         };
         document.getElementById('btn-add-wp').onclick = function() {
-            nodes.push({ id: generateId(), type: TYPE.WAYPOINT, x: 15, y: 15, name: '新途经点', totalVisits: 0, history: [] });
-            updateUIPanel();
+            nodes.push({ id: generateId(), type: TYPE.WAYPOINT, x: 30, y: 30, name: '新途经点', totalVisits: 0, history: [] });
+            updateEntityPanel(); updateFlowPanel();
         };
         document.getElementById('btn-add-dest').onclick = function() {
-            nodes.push({ id: generateId(), type: TYPE.DESTINATION, x: 25, y: 25, name: '新终点', totalVisits: 0, history: [] });
-            updateUIPanel();
+            nodes.push({ id: generateId(), type: TYPE.DESTINATION, x: 50, y: 50, name: '新终点', totalVisits: 0, history: [] });
+            updateEntityPanel(); updateFlowPanel();
         };
 
         // ==========================================
         // 相机交互
         // ==========================================
-        let mouseState = { isDown: false, button: -1, lastX: 0, lastY: 0 };
+        var mouseState = { isDown: false, button: -1, lastX: 0, lastY: 0 };
 
         window.addEventListener('contextmenu', function(e) {
             if (e.target === canvasDynamic || e.target === canvasStatic) e.preventDefault();
@@ -927,13 +1543,14 @@
             mouseState.lastY = e.clientY;
 
             if (e.button === 0) {
-                const node = nodes.find(function(n) { return n.id === state.selectedNodeId; });
-                let hitGumball = false;
+                var selectedNode = null;
+                for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === state.selectedNodeId) { selectedNode = nodes[i]; break; } }
+                var hitGumball = false;
 
-                if (node) {
-                    const axisLen = 2.5;
-                    const pX = project(node.x + axisLen, node.y, 0);
-                    const pY = project(node.x, node.y + axisLen, 0);
+                if (selectedNode) {
+                    var axisLen = 2.5;
+                    var pX = project(selectedNode.x + axisLen, selectedNode.y, 0);
+                    var pY = project(selectedNode.x, selectedNode.y + axisLen, 0);
 
                     if (Math.hypot(e.clientX - pX.x, e.clientY - pX.y) < 12) {
                         state.dragMode = 'X'; hitGumball = true;
@@ -943,25 +1560,26 @@
                 }
 
                 if (!hitGumball) {
-                    let hitNode = null;
-                    let minDist = 20;
-                    nodes.forEach(function(n) {
-                        const p = project(n.x, n.y, 0);
-                        const dist = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+                    var hitNode = null;
+                    var minDist = 20;
+                    for (var i = 0; i < nodes.length; i++) {
+                        var n = nodes[i];
+                        var p = project(n.x, n.y, 0);
+                        var dist = Math.hypot(e.clientX - p.x, e.clientY - p.y);
                         if (dist < minDist) { minDist = dist; hitNode = n; }
-                    });
+                    }
 
                     state.selectedNodeId = hitNode ? hitNode.id : null;
                     state.dragMode = null;
-                    updateUIPanel();
+                    updateEntityPanel();
                 }
             }
         });
 
         window.addEventListener('mousemove', function(e) {
             if (!mouseState.isDown) return;
-            const dx = e.clientX - mouseState.lastX;
-            const dy = e.clientY - mouseState.lastY;
+            var dx = e.clientX - mouseState.lastX;
+            var dy = e.clientY - mouseState.lastY;
 
             if (mouseState.button === 2) {
                 camera.yaw -= dx * 0.01;
@@ -975,15 +1593,17 @@
                 requestStaticRedraw();
             }
             else if (mouseState.button === 0 && state.dragMode && state.selectedNodeId) {
-                const node = nodes.find(function(n) { return n.id === state.selectedNodeId; });
-                const unproj = unprojectZeroZ(e.clientX, e.clientY);
+                var node = null;
+                for (var i = 0; i < nodes.length; i++) { if (nodes[i].id === state.selectedNodeId) { node = nodes[i]; break; } }
+                var unproj = unprojectZeroZ(e.clientX, e.clientY);
 
                 if (state.dragMode === 'X') {
                     node.x = Math.max(0, Math.min(CONFIG.grid.cols, unproj.x));
                 } else if (state.dragMode === 'Y') {
                     node.y = Math.max(0, Math.min(CONFIG.grid.rows, unproj.y));
                 }
-                updateUIPanel();
+                updateEntityPanel();
+                updateFlowPanel();
             }
 
             mouseState.lastX = e.clientX;
@@ -998,13 +1618,13 @@
         window.addEventListener('wheel', function(e) {
             if (e.target !== canvasDynamic && e.target !== canvasStatic) return;
             camera.zoom -= e.deltaY * 0.05;
-            camera.zoom = Math.max(5, Math.min(100, camera.zoom));
+            camera.zoom = Math.max(3, Math.min(60, camera.zoom));
             requestStaticRedraw();
         });
 
         document.getElementById('btn-reset-camera').onclick = function() {
             camera = {
-                yaw: Math.PI / 4, pitch: Math.PI / 4, zoom: 25,
+                yaw: Math.PI / 4, pitch: Math.PI / 4, zoom: 12,
                 panX: window.innerWidth / 2, panY: window.innerHeight / 2
             };
             requestStaticRedraw();
@@ -1014,36 +1634,50 @@
         // 主循环
         // ==========================================
         function formatTime(secs) {
-            const h = Math.floor(secs / 3600).toString().padStart(2, '0');
-            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
-            const s = Math.floor(secs % 60).toString().padStart(2, '0');
+            var h = Math.floor(secs / 3600).toString();
+            while (h.length < 2) h = '0' + h;
+            var m = Math.floor((secs % 3600) / 60).toString();
+            while (m.length < 2) m = '0' + m;
+            var s = Math.floor(secs % 60).toString();
+            while (s.length < 2) s = '0' + s;
             return h + ':' + m + ':' + s;
         }
 
         function loop(timestamp) {
             if (!state.lastRealTime) state.lastRealTime = timestamp;
-            const realDt = (timestamp - state.lastRealTime) / 1000;
+            var realDt = (timestamp - state.lastRealTime) / 1000;
             state.lastRealTime = timestamp;
 
             if (state.isRunning && state.simTime < CONFIG.sim.maxTime) {
-                const simDt = realDt * CONFIG.sim.speedMultiplier;
+                var simDt = realDt * CONFIG.sim.speedMultiplier;
                 state.simTime += simDt;
 
-                nodes.filter(function(n) { return n.type === TYPE.SOURCE; }).forEach(function(source) {
+                // 生成行人
+                for (var i = 0; i < nodes.length; i++) {
+                    var source = nodes[i];
+                    if (source.type !== TYPE.SOURCE) continue;
                     if (source.nextSpawnTime === undefined) source.nextSpawnTime = state.simTime;
 
                     if (state.simTime >= source.nextSpawnTime) {
-                        if (source.targetDest || source.targetWp) {
+                        if (source.targetDest || (source.waypoints && source.waypoints.length > 0)) {
                             agents.push(new Agent(source));
                         }
-                        const intervalSecs = 60 / (source.rate || 1);
+                        var intervalSecs = 60 / (source.rate || 1);
                         source.nextSpawnTime = state.simTime + intervalSecs;
                     }
-                });
+                }
 
-                agents.forEach(function(a) { a.update(simDt); });
+                // 1. 清空空间网格
+                spatialGrid.clear();
+                // 2. 加入所有活跃行人
+                for (var i = 0; i < agents.length; i++) {
+                    if (agents[i].active) spatialGrid.add(agents[i]);
+                }
+                // 3. 更新行人
+                for (var i = 0; i < agents.length; i++) agents[i].update(simDt);
                 agents = agents.filter(function(a) { return a.active; });
 
+                // 图表采样
                 if (Math.floor(state.simTime) % 1 === 0 && Math.abs(state.simTime - (state.lastSampleTime || 0)) > 0.5) {
                     state.lastSampleTime = state.simTime;
 
@@ -1052,13 +1686,11 @@
 
                     if (chartData.throughput.length > chartData.maxPoints) chartData.throughput.shift();
                     if (chartData.usage.length > chartData.maxPoints) chartData.usage.shift();
-
-                    drawChart();
                 }
 
                 if (state.simTime >= CONFIG.sim.maxTime) {
                     state.isRunning = false;
-                    const uiStatus = document.getElementById('ui-status');
+                    var uiStatus = document.getElementById('ui-status');
                     uiStatus.innerText = '仿真结束 (8小时)';
                     uiStatus.style.color = getComputedStyle(document.body).getPropertyValue('--sf-status-pause').trim();
                 }
@@ -1076,8 +1708,8 @@
         document.getElementById('btn-toggle-sim').onclick = function() {
             if (state.simTime >= CONFIG.sim.maxTime) return;
             state.isRunning = !state.isRunning;
-            const uiStatus = document.getElementById('ui-status');
-            const style = getComputedStyle(document.body);
+            var uiStatus = document.getElementById('ui-status');
+            var style = getComputedStyle(document.body);
             uiStatus.innerText = state.isRunning ? '运行中' : '已暂停';
             uiStatus.style.color = style.getPropertyValue(state.isRunning ? '--sf-status-run' : '--sf-status-pause').trim();
             state.lastRealTime = performance.now();
@@ -1092,17 +1724,16 @@
             chartData.throughput = [];
             chartData.usage = [];
 
-            nodes.forEach(function(n) {
-                n.totalVisits = 0;
-                n.history = [];
-                n.nextSpawnTime = 0;
-            });
+            for (var i = 0; i < nodes.length; i++) {
+                nodes[i].totalVisits = 0;
+                nodes[i].history = [];
+                nodes[i].nextSpawnTime = 0;
+            }
 
-            const uiStatus = document.getElementById('ui-status');
+            var uiStatus = document.getElementById('ui-status');
             uiStatus.innerText = '已重置';
             uiStatus.style.color = getComputedStyle(document.body).getPropertyValue('--text-color').trim();
             updateStats();
-            drawChart();
         };
 
         document.getElementById('input-speed').onchange = function(e) {
@@ -1118,9 +1749,10 @@
             requestStaticRedraw();
         });
 
-        updateUIPanel();
+        initECharts();
+        updateFlowPanel();
+        updateEntityPanel();
         updateStats();
-        drawChart();
         requestStaticRedraw();
         requestAnimationFrame(loop);
     </script>
