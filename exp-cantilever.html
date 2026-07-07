@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>悬臂梁材料力学交互分析</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        /* ========== Cantilever Theme Variables ========== */
+        :root {
+            --ct-canvas-bg: #fafafa;
+            --ct-panel-bg: #ffffff;
+            --ct-panel-border: #e0e0e0;
+            --ct-text: #1a1a2e;
+            --ct-text-muted: #7a7a8a;
+            --ct-accent: #6b8cae;
+            --ct-accent-2: #8a7ca8;
+            --ct-danger: #c45a4a;
+            --ct-beam-fill: #e0e0e0;
+            --ct-beam-stroke: #1a1a2e;
+            --ct-force: #c45a4a;
+            --ct-moment-line: #c4956a;
+            --ct-moment-area: rgba(196,149,106,0.2);
+            --ct-deflect-line: #6b8cae;
+            --ct-deflect-area: rgba(107,140,174,0.2);
+            --ct-chart-bg: #ffffff;
+            --ct-input-track: #e0e0e0;
+            --ct-input-thumb: #6b8cae;
+        }
+
+        [data-theme="glass"] {
+            --ct-canvas-bg: #0f1117;
+            --ct-panel-bg: rgba(255,255,255,0.06);
+            --ct-panel-border: rgba(255,255,255,0.12);
+            --ct-text: #e0e6ed;
+            --ct-text-muted: #8b92a8;
+            --ct-accent: #74b9ff;
+            --ct-accent-2: #a29bfe;
+            --ct-danger: #ff7675;
+            --ct-beam-fill: rgba(255,255,255,0.08);
+            --ct-beam-stroke: #e0e6ed;
+            --ct-force: #ff7675;
+            --ct-moment-line: #fab1a0;
+            --ct-moment-area: rgba(250,177,160,0.15);
+            --ct-deflect-line: #74b9ff;
+            --ct-deflect-area: rgba(116,185,255,0.15);
+            --ct-chart-bg: rgba(255,255,255,0.03);
+            --ct-input-track: rgba(255,255,255,0.1);
+            --ct-input-thumb: #74b9ff;
+        }
+
+        [data-theme="cyber"] {
+            --ct-canvas-bg: #0a0014;
+            --ct-panel-bg: rgba(20,0,40,0.6);
+            --ct-panel-border: rgba(189,0,255,0.4);
+            --ct-text: #f0e6ff;
+            --ct-text-muted: #a080c0;
+            --ct-accent: #00f3ff;
+            --ct-accent-2: #bd00ff;
+            --ct-danger: #ff00ea;
+            --ct-beam-fill: rgba(189,0,255,0.1);
+            --ct-beam-stroke: #f0e6ff;
+            --ct-force: #ff00ea;
+            --ct-moment-line: #ff9d00;
+            --ct-moment-area: rgba(255,157,0,0.15);
+            --ct-deflect-line: #00f3ff;
+            --ct-deflect-area: rgba(0,243,255,0.15);
+            --ct-chart-bg: rgba(20,0,40,0.4);
+            --ct-input-track: rgba(189,0,255,0.2);
+            --ct-input-thumb: #bd00ff;
+        }
+
+        [data-theme="cartoon"] {
+            --ct-canvas-bg: #fef6e4;
+            --ct-panel-bg: rgba(255,255,255,0.9);
+            --ct-panel-border: rgba(255,180,100,0.4);
+            --ct-text: #2d3436;
+            --ct-text-muted: #636e72;
+            --ct-accent: #ff6b6b;
+            --ct-accent-2: #4ecdc4;
+            --ct-danger: #ff6b6b;
+            --ct-beam-fill: rgba(255,180,100,0.2);
+            --ct-beam-stroke: #2d3436;
+            --ct-force: #ff6b6b;
+            --ct-moment-line: #ff9f43;
+            --ct-moment-area: rgba(255,159,67,0.2);
+            --ct-deflect-line: #4ecdc4;
+            --ct-deflect-area: rgba(78,205,196,0.2);
+            --ct-chart-bg: rgba(255,255,255,0.7);
+            --ct-input-track: rgba(0,0,0,0.1);
+            --ct-input-thumb: #ff6b6b;
+        }
+
+        [data-theme="soviet"] {
+            --ct-canvas-bg: #f0ebe4;
+            --ct-panel-bg: #fffaf2;
+            --ct-panel-border: #c41e1e;
+            --ct-text: #1a1a1a;
+            --ct-text-muted: #6a5a4a;
+            --ct-accent: #c41e1e;
+            --ct-accent-2: #8b4513;
+            --ct-danger: #c41e1e;
+            --ct-beam-fill: rgba(196,30,30,0.1);
+            --ct-beam-stroke: #1a1a1a;
+            --ct-force: #c41e1e;
+            --ct-moment-line: #8b4513;
+            --ct-moment-area: rgba(139,69,19,0.15);
+            --ct-deflect-line: #556b2f;
+            --ct-deflect-area: rgba(85,107,47,0.15);
+            --ct-chart-bg: #fffaf2;
+            --ct-input-track: #d4c4a8;
+            --ct-input-thumb: #c41e1e;
+        }
+
+        /* ========== Layout ========== */
+        body, html {
+            margin: 0; padding: 0; width: 100%; min-height: 100vh;
+            background-color: var(--ct-canvas-bg);
+            font-family: var(--font-main);
+            color: var(--ct-text);
+            transition: background-color 0.6s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        .ct-container {
+            padding: 20px;
+            padding-top: 70px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .ct-header {
+            margin-bottom: 20px; padding-bottom: 10px;
+            border-bottom: 2px solid var(--ct-panel-border);
+        }
+        .ct-header h1 {
+            margin: 0; font-size: 1.5rem; color: var(--ct-text);
+        }
+        .ct-header p {
+            margin: 6px 0 0 0; font-size: 0.85rem; color: var(--ct-text-muted);
+        }
+
+        .ct-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .ct-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ========== Panel ========== */
+        .ct-panel {
+            background: var(--ct-panel-bg);
+            border: var(--border-width) solid var(--ct-panel-border);
+            border-radius: var(--radius);
+            padding: 18px;
+            transition: all 0.4s ease;
+        }
+
+        [data-theme="academic"] .ct-panel {
+            border-radius: 4px; box-shadow: none;
+        }
+        [data-theme="soviet"] .ct-panel {
+            border-radius: 2px; border-width: 2px;
+        }
+        [data-theme="glass"] .ct-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            backdrop-filter: blur(20px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        [data-theme="cyber"] .ct-panel {
+            background: rgba(20,0,40,0.6); backdrop-filter: blur(12px);
+            border: 1px solid rgba(189,0,255,0.4);
+        }
+
+        .ct-panel h3 {
+            margin: 0 0 14px 0; font-size: 1rem;
+            color: var(--ct-accent); border-bottom: 1px solid var(--ct-panel-border);
+            padding-bottom: 8px;
+        }
+
+        /* ========== Controls ========== */
+        .control-group { margin-bottom: 14px; }
+        .control-group label {
+            display: flex; justify-content: space-between;
+            font-size: 0.82rem; font-weight: 600;
+            margin-bottom: 4px; color: var(--ct-text);
+        }
+        .control-group span { font-family: monospace; color: var(--ct-accent); }
+        input[type="range"] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
+            background: var(--ct-input-thumb); cursor: pointer; margin-top: -5px;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer;
+            background: var(--ct-input-track); border-radius: 2px;
+        }
+        [data-theme="academic"] input[type="range"]::-webkit-slider-thumb {
+            border-radius: 0; width: 12px; height: 12px; background: #1a1a2e;
+        }
+        [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb {
+            border-radius: 0; width: 14px; height: 14px; background: #c41e1e;
+        }
+
+        select {
+            width: 100%; padding: 6px 8px;
+            border: 1px solid var(--ct-panel-border);
+            border-radius: var(--radius);
+            font-family: inherit; font-size: 0.82rem;
+            background: var(--ct-panel-bg); color: var(--ct-text);
+            outline: none;
+        }
+        [data-theme="academic"] select { border-radius: 2px; }
+        [data-theme="soviet"] select { border-radius: 0; }
+
+        /* ========== Results ========== */
+        .results-section {
+            margin-top: 18px; padding-top: 14px;
+            border-top: 1px dashed var(--ct-panel-border);
+        }
+        .result-item {
+            display: flex; justify-content: space-between;
+            font-size: 0.82rem; margin-bottom: 6px;
+            font-family: monospace;
+            color: var(--ct-text);
+        }
+        .result-item span:first-child { color: var(--ct-text-muted); }
+
+        #warning-box {
+            display: none; margin-top: 12px; padding: 10px 12px;
+            background-color: rgba(196,90,74,0.12);
+            color: var(--ct-danger);
+            border-left: 3px solid var(--ct-danger);
+            font-weight: bold; font-size: 0.78rem;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        /* ========== Canvas ========== */
+        #fbd-canvas {
+            display: block; width: 100%; max-width: 800px;
+            border: 1px solid var(--ct-panel-border);
+            background-color: var(--ct-canvas-bg);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+        }
+        [data-theme="academic"] #fbd-canvas { border-radius: 4px; }
+        [data-theme="soviet"] #fbd-canvas { border-radius: 0; }
+
+        /* ========== Charts ========== */
+        .charts-container {
+            display: grid; grid-template-rows: 300px 300px; gap: 16px;
+        }
+        .chart {
+            width: 100%; height: 100%;
+            border: 1px solid var(--ct-panel-border);
+            border-radius: var(--radius);
+            background: var(--ct-chart-bg);
+        }
+        [data-theme="academic"] .chart { border-radius: 4px; }
+        [data-theme="soviet"] .chart { border-radius: 0; }
+
+        /* ========== Back Button ========== */
+        .back-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            padding: 10px 20px; border-radius: 50px; font-weight: bold;
+            cursor: pointer; text-decoration: none; display: inline-flex;
+            align-items: center; gap: 6px; transition: all 0.3s ease;
+            font-family: var(--font-main); font-size: 0.9rem;
+        }
+        [data-theme="cartoon"] .back-btn {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+            color: white; border: none; box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+        }
+        [data-theme="cartoon"] .back-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,107,0.4); }
+        [data-theme="glass"] .back-btn {
+            background: rgba(255,255,255,0.1); color: var(--text-color);
+            border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+        }
+        [data-theme="glass"] .back-btn:hover { background: rgba(255,255,255,0.2); }
+        [data-theme="cyber"] .back-btn {
+            background: rgba(189,0,255,0.15); color: #bd00ff;
+            border: 1px solid rgba(189,0,255,0.5); text-shadow: 0 0 8px rgba(189,0,255,0.3);
+        }
+        [data-theme="cyber"] .back-btn:hover { background: rgba(189,0,255,0.3); box-shadow: 0 0 20px rgba(189,0,255,0.2); }
+        [data-theme="academic"] .back-btn {
+            background: #ffffff; color: #1a1a2e; border: 1px solid #c0c0c0;
+            border-radius: 4px; font-weight: 500;
+        }
+        [data-theme="academic"] .back-btn:hover { background: #f0f0f0; border-color: #1a1a2e; }
+        [data-theme="soviet"] .back-btn {
+            background: #c41e1e; color: #ffffff; border: 2px solid #8b0000;
+            border-radius: 2px; font-weight: 700; letter-spacing: 1px;
+        }
+        [data-theme="soviet"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+    </style>
+</head>
+<body>
+
+    <div class="ct-container">
+        <div class="ct-header">
+            <h1>悬臂梁受力与变形分析解算器</h1>
+            <p>基于 Euler-Bernoulli 梁理论。限制条件：仅适用于细长梁（跨高比 > 10）且在小变形、线弹性范围内。</p>
+        </div>
+
+        <div class="ct-grid">
+            <!-- 左侧：参数输入与解算结果 -->
+            <div class="ct-panel">
+                <h3>输入参数 (Input)</h3>
+
+                <div class="control-group">
+                    <label>材料 (Material):</label>
+                    <select id="input-material">
+                        <option value="q235">Q235钢 (E=200 GPa, Yield=235 MPa)</option>
+                        <option value="alu">铝合金 (E=70 GPa, Yield=276 MPa)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label><span>梁长 L (m):</span><span id="val-l">5.0</span></label>
+                    <input type="range" id="input-l" min="1.0" max="5.0" step="0.1" value="5.0">
+                </div>
+
+                <div class="control-group">
+                    <label><span>截面宽 b (m):</span><span id="val-b">0.10</span></label>
+                    <input type="range" id="input-b" min="0.05" max="0.20" step="0.01" value="0.10">
+                </div>
+
+                <div class="control-group">
+                    <label><span>截面高 h (m):</span><span id="val-h">0.20</span></label>
+                    <input type="range" id="input-h" min="0.05" max="0.20" step="0.01" value="0.20">
+                </div>
+
+                <div class="control-group">
+                    <label><span>末端集中力 F (kN):</span><span id="val-f">10</span></label>
+                    <input type="range" id="input-f" min="1" max="50" step="1" value="10">
+                </div>
+
+                <div class="results-section">
+                    <h3>解算结果 (Results)</h3>
+                    <div class="result-item"><span>截面惯性矩 I:</span> <span id="res-inertia">-</span></div>
+                    <div class="result-item"><span>最大弯矩 M_max:</span> <span id="res-moment">-</span></div>
+                    <div class="result-item"><span>最大正应力 &#963;_max:</span> <span id="res-stress">-</span></div>
+                    <div class="result-item"><span>最大挠度 v_max:</span> <span id="res-deflection">-</span></div>
+                    <div class="result-item" style="font-size:0.75rem; color:var(--ct-text-muted);"><span>当前跨高比 L/h:</span> <span id="res-ratio">-</span></div>
+
+                    <div id="warning-box">
+                        [严重警告] 超出线弹性范围，解析解失效，结构已发生塑性屈服。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：可视化 -->
+            <div class="ct-panel">
+                <h3>受力分析 (Free Body Diagram)</h3>
+                <canvas id="fbd-canvas" width="800" height="250"></canvas>
+
+                <h3>工程数据分布图 (Engineering Data)</h3>
+                <div class="charts-container">
+                    <div id="chart-moment" class="chart"></div>
+                    <div id="chart-deflection" class="chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="index.html" class="back-btn" id="back-btn">&larr; 返回空间站</a>
+
+    <script src="shared-theme.js"></script>
+    <script>
+        // Initialize theme
+        const theme = PSUTheme.get();
+        document.documentElement.setAttribute('data-theme', theme);
+
+        // --- Theme helpers ---
+        function getThemeColors() {
+            const style = getComputedStyle(document.body);
+            return {
+                beamFill: style.getPropertyValue('--ct-beam-fill').trim() || '#e0e0e0',
+                beamStroke: style.getPropertyValue('--ct-beam-stroke').trim() || '#1a1a2e',
+                force: style.getPropertyValue('--ct-force').trim() || '#c45a4a',
+                text: style.getPropertyValue('--ct-text').trim() || '#1a1a2e',
+                textMuted: style.getPropertyValue('--ct-text-muted').trim() || '#7a7a8a',
+                accent: style.getPropertyValue('--ct-accent').trim() || '#6b8cae',
+                accent2: style.getPropertyValue('--ct-accent-2').trim() || '#8a7ca8',
+                danger: style.getPropertyValue('--ct-danger').trim() || '#c45a4a',
+                momentLine: style.getPropertyValue('--ct-moment-line').trim() || '#c4956a',
+                momentArea: style.getPropertyValue('--ct-moment-area').trim() || 'rgba(196,149,106,0.2)',
+                deflectLine: style.getPropertyValue('--ct-deflect-line').trim() || '#6b8cae',
+                deflectArea: style.getPropertyValue('--ct-deflect-area').trim() || 'rgba(107,140,174,0.2)',
+                chartBg: style.getPropertyValue('--ct-chart-bg').trim() || '#ffffff',
+                panelBorder: style.getPropertyValue('--ct-panel-border').trim() || '#e0e0e0'
+            };
+        }
+
+        function hexToRgba(hex, alpha) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            if (!result) return hex;
+            const r = parseInt(result[1], 16);
+            const g = parseInt(result[2], 16);
+            const b = parseInt(result[3], 16);
+            return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+        }
+
+        // --- Physics Constants ---
+        const materialData = {
+            'q235': { E: 200e9, yield: 235e6 },
+            'alu': { E: 70e9, yield: 276e6 }
+        };
+
+        // --- DOM Elements ---
+        const inputs = {
+            mat: document.getElementById('input-material'),
+            L: document.getElementById('input-l'),
+            b: document.getElementById('input-b'),
+            h: document.getElementById('input-h'),
+            F: document.getElementById('input-f')
+        };
+        const displays = {
+            L: document.getElementById('val-l'),
+            b: document.getElementById('val-b'),
+            h: document.getElementById('val-h'),
+            F: document.getElementById('val-f')
+        };
+        const results = {
+            I: document.getElementById('res-inertia'),
+            M: document.getElementById('res-moment'),
+            S: document.getElementById('res-stress'),
+            V: document.getElementById('res-deflection'),
+            R: document.getElementById('res-ratio')
+        };
+        const warningBox = document.getElementById('warning-box');
+
+        // --- ECharts ---
+        const chartMoment = echarts.init(document.getElementById('chart-moment'));
+        const chartDeflection = echarts.init(document.getElementById('chart-deflection'));
+
+        // --- Core Physics ---
+        function updatePhysics() {
+            const matKey = inputs.mat.value;
+            const elasticModulus = materialData[matKey].E;
+            const yieldStrength = materialData[matKey].yield;
+
+            const L = parseFloat(inputs.L.value);
+            const b = parseFloat(inputs.b.value);
+            const h = parseFloat(inputs.h.value);
+            const F_kN = parseFloat(inputs.F.value);
+            const force = F_kN * 1000;
+
+            displays.L.textContent = L.toFixed(1);
+            displays.b.textContent = b.toFixed(2);
+            displays.h.textContent = h.toFixed(2);
+            displays.F.textContent = F_kN;
+
+            const inertia = (b * Math.pow(h, 3)) / 12;
+            const maxMoment = force * L;
+            const maxStress = (maxMoment * (h / 2)) / inertia;
+            const maxDeflection = (force * Math.pow(L, 3)) / (3 * elasticModulus * inertia);
+            const aspectRatio = L / h;
+
+            const canvasDeflectionProfile = [];
+            const canvasSteps = 50;
+            for (let i = 0; i <= canvasSteps; i++) {
+                const x = (i / canvasSteps) * L;
+                const vx = (force * Math.pow(x, 2) * (3 * L - x)) / (6 * elasticModulus * inertia);
+                canvasDeflectionProfile.push(vx);
+            }
+
+            results.I.textContent = inertia.toExponential(4) + ' m⁴';
+            results.M.textContent = (maxMoment / 1000).toFixed(2) + ' kN·m';
+            results.S.textContent = (maxStress / 1e6).toFixed(2) + ' MPa';
+            results.V.textContent = (maxDeflection * 1000).toFixed(3) + ' mm';
+            results.R.textContent = aspectRatio.toFixed(1) + (aspectRatio < 10 ? ' (<10, 存在剪切误差)' : '');
+
+            if (maxStress > yieldStrength) {
+                warningBox.style.display = 'block';
+                results.S.style.color = 'var(--ct-danger)';
+                results.S.style.fontWeight = 'bold';
+            } else {
+                warningBox.style.display = 'none';
+                results.S.style.color = 'inherit';
+                results.S.style.fontWeight = 'normal';
+            }
+
+            drawFBD(L, F_kN, canvasDeflectionProfile);
+            updateCharts(L, force, elasticModulus, inertia);
+        }
+
+        // --- Canvas Drawing ---
+        function drawFBD(L, F_kN, deflectionProfile) {
+            const canvas = document.getElementById('fbd-canvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const colors = getThemeColors();
+
+            ctx.clearRect(0, 0, width, height);
+
+            const marginLeft = 80;
+            const marginRight = 80;
+            const centerY = height / 2;
+            const maxL = 5.0;
+            const maxDrawWidth = width - marginLeft - marginRight;
+            const drawWidth = (L / maxL) * maxDrawWidth;
+
+            // Fixed end (wall)
+            ctx.beginPath();
+            ctx.moveTo(marginLeft, centerY - 60);
+            ctx.lineTo(marginLeft, centerY + 60);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = colors.beamStroke;
+            ctx.stroke();
+
+            ctx.lineWidth = 1;
+            for (let i = -50; i <= 60; i += 15) {
+                ctx.beginPath();
+                ctx.moveTo(marginLeft, centerY + i);
+                ctx.lineTo(marginLeft - 20, centerY + i - 15);
+                ctx.stroke();
+            }
+
+            // Beam body
+            const visualThickness = 30;
+            const numSegments = deflectionProfile.length - 1;
+            const segmentWidth = drawWidth / numSegments;
+            const deflectionScaleFactor = 2500;
+            const scaledProfile = deflectionProfile.map(d => d * deflectionScaleFactor);
+
+            ctx.beginPath();
+            const startX = marginLeft;
+            const startYTop = centerY - visualThickness / 2;
+            const startYBottom = centerY + visualThickness / 2;
+
+            ctx.moveTo(startX, startYTop);
+            for (let i = 1; i <= numSegments; i++) {
+                const x = startX + i * segmentWidth;
+                const y = startYTop + scaledProfile[i];
+                ctx.lineTo(x, y);
+            }
+
+            const endX = startX + drawWidth;
+            const endYTop = startYTop + scaledProfile[numSegments];
+            const endYBottom = startYBottom + scaledProfile[numSegments];
+            ctx.lineTo(endX, endYBottom);
+
+            for (let i = numSegments - 1; i >= 0; i--) {
+                const x = startX + i * segmentWidth;
+                const y = startYBottom + scaledProfile[i];
+                ctx.lineTo(x, y);
+            }
+
+            ctx.closePath();
+            ctx.fillStyle = colors.beamFill;
+            ctx.fill();
+            ctx.strokeStyle = colors.beamStroke;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Force arrow
+            const forceX = endX;
+            const forceYStart = endYBottom + 5;
+            const forceYEnd = forceYStart + 60;
+
+            ctx.beginPath();
+            ctx.moveTo(forceX, forceYStart);
+            ctx.lineTo(forceX, forceYEnd);
+            ctx.strokeStyle = colors.force;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(forceX, forceYEnd);
+            ctx.lineTo(forceX - 8, forceYEnd - 12);
+            ctx.lineTo(forceX + 8, forceYEnd - 12);
+            ctx.fillStyle = colors.force;
+            ctx.fill();
+
+            ctx.font = '16px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = colors.force;
+            ctx.fillText('F = ' + F_kN + ' kN', forceX, forceYStart - 10);
+
+            // Coordinate system
+            const coordOriginX = 20;
+            const coordOriginY = 20;
+            ctx.strokeStyle = colors.text;
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+            ctx.moveTo(coordOriginX, coordOriginY);
+            ctx.lineTo(coordOriginX + 40, coordOriginY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(coordOriginX + 40, coordOriginY);
+            ctx.lineTo(coordOriginX + 35, coordOriginY - 4);
+            ctx.lineTo(coordOriginX + 35, coordOriginY + 4);
+            ctx.fillStyle = colors.text;
+            ctx.fill();
+            ctx.textAlign = 'left';
+            ctx.fillText('x', coordOriginX + 45, coordOriginY + 5);
+
+            ctx.beginPath();
+            ctx.moveTo(coordOriginX, coordOriginY);
+            ctx.lineTo(coordOriginX, coordOriginY + 40);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(coordOriginX, coordOriginY + 40);
+            ctx.lineTo(coordOriginX - 4, coordOriginY + 35);
+            ctx.lineTo(coordOriginX + 4, coordOriginY + 35);
+            ctx.fill();
+            ctx.fillText('y', coordOriginX - 4, coordOriginY + 55);
+        }
+
+        // --- ECharts ---
+        function updateCharts(L, force, elasticModulus, inertia) {
+            const dataX = [];
+            const dataMoment = [];
+            const dataDeflection = [];
+            const steps = 100;
+
+            for (let i = 0; i <= steps; i++) {
+                const x = (i / steps) * L;
+                dataX.push(x.toFixed(2));
+                const mx = (force * (L - x)) / 1000;
+                dataMoment.push(mx.toFixed(2));
+                const vx = (force * Math.pow(x, 2) * (3 * L - x)) / (6 * elasticModulus * inertia);
+                dataDeflection.push((vx * 1000).toFixed(3));
+            }
+
+            const colors = getThemeColors();
+
+            const optionMoment = {
+                backgroundColor: colors.chartBg,
+                title: { text: '内力图：弯矩分布 M(x)', left: 'center', textStyle: { fontSize: 14, color: colors.text } },
+                tooltip: { trigger: 'axis', formatter: 'x: {b} m<br/>M: {c} kN·m' },
+                grid: { left: '10%', right: '5%', bottom: '15%', top: '15%' },
+                xAxis: { type: 'category', data: dataX, name: 'x (m)', nameLocation: 'middle', nameGap: 25,
+                    axisLine: { lineStyle: { color: colors.textMuted } }, axisLabel: { color: colors.textMuted } },
+                yAxis: { type: 'value', name: '弯矩 (kN·m)',
+                    axisLine: { lineStyle: { color: colors.textMuted } }, axisLabel: { color: colors.textMuted },
+                    splitLine: { lineStyle: { color: colors.panelBorder, opacity: 0.3 } } },
+                series: [{
+                    data: dataMoment, type: 'line', symbol: 'none',
+                    lineStyle: { color: colors.momentLine, width: 3 },
+                    areaStyle: { color: colors.momentArea }
+                }]
+            };
+
+            const optionDeflection = {
+                backgroundColor: colors.chartBg,
+                title: { text: '变形图：挠度曲线 v(x)', left: 'center', textStyle: { fontSize: 14, color: colors.text } },
+                tooltip: { trigger: 'axis', formatter: 'x: {b} m<br/>v: {c} mm' },
+                grid: { left: '10%', right: '5%', bottom: '15%', top: '15%' },
+                xAxis: { type: 'category', data: dataX, name: 'x (m)', nameLocation: 'middle', nameGap: 25,
+                    axisLine: { lineStyle: { color: colors.textMuted } }, axisLabel: { color: colors.textMuted } },
+                yAxis: { type: 'value', name: '向下位移 (mm)', inverse: true,
+                    axisLine: { lineStyle: { color: colors.textMuted } }, axisLabel: { color: colors.textMuted },
+                    splitLine: { lineStyle: { color: colors.panelBorder, opacity: 0.3 } } },
+                series: [{
+                    data: dataDeflection, type: 'line', symbol: 'none', smooth: true,
+                    lineStyle: { color: colors.deflectLine, width: 3 },
+                    areaStyle: { color: colors.deflectArea }
+                }]
+            };
+
+            chartMoment.setOption(optionMoment, true);
+            chartDeflection.setOption(optionDeflection, true);
+        }
+
+        // --- Theme change listener for ECharts ---
+        const themeObserver = new MutationObserver(() => {
+            updatePhysics();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // --- Event Listeners ---
+        Object.values(inputs).forEach(input => {
+            input.addEventListener(input.tagName.toLowerCase() === 'select' ? 'change' : 'input', updatePhysics);
+        });
+
+        window.addEventListener('resize', () => {
+            chartMoment.resize();
+            chartDeflection.resize();
+        });
+
+        // Init
+        updatePhysics();
+    </script>
+</body>
+</html>
