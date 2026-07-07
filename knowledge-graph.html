@@ -320,18 +320,40 @@
       transform: translateX(calc(100% + 20px));
     }
     .catalog-toggle {
-      position: absolute; left: -16px; top: 20px;
-      width: 28px; height: 28px; border-radius: 50%;
+      position: fixed; top: 70px; right: 0;
+      width: 32px; height: 36px;
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
+      border-right: none;
       color: var(--text-color);
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; transition: all 0.3s;
-      z-index: 10;
+      font-size: 12px; transition: all 0.3s;
+      z-index: 101;
+      border-radius: var(--radius) 0 0 var(--radius);
     }
     .catalog-toggle:hover { background: var(--panel-border); }
-    .catalog-panel.collapsed .catalog-toggle { transform: rotate(180deg); }
+    .catalog-toggle[data-expanded="true"] {
+      right: 300px;
+    }
+    .catalog-actions {
+      display: flex; gap: 6px;
+    }
+    .catalog-actions button {
+      padding: 3px 10px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel-bg);
+      color: var(--text-muted);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .catalog-actions button:hover {
+      background: var(--panel-border);
+      color: var(--text-color);
+    }
 
     .catalog-header {
       display: flex; justify-content: space-between; align-items: center;
@@ -531,13 +553,19 @@
 
   <!-- Experiment Catalog Panel -->
   <div class="catalog-panel" id="catalog-panel">
-    <div class="catalog-toggle" id="catalog-toggle">&#9664;</div>
     <div class="catalog-header">
-      <h3>&#128214; 实验目录</h3>
-      <span class="catalog-count" id="catalog-count">0 个实验</span>
+      <div>
+        <h3>&#128214; 实验目录</h3>
+        <span class="catalog-count" id="catalog-count">0 个实验</span>
+      </div>
+      <div class="catalog-actions">
+        <button id="btn-collapse-all">&#9660; 全折</button>
+        <button id="btn-expand-all">&#9650; 全展</button>
+      </div>
     </div>
     <div class="catalog-body" id="catalog-body"></div>
   </div>
+  <div class="catalog-toggle" id="catalog-toggle">&#9664;</div>
 
   <!-- Back Button -->
   <a href="index.html" class="back-btn" id="back-btn">← 返回首页</a>
@@ -1031,7 +1059,20 @@
 
     // Catalog toggle
     document.getElementById('catalog-toggle').addEventListener('click', () => {
-      document.getElementById('catalog-panel').classList.toggle('collapsed');
+      const panel = document.getElementById('catalog-panel');
+      const toggle = document.getElementById('catalog-toggle');
+      panel.classList.toggle('collapsed');
+      const expanded = !panel.classList.contains('collapsed');
+      toggle.setAttribute('data-expanded', expanded);
+      toggle.innerHTML = expanded ? '&#9654;' : '&#9664;';
+    });
+
+    // Expand / Collapse all sections
+    document.getElementById('btn-collapse-all').addEventListener('click', () => {
+      document.querySelectorAll('.catalog-section').forEach(s => s.classList.add('collapsed'));
+    });
+    document.getElementById('btn-expand-all').addEventListener('click', () => {
+      document.querySelectorAll('.catalog-section').forEach(s => s.classList.remove('collapsed'));
     });
 
     // ==========================================
@@ -1043,6 +1084,12 @@
       createThemeSwitcher();
       updateGraphTheme();
       buildCatalog();
+      // Initialize catalog toggle position
+      const panel = document.getElementById('catalog-panel');
+      const toggle = document.getElementById('catalog-toggle');
+      const expanded = !panel.classList.contains('collapsed');
+      toggle.setAttribute('data-expanded', expanded);
+      toggle.innerHTML = expanded ? '&#9654;' : '&#9664;';
     });
 
     // Responsive resize
