@@ -531,7 +531,7 @@
       const mx = (e.clientX || e.touches[0].clientX) - rect.left;
       const my = (e.clientY || e.touches[0].clientY) - rect.top;
       const cx = cw * 0.35;
-      const cy = state.bikeType === 'modern' ? ch * 0.55 : ch * 0.72;
+      const cy = state.bikeType === 'modern' ? ch * 0.58 + 8 : ch * 0.72 - 30;
       return Math.atan2(my - cy, mx - cx);
     }
 
@@ -644,115 +644,159 @@
       ctx.translate(x, y);
       ctx.rotate(angle);
 
-      // Gear body
+      // Gear body circle
       ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
       ctx.fillStyle = colors.bg;
       ctx.fill();
       ctx.strokeStyle = colors.accent;
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Teeth
-      const toothH = 4;
+      // Teeth - trapezoid shape for realism
+      const outerR = r;
+      const innerR = r * 0.82;
+      const toothWidthAngle = (Math.PI * 2 / teeth) * 0.45;
+      const gapWidthAngle = (Math.PI * 2 / teeth) * 0.55;
+
       for (let i = 0; i < teeth; i++) {
-        const a = (Math.PI * 2 / teeth) * i;
-        const a2 = (Math.PI * 2 / teeth) * (i + 0.5);
+        const baseAngle = (Math.PI * 2 / teeth) * i;
+        const a1 = baseAngle - toothWidthAngle / 2;
+        const a2 = baseAngle + toothWidthAngle / 2;
+        const a3 = baseAngle + gapWidthAngle / 2;
+        const a4 = baseAngle - gapWidthAngle / 2;
+
         ctx.beginPath();
-        ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
-        ctx.lineTo(Math.cos(a) * (r + toothH), Math.sin(a) * (r + toothH));
-        ctx.arc(0, 0, r + toothH, a, a2);
-        ctx.lineTo(Math.cos(a2) * r, Math.sin(a2) * r);
-        ctx.strokeStyle = colors.accent;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        ctx.moveTo(Math.cos(a1) * innerR, Math.sin(a1) * innerR);
+        ctx.lineTo(Math.cos(a1) * outerR, Math.sin(a1) * outerR);
+        ctx.arc(0, 0, outerR, a1, a2);
+        ctx.lineTo(Math.cos(a2) * innerR, Math.sin(a2) * innerR);
+        ctx.closePath();
+        ctx.fillStyle = colors.accent;
+        ctx.globalAlpha = 0.8;
+        ctx.fill();
+        ctx.globalAlpha = 1;
       }
 
-      // Inner decorative circle
+      // Inner decorative structure
       ctx.beginPath();
-      ctx.arc(0, 0, r * 0.6, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 0.55, 0, Math.PI * 2);
       ctx.strokeStyle = colors.accent2;
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.4;
       ctx.stroke();
       ctx.globalAlpha = 1;
 
-      // Spoke-like internals
-      const innerSpokes = 5;
+      // Spoke-like pattern
+      const innerSpokes = Math.min(teeth, 8);
       ctx.strokeStyle = colors.accent;
-      ctx.lineWidth = 1.2;
-      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.35;
       for (let i = 0; i < innerSpokes; i++) {
-        const a = (Math.PI * 2 / innerSpokes) * i + angle * 0.5;
+        const a = (Math.PI * 2 / innerSpokes) * i;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(a) * r * 0.55, Math.sin(a) * r * 0.55);
+        ctx.lineTo(Math.cos(a) * r * 0.5, Math.sin(a) * r * 0.5);
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
 
-      // Center
+      // Center hub
       ctx.beginPath();
-      ctx.arc(0, 0, 5, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 0.12, 0, Math.PI * 2);
       ctx.fillStyle = colors.accent;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.06, 0, Math.PI * 2);
+      ctx.fillStyle = colors.bg;
       ctx.fill();
 
       ctx.restore();
     }
 
-    function drawChain(cx1, cy1, r1, cx2, cy2, r2, colors) {
-      ctx.strokeStyle = colors.chainColor;
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = 'round';
-
-      // Dynamic shadow
-      ctx.shadowColor = colors.accent;
-      ctx.shadowBlur = state.rpm > 60 ? 8 : 0;
-
-      const dx = cx2 - cx1;
-      const dy = cy2 - cy1;
+    function drawChain(x1, y1, r1, x2, y2, r2, colors) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
       const dist = Math.hypot(dx, dy);
+      if (dist < Math.abs(r1 - r2)) return; // gears overlap
+
       const angle = Math.atan2(dy, dx);
 
-      const topOffset = Math.PI / 2;
-      const botOffset = -Math.PI / 2;
+      // For external tangents (crossed belt would be internal)
+      const offsetAngle = Math.acos((r1 - r2) / dist);
 
-      const x1t = cx1 + Math.cos(angle + topOffset) * r1;
-      const y1t = cy1 + Math.sin(angle + topOffset) * r1;
-      const x2t = cx2 + Math.cos(angle + topOffset) * r2;
-      const y2t = cy2 + Math.sin(angle + topOffset) * r2;
+      // Top tangent points
+      const t1x = x1 + r1 * Math.cos(angle + offsetAngle);
+      const t1y = y1 + r1 * Math.sin(angle + offsetAngle);
+      const t2x = x2 + r2 * Math.cos(angle + offsetAngle);
+      const t2y = y2 + r2 * Math.sin(angle + offsetAngle);
 
-      const x1b = cx1 + Math.cos(angle + botOffset) * r1;
-      const y1b = cy1 + Math.sin(angle + botOffset) * r1;
-      const x2b = cx2 + Math.cos(angle + botOffset) * r2;
-      const y2b = cy2 + Math.sin(angle + botOffset) * r2;
+      // Bottom tangent points
+      const b1x = x1 + r1 * Math.cos(angle - offsetAngle);
+      const b1y = y1 + r1 * Math.sin(angle - offsetAngle);
+      const b2x = x2 + r2 * Math.cos(angle - offsetAngle);
+      const b2y = y2 + r2 * Math.sin(angle - offsetAngle);
 
+      ctx.save();
+      ctx.strokeStyle = colors.chainColor;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+
+      // Chain shadow/glow at high RPM
+      if (state.rpm > 60) {
+        ctx.shadowColor = colors.accent;
+        ctx.shadowBlur = 6;
+      }
+
+      // Top chain segment
       ctx.beginPath();
-      ctx.moveTo(x1t, y1t);
-      ctx.lineTo(x2t, y2t);
+      ctx.moveTo(t1x, t1y);
+      ctx.lineTo(t2x, t2y);
       ctx.stroke();
 
+      // Bottom chain segment
       ctx.beginPath();
-      ctx.moveTo(x1b, y1b);
-      ctx.lineTo(x2b, y2b);
+      ctx.moveTo(b1x, b1y);
+      ctx.lineTo(b2x, b2y);
       ctx.stroke();
 
       ctx.shadowBlur = 0;
 
-      // Chain links (dashed effect)
-      ctx.setLineDash([4, 4]);
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.6;
+      // Chain links effect (dashed)
+      ctx.setLineDash([3, 3]);
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.5;
       ctx.beginPath();
-      ctx.moveTo(x1t, y1t);
-      ctx.lineTo(x2t, y2t);
+      ctx.moveTo(t1x, t1y);
+      ctx.lineTo(t2x, t2y);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(x1b, y1b);
-      ctx.lineTo(x2b, y2b);
+      ctx.moveTo(b1x, b1y);
+      ctx.lineTo(b2x, b2y);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
+
+      // Arc segments wrapping around gears
+      ctx.strokeStyle = colors.chainColor;
+      ctx.lineWidth = 3;
+
+      // Gear 1 arc (from bottom to top)
+      const arc1Start = Math.atan2(b1y - y1, b1x - x1);
+      const arc1End = Math.atan2(t1y - y1, t1x - x1);
+      ctx.beginPath();
+      ctx.arc(x1, y1, r1, arc1Start, arc1End);
+      ctx.stroke();
+
+      // Gear 2 arc (from top to bottom)
+      const arc2Start = Math.atan2(t2y - y2, t2x - x2);
+      const arc2End = Math.atan2(b2y - y2, b2x - x2);
+      ctx.beginPath();
+      ctx.arc(x2, y2, r2, arc2Start, arc2End);
+      ctx.stroke();
+
+      ctx.restore();
     }
 
     function drawPedal(x, y, angle, colors, isGlow) {
@@ -760,72 +804,74 @@
       ctx.translate(x, y);
       ctx.rotate(angle);
 
+      const crankLen = 45;  // 放大曲柄长度
+
       // Crank arm
       ctx.strokeStyle = colors.frameStroke;
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 5;
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.lineTo(0, 35);
+      ctx.lineTo(0, crankLen);
       ctx.stroke();
 
-      // Pedal glow when dragging/high RPM
+      // Glow
       if (isGlow || state.rpm > 80) {
         ctx.shadowColor = colors.accent;
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 18;
       }
 
-      // Pedal body
+      // Pedal body (larger)
       ctx.fillStyle = colors.pedalColor;
-      ctx.fillRect(-10, 32, 20, 8);
+      ctx.fillRect(-14, crankLen - 3, 28, 10);
       ctx.strokeStyle = colors.frameStroke;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(-10, 32, 20, 8);
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(-14, crankLen - 3, 28, 10);
 
       ctx.shadowBlur = 0;
       ctx.restore();
     }
 
-    function drawRider(colors) {
-      // Simple silhouette
-      const x = cw * 0.35;
-      const y = ch * 0.55;
+    function drawRider(seatX, seatY, colors) {
+      const scale = 1.5;
+      const x = seatX + 5;
+      const y = seatY;
 
       ctx.save();
       ctx.strokeStyle = colors.frameStroke;
       ctx.fillStyle = colors.textMuted;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
       // Head
       ctx.beginPath();
-      ctx.arc(x - 5, y - 75, 8, 0, Math.PI * 2);
+      ctx.arc(x - 3 * scale, y - 50 * scale, 10 * scale, 0, Math.PI * 2);
       ctx.fill();
 
       // Body
       ctx.beginPath();
-      ctx.moveTo(x - 5, y - 67);
-      ctx.lineTo(x - 8, y - 45);
-      ctx.lineTo(x + 15, y - 38);
+      ctx.moveTo(x - 3 * scale, y - 40 * scale);
+      ctx.lineTo(x - 8 * scale, y - 20 * scale);
+      ctx.lineTo(x + 18 * scale, y - 12 * scale);
       ctx.stroke();
 
-      // Arms
+      // Arms to handlebar
       ctx.beginPath();
-      ctx.moveTo(x - 6, y - 58);
-      ctx.lineTo(x + 25, y - 50);
+      ctx.moveTo(x - 5 * scale, y - 32 * scale);
+      ctx.lineTo(x + 30 * scale, y - 38 * scale);
       ctx.stroke();
 
       // Legs (animated with pedal)
       const legAngle = state.pedalAngle;
-      const hipX = x - 8;
-      const hipY = y - 45;
-      const pedalX = x + Math.sin(legAngle) * 35;
-      const pedalY = y + Math.cos(legAngle) * 35;
+      const hipX = x - 8 * scale;
+      const hipY = y - 20 * scale;
+      const pedalX = x + Math.sin(legAngle) * 40 * scale;
+      const pedalY = y + 15 * scale + Math.cos(legAngle) * 40 * scale;
 
       ctx.beginPath();
       ctx.moveTo(hipX, hipY);
-      ctx.lineTo((hipX + pedalX) / 2 + 5, (hipY + pedalY) / 2);
+      ctx.lineTo((hipX + pedalX) / 2 + 6 * scale, (hipY + pedalY) / 2);
       ctx.lineTo(pedalX, pedalY);
       ctx.stroke();
 
@@ -835,17 +881,13 @@
     function drawGroundShadow(bikeX, bikeY, wheelR, colors) {
       ctx.save();
       ctx.fillStyle = colors.textMuted;
-      ctx.globalAlpha = 0.15;
-
-      // Shadow ellipse under wheels
+      ctx.globalAlpha = 0.12;
       ctx.beginPath();
-      ctx.ellipse(bikeX - 80, bikeY + wheelR + 4, wheelR * 0.9, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(bikeX - 110, bikeY + wheelR + 5, wheelR * 0.85, 5, 0, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.beginPath();
-      ctx.ellipse(bikeX + 80, bikeY + wheelR + 4, wheelR * 0.9, 4, 0, 0, Math.PI * 2);
+      ctx.ellipse(bikeX + 110, bikeY + wheelR + 5, wheelR * 0.85, 5, 0, 0, Math.PI * 2);
       ctx.fill();
-
       ctx.globalAlpha = 1;
       ctx.restore();
     }
@@ -853,16 +895,17 @@
     function spawnParticles() {
       if (state.rpm < 40) return;
       const count = Math.floor(state.rpm / 30);
-      const rearX = state.bikeType === 'modern' ? cw * 0.35 - 80 : cw * 0.35 - 40;
-      const rearY = state.bikeType === 'modern' ? ch * 0.55 + 45 : ch * 0.72 + 60;
+      // 粒子从后轮后方发射
+      const rearX = state.bikeType === 'modern' ? cw * 0.35 - 110 : cw * 0.35 - 100;
+      const wheelY = state.bikeType === 'modern' ? ch * 0.58 : ch * 0.72 + 100;
       for (let i = 0; i < count; i++) {
         state.particles.push({
           x: rearX,
-          y: rearY + (Math.random() - 0.5) * 20,
+          y: wheelY + (Math.random() - 0.5) * 30,
           vx: -2 - Math.random() * (state.rpm / 20),
-          vy: (Math.random() - 0.5) * 1,
+          vy: (Math.random() - 0.5) * 1.5,
           life: 1.0,
-          len: 10 + Math.random() * 20
+          len: 12 + Math.random() * 25
         });
       }
     }
@@ -896,88 +939,93 @@
     // ======================
     function drawModernBike(colors) {
       const cx = cw * 0.35;
-      const cy = ch * 0.55;
-      const rearR = 45;
-      const frontR = 45;
-      const rearX = cx - 80;
-      const frontX = cx + 80;
-      const wheelY = cy + 10;
+      const wheelY = ch * 0.58;
+      const rearR = 70, frontR = 70;
+      const rearX = cx - 110, frontX = cx + 110;
+
+      // Bottom bracket (pedal/chainring center)
+      const bbX = cx - 25;
+      const bbY = wheelY + 8;
+
+      // Gear radii proportional to tooth count
+      const r1 = state.z1 * 0.55;  // chainring
+      const r2 = state.z2 * 0.55;  // cog
 
       // Ground shadow
       drawGroundShadow(cx, wheelY, rearR, colors);
 
-      // Frame (gradient stroke)
-      const grad = ctx.createLinearGradient(rearX, wheelY, frontX, wheelY - 60);
+      // Frame with gradient
+      const grad = ctx.createLinearGradient(rearX, wheelY, frontX, wheelY - 70);
       grad.addColorStop(0, colors.accent);
       grad.addColorStop(1, colors.accent2);
-
       ctx.strokeStyle = grad;
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 5;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
-      // Chain stay
+      // Chain stay (rear axle to BB)
       ctx.beginPath();
       ctx.moveTo(rearX, wheelY);
-      ctx.lineTo(cx, wheelY - 15);
+      ctx.lineTo(bbX, bbY);
       ctx.stroke();
 
-      // Seat stay
+      // Seat stay (rear axle to seat tube top)
       ctx.beginPath();
       ctx.moveTo(rearX, wheelY);
-      ctx.lineTo(cx - 15, wheelY - 55);
+      ctx.lineTo(bbX - 10, wheelY - 70);
       ctx.stroke();
 
-      // Seat tube
+      // Seat tube (BB to seat)
       ctx.beginPath();
-      ctx.moveTo(cx, wheelY - 15);
-      ctx.lineTo(cx - 15, wheelY - 55);
+      ctx.moveTo(bbX, bbY);
+      ctx.lineTo(bbX - 10, wheelY - 70);
       ctx.stroke();
 
-      // Down tube
+      // Down tube (BB to head tube)
       ctx.beginPath();
-      ctx.moveTo(cx, wheelY - 15);
-      ctx.lineTo(frontX - 10, wheelY - 55);
+      ctx.moveTo(bbX, bbY);
+      ctx.lineTo(frontX - 15, wheelY - 65);
       ctx.stroke();
 
-      // Top tube
+      // Top tube (seat to head)
       ctx.beginPath();
-      ctx.moveTo(cx - 15, wheelY - 55);
-      ctx.lineTo(frontX - 10, wheelY - 55);
+      ctx.moveTo(bbX - 10, wheelY - 70);
+      ctx.lineTo(frontX - 15, wheelY - 65);
       ctx.stroke();
 
       // Fork
       ctx.beginPath();
       ctx.moveTo(frontX, wheelY);
-      ctx.lineTo(frontX - 10, wheelY - 55);
+      ctx.lineTo(frontX - 15, wheelY - 65);
       ctx.stroke();
 
       // Handlebar
       ctx.strokeStyle = colors.frameStroke;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.moveTo(frontX - 10, wheelY - 55);
-      ctx.lineTo(frontX - 5, wheelY - 70);
-      ctx.lineTo(frontX + 10, wheelY - 72);
+      ctx.moveTo(frontX - 15, wheelY - 65);
+      ctx.lineTo(frontX - 10, wheelY - 85);
+      ctx.lineTo(frontX + 15, wheelY - 88);
       ctx.stroke();
 
       // Seat
       ctx.beginPath();
-      ctx.moveTo(cx - 25, wheelY - 55);
-      ctx.lineTo(cx - 5, wheelY - 55);
+      ctx.moveTo(bbX - 25, wheelY - 70);
+      ctx.lineTo(bbX - 2, wheelY - 70);
       ctx.stroke();
 
       // Rider
-      drawRider(colors);
+      drawRider(bbX - 10, wheelY - 70, colors);
 
-      // Chain
-      drawGear(cx, wheelY - 15, 18, state.z2, state.wheelAngle, colors);
-      drawGear(cx, wheelY - 15, 28, state.z1, state.pedalAngle, colors);
-      drawChain(cx, wheelY - 15, 28, rearX, wheelY, 18, colors);
+      // Gears and chain
+      // Chainring at BB, cog at rear axle
+      drawGear(bbX, bbY, r1, state.z1, state.pedalAngle, colors);  // chainring
+      drawGear(rearX, wheelY, r2, state.z2, state.wheelAngle, colors);  // cog
+      drawChain(bbX, bbY, r1, rearX, wheelY, r2, colors);
 
-      // Pedals
-      drawPedal(cx, wheelY - 15, state.pedalAngle, colors, state.isDragging);
-      drawPedal(cx, wheelY - 15, state.pedalAngle + Math.PI, colors, false);
+      // Pedals on chainring axle
+      drawPedal(bbX, bbY, state.pedalAngle, colors, state.isDragging);
+      drawPedal(bbX, bbY, state.pedalAngle + Math.PI, colors, false);
 
       // Wheels
       drawWheel(rearX, wheelY, rearR, state.wheelAngle, colors, false);
@@ -993,13 +1041,12 @@
     // ======================
     function drawPennyBike(colors) {
       const cx = cw * 0.35;
-      const cy = ch * 0.72;
-      const frontR = 90;
-      const rearR = 22;
-      const frontX = cx + 40;
-      const rearX = cx - 70;
-      const frontY = cy;
-      const rearY = cy + frontR - rearR;
+      const frontR = 130;
+      const rearR = 32;
+      const frontX = cx + 50;
+      const rearX = cx - 100;
+      const frontY = cy - 30;  // 抬高前轮中心
+      const rearY = frontY + frontR - rearR;  // 后轮底部与前轮底部齐平
 
       // Ground shadow
       drawGroundShadow(cx, rearY, rearR, colors);
@@ -1014,7 +1061,7 @@
 
       // Frame - classical copper tone
       ctx.strokeStyle = colors.frameStroke;
-      ctx.lineWidth = 3.5;
+      ctx.lineWidth = 5;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
 
@@ -1075,12 +1122,12 @@
       ctx.stroke();
 
       // Pedal crank attached directly to front wheel
-      const crankLen = 20;
+      const crankLen = 32;
       const pedalX = frontX + Math.cos(state.pedalAngle) * crankLen;
       const pedalY = frontY + Math.sin(state.pedalAngle) * crankLen;
 
       ctx.strokeStyle = colors.frameStroke;
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 5;
       ctx.beginPath();
       ctx.moveTo(frontX, frontY);
       ctx.lineTo(pedalX, pedalY);
@@ -1123,7 +1170,7 @@
       ctx.clearRect(0, 0, cw, ch);
 
       // Ground line
-      const groundY = state.bikeType === 'modern' ? ch * 0.55 + 60 : ch * 0.72 + 115;
+      const groundY = state.bikeType === 'modern' ? ch * 0.58 + 75 : ch * 0.72 + 100;
       ctx.strokeStyle = colors.chartLine;
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -1157,13 +1204,21 @@
     function animate() {
       state.time += 0.016;
 
-      // Auto-rotate if not dragging
       if (!state.isDragging && state.rpm > 0) {
         state.pedalAngle += (state.rpm * Math.PI / 30) * 0.016;
       }
 
-      const ratio = getRatio();
-      state.wheelAngle = state.pedalAngle * ratio;
+      if (state.bikeType === 'modern') {
+        // Chainring and pedal rotate together
+        // Cog rotates in opposite direction (external mesh)
+        // Ratio: omega_cog = omega_chainring * (z1/z2), opposite direction
+        const ratio = getRatio();
+        state.wheelAngle = -state.pedalAngle * ratio;  // negative for opposite direction
+      } else {
+        // Penny: direct drive, wheel = pedal
+        state.wheelAngle = state.pedalAngle;
+      }
+
       state.groundOffset += (getWheelRPM() * 0.01);
 
       draw();
