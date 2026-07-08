@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>引力波生成与探测模拟 - 物理沙盒宇宙</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        /* ========== Gravitational Wave Experiment CSS Variables ========== */
+        :root {
+          --gw-bg: #f8f9fa;
+          --gw-panel-bg: #ffffff;
+          --gw-panel-border: #e0e0e0;
+          --gw-text: #1a1a2e;
+          --gw-text-muted: #7a7a8a;
+          --gw-accent: #6b8cae;
+          --gw-accent-2: #8a7ca8;
+          --gw-chart-line: rgba(0,0,0,0.12);
+          --gw-card-bg: rgba(0,0,0,0.03);
+          --gw-radius: 4px;
+          --gw-backdrop: none;
+          --gw-border-width: 1px;
+          --gw-shadow: none;
+          --gw-scene-bg: #f0f0f5;
+        }
+
+        [data-theme="glass"] {
+          --gw-bg: #0f1117;
+          --gw-panel-bg: rgba(255,255,255,0.06);
+          --gw-panel-border: rgba(255,255,255,0.12);
+          --gw-text: #e0e6ed;
+          --gw-text-muted: #8b92a8;
+          --gw-accent: #74b9ff;
+          --gw-accent-2: #a29bfe;
+          --gw-chart-line: rgba(255,255,255,0.1);
+          --gw-card-bg: rgba(255,255,255,0.04);
+          --gw-radius: 20px;
+          --gw-backdrop: blur(20px);
+          --gw-border-width: 1px;
+          --gw-shadow: 0 8px 32px rgba(0,0,0,0.3);
+          --gw-scene-bg: #050508;
+        }
+
+        [data-theme="cyber"] {
+          --gw-bg: #0a0014;
+          --gw-panel-bg: rgba(20,0,40,0.6);
+          --gw-panel-border: rgba(189,0,255,0.4);
+          --gw-text: #f0e6ff;
+          --gw-text-muted: #a080c0;
+          --gw-accent: #bd00ff;
+          --gw-accent-2: #00f3ff;
+          --gw-chart-line: rgba(189,0,255,0.2);
+          --gw-card-bg: rgba(0,0,0,0.3);
+          --gw-radius: 8px;
+          --gw-backdrop: blur(12px);
+          --gw-border-width: 1px;
+          --gw-shadow: 0 0 20px rgba(189,0,255,0.15);
+          --gw-scene-bg: #0a0014;
+        }
+
+        [data-theme="cartoon"] {
+          --gw-bg: #fef6e4;
+          --gw-panel-bg: rgba(255,255,255,0.9);
+          --gw-panel-border: rgba(255,180,100,0.4);
+          --gw-text: #2d3436;
+          --gw-text-muted: #636e72;
+          --gw-accent: #ff6b6b;
+          --gw-accent-2: #4ecdc4;
+          --gw-chart-line: rgba(0,0,0,0.15);
+          --gw-card-bg: rgba(255,255,255,0.6);
+          --gw-radius: 24px;
+          --gw-backdrop: blur(16px);
+          --gw-border-width: 3px;
+          --gw-shadow: 0 8px 32px rgba(0,0,0,0.08);
+          --gw-scene-bg: #fef6e4;
+        }
+
+        [data-theme="soviet"] {
+          --gw-bg: #f0ebe4;
+          --gw-panel-bg: #fffaf2;
+          --gw-panel-border: #c41e1e;
+          --gw-text: #1a1a1a;
+          --gw-text-muted: #6a5a4a;
+          --gw-accent: #c41e1e;
+          --gw-accent-2: #8b4513;
+          --gw-chart-line: rgba(0,0,0,0.12);
+          --gw-card-bg: rgba(0,0,0,0.03);
+          --gw-radius: 2px;
+          --gw-backdrop: none;
+          --gw-border-width: 2px;
+          --gw-shadow: 0 4px 12px rgba(0,0,0,0.12);
+          --gw-scene-bg: #f0ebe4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body, html {
+          width: 100vw; height: 100vh;
+          overflow: hidden;
+          font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+          background: var(--gw-bg);
+          color: var(--gw-text);
+          transition: background-color 0.6s ease, color 0.4s ease;
+        }
+
+        /* 3D Canvas container */
+        #canvas-container {
+          position: fixed;
+          top: 56px;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 1;
+        }
+
+        /* Tooltip */
+        #tooltip {
+          position: absolute;
+          background: rgba(0, 0, 0, 0.9);
+          border: 1px solid var(--gw-accent);
+          color: #fff;
+          padding: 10px;
+          border-radius: 4px;
+          font-family: monospace;
+          font-size: 12px;
+          pointer-events: none;
+          display: none;
+          z-index: 20;
+          transform: translate(-50%, -120%);
+          white-space: nowrap;
+        }
+
+        /* ========== Left Drawer (Controls) ========== */
+        .left-drawer {
+          position: fixed; top: 56px; left: 0; bottom: 0;
+          width: 300px; z-index: 20;
+          transform: translateX(0);
+          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .left-drawer.collapsed { transform: translateX(-100%); }
+
+        .left-drawer-inner {
+          width: 100%; height: 100%;
+          padding: 16px;
+          overflow-y: auto;
+          background: var(--gw-panel-bg);
+          border-right: var(--gw-border-width) solid var(--gw-panel-border);
+          box-shadow: var(--gw-shadow);
+          backdrop-filter: var(--gw-backdrop);
+          -webkit-backdrop-filter: var(--gw-backdrop);
+          transition: all 0.4s ease;
+        }
+
+        /* ========== Right Drawer (Knowledge) ========== */
+        .right-drawer {
+          position: fixed; top: 56px; right: 0; bottom: 0;
+          width: 320px; z-index: 20;
+          transform: translateX(0);
+          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .right-drawer.collapsed { transform: translateX(100%); }
+
+        .right-drawer-inner {
+          width: 100%; height: 100%;
+          padding: 16px;
+          overflow-y: auto;
+          background: var(--gw-panel-bg);
+          border-left: var(--gw-border-width) solid var(--gw-panel-border);
+          box-shadow: var(--gw-shadow);
+          backdrop-filter: var(--gw-backdrop);
+          -webkit-backdrop-filter: var(--gw-backdrop);
+          transition: all 0.4s ease;
+          display: flex; flex-direction: column; gap: 12px;
+        }
+
+        /* Drawer toggles */
+        .drawer-toggle {
+          position: absolute; top: 50%;
+          width: 28px; height: 60px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; z-index: 21;
+          background: var(--gw-panel-bg);
+          border: var(--gw-border-width) solid var(--gw-panel-border);
+          font-size: 0.7rem; color: var(--gw-text-muted);
+          transition: all 0.3s ease;
+          user-select: none;
+        }
+        .drawer-toggle:hover {
+          color: var(--gw-accent);
+          background: var(--gw-card-bg);
+        }
+
+        .left-drawer .drawer-toggle {
+          left: 100%; top: 50%; transform: translateY(-50%);
+          border-left: none;
+          border-radius: 0 var(--gw-radius) var(--gw-radius) 0;
+        }
+        .left-drawer.collapsed .drawer-toggle {
+          left: 0; top: 50%;
+          border-left: var(--gw-border-width) solid var(--gw-panel-border);
+          border-radius: 0 var(--gw-radius) var(--gw-radius) 0;
+        }
+
+        .right-drawer .drawer-toggle {
+          right: 100%; top: 50%; transform: translateY(-50%);
+          border-right: none;
+          border-radius: var(--gw-radius) 0 0 var(--gw-radius);
+        }
+        .right-drawer.collapsed .drawer-toggle {
+          right: 0; top: 50%;
+          border-right: var(--gw-border-width) solid var(--gw-panel-border);
+          border-radius: var(--gw-radius) 0 0 var(--gw-radius);
+        }
+
+        /* Soviet overrides */
+        [data-theme="soviet"] .left-drawer-inner { border-right: 2px solid #c41e1e; }
+        [data-theme="soviet"] .right-drawer-inner { border-left: 2px solid #c41e1e; }
+        [data-theme="soviet"] .drawer-toggle { border-color: #c41e1e; }
+
+        /* Panel headings */
+        h2 {
+          font-size: 15px;
+          border-bottom: 1px solid var(--gw-panel-border);
+          padding-bottom: 8px;
+          margin-top: 0;
+          margin-bottom: 12px;
+          color: var(--gw-text);
+        }
+        h3 {
+          font-size: 13px;
+          color: var(--gw-text-muted);
+          margin-bottom: 4px;
+        }
+
+        /* Controls */
+        .control-group {
+          margin-bottom: 14px;
+        }
+        .control-group label {
+          display: flex;
+          justify-content: space-between;
+          font-size: 12px;
+          margin-bottom: 5px;
+          color: var(--gw-text);
+        }
+        .control-group label span:first-child {
+          color: var(--gw-text);
+        }
+        .control-group label span:last-child {
+          color: var(--gw-accent);
+          font-weight: 600;
+        }
+
+        input[type=range] {
+          width: 100%;
+          -webkit-appearance: none;
+          background: var(--gw-chart-line);
+          height: 4px;
+          border-radius: 2px;
+          outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 14px;
+          height: 14px;
+          background: var(--gw-accent);
+          border-radius: 50%;
+          cursor: pointer;
+        }
+
+        .btn {
+          width: 100%;
+          padding: 8px;
+          margin-bottom: 10px;
+          background: var(--gw-card-bg);
+          color: var(--gw-accent);
+          border: 1px solid var(--gw-accent);
+          border-radius: var(--gw-radius);
+          cursor: pointer;
+          font-size: 13px;
+          transition: all 0.2s;
+          font-family: inherit;
+        }
+        .btn:hover {
+          background: var(--gw-accent);
+          color: var(--gw-bg);
+        }
+        .btn-reset {
+          border-color: var(--gw-accent-2);
+          color: var(--gw-accent-2);
+        }
+        .btn-reset:hover {
+          background: var(--gw-accent-2);
+          color: var(--gw-bg);
+        }
+
+        /* Chart container */
+        #chart-container {
+          width: 100%;
+          height: 200px;
+          margin-top: 10px;
+          background: transparent;
+          border-radius: var(--gw-radius);
+        }
+
+        /* Text content */
+        .text-content {
+          font-size: 12px;
+          line-height: 1.6;
+          color: var(--gw-text-muted);
+        }
+        .text-content p {
+          margin-bottom: 10px;
+        }
+        .text-content p b {
+          color: var(--gw-text);
+        }
+
+        .data-fact {
+          background: var(--gw-card-bg);
+          border-left: 3px solid var(--gw-accent);
+          padding: 8px;
+          margin-bottom: 10px;
+          font-family: monospace;
+          color: var(--gw-text);
+          border-radius: 0 var(--gw-radius) var(--gw-radius) 0;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--gw-panel-border); border-radius: 3px; }
+
+        /* Back button */
+        .back-btn {
+          position: fixed;
+          top: 68px;
+          right: 20px;
+          z-index: 1000;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+          .left-drawer { width: 260px; }
+          .right-drawer { width: 280px; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+    <div id="tooltip"></div>
+
+    <!-- Left Drawer: Controls -->
+    <div class="left-drawer" id="left-drawer">
+        <div class="drawer-toggle" id="left-toggle" onclick="toggleLeftDrawer()" title="展开/收起控制面板">&#9664;</div>
+        <div class="left-drawer-inner">
+            <h2>系统参数 (System Parameters)</h2>
+
+            <div class="control-group">
+                <label><span>黑洞1 质量 (M1)</span> <span id="val-m1">10 M☉</span></label>
+                <input type="range" id="input-m1" min="10" max="100" step="1" value="10">
+            </div>
+            <div class="control-group">
+                <label><span>黑洞2 质量 (M2)</span> <span id="val-m2">10 M☉</span></label>
+                <input type="range" id="input-m2" min="10" max="100" step="1" value="10">
+            </div>
+            <div class="control-group">
+                <label><span>轨道半径 (R)</span> <span id="val-r">5.0 AU</span></label>
+                <input type="range" id="input-r" min="1.5" max="10.0" step="0.1" value="5.0">
+            </div>
+            <div class="control-group">
+                <label><span>黑洞自旋 (a*)</span> <span id="val-spin">0.99</span></label>
+                <input type="range" id="input-spin" min="0" max="0.99" step="0.01" value="0.99">
+            </div>
+            <div class="control-group">
+                <label><span>探测器灵敏度</span> <span id="val-sens">0.10</span></label>
+                <input type="range" id="input-sens" min="0.1" max="5.0" step="0.1" value="0.1">
+            </div>
+
+            <div class="control-group" style="border-top: 1px dashed var(--gw-panel-border); padding-top: 10px; margin-top: 10px;">
+                <label><span>引力透镜开关 (Lensing)</span> <input type="checkbox" id="input-lensing" checked></label>
+            </div>
+
+            <div class="control-group" style="border-top: 1px dashed var(--gw-panel-border); padding-top: 10px; margin-top: 10px;">
+                <label><span style="color:var(--gw-accent-2);">新增黑洞质量 (M_new)</span> <span id="val-m3">10 M☉</span></label>
+                <input type="range" id="input-m3" min="5" max="100" step="1" value="10">
+                <div style="font-size:10px; color:var(--gw-accent-2); margin-top:4px;">(仅铃宕模式下左键点击3D网格区域释放游离黑洞)</div>
+            </div>
+
+            <button id="btn-merge" class="btn">触发合并并铃宕 (Trigger Merger)</button>
+            <button id="btn-reset" class="btn btn-reset">重置系统状态 (Reset System)</button>
+
+            <h2>实时监测 (Real-time Monitor)</h2>
+            <div id="chart-container"></div>
+        </div>
+    </div>
+
+    <!-- Right Drawer: Knowledge -->
+    <div class="right-drawer" id="right-drawer">
+        <div class="drawer-toggle" id="right-toggle" onclick="toggleRightDrawer()" title="展开/收起知识面板">&#9654;</div>
+        <div class="right-drawer-inner">
+            <h2>理论背景 (Theoretical Context)</h2>
+            <div class="text-content">
+                <h3>广义相对论与透镜效应</h3>
+                <p>由于大质量天体引发的时空扭曲，光线在途经其附近时会发生偏折（光束传播路径沿测地线偏移）。本系统通过全屏后处理计算多个引力源导致的光线偏折近似叠加效应。</p>
+
+                <h3>双黑洞合并三阶段</h3>
+                <p>1. <b>旋近 (Inspiral)</b>: 引力辐射导致轨道能量及角动量耗散。<br>
+                   2. <b>合并 (Merger)</b>: 视界融合，应变振幅达到峰值。<br>
+                   3. <b>铃振 (Ringdown)</b>: 形成单一克尔黑洞，发射准简正模式引力波。</p>
+            </div>
+
+            <h2>事实数据验证 (GW150914)</h2>
+            <div class="text-content">
+                <div class="data-fact">
+                    <b>波源:</b> 双黑洞 (36+29 M☉)<br>
+                    <b>最终质量:</b> 62 M☉<br>
+                    <b>距离:</b> 410 Mpc
+                </div>
+                <p>注：本系统为了可视化直观性，夸大了空间网格振幅与探测器形变，并在二维空间近似多体引力透镜的线性叠加。</p>
+            </div>
+        </div>
+    </div>
+
+    <a href="index.html" class="back-btn" id="back-btn">&#8592; 返回首页</a>
+
+    <script>
+        // Drawer toggle functions
+        function toggleLeftDrawer() {
+            const drawer = document.getElementById('left-drawer');
+            const toggle = document.getElementById('left-toggle');
+            drawer.classList.toggle('collapsed');
+            toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9654;' : '&#9664;';
+        }
+        function toggleRightDrawer() {
+            const drawer = document.getElementById('right-drawer');
+            const toggle = document.getElementById('right-toggle');
+            drawer.classList.toggle('collapsed');
+            toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9664;' : '&#9654;';
+        }
+    </script>
+
+    <script>
+
+        /**
+         * ==========================================
+         * 物理引擎与 3D 渲染核心 (Three.js)
+         * ==========================================
+         */
+
+// Theme color helpers
+        function getCSSColor(varName) {
+            const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            if (!val) return '#000000';
+            return val;
+        }
+        function cssColorToThree(color) {
+            return new THREE.Color(color);
+        }
+        function hexToRgbVec4(hex) {
+            const r = parseInt(hex.slice(1, 3), 16) / 255;
+            const g = parseInt(hex.slice(3, 5), 16) / 255;
+            const b = parseInt(hex.slice(5, 7), 16) / 255;
+            return new THREE.Vector4(r, g, b, 1.0);
+        }
+        function getGridBaseColor() {
+            const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+            const colors = {
+                academic: new THREE.Vector3(0.0, 0.35, 0.55),
+                glass: new THREE.Vector3(0.0, 0.5, 1.0),
+                cyber: new THREE.Vector3(0.6, 0.0, 1.0),
+                cartoon: new THREE.Vector3(0.0, 0.35, 0.55),
+                soviet: new THREE.Vector3(0.0, 0.35, 0.55)
+            };
+            return colors[theme] || colors['academic'];
+        }
+        function getGlowColor() {
+            const accent = getCSSColor('--gw-accent');
+            return hexToRgbVec4(accent);
+        }
+        function updateMaterialColors() {
+            const accent = getCSSColor('--gw-accent');
+            const accent2 = getCSSColor('--gw-accent-2');
+            const sceneBg = getCSSColor('--gw-scene-bg');
+            scene.background = cssColorToThree(sceneBg);
+            if (bhHaloMat1) bhHaloMat1.color = cssColorToThree(accent);
+            if (bhHaloMat2) bhHaloMat2.color = cssColorToThree(accent2);
+            if (gridShaderMaterial && gridShaderMaterial.uniforms.u_baseColor) {
+                const c = getGridBaseColor();
+                gridShaderMaterial.uniforms.u_baseColor.value.copy(c);
+            }
+            if (lensingPass && lensingPass.uniforms.u_glowColor) {
+                lensingPass.uniforms.u_glowColor.value = getGlowColor();
+            }
+            updateChartColors();
+        }
+        let echartInstance = null;
+        function updateChartColors() {
+            if (!echartInstance) return;
+            const accent = getCSSColor('--gw-accent');
+            const chartLine = getCSSColor('--gw-chart-line');
+            const textMuted = getCSSColor('--gw-text-muted');
+            echartInstance.setOption({
+                yAxis: {
+                    splitLine: { lineStyle: { color: chartLine } },
+                    axisLabel: { color: textMuted }
+                },
+                series: [{ lineStyle: { color: accent } }]
+            });
+        }
+
+        const G = 1; // 简化万有引力常数
+        const C = 50; // 简化光速，控制波传播速度
+        const MAX_BH_COUNT = 20; // 允许引力透镜着色器计算的最大黑洞数量
+
+        let state = {
+            m1: 10,
+            m2: 10,
+            r: 5.0,
+            spin: 0.99,
+            sensitivity: 0.1,
+            time: 0,
+            lensingEnabled: true
+        };
+
+        let systemPhase = 0; 
+        let transitionStartTime = 0;
+        let ringdownStartTime = 0;
+        let peakAmplitude = 0;
+        let ringdownFrequency = 0;
+        let currentTheta = 0; 
+
+        let extraBlackHoles = [];
+        let addedMass = 0;
+
+        // UI 绑定更新
+        const inputs = ['m1', 'm2', 'r', 'spin', 'sens'];
+        inputs.forEach(key => {
+            const el = document.getElementById(`input-${key}`);
+            const valEl = document.getElementById(`val-${key}`);
+            el.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                const stateKey = key === 'sens' ? 'sensitivity' : key;
+                state[stateKey] = val;
+                valEl.innerText = key === 'r' ? val.toFixed(1) + ' AU' : (key === 'm1' || key === 'm2' ? val + ' M☉' : val.toFixed(2));
+                
+                if (systemPhase !== 0) resetSystem();
+            });
+        });
+
+        document.getElementById('input-lensing').addEventListener('change', (e) => {
+            state.lensingEnabled = e.target.checked;
+            lensingPass.enabled = state.lensingEnabled;
+        });
+
+        document.getElementById('input-m3').addEventListener('input', (e) => {
+            document.getElementById('val-m3').innerText = e.target.value + ' M☉';
+        });
+
+        document.getElementById('btn-merge').addEventListener('click', () => {
+            if (systemPhase === 0) {
+                systemPhase = 1;
+                transitionStartTime = state.time;
+            }
+        });
+
+        function resetSystem() {
+            systemPhase = 0;
+            currentTheta = 0;
+            addedMass = 0;
+            bh1.visible = true;
+            bh2.visible = true;
+            bh1.position.set(0, 0, 0);
+
+            extraBlackHoles.forEach(bh => {
+                scene.remove(bh);
+                const idx = interactiveObjects.indexOf(bh);
+                if (idx > -1) interactiveObjects.splice(idx, 1);
+            });
+            extraBlackHoles = [];
+        }
+
+        document.getElementById('btn-reset').addEventListener('click', resetSystem);
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // 初始化 Three.js 场景
+        const scene = new THREE.Scene();
+        scene.background = cssColorToThree(getCSSColor('--gw-scene-bg'));
+
+        const canvasContainer = document.getElementById('canvas-container');
+        const camera = new THREE.PerspectiveCamera(45, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 4000);
+        camera.position.set(0, 30, 60);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: false }); // 关闭原生抗锯齿以配合后处理
+        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+        canvasContainer.appendChild(renderer.domElement);
+
+        /**
+         * ----------------------------------------------------
+         * 多体引力透镜 后处理管线构建
+         * ----------------------------------------------------
+         */
+        const composer = new THREE.EffectComposer(renderer);
+        composer.addPass(new THREE.RenderPass(scene, camera));
+
+        const MultiLensingShader = {
+            uniforms: {
+                "tDiffuse": { value: null },
+                "u_aspect": { value: window.innerWidth / window.innerHeight },
+                "u_bhCount": { value: 0 },
+                "u_bhCenters": { value: Array.from({length: MAX_BH_COUNT}, () => new THREE.Vector2(-10, -10)) },
+                "u_bhRadii": { value: new Array(MAX_BH_COUNT).fill(0.0) },
+                "u_glowColor": { value: getGlowColor() }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float u_aspect;
+                uniform int u_bhCount;
+                uniform vec2 u_bhCenters[${MAX_BH_COUNT}];
+                uniform float u_bhRadii[${MAX_BH_COUNT}];
+                uniform vec4 u_glowColor;
+                varying vec2 vUv;
+
+                void main() {
+                    vec2 uv = vUv;
+                    vec2 totalOffset = vec2(0.0);
+                    vec4 colorAdd = vec4(0.0);
+                    bool insideHorizon = false;
+
+                    for(int i = 0; i < ${MAX_BH_COUNT}; i++) {
+                        if(i >= u_bhCount) break;
+
+                        vec2 delta = uv - u_bhCenters[i];
+                        delta.x *= u_aspect;
+                        float dist = length(delta);
+
+                        // 触及视界强制吸收
+                        if(dist < u_bhRadii[i]) {
+                            insideHorizon = true;
+                            break;
+                        }
+
+                        // 累加计算单点偏折引力场 
+                        // 系数控制形变夸张程度
+                        float lensingStrength = u_bhRadii[i] * 3.0;
+                        float lensingForce = lensingStrength / sqrt(dist);
+                        vec2 offset = normalize(delta) * lensingForce;
+                        offset.x /= u_aspect;
+                        
+                        totalOffset += offset;
+
+                        // 吸积盘或引力红移效应的发光光晕近似
+                        float ringGlow = smoothstep(u_bhRadii[i] * 2.5, u_bhRadii[i] * 1.2, dist);
+                        colorAdd += u_glowColor * ringGlow * 0.35;
+                    }
+
+                    if(insideHorizon) {
+                        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+                        return;
+                    }
+
+                    // 扭曲纹理采样
+                    vec2 sampleUV = uv - totalOffset * 0.8;
+                    vec4 color = texture2D(tDiffuse, sampleUV);
+                    gl_FragColor = color + colorAdd;
+                }
+            `
+        };
+
+        const lensingPass = new THREE.ShaderPass(MultiLensingShader);
+        composer.addPass(lensingPass);
+
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.mouseButtons = {
+            LEFT: THREE.MOUSE.NONE,
+            MIDDLE: THREE.MOUSE.PAN,
+            RIGHT: THREE.MOUSE.ROTATE
+        };
+
+        const transformControl = new THREE.TransformControls(camera, renderer.domElement);
+        transformControl.addEventListener('dragging-changed', function (event) {
+            controls.enabled = !event.value;
+        });
+        scene.add(transformControl);
+
+        const ambientLight = new THREE.AmbientLight(0x222222);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+        scene.add(pointLight); 
+
+        const interactiveObjects = [];
+        const bhMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const bhHaloMat1 = new THREE.MeshBasicMaterial({ color: cssColorToThree(getCSSColor('--gw-accent')), transparent: true, opacity: 0.2, wireframe: true });
+        const bhHaloMat2 = new THREE.MeshBasicMaterial({ color: cssColorToThree(getCSSColor('--gw-accent-2')), transparent: true, opacity: 0.2, wireframe: true });
+
+        const bh1 = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), bhMaterial);
+        const halo1 = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), bhHaloMat1);
+        bh1.add(halo1);
+        bh1.userData = { type: 'bh', index: 1 };
+        
+        const bh2 = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), bhMaterial);
+        const halo2 = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), bhHaloMat2);
+        bh2.add(halo2);
+        bh2.userData = { type: 'bh', index: 2 };
+
+        scene.add(bh1);
+        scene.add(bh2);
+        interactiveObjects.push(bh1, bh2);
+
+        const raycastPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(4000, 4000),
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        raycastPlane.rotation.x = -Math.PI / 2;
+        scene.add(raycastPlane);
+
+        let isDraggingNewBH = false;
+        let dragStartPoint = new THREE.Vector3();
+        let previewMesh = null;
+        
+        const velocityArrow = new THREE.ArrowHelper(
+            new THREE.Vector3(1, 0, 0), 
+            new THREE.Vector3(0, 0, 0), 
+            0, 
+            0xffaa00, 
+            1, 
+            0.5
+        );
+        velocityArrow.visible = false;
+        scene.add(velocityArrow);
+
+        /**
+         * 时空网格 (Spacetime Grid)
+         */
+        const gridUniforms = {
+            time: { value: 0 },
+            waveSpeed: { value: C },
+            frequency: { value: 0 },
+            amplitude: { value: 0 },
+            u_baseColor: { value: getGridBaseColor() }
+        };
+
+        const gridShaderMaterial = new THREE.ShaderMaterial({
+            uniforms: gridUniforms,
+            vertexShader: `
+                uniform float time;
+                uniform float waveSpeed;
+                uniform float frequency;
+                uniform float amplitude;
+                uniform vec3 u_baseColor;
+                varying vec3 vColor;
+                
+                void main() {
+                    vec3 pos = position;
+                    float dist = length(pos.xy);
+                    float wave = 0.0;
+                    if(dist > 2.0) {
+                        wave = amplitude * sin(dist * frequency - time * waveSpeed * frequency) / sqrt(dist);
+                    }
+                    pos.z += wave;
+                    vColor = u_baseColor + vec3(0.0, wave * 1.5, wave * 2.0);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                void main() {
+                    gl_FragColor = vec4(vColor, 0.6);
+                }
+            `,
+            wireframe: true,
+            transparent: true
+        });
+
+        const gridGeo = new THREE.PlaneGeometry(800, 800, 800, 800);
+        const gridMesh = new THREE.Mesh(gridGeo, gridShaderMaterial);
+        gridMesh.rotation.x = -Math.PI / 2; 
+        gridMesh.position.y = -5; 
+        scene.add(gridMesh);
+
+        /**
+         * 探测器模型
+         */
+        const detectorGroup = new THREE.Group();
+        detectorGroup.position.set(30, 0, 0); 
+        detectorGroup.userData = { type: 'detector' };
+
+        const armMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.2 });
+        const mirrorMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.0 });
+        
+        const beamsplitter = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), mirrorMaterial);
+        
+        const armX = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 10, 16), armMaterial);
+        armX.rotation.z = Math.PI / 2;
+        armX.position.set(6, 0, 0);
+        const mirrorX = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2, 2), mirrorMaterial);
+        mirrorX.position.set(11, 0, 0);
+        
+        const armZ = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 10, 16), armMaterial);
+        armZ.rotation.x = Math.PI / 2;
+        armZ.position.set(0, 0, 6);
+        const mirrorZ = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 0.5), mirrorMaterial);
+        mirrorZ.position.set(0, 0, 11);
+
+        detectorGroup.add(beamsplitter, armX, mirrorX, armZ, mirrorZ);
+        scene.add(detectorGroup);
+        interactiveObjects.push(detectorGroup);
+
+        const detectorCollider = new THREE.Mesh(new THREE.BoxGeometry(15, 5, 15), new THREE.MeshBasicMaterial({visible: false}));
+        detectorCollider.position.set(5, 0, 5);
+        detectorCollider.userData = detectorGroup.userData;
+        detectorGroup.add(detectorCollider);
+        interactiveObjects.push(detectorCollider);
+
+        /**
+         * 射线检测与 Tooltip
+         */
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const tooltip = document.getElementById('tooltip');
+
+        let currentPhysicsData = { ke: 0, pe: 0, phaseDiff: 0 };
+
+        window.addEventListener('pointerdown', (e) => {
+            if (e.button !== 0) return;
+            const leftW = document.getElementById('left-drawer').classList.contains('collapsed') ? 0 : 300;
+            const rightW = document.getElementById('right-drawer').classList.contains('collapsed') ? 0 : 320;
+            if (e.clientX < leftW || e.clientX > window.innerWidth - rightW) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(interactiveObjects, false);
+
+            if (intersects.length > 0) {
+                const object = intersects[0].object;
+                const type = object.userData.type;
+
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top = e.clientY + 'px';
+                tooltip.style.display = 'block';
+
+                if (type === 'bh') {
+                    if (transformControl.axis === null) transformControl.detach();
+                    tooltip.innerHTML = `
+                        <b>当前目标数据</b><br>
+                        系统状态: ${systemPhase === 2 ? '克尔黑洞(铃宕)' : '旋近黑洞'}<br>
+                        计算相对动能: ${currentPhysicsData.ke.toExponential(2)} J<br>
+                        计算势能: ${currentPhysicsData.pe.toExponential(2)} J
+                    `;
+                } else if (type === 'extra_bh') {
+                    if (transformControl.axis === null) transformControl.detach();
+                    tooltip.innerHTML = `
+                        <b>游离黑洞数据</b><br>
+                        质量: ${object.userData.mass} M☉<br>
+                        计算速度: ${object.userData.velocity.length().toExponential(2)} (标度单位)
+                    `;
+                } else if (type === 'detector') {
+                    transformControl.attach(detectorGroup);
+                    tooltip.innerHTML = `
+                        <b>干涉仪实时数据</b><br>
+                        激光相位差: ${currentPhysicsData.phaseDiff.toExponential(2)} rad
+                    `;
+                }
+            } else {
+                if (transformControl.axis === null) {
+                    transformControl.detach();
+                }
+                tooltip.style.display = 'none';
+
+                if (systemPhase === 2) {
+                    const planeIntersects = raycaster.intersectObject(raycastPlane);
+                    if (planeIntersects.length > 0) {
+                        const pt = planeIntersects[0].point;
+                        const dist = Math.sqrt(pt.x * pt.x + pt.z * pt.z);
+                        
+                        if (dist > 1.5 && dist < 100.0) {
+                            controls.enabled = false;
+                            isDraggingNewBH = true;
+                            dragStartPoint.copy(pt);
+                            
+                            const mNew = parseFloat(document.getElementById('input-m3').value);
+                            
+                            if (!previewMesh) {
+                                previewMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshBasicMaterial({ color: 0x555555, wireframe: true }));
+                                scene.add(previewMesh);
+                            }
+                            previewMesh.scale.setScalar(Math.pow(mNew, 0.33) * 0.5);
+                            previewMesh.position.copy(dragStartPoint);
+                            previewMesh.visible = true;
+
+                            velocityArrow.position.copy(dragStartPoint);
+                            velocityArrow.setLength(0);
+                            velocityArrow.visible = true;
+                        }
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isDraggingNewBH) return;
+
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            
+            const planeIntersects = raycaster.intersectObject(raycastPlane);
+            if (planeIntersects.length > 0) {
+                const currentPt = planeIntersects[0].point;
+                const vVec = new THREE.Vector3().subVectors(dragStartPoint, currentPt);
+                const vLen = vVec.length();
+                
+                if (vLen > 0.01) {
+                    velocityArrow.setDirection(vVec.normalize());
+                    velocityArrow.setLength(vLen, Math.min(1, vLen * 0.2), Math.min(0.5, vLen * 0.1));
+                } else {
+                    velocityArrow.setLength(0);
+                }
+            }
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            if (!isDraggingNewBH) return;
+            
+            isDraggingNewBH = false;
+            controls.enabled = true;
+            velocityArrow.visible = false;
+            if (previewMesh) previewMesh.visible = false;
+
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            
+            const planeIntersects = raycaster.intersectObject(raycastPlane);
+            if (planeIntersects.length > 0) {
+                const releasePt = planeIntersects[0].point;
+                const mNew = parseFloat(document.getElementById('input-m3').value);
+                
+                const ebh = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), bhMaterial);
+                const ehalo = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), bhHaloMat2);
+                ebh.add(ehalo);
+                ebh.position.copy(dragStartPoint);
+                ebh.scale.setScalar(Math.pow(mNew, 0.33) * 0.5);
+                
+                const vScale = 0.5;
+                const initialVelocity = new THREE.Vector3().subVectors(dragStartPoint, releasePt).multiplyScalar(vScale);
+                
+                ebh.userData = { type: 'extra_bh', mass: mNew, velocity: initialVelocity };
+                
+                scene.add(ebh);
+                interactiveObjects.push(ebh);
+                extraBlackHoles.push(ebh);
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            const w = canvasContainer.clientWidth;
+            const h = canvasContainer.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            composer.setSize(w, h);
+            lensingPass.uniforms.u_aspect.value = w / h;
+            if (echartInstance) echartInstance.resize();
+        });
+
+        /**
+         * ECharts 数据绘图配置
+         */
+        echartInstance = echarts.init(document.getElementById('chart-container'));
+        const maxDataPoints = 400;
+        let chartData = [];
+        for (let i = 0; i < maxDataPoints; i++) chartData.push([i, 0]);
+
+        const chartOption = {
+            grid: { top: 10, right: 10, bottom: 20, left: 40 },
+            xAxis: {
+                type: 'value',
+                show: false,
+                min: 0,
+                max: maxDataPoints
+            },
+            yAxis: {
+                type: 'value',
+                min: -6,
+                max: 6,
+                splitLine: { lineStyle: { color: getCSSColor('--gw-chart-line') } },
+                axisLabel: { color: getCSSColor('--gw-text-muted'), fontSize: 10, formatter: (val) => val.toFixed(1) }
+            },
+            series: [{
+                type: 'line',
+                data: chartData,
+                showSymbol: false,
+                lineStyle: { color: getCSSColor('--gw-accent'), width: 2 },
+                animation: false
+            }]
+        };
+        echartInstance.setOption(chartOption);
+
+        let chartUpdateCounter = 0;
+
+        /**
+         * 物理计算与动画循环
+         */
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt_frame = 0.016;
+            state.time += dt_frame;
+            const time_scaled = dt_frame * 5.0;
+
+            const M1 = state.m1;
+            const M2 = state.m2;
+            const M_total = M1 + M2;
+            const mu = (M1 * M2) / M_total; 
+
+            let currentR = state.r;
+            let visualAmplitude = 0;
+            let f_gw = 0;
+            let omega_orbital = 0;
+
+            if (systemPhase === 0) {
+                currentR = state.r;
+                omega_orbital = Math.sqrt((G * M_total) / Math.pow(currentR, 3));
+                f_gw = 2.0 * omega_orbital;
+                let M_chirp = Math.pow(mu, 3/5) * Math.pow(M_total, 2/5);
+                visualAmplitude = Math.pow(M_chirp, 1.5) / currentR * 0.5;
+
+                currentTheta += omega_orbital * time_scaled;
+
+            } else if (systemPhase === 1) {
+                let dt = state.time - transitionStartTime;
+                let progress = Math.min(dt / 1.5, 1.0);
+                currentR = state.r * Math.pow(1.0 - progress, 0.4); 
+
+                if (currentR < 0.2) currentR = 0.2;
+
+                omega_orbital = Math.sqrt((G * M_total) / Math.pow(currentR, 3));
+                f_gw = 2.0 * omega_orbital;
+                let M_chirp = Math.pow(mu, 3/5) * Math.pow(M_total, 2/5);
+                visualAmplitude = Math.pow(M_chirp, 1.5) / currentR * 0.5;
+
+                currentTheta += omega_orbital * time_scaled;
+
+                if (progress >= 1.0) {
+                    systemPhase = 2; 
+                    ringdownStartTime = state.time;
+                    peakAmplitude = visualAmplitude;
+                    ringdownFrequency = f_gw;
+                }
+
+            } else if (systemPhase === 2) {
+                f_gw = ringdownFrequency;
+                let currentCenterMass = M_total + addedMass;
+                let rHorizonC = Math.pow(currentCenterMass, 0.33) * 0.55;
+                
+                // 1. 碰撞检测与合并处理
+                let toRemove = new Set();
+                for (let i = 0; i < extraBlackHoles.length; i++) {
+                    if (toRemove.has(i)) continue;
+                    let ebh1 = extraBlackHoles[i];
+                    let rMag1 = ebh1.position.length();
+                    let rHorizon1 = Math.pow(ebh1.userData.mass, 0.33) * 0.5;
+
+                    if (rMag1 < (rHorizonC + rHorizon1)) {
+                        addedMass += ebh1.userData.mass;
+                        toRemove.add(i);
+                        ringdownStartTime = state.time;
+                        peakAmplitude += ebh1.userData.mass * 0.05; 
+                        continue;
+                    }
+
+                    for (let j = i + 1; j < extraBlackHoles.length; j++) {
+                        if (toRemove.has(j)) continue;
+                        let ebh2 = extraBlackHoles[j];
+                        let dist = ebh1.position.distanceTo(ebh2.position);
+                        let rHorizon2 = Math.pow(ebh2.userData.mass, 0.33) * 0.5;
+                        
+                        if (dist < (rHorizon1 + rHorizon2)) {
+                            let m1 = ebh1.userData.mass;
+                            let m2 = ebh2.userData.mass;
+                            let mNew = m1 + m2;
+                            
+                            ebh1.userData.velocity.multiplyScalar(m1).add(ebh2.userData.velocity.clone().multiplyScalar(m2)).divideScalar(mNew);
+                            ebh1.position.multiplyScalar(m1).add(ebh2.position.clone().multiplyScalar(m2)).divideScalar(mNew);
+                            ebh1.userData.mass = mNew;
+                            ebh1.scale.setScalar(Math.pow(mNew, 0.33) * 0.5);
+                            
+                            toRemove.add(j);
+                            
+                            ringdownStartTime = state.time;
+                            peakAmplitude += mNew * 0.02; 
+                            rHorizon1 = Math.pow(mNew, 0.33) * 0.5; 
+                        }
+                    }
+                }
+
+                if (toRemove.size > 0) {
+                    let newExtra = [];
+                    for (let i = 0; i < extraBlackHoles.length; i++) {
+                        if (toRemove.has(i)) {
+                            let obj = extraBlackHoles[i];
+                            scene.remove(obj);
+                            const idx = interactiveObjects.indexOf(obj);
+                            if (idx > -1) interactiveObjects.splice(idx, 1);
+                        } else {
+                            newExtra.push(extraBlackHoles[i]);
+                        }
+                    }
+                    extraBlackHoles = newExtra;
+                }
+
+                // 2. 引力加速度积分计算
+                for (let i = 0; i < extraBlackHoles.length; i++) {
+                    let ebh1 = extraBlackHoles[i];
+                    let r1 = ebh1.position;
+                    let aVec = new THREE.Vector3(0, 0, 0);
+
+                    let rMagSq = r1.lengthSq();
+                    if (rMagSq > 0.01) {
+                        let aCenterMag = G * currentCenterMass / rMagSq;
+                        aVec.add(r1.clone().normalize().multiplyScalar(-aCenterMag));
+                    }
+
+                    for (let j = 0; j < extraBlackHoles.length; j++) {
+                        if (i === j) continue;
+                        let ebh2 = extraBlackHoles[j];
+                        let r12 = new THREE.Vector3().subVectors(ebh2.position, r1);
+                        let distSq = Math.max(r12.lengthSq(), 0.01);
+                        
+                        let aijMag = G * ebh2.userData.mass / distSq;
+                        aVec.add(r12.normalize().multiplyScalar(aijMag));
+                    }
+                    ebh1.userData.acceleration = aVec;
+                }
+
+                // 3. 欧拉法更新位移与速度
+                for (let i = 0; i < extraBlackHoles.length; i++) {
+                    let ebh = extraBlackHoles[i];
+                    ebh.userData.velocity.add(ebh.userData.acceleration.clone().multiplyScalar(time_scaled));
+                    ebh.position.add(ebh.userData.velocity.clone().multiplyScalar(time_scaled));
+                    ebh.children[0].rotation.y += state.spin * 0.1;
+                }
+
+                let dt = state.time - ringdownStartTime;
+                visualAmplitude = peakAmplitude * Math.exp(-dt / 0.8);
+                omega_orbital = 0; 
+                currentR = 0;
+            }
+
+            if (systemPhase < 2) {
+                const r1 = (M2 / M_total) * currentR;
+                const r2 = (M1 / M_total) * currentR;
+
+                bh1.position.set(r1 * Math.cos(currentTheta), 0, r1 * Math.sin(currentTheta));
+                bh2.position.set(-r2 * Math.cos(currentTheta), 0, -r2 * Math.sin(currentTheta));
+
+                bh1.scale.setScalar(Math.pow(M1, 0.33) * 0.5);
+                bh2.scale.setScalar(Math.pow(M2, 0.33) * 0.5);
+                
+                bh1.children[0].rotation.y += state.spin * 0.1;
+                bh2.children[0].rotation.y += state.spin * 0.1;
+            } else {
+                bh1.position.set(0, 0, 0);
+                bh2.visible = false;
+                bh1.scale.setScalar(Math.pow(M_total + addedMass, 0.33) * 0.55);
+                bh1.children[0].rotation.y += state.spin * 0.3; 
+            }
+
+            gridUniforms.time.value = state.time;
+            gridUniforms.frequency.value = f_gw;
+            gridUniforms.amplitude.value = visualAmplitude;
+
+            const d_detector = Math.max(detectorGroup.position.length(), 0.1);
+            const phase_delay = d_detector / C; 
+            const h_strain = visualAmplitude * Math.sin(f_gw * (state.time * 5.0 - phase_delay)) / Math.sqrt(d_detector);
+            const h_observed = h_strain * state.sensitivity;
+
+            const armScale = 50.0;
+            armX.scale.y = 1 + h_observed * armScale;
+            armX.position.x = 1 + (5 * armX.scale.y); 
+            mirrorX.position.x = 1 + (10 * armX.scale.y);
+
+            armZ.scale.y = 1 - h_observed * armScale;
+            armZ.position.z = 1 + (5 * armZ.scale.y);
+            mirrorZ.position.z = 1 + (10 * armZ.scale.y);
+
+            if (systemPhase < 2) {
+                const v_rel = omega_orbital * currentR;
+                currentPhysicsData.ke = 0.5 * mu * v_rel * v_rel * 1e42; 
+                currentPhysicsData.pe = - (G * M1 * M2) / currentR * 1e42;
+            } else {
+                currentPhysicsData.ke = 0;
+                currentPhysicsData.pe = 0;
+            }
+            currentPhysicsData.phaseDiff = h_observed * 1e-8;
+
+            chartUpdateCounter++;
+            if (chartUpdateCounter % 2 === 0) {
+                for (let i = 0; i < maxDataPoints - 1; i++) {
+                    chartData[i][1] = chartData[i + 1][1];
+                }
+                chartData[maxDataPoints - 1][1] = h_observed;
+                
+                echartInstance.setOption({
+                    series: [{ data: chartData }]
+                });
+            }
+
+            controls.update();
+            
+            /**
+             * ----------------------------------------------------
+             * 解析各黑洞投影数据输入着色器Uniform
+             * ----------------------------------------------------
+             */
+            if (state.lensingEnabled) {
+                let bhList = [];
+                if (systemPhase < 2) {
+                    bhList.push(bh1, bh2);
+                } else {
+                    bhList.push(bh1); // 合并后的单一黑洞
+                }
+                bhList.push(...extraBlackHoles); // 追加全部游离黑洞
+
+                let validCount = Math.min(bhList.length, MAX_BH_COUNT);
+                lensingPass.uniforms.u_bhCount.value = validCount;
+                
+                let fov = camera.fov * Math.PI / 180;
+
+                for (let i = 0; i < validCount; i++) {
+                    let bh = bhList[i];
+                    let bhPos = bh.position.clone().project(camera);
+                    
+                    // 若目标处于相机视锥前方则计算有效透镜映射
+                    if (bhPos.z < 1.0) {
+                        let screenX = (bhPos.x + 1) / 2;
+                        let screenY = (bhPos.y + 1) / 2;
+                        lensingPass.uniforms.u_bhCenters.value[i].set(screenX, screenY);
+                        
+                        // 基于黑洞体积缩放和相机距离进行透镜范围透视反推计算
+                        let distToCam = camera.position.distanceTo(bh.position);
+                        let visibleHeight = 2 * Math.tan(fov / 2) * distToCam;
+                        let worldRadius = bh.scale.x; 
+                        // 比例系数 0.8 系经验映射常量控制扭曲强度边界
+                        lensingPass.uniforms.u_bhRadii.value[i] = (worldRadius / visibleHeight) * 0.8; 
+                    } else {
+                        // 若处于视野后方则置于不可见远点
+                        lensingPass.uniforms.u_bhCenters.value[i].set(-10, -10);
+                        lensingPass.uniforms.u_bhRadii.value[i] = 0;
+                    }
+                }
+            }
+
+            // 执行替代后的后处理渲染管线
+            composer.render();
+        }
+
+        animate();
+
+        // Theme change observer
+        const themeObserver = new MutationObserver(() => {
+            updateMaterialColors();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // Drawer toggle observers for chart resize
+        const leftDrawer = document.getElementById('left-drawer');
+        const rightDrawer = document.getElementById('right-drawer');
+        const drawerObserver = new MutationObserver(() => {
+            setTimeout(() => { if (echartInstance) echartInstance.resize(); }, 350);
+        });
+        if (leftDrawer) drawerObserver.observe(leftDrawer, { attributes: true, attributeFilter: ['class'] });
+        if (rightDrawer) drawerObserver.observe(rightDrawer, { attributes: true, attributeFilter: ['class'] });
+
+    
+    </script>
+
+    <script src="shared-theme.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const current = PSUTheme.get();
+            document.documentElement.setAttribute('data-theme', current);
+            PSUTheme.createSwitcher();
+            // Ensure back button exists
+            if (!document.getElementById('back-btn')) {
+                PSUTheme.createBackButton('index.html');
+            }
+            // Initial material color update
+            if (typeof updateMaterialColors === 'function') {
+                updateMaterialColors();
+            }
+        });
+    </script>
+</body>
+</html>
