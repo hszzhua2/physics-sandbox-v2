@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>齿轮与自行车 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    /* ========== Bicycle Experiment CSS Variables ========== */
+    :root {
+      --bc-bg: #f8f9fa;
+      --bc-panel-bg: #ffffff;
+      --bc-panel-border: #e0e0e0;
+      --bc-text: #1a1a2e;
+      --bc-text-muted: #7a7a8a;
+      --bc-accent: #6b8cae;
+      --bc-accent-2: #8a7ca8;
+      --bc-chart-line: rgba(0,0,0,0.12);
+      --bc-card-bg: rgba(0,0,0,0.03);
+      --bc-wheel-stroke: #6b8cae;
+      --bc-frame-stroke: #555;
+      --bc-chain-color: #888;
+      --bc-pedal-color: #6b8cae;
+      --bc-radius: 4px;
+      --bc-backdrop: none;
+      --bc-border-width: 1px;
+      --bc-shadow: none;
+    }
+
+    [data-theme="glass"] {
+      --bc-bg: #0f1117;
+      --bc-panel-bg: rgba(255,255,255,0.06);
+      --bc-panel-border: rgba(255,255,255,0.12);
+      --bc-text: #e0e6ed;
+      --bc-text-muted: #8b92a8;
+      --bc-accent: #74b9ff;
+      --bc-accent-2: #a29bfe;
+      --bc-chart-line: rgba(255,255,255,0.1);
+      --bc-card-bg: rgba(255,255,255,0.04);
+      --bc-wheel-stroke: #74b9ff;
+      --bc-frame-stroke: rgba(255,255,255,0.3);
+      --bc-chain-color: rgba(255,255,255,0.5);
+      --bc-pedal-color: #74b9ff;
+      --bc-radius: 20px;
+      --bc-backdrop: blur(20px) saturate(1.2);
+      --bc-border-width: 1px;
+      --bc-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    [data-theme="cyber"] {
+      --bc-bg: #0a0014;
+      --bc-panel-bg: rgba(20,0,40,0.6);
+      --bc-panel-border: rgba(189,0,255,0.4);
+      --bc-text: #f0e6ff;
+      --bc-text-muted: #a080c0;
+      --bc-accent: #bd00ff;
+      --bc-accent-2: #00f3ff;
+      --bc-chart-line: rgba(189,0,255,0.2);
+      --bc-card-bg: rgba(0,0,0,0.3);
+      --bc-wheel-stroke: #bd00ff;
+      --bc-frame-stroke: rgba(189,0,255,0.4);
+      --bc-chain-color: #00f3ff;
+      --bc-pedal-color: #bd00ff;
+      --bc-radius: 8px;
+      --bc-backdrop: blur(12px);
+      --bc-border-width: 1px;
+      --bc-shadow: 0 0 20px rgba(189,0,255,0.15), inset 0 0 20px rgba(189,0,255,0.05);
+    }
+
+    [data-theme="cartoon"] {
+      --bc-bg: #fef6e4;
+      --bc-panel-bg: rgba(255,255,255,0.9);
+      --bc-panel-border: rgba(255,180,100,0.4);
+      --bc-text: #2d3436;
+      --bc-text-muted: #636e72;
+      --bc-accent: #ff6b6b;
+      --bc-accent-2: #4ecdc4;
+      --bc-chart-line: rgba(0,0,0,0.15);
+      --bc-card-bg: rgba(255,255,255,0.6);
+      --bc-wheel-stroke: #ff6b6b;
+      --bc-frame-stroke: #8b6914;
+      --bc-chain-color: #d4a574;
+      --bc-pedal-color: #ff6b6b;
+      --bc-radius: 24px;
+      --bc-backdrop: blur(16px);
+      --bc-border-width: 3px;
+      --bc-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(255,180,100,0.15);
+    }
+
+    [data-theme="soviet"] {
+      --bc-bg: #f0ebe4;
+      --bc-panel-bg: #fffaf2;
+      --bc-panel-border: #c41e1e;
+      --bc-text: #1a1a1a;
+      --bc-text-muted: #6a5a4a;
+      --bc-accent: #c41e1e;
+      --bc-accent-2: #8b4513;
+      --bc-chart-line: rgba(0,0,0,0.12);
+      --bc-card-bg: rgba(0,0,0,0.03);
+      --bc-wheel-stroke: #c41e1e;
+      --bc-frame-stroke: #5c4033;
+      --bc-chain-color: #8b7355;
+      --bc-pedal-color: #c41e1e;
+      --bc-radius: 2px;
+      --bc-backdrop: none;
+      --bc-border-width: 2px;
+      --bc-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+      background: var(--bc-bg);
+      color: var(--bc-text);
+      transition: background-color 0.6s ease, color 0.4s ease;
+    }
+
+    .exp-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: var(--bc-bg);
+      transition: background-color 0.6s ease;
+    }
+
+    /* Layout */
+    .main-layout {
+      position: fixed; inset: 0; z-index: 1;
+      display: flex;
+      padding-top: 56px;
+    }
+
+    .canvas-area {
+      width: 65%; height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .knowledge-panel {
+      width: 35%; height: 100%;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    /* Floating controls */
+    .floating-controls {
+      position: absolute;
+      top: 16px; left: 16px;
+      z-index: 10;
+      width: 280px;
+      padding: 16px;
+      border-radius: var(--bc-radius);
+      background: var(--bc-panel-bg);
+      border: var(--bc-border-width) solid var(--bc-panel-border);
+      box-shadow: var(--bc-shadow);
+      backdrop-filter: var(--bc-backdrop);
+      -webkit-backdrop-filter: var(--bc-backdrop);
+      transition: all 0.4s ease;
+    }
+
+    .floating-controls h3 {
+      margin: 0 0 12px 0; font-size: 1rem;
+      color: var(--bc-text);
+    }
+
+    .control-row {
+      margin-bottom: 10px;
+    }
+
+    .control-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.8rem; color: var(--bc-text-muted);
+      margin-bottom: 4px;
+    }
+
+    .control-value {
+      font-weight: 600; color: var(--bc-accent);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none; width: 100%; height: 6px;
+      border-radius: 3px; background: var(--bc-chart-line);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--bc-accent); cursor: pointer;
+      box-shadow: 0 0 8px var(--bc-accent);
+    }
+
+    .toggle-row {
+      display: flex; gap: 8px; margin-bottom: 10px;
+    }
+
+    .toggle-btn {
+      flex: 1; padding: 6px 10px;
+      border: var(--bc-border-width) solid var(--bc-panel-border);
+      background: var(--bc-card-bg);
+      color: var(--bc-text-muted);
+      border-radius: var(--bc-radius);
+      cursor: pointer; font-size: 0.8rem;
+      transition: all 0.2s; font-family: inherit;
+    }
+
+    .toggle-btn.active {
+      background: var(--bc-accent);
+      color: #fff;
+      border-color: var(--bc-accent);
+    }
+
+    /* Telemetry panel inside floating controls */
+    .telemetry-charts {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--bc-panel-border);
+    }
+
+    .chart-row {
+      display: flex; gap: 8px;
+    }
+
+    .chart-box {
+      flex: 1; height: 100px;
+    }
+
+    /* Knowledge cards */
+    .k-card {
+      padding: 14px;
+      border-radius: var(--bc-radius);
+      background: var(--bc-panel-bg);
+      border: var(--bc-border-width) solid var(--bc-panel-border);
+      box-shadow: var(--bc-shadow);
+      transition: all 0.4s ease;
+    }
+
+    .k-card h4 {
+      margin: 0 0 8px 0; font-size: 0.95rem;
+      color: var(--bc-text);
+    }
+
+    .k-card p, .k-card li {
+      font-size: 0.82rem; color: var(--bc-text-muted);
+      line-height: 1.5;
+    }
+
+    .k-card ul { padding-left: 16px; margin: 6px 0; }
+
+    .formula {
+      font-family: 'Courier New', monospace;
+      background: var(--bc-card-bg);
+      padding: 4px 8px; border-radius: 4px;
+      font-size: 0.85rem; color: var(--bc-accent);
+      display: inline-block; margin: 4px 0;
+    }
+
+    .comparison-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin-top: 8px;
+    }
+
+    .comp-item {
+      background: var(--bc-card-bg);
+      padding: 8px; border-radius: var(--bc-radius);
+      text-align: center;
+    }
+
+    .comp-item .val {
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--bc-accent);
+    }
+
+    .comp-item .lab {
+      font-size: 0.7rem; color: var(--bc-text-muted);
+    }
+
+    /* Canvas */
+    #bike-canvas {
+      width: 100%; height: 100%;
+      cursor: grab;
+    }
+
+    #bike-canvas:active { cursor: grabbing; }
+
+    /* Drag hint */
+    .drag-hint {
+      position: absolute; bottom: 16px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.78rem; color: var(--bc-text-muted);
+      pointer-events: none; opacity: 0.7;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bc-panel-border); border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .main-layout { flex-direction: column; }
+      .canvas-area { width: 100%; height: 60%; }
+      .knowledge-panel { width: 100%; height: 40%; }
+      .floating-controls { width: calc(100% - 32px); max-width: 320px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+
+  <!-- Top nav is auto-created by shared-theme.js -->
+
+  <!-- Back button -->
+  <a href="index.html" class="back-btn" id="back-btn">&#8592; 返回首页</a>
+
+  <div class="main-layout">
+    <div class="canvas-area">
+      <canvas id="bike-canvas"></canvas>
+
+      <div class="floating-controls">
+        <h3>控制面板</h3>
+
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="btn-modern" onclick="setBikeType('modern')">现代自行车</button>
+          <button class="toggle-btn" id="btn-penny" onclick="setBikeType('penny')">高轮车</button>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <span>牙盘齿数 Z1</span>
+            <span class="control-value" id="val-z1">48</span>
+          </div>
+          <input type="range" id="slider-z1" min="20" max="60" value="48" oninput="updateZ1(this.value)">
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <span>飞轮齿数 Z2</span>
+            <span class="control-value" id="val-z2">16</span>
+          </div>
+          <input type="range" id="slider-z2" min="10" max="30" value="16" oninput="updateZ2(this.value)">
+        </div>
+
+        <div class="control-row">
+          <div class="control-label">
+            <span>踏频 RPM</span>
+            <span class="control-value" id="val-rpm">60</span>
+          </div>
+          <input type="range" id="slider-rpm" min="0" max="120" value="60" oninput="updateRPM(this.value)">
+        </div>
+
+        <div class="telemetry-charts">
+          <div class="chart-row">
+            <div class="chart-box" id="gauge-chart"></div>
+            <div class="chart-box" id="line-chart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="drag-hint">拖拽踏板旋转自行车 · 或使用滑块控制</div>
+    </div>
+
+    <div class="knowledge-panel">
+      <div class="k-card">
+        <h4>动力学对比</h4>
+        <div class="comparison-grid">
+          <div class="comp-item">
+            <div class="val" id="comp-ratio">3.0</div>
+            <div class="lab">传动比 Z1/Z2</div>
+          </div>
+          <div class="comp-item">
+            <div class="val" id="comp-speed">21.6</div>
+            <div class="lab">速度 km/h</div>
+          </div>
+          <div class="comp-item">
+            <div class="val" id="comp-wheel-rpm">180</div>
+            <div class="lab">轮速 RPM</div>
+          </div>
+          <div class="comp-item">
+            <div class="val" id="comp-cadence">60</div>
+            <div class="lab">踏频 RPM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="k-card">
+        <h4>参数说明</h4>
+        <ul>
+          <li><b>牙盘 Z1</b>：前齿轮齿数，决定踩踏一圈输入的转矩</li>
+          <li><b>飞轮 Z2</b>：后齿轮齿数，与牙盘配合决定传动比</li>
+          <li><b>传动比</b>：<span class="formula">i = Z1 / Z2</span></li>
+          <li><b>车轮转速</b>：<span class="formula">n_wheel = n_pedal * i</span></li>
+          <li><b>车速</b>：<span class="formula">v = n_wheel * C / 60</span> （C为轮周长）</li>
+        </ul>
+      </div>
+
+      <div class="k-card">
+        <h4>自行车演化史</h4>
+        <p><b>1817</b> 德莱斯发明步行机（无踏板）</p>
+        <p><b>1860s</b> 米肖父子加装踏板曲柄</p>
+        <p><b>1870s</b> 高轮车（Penny-Farthing）风靡</p>
+        <p><b>1885</b> 安全自行车问世，齿轮传动普及</p>
+        <p><b>现代</b> 多档位变速系统，传动效率超98%</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    // ======================
+    // State
+    // ======================
+    const state = {
+      bikeType: 'modern', // 'modern' | 'penny'
+      z1: 48,
+      z2: 16,
+      rpm: 60,
+      pedalAngle: 0,
+      wheelAngle: 0,
+      isDragging: false,
+      lastMouseAngle: 0,
+      speedHistory: [],
+      maxHistory: 60,
+      particles: [],
+      groundOffset: 0,
+      time: 0
+    };
+
+    const canvas = document.getElementById('bike-canvas');
+    const ctx = canvas.getContext('2d');
+    let cw, ch;
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      cw = canvas.width = rect.width * dpr;
+      ch = canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cw = rect.width;
+      ch = rect.height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // ======================
+    // Theme helpers
+    // ======================
+    function getCSSVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function getThemeColors() {
+      return {
+        bg: getCSSVar('--bc-bg'),
+        panelBg: getCSSVar('--bc-panel-bg'),
+        text: getCSSVar('--bc-text'),
+        textMuted: getCSSVar('--bc-text-muted'),
+        accent: getCSSVar('--bc-accent'),
+        accent2: getCSSVar('--bc-accent-2'),
+        wheelStroke: getCSSVar('--bc-wheel-stroke'),
+        frameStroke: getCSSVar('--bc-frame-stroke'),
+        chainColor: getCSSVar('--bc-chain-color'),
+        pedalColor: getCSSVar('--bc-pedal-color'),
+        chartLine: getCSSVar('--bc-chart-line')
+      };
+    }
+
+    // ======================
+    // Physics
+    // ======================
+    function getRatio() { return state.z1 / state.z2; }
+
+    function getWheelRPM() { return state.rpm * getRatio(); }
+
+    function getSpeedKmh() {
+      const wheelRpm = getWheelRPM();
+      const wheelCircumference = state.bikeType === 'modern' ? 2.1 : 4.2; // meters
+      return (wheelRpm * wheelCircumference * 60 / 1000).toFixed(1);
+    }
+
+    // ======================
+    // Controls
+    // ======================
+    window.setBikeType = function(type) {
+      state.bikeType = type;
+      document.getElementById('btn-modern').classList.toggle('active', type === 'modern');
+      document.getElementById('btn-penny').classList.toggle('active', type === 'penny');
+      // Disable z1/z2 for penny (fixed gear)
+      const disabled = type === 'penny';
+      document.getElementById('slider-z1').disabled = disabled;
+      document.getElementById('slider-z2').disabled = disabled;
+      updateCharts();
+    };
+
+    window.updateZ1 = function(v) {
+      state.z1 = parseInt(v);
+      document.getElementById('val-z1').textContent = state.z1;
+      updateStats();
+    };
+
+    window.updateZ2 = function(v) {
+      state.z2 = parseInt(v);
+      document.getElementById('val-z2').textContent = state.z2;
+      updateStats();
+    };
+
+    window.updateRPM = function(v) {
+      state.rpm = parseInt(v);
+      document.getElementById('val-rpm').textContent = state.rpm;
+      updateStats();
+    };
+
+    function updateStats() {
+      document.getElementById('comp-ratio').textContent = getRatio().toFixed(1);
+      document.getElementById('comp-speed').textContent = getSpeedKmh();
+      document.getElementById('comp-wheel-rpm').textContent = Math.round(getWheelRPM());
+      document.getElementById('comp-cadence').textContent = state.rpm;
+    }
+
+    // ======================
+    // Drag interaction
+    // ======================
+    function getMouseAngle(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX || e.touches[0].clientX) - rect.left;
+      const my = (e.clientY || e.touches[0].clientY) - rect.top;
+      const cx = cw * 0.35;
+      const cy = state.bikeType === 'modern' ? ch * 0.55 : ch * 0.72;
+      return Math.atan2(my - cy, mx - cx);
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      state.isDragging = true;
+      state.lastMouseAngle = getMouseAngle(e);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!state.isDragging) return;
+      const angle = getMouseAngle(e);
+      const diff = angle - state.lastMouseAngle;
+      state.pedalAngle += diff;
+      state.lastMouseAngle = angle;
+      // Derive RPM from drag speed (simplified)
+      state.rpm = Math.min(120, Math.max(0, Math.round(Math.abs(diff) * 30)));
+      document.getElementById('slider-rpm').value = state.rpm;
+      document.getElementById('val-rpm').textContent = state.rpm;
+      updateStats();
+    });
+
+    canvas.addEventListener('mouseup', () => { state.isDragging = false; });
+    canvas.addEventListener('mouseleave', () => { state.isDragging = false; });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      state.isDragging = true;
+      state.lastMouseAngle = getMouseAngle(e);
+    }, {passive: false});
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!state.isDragging) return;
+      const angle = getMouseAngle(e);
+      const diff = angle - state.lastMouseAngle;
+      state.pedalAngle += diff;
+      state.lastMouseAngle = angle;
+      state.rpm = Math.min(120, Math.max(0, Math.round(Math.abs(diff) * 30)));
+      document.getElementById('slider-rpm').value = state.rpm;
+      document.getElementById('val-rpm').textContent = state.rpm;
+      updateStats();
+    }, {passive: false});
+
+    canvas.addEventListener('touchend', () => { state.isDragging = false; });
+
+    // ======================
+    // Drawing Helpers
+    // ======================
+    function drawWheel(x, y, r, angle, colors, isFront) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      // Tire outer
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.strokeStyle = colors.wheelStroke;
+      ctx.lineWidth = isFront ? 5 : 4;
+      ctx.stroke();
+
+      // Inner tire line
+      ctx.beginPath();
+      ctx.arc(0, 0, r - 4, 0, Math.PI * 2);
+      ctx.strokeStyle = colors.textMuted;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.4;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Rim ring
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.85, 0, Math.PI * 2);
+      ctx.strokeStyle = colors.wheelStroke;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.5;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Spokes
+      const spokeCount = isFront && state.bikeType === 'penny' ? 32 : 16;
+      ctx.strokeStyle = colors.wheelStroke;
+      ctx.lineWidth = 0.8;
+      ctx.globalAlpha = 0.6;
+      for (let i = 0; i < spokeCount; i++) {
+        const a = (Math.PI * 2 / spokeCount) * i;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a) * r * 0.82, Math.sin(a) * r * 0.82);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Hub
+      ctx.beginPath();
+      ctx.arc(0, 0, 6, 0, Math.PI * 2);
+      ctx.fillStyle = colors.frameStroke;
+      ctx.fill();
+
+      // Hub accent
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fillStyle = colors.accent;
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawGear(x, y, r, teeth, angle, colors) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      // Gear body
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fillStyle = colors.bg;
+      ctx.fill();
+      ctx.strokeStyle = colors.accent;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Teeth
+      const toothH = 4;
+      for (let i = 0; i < teeth; i++) {
+        const a = (Math.PI * 2 / teeth) * i;
+        const a2 = (Math.PI * 2 / teeth) * (i + 0.5);
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+        ctx.lineTo(Math.cos(a) * (r + toothH), Math.sin(a) * (r + toothH));
+        ctx.arc(0, 0, r + toothH, a, a2);
+        ctx.lineTo(Math.cos(a2) * r, Math.sin(a2) * r);
+        ctx.strokeStyle = colors.accent;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Inner decorative circle
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.6, 0, Math.PI * 2);
+      ctx.strokeStyle = colors.accent2;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.5;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Spoke-like internals
+      const innerSpokes = 5;
+      ctx.strokeStyle = colors.accent;
+      ctx.lineWidth = 1.2;
+      ctx.globalAlpha = 0.4;
+      for (let i = 0; i < innerSpokes; i++) {
+        const a = (Math.PI * 2 / innerSpokes) * i + angle * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(a) * r * 0.55, Math.sin(a) * r * 0.55);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Center
+      ctx.beginPath();
+      ctx.arc(0, 0, 5, 0, Math.PI * 2);
+      ctx.fillStyle = colors.accent;
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawChain(cx1, cy1, r1, cx2, cy2, r2, colors) {
+      ctx.strokeStyle = colors.chainColor;
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+
+      // Dynamic shadow
+      ctx.shadowColor = colors.accent;
+      ctx.shadowBlur = state.rpm > 60 ? 8 : 0;
+
+      const dx = cx2 - cx1;
+      const dy = cy2 - cy1;
+      const dist = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx);
+
+      const topOffset = Math.PI / 2;
+      const botOffset = -Math.PI / 2;
+
+      const x1t = cx1 + Math.cos(angle + topOffset) * r1;
+      const y1t = cy1 + Math.sin(angle + topOffset) * r1;
+      const x2t = cx2 + Math.cos(angle + topOffset) * r2;
+      const y2t = cy2 + Math.sin(angle + topOffset) * r2;
+
+      const x1b = cx1 + Math.cos(angle + botOffset) * r1;
+      const y1b = cy1 + Math.sin(angle + botOffset) * r1;
+      const x2b = cx2 + Math.cos(angle + botOffset) * r2;
+      const y2b = cy2 + Math.sin(angle + botOffset) * r2;
+
+      ctx.beginPath();
+      ctx.moveTo(x1t, y1t);
+      ctx.lineTo(x2t, y2t);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(x1b, y1b);
+      ctx.lineTo(x2b, y2b);
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+
+      // Chain links (dashed effect)
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(x1t, y1t);
+      ctx.lineTo(x2t, y2t);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x1b, y1b);
+      ctx.lineTo(x2b, y2b);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    }
+
+    function drawPedal(x, y, angle, colors, isGlow) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      // Crank arm
+      ctx.strokeStyle = colors.frameStroke;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, 35);
+      ctx.stroke();
+
+      // Pedal glow when dragging/high RPM
+      if (isGlow || state.rpm > 80) {
+        ctx.shadowColor = colors.accent;
+        ctx.shadowBlur = 15;
+      }
+
+      // Pedal body
+      ctx.fillStyle = colors.pedalColor;
+      ctx.fillRect(-10, 32, 20, 8);
+      ctx.strokeStyle = colors.frameStroke;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-10, 32, 20, 8);
+
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+
+    function drawRider(colors) {
+      // Simple silhouette
+      const x = cw * 0.35;
+      const y = ch * 0.55;
+
+      ctx.save();
+      ctx.strokeStyle = colors.frameStroke;
+      ctx.fillStyle = colors.textMuted;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(x - 5, y - 75, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Body
+      ctx.beginPath();
+      ctx.moveTo(x - 5, y - 67);
+      ctx.lineTo(x - 8, y - 45);
+      ctx.lineTo(x + 15, y - 38);
+      ctx.stroke();
+
+      // Arms
+      ctx.beginPath();
+      ctx.moveTo(x - 6, y - 58);
+      ctx.lineTo(x + 25, y - 50);
+      ctx.stroke();
+
+      // Legs (animated with pedal)
+      const legAngle = state.pedalAngle;
+      const hipX = x - 8;
+      const hipY = y - 45;
+      const pedalX = x + Math.sin(legAngle) * 35;
+      const pedalY = y + Math.cos(legAngle) * 35;
+
+      ctx.beginPath();
+      ctx.moveTo(hipX, hipY);
+      ctx.lineTo((hipX + pedalX) / 2 + 5, (hipY + pedalY) / 2);
+      ctx.lineTo(pedalX, pedalY);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawGroundShadow(bikeX, bikeY, wheelR, colors) {
+      ctx.save();
+      ctx.fillStyle = colors.textMuted;
+      ctx.globalAlpha = 0.15;
+
+      // Shadow ellipse under wheels
+      ctx.beginPath();
+      ctx.ellipse(bikeX - 80, bikeY + wheelR + 4, wheelR * 0.9, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.ellipse(bikeX + 80, bikeY + wheelR + 4, wheelR * 0.9, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    function spawnParticles() {
+      if (state.rpm < 40) return;
+      const count = Math.floor(state.rpm / 30);
+      const rearX = state.bikeType === 'modern' ? cw * 0.35 - 80 : cw * 0.35 - 40;
+      const rearY = state.bikeType === 'modern' ? ch * 0.55 + 45 : ch * 0.72 + 60;
+      for (let i = 0; i < count; i++) {
+        state.particles.push({
+          x: rearX,
+          y: rearY + (Math.random() - 0.5) * 20,
+          vx: -2 - Math.random() * (state.rpm / 20),
+          vy: (Math.random() - 0.5) * 1,
+          life: 1.0,
+          len: 10 + Math.random() * 20
+        });
+      }
+    }
+
+    function updateAndDrawParticles(colors) {
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.03;
+
+        if (p.life <= 0) {
+          state.particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.strokeStyle = colors.accent;
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = p.life * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x + p.len, p.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // ======================
+    // Modern Bicycle
+    // ======================
+    function drawModernBike(colors) {
+      const cx = cw * 0.35;
+      const cy = ch * 0.55;
+      const rearR = 45;
+      const frontR = 45;
+      const rearX = cx - 80;
+      const frontX = cx + 80;
+      const wheelY = cy + 10;
+
+      // Ground shadow
+      drawGroundShadow(cx, wheelY, rearR, colors);
+
+      // Frame (gradient stroke)
+      const grad = ctx.createLinearGradient(rearX, wheelY, frontX, wheelY - 60);
+      grad.addColorStop(0, colors.accent);
+      grad.addColorStop(1, colors.accent2);
+
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Chain stay
+      ctx.beginPath();
+      ctx.moveTo(rearX, wheelY);
+      ctx.lineTo(cx, wheelY - 15);
+      ctx.stroke();
+
+      // Seat stay
+      ctx.beginPath();
+      ctx.moveTo(rearX, wheelY);
+      ctx.lineTo(cx - 15, wheelY - 55);
+      ctx.stroke();
+
+      // Seat tube
+      ctx.beginPath();
+      ctx.moveTo(cx, wheelY - 15);
+      ctx.lineTo(cx - 15, wheelY - 55);
+      ctx.stroke();
+
+      // Down tube
+      ctx.beginPath();
+      ctx.moveTo(cx, wheelY - 15);
+      ctx.lineTo(frontX - 10, wheelY - 55);
+      ctx.stroke();
+
+      // Top tube
+      ctx.beginPath();
+      ctx.moveTo(cx - 15, wheelY - 55);
+      ctx.lineTo(frontX - 10, wheelY - 55);
+      ctx.stroke();
+
+      // Fork
+      ctx.beginPath();
+      ctx.moveTo(frontX, wheelY);
+      ctx.lineTo(frontX - 10, wheelY - 55);
+      ctx.stroke();
+
+      // Handlebar
+      ctx.strokeStyle = colors.frameStroke;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(frontX - 10, wheelY - 55);
+      ctx.lineTo(frontX - 5, wheelY - 70);
+      ctx.lineTo(frontX + 10, wheelY - 72);
+      ctx.stroke();
+
+      // Seat
+      ctx.beginPath();
+      ctx.moveTo(cx - 25, wheelY - 55);
+      ctx.lineTo(cx - 5, wheelY - 55);
+      ctx.stroke();
+
+      // Rider
+      drawRider(colors);
+
+      // Chain
+      drawGear(cx, wheelY - 15, 18, state.z2, state.wheelAngle, colors);
+      drawGear(cx, wheelY - 15, 28, state.z1, state.pedalAngle, colors);
+      drawChain(cx, wheelY - 15, 28, rearX, wheelY, 18, colors);
+
+      // Pedals
+      drawPedal(cx, wheelY - 15, state.pedalAngle, colors, state.isDragging);
+      drawPedal(cx, wheelY - 15, state.pedalAngle + Math.PI, colors, false);
+
+      // Wheels
+      drawWheel(rearX, wheelY, rearR, state.wheelAngle, colors, false);
+      drawWheel(frontX, wheelY, frontR, state.wheelAngle, colors, true);
+
+      // Speed particles
+      spawnParticles();
+      updateAndDrawParticles(colors);
+    }
+
+    // ======================
+    // High-Wheel (Penny-Farthing)
+    // ======================
+    function drawPennyBike(colors) {
+      const cx = cw * 0.35;
+      const cy = ch * 0.72;
+      const frontR = 90;
+      const rearR = 22;
+      const frontX = cx + 40;
+      const rearX = cx - 70;
+      const frontY = cy;
+      const rearY = cy + frontR - rearR;
+
+      // Ground shadow
+      drawGroundShadow(cx, rearY, rearR, colors);
+      ctx.save();
+      ctx.fillStyle = colors.textMuted;
+      ctx.globalAlpha = 0.15;
+      ctx.beginPath();
+      ctx.ellipse(frontX, frontY + frontR + 4, frontR * 0.9, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // Frame - classical copper tone
+      ctx.strokeStyle = colors.frameStroke;
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Main backbone (elegant curve)
+      ctx.beginPath();
+      ctx.moveTo(frontX, frontY);
+      ctx.quadraticCurveTo(frontX - 10, frontY - frontR * 0.6, frontX - 20, frontY - frontR - 10);
+      ctx.stroke();
+
+      // Fork (Bezier curve)
+      ctx.beginPath();
+      ctx.moveTo(frontX, frontY);
+      ctx.quadraticCurveTo(frontX + 15, frontY - frontR * 0.5, frontX + 5, frontY - frontR + 10);
+      ctx.stroke();
+
+      // Rear fork
+      ctx.beginPath();
+      ctx.moveTo(rearX, rearY);
+      ctx.lineTo(frontX - 35, frontY - frontR * 0.4);
+      ctx.stroke();
+
+      // Seat post with spring detail
+      ctx.beginPath();
+      ctx.moveTo(frontX - 20, frontY - frontR - 10);
+      ctx.lineTo(frontX - 22, frontY - frontR - 35);
+      ctx.stroke();
+
+      // Spring coils
+      ctx.strokeStyle = colors.chainColor;
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 4; i++) {
+        const sy = frontY - frontR - 15 - i * 5;
+        ctx.beginPath();
+        ctx.moveTo(frontX - 24, sy);
+        ctx.lineTo(frontX - 18, sy + 2);
+        ctx.lineTo(frontX - 24, sy + 4);
+        ctx.stroke();
+      }
+
+      // Seat
+      ctx.strokeStyle = colors.frameStroke;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(frontX - 32, frontY - frontR - 35);
+      ctx.lineTo(frontX - 12, frontY - frontR - 35);
+      ctx.stroke();
+
+      // Handlebar decorative curve
+      ctx.beginPath();
+      ctx.moveTo(frontX + 5, frontY - frontR + 10);
+      ctx.quadraticCurveTo(frontX + 25, frontY - frontR + 5, frontX + 20, frontY - frontR + 20);
+      ctx.stroke();
+
+      // Small handle
+      ctx.beginPath();
+      ctx.moveTo(frontX + 20, frontY - frontR + 20);
+      ctx.lineTo(frontX + 30, frontY - frontR + 22);
+      ctx.stroke();
+
+      // Pedal crank attached directly to front wheel
+      const crankLen = 20;
+      const pedalX = frontX + Math.cos(state.pedalAngle) * crankLen;
+      const pedalY = frontY + Math.sin(state.pedalAngle) * crankLen;
+
+      ctx.strokeStyle = colors.frameStroke;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(frontX, frontY);
+      ctx.lineTo(pedalX, pedalY);
+      ctx.stroke();
+
+      // Pedals
+      drawPedal(frontX, frontY, state.pedalAngle, colors, state.isDragging);
+      drawPedal(frontX, frontY, state.pedalAngle + Math.PI, colors, false);
+
+      // Large front wheel with decorative rim ring
+      drawWheel(frontX, frontY, frontR, state.wheelAngle, colors, true);
+
+      // Extra rim decoration for penny
+      ctx.save();
+      ctx.translate(frontX, frontY);
+      ctx.beginPath();
+      ctx.arc(0, 0, frontR * 0.9, 0, Math.PI * 2);
+      ctx.strokeStyle = colors.chainColor;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 6]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Small rear wheel
+      drawWheel(rearX, rearY, rearR, state.wheelAngle, colors, false);
+
+      // Speed particles
+      spawnParticles();
+      updateAndDrawParticles(colors);
+    }
+
+    // ======================
+    // Main Loop
+    // ======================
+    function draw() {
+      const colors = getThemeColors();
+
+      // Clear
+      ctx.clearRect(0, 0, cw, ch);
+
+      // Ground line
+      const groundY = state.bikeType === 'modern' ? ch * 0.55 + 60 : ch * 0.72 + 115;
+      ctx.strokeStyle = colors.chartLine;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(cw, groundY);
+      ctx.stroke();
+
+      // Dashed ground motion lines
+      if (state.rpm > 0) {
+        ctx.save();
+        ctx.strokeStyle = colors.textMuted;
+        ctx.globalAlpha = 0.2;
+        ctx.lineWidth = 1;
+        const offset = (state.groundOffset % 40);
+        for (let x = -offset; x < cw; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, groundY + 8);
+          ctx.lineTo(x + 20, groundY + 8);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      if (state.bikeType === 'modern') {
+        drawModernBike(colors);
+      } else {
+        drawPennyBike(colors);
+      }
+    }
+
+    function animate() {
+      state.time += 0.016;
+
+      // Auto-rotate if not dragging
+      if (!state.isDragging && state.rpm > 0) {
+        state.pedalAngle += (state.rpm * Math.PI / 30) * 0.016;
+      }
+
+      const ratio = getRatio();
+      state.wheelAngle = state.pedalAngle * ratio;
+      state.groundOffset += (getWheelRPM() * 0.01);
+
+      draw();
+      updateTelemetry();
+      requestAnimationFrame(animate);
+    }
+
+    // ======================
+    // ECharts
+    // ======================
+    let gaugeChart, lineChart;
+
+    function initCharts() {
+      gaugeChart = echarts.init(document.getElementById('gauge-chart'));
+      lineChart = echarts.init(document.getElementById('line-chart'));
+      updateCharts();
+    }
+
+    function updateCharts() {
+      const colors = getThemeColors();
+      const speed = parseFloat(getSpeedKmh());
+
+      // Gauge
+      gaugeChart.setOption({
+        backgroundColor: 'transparent',
+        series: [{
+          type: 'gauge',
+          startAngle: 180,
+          endAngle: 0,
+          min: 0,
+          max: 60,
+          splitNumber: 6,
+          radius: '90%',
+          center: ['50%', '70%'],
+          axisLine: {
+            lineStyle: {
+              width: 6,
+              color: [[speed/60, colors.accent], [1, colors.chartLine]]
+            }
+          },
+          pointer: {
+            itemStyle: { color: colors.accent },
+            width: 3
+          },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: { show: false },
+          detail: {
+            valueAnimation: true,
+            formatter: '{value}',
+            color: colors.text,
+            fontSize: 14,
+            offsetCenter: [0, '-10%']
+          },
+          data: [{ value: speed }],
+          title: {
+            offsetCenter: [0, '30%'],
+            fontSize: 10,
+            color: colors.textMuted
+          }
+        }]
+      });
+
+      // History for line chart
+      state.speedHistory.push(speed);
+      if (state.speedHistory.length > state.maxHistory) state.speedHistory.shift();
+
+      lineChart.setOption({
+        backgroundColor: 'transparent',
+        grid: { left: 0, right: 0, top: 5, bottom: 5 },
+        xAxis: { type: 'category', show: false, data: state.speedHistory.map((_, i) => i) },
+        yAxis: { type: 'value', show: false, min: 0, max: 60 },
+        series: [{
+          data: state.speedHistory,
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+          lineStyle: { color: colors.accent2, width: 2 },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: colors.accent2 + '40' },
+                { offset: 1, color: colors.accent2 + '00' }
+              ]
+            }
+          }
+        }]
+      });
+    }
+
+    function updateTelemetry() {
+      if (state.time % 0.2 < 0.016) { // update every ~12 frames
+        updateCharts();
+      }
+    }
+
+    // ======================
+    // Theme observer
+    // ======================
+    const themeObserver = new MutationObserver(() => {
+      updateCharts();
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // ======================
+    // Init
+    // ======================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set default academic if none
+      const current = PSUTheme.get();
+      document.documentElement.setAttribute('data-theme', current);
+
+      PSUTheme.createSwitcher();
+      PSUTheme.createBackButton('index.html');
+
+      initCharts();
+      updateStats();
+      animate();
+
+      // Handle window resize for charts
+      window.addEventListener('resize', () => {
+        gaugeChart && gaugeChart.resize();
+        lineChart && lineChart.resize();
+      });
+    });
+
+  })();
+  </script>
+</body>
+</html>
