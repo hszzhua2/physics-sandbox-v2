@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>忒伊亚撞击模拟 · SPH × Three.js</title>
+<link rel="stylesheet" href="shared-theme.css">
+
+<style>
+/* ========== Theia Impact CSS Variables (--ti-*) ========== */
+:root {
+  --ti-bg: #f8f9fa;
+  --ti-scene-bg: #e8e8ee;
+  --ti-panel-bg: #ffffff;
+  --ti-panel-border: #e0e0e0;
+  --ti-text: #1a1a2e;
+  --ti-text-muted: #7a7a8a;
+  --ti-accent: #6b8cae;
+  --ti-accent-2: #8a7ca8;
+  --ti-slider-track: rgba(0,0,0,0.12);
+  --ti-radius: 4px;
+  --ti-border-width: 1px;
+  --ti-backdrop: none;
+  --ti-shadow: none;
+}
+
+[data-theme="glass"] {
+  --ti-bg: #0f1117;
+  --ti-scene-bg: #050508;
+  --ti-panel-bg: rgba(255,255,255,0.06);
+  --ti-panel-border: rgba(255,255,255,0.12);
+  --ti-text: #e0e6ed;
+  --ti-text-muted: #8b92a8;
+  --ti-accent: #74b9ff;
+  --ti-accent-2: #a29bfe;
+  --ti-slider-track: rgba(255,255,255,0.1);
+  --ti-radius: 20px;
+  --ti-border-width: 1px;
+  --ti-backdrop: blur(20px);
+  --ti-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+[data-theme="cyber"] {
+  --ti-bg: #0a0014;
+  --ti-scene-bg: #0a0014;
+  --ti-panel-bg: rgba(20,0,40,0.6);
+  --ti-panel-border: rgba(189,0,255,0.4);
+  --ti-text: #f0e6ff;
+  --ti-text-muted: #a080c0;
+  --ti-accent: #bd00ff;
+  --ti-accent-2: #00f3ff;
+  --ti-slider-track: rgba(189,0,255,0.2);
+  --ti-radius: 8px;
+  --ti-border-width: 1px;
+  --ti-backdrop: blur(12px);
+  --ti-shadow: 0 0 20px rgba(189,0,255,0.15), inset 0 0 20px rgba(189,0,255,0.05);
+}
+
+[data-theme="cartoon"] {
+  --ti-bg: #fef6e4;
+  --ti-scene-bg: #fef6e4;
+  --ti-panel-bg: rgba(255,255,255,0.9);
+  --ti-panel-border: rgba(255,180,100,0.4);
+  --ti-text: #2d3436;
+  --ti-text-muted: #636e72;
+  --ti-accent: #ff6b6b;
+  --ti-accent-2: #4ecdc4;
+  --ti-slider-track: rgba(0,0,0,0.15);
+  --ti-radius: 24px;
+  --ti-border-width: 3px;
+  --ti-backdrop: blur(16px);
+  --ti-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(255,180,100,0.15);
+}
+
+[data-theme="soviet"] {
+  --ti-bg: #f0ebe4;
+  --ti-scene-bg: #f0ebe4;
+  --ti-panel-bg: #fffaf2;
+  --ti-panel-border: #c41e1e;
+  --ti-text: #1a1a1a;
+  --ti-text-muted: #6a5a4a;
+  --ti-accent: #c41e1e;
+  --ti-accent-2: #8b4513;
+  --ti-slider-track: rgba(0,0,0,0.12);
+  --ti-radius: 2px;
+  --ti-border-width: 2px;
+  --ti-backdrop: none;
+  --ti-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body, html {
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+  background: var(--ti-bg);
+  color: var(--ti-text);
+  transition: background-color 0.6s ease, color 0.4s ease;
+}
+
+.exp-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background: var(--ti-bg);
+  transition: background-color 0.6s ease;
+}
+
+#canvas-container {
+  position: fixed; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+}
+canvas { display: block; }
+
+/* ========== Left Drawer ========== */
+.left-drawer {
+  position: fixed; top: 56px; left: 0; bottom: 0;
+  width: 300px; z-index: 20;
+  transform: translateX(0);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.left-drawer.collapsed {
+  transform: translateX(-100%);
+}
+
+.left-drawer-inner {
+  width: 100%; height: 100%;
+  padding: 14px;
+  overflow-y: auto;
+  background: var(--ti-panel-bg);
+  border-right: var(--ti-border-width) solid var(--ti-panel-border);
+  box-shadow: var(--ti-shadow);
+  backdrop-filter: var(--ti-backdrop);
+  -webkit-backdrop-filter: var(--ti-backdrop);
+  transition: all 0.4s ease;
+}
+
+.left-drawer-inner::-webkit-scrollbar { width: 4px; }
+.left-drawer-inner::-webkit-scrollbar-thumb {
+  background: var(--ti-panel-border);
+  border-radius: 2px;
+}
+
+/* ========== Right Drawer ========== */
+.right-drawer {
+  position: fixed; top: 56px; right: 0; bottom: 0;
+  width: 250px; z-index: 20;
+  transform: translateX(0);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.right-drawer.collapsed {
+  transform: translateX(100%);
+}
+
+.right-drawer-inner {
+  width: 100%; height: 100%;
+  padding: 14px;
+  overflow-y: auto;
+  background: var(--ti-panel-bg);
+  border-left: var(--ti-border-width) solid var(--ti-panel-border);
+  box-shadow: var(--ti-shadow);
+  backdrop-filter: var(--ti-backdrop);
+  -webkit-backdrop-filter: var(--ti-backdrop);
+  transition: all 0.4s ease;
+}
+
+.right-drawer-inner::-webkit-scrollbar { width: 4px; }
+.right-drawer-inner::-webkit-scrollbar-thumb {
+  background: var(--ti-panel-border);
+  border-radius: 2px;
+}
+
+/* ========== Drawer Toggle Buttons (position: fixed) ========== */
+.drawer-toggle {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  width: 28px; height: 60px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 21;
+  background: var(--ti-panel-bg);
+  border: var(--ti-border-width) solid var(--ti-panel-border);
+  font-size: 0.7rem; color: var(--ti-text-muted);
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.drawer-toggle:hover {
+  color: var(--ti-accent);
+}
+
+/* Left drawer toggle */
+.left-drawer .drawer-toggle {
+  left: 300px;
+  border-left: none;
+  border-radius: 0 var(--ti-radius) var(--ti-radius) 0;
+}
+
+.left-drawer.collapsed .drawer-toggle {
+  left: 0;
+  border-left: var(--ti-border-width) solid var(--ti-panel-border);
+  border-radius: 0 var(--ti-radius) var(--ti-radius) 0;
+}
+
+/* Right drawer toggle */
+.right-drawer .drawer-toggle {
+  right: 250px;
+  border-right: none;
+  border-radius: var(--ti-radius) 0 0 var(--ti-radius);
+}
+
+.right-drawer.collapsed .drawer-toggle {
+  right: 0;
+  border-right: var(--ti-border-width) solid var(--ti-panel-border);
+  border-radius: var(--ti-radius) 0 0 var(--ti-radius);
+}
+
+/* ========== Panel Content Styles ========== */
+.panel-title {
+  color: var(--ti-accent);
+  font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--ti-panel-border);
+  transition: color 0.4s ease, border-color 0.4s ease;
+}
+
+.control-group { margin-bottom: 10px; }
+
+.control-label {
+  display: flex; justify-content: space-between; align-items: center;
+  color: var(--ti-text-muted); font-size: 11px; margin-bottom: 4px;
+  transition: color 0.4s ease;
+}
+.control-label span:last-child {
+  color: var(--ti-accent);
+  font-family: 'Segoe UI', monospace; font-size: 11px;
+  min-width: 40px; text-align: right;
+  transition: color 0.4s ease;
+}
+
+input[type="range"] {
+  width: 100%; height: 4px;
+  border-radius: 2px;
+  background: var(--ti-slider-track);
+  outline: none; -webkit-appearance: none;
+  transition: background 0.4s ease;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--ti-accent);
+  border: 2px solid var(--ti-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--ti-accent);
+  border: 2px solid var(--ti-text);
+  cursor: pointer;
+}
+
+.toggle-row {
+  display: flex; justify-content: space-between; align-items: center;
+  color: var(--ti-text-muted); font-size: 11px; margin: 8px 0;
+  transition: color 0.4s ease;
+}
+
+.toggle-switch {
+  width: 36px; height: 18px;
+  border-radius: 9px;
+  background: var(--ti-slider-track);
+  position: relative; cursor: pointer; transition: background 0.3s;
+}
+.toggle-switch.active { background: var(--ti-accent); }
+.toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%; background: var(--ti-text);
+  transition: transform 0.3s;
+}
+.toggle-switch.active::after { transform: translateX(18px); }
+
+.btn-row { display: flex; gap: 6px; margin: 10px 0; }
+.btn {
+  flex: 1; padding: 7px 0;
+  border-radius: var(--ti-radius);
+  border: var(--ti-border-width) solid var(--ti-panel-border);
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  text-align: center; user-select: none;
+  background: var(--ti-panel-bg);
+  color: var(--ti-text);
+}
+.btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn-accent {
+  background: var(--ti-accent); color: #fff;
+  border-color: var(--ti-accent);
+}
+.btn-accent2 {
+  background: var(--ti-accent-2); color: #fff;
+  border-color: var(--ti-accent-2);
+}
+
+.preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.preset-btn {
+  padding: 6px 0;
+  border-radius: var(--ti-radius);
+  border: var(--ti-border-width) solid var(--ti-panel-border);
+  background: var(--ti-panel-bg);
+  color: var(--ti-text-muted); font-size: 10px;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.preset-btn:hover {
+  color: var(--ti-text);
+  border-color: var(--ti-accent);
+}
+
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  margin: 4px 0; font-size: 10px;
+  color: var(--ti-text-muted);
+  transition: color 0.4s ease;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ========== Right Panel Stats ========== */
+.stat-row {
+  display: flex; justify-content: space-between;
+  margin: 5px 0; font-size: 11px;
+}
+.stat-label { color: var(--ti-text-muted); transition: color 0.4s ease; }
+.stat-value {
+  color: var(--ti-accent);
+  font-family: 'Segoe UI', monospace; font-size: 11px;
+  text-align: right;
+  transition: color 0.4s ease;
+}
+
+#energy-canvas {
+  width: 100%; height: 80px; margin-top: 8px;
+  border-radius: var(--ti-radius);
+  background: transparent;
+}
+
+/* ========== Bottom Progress ========== */
+#bottom-progress {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  z-index: 10;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--ti-panel-bg);
+  border: var(--ti-border-width) solid var(--ti-panel-border);
+  border-radius: var(--ti-radius);
+  box-shadow: var(--ti-shadow);
+  backdrop-filter: var(--ti-backdrop);
+  -webkit-backdrop-filter: var(--ti-backdrop);
+  padding: 8px 18px;
+  transition: all 0.4s ease;
+}
+.step {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: var(--ti-text-muted);
+  transition: color 0.5s;
+}
+.step-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ti-slider-track);
+  transition: all 0.5s;
+}
+.step.active { color: var(--ti-accent); }
+.step.active .step-dot {
+  background: var(--ti-accent);
+  box-shadow: 0 0 6px var(--ti-accent);
+}
+.step.done { color: #4caf50; }
+.step.done .step-dot { background: #4caf50; }
+.step-arrow { color: var(--ti-text-muted); font-size: 10px; }
+
+/* ========== Hint ========== */
+#hint {
+  position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%);
+  z-index: 10;
+  color: var(--ti-text-muted); font-size: 10px;
+  pointer-events: none; opacity: 1; transition: opacity 1s;
+}
+#hint.fade { opacity: 0; }
+
+/* ========== Back Button ========== */
+.back-btn {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 1000;
+  padding: 10px 20px;
+  font-weight: bold; cursor: pointer;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all 0.3s ease;
+  font-family: var(--font-main, 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif);
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 900px) {
+  .left-drawer { width: 260px; }
+  .right-drawer { width: 220px; }
+  .left-drawer .drawer-toggle { left: 260px; }
+  .left-drawer.collapsed .drawer-toggle { left: 0; }
+  .right-drawer .drawer-toggle { right: 220px; }
+  .right-drawer.collapsed .drawer-toggle { right: 0; }
+}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+<div class="exp-bg"></div>
+
+<!-- Back button -->
+<a href="index.html" class="back-btn" id="back-btn">&#8592; 返回首页</a>
+
+<div id="canvas-container"></div>
+
+<!-- Left Drawer: Controls -->
+<div class="left-drawer" id="left-drawer">
+  <div class="drawer-toggle" id="left-toggle" onclick="toggleLeftDrawer()" title="展开/收起控制面板">&#9664;</div>
+  <div class="left-drawer-inner">
+    <div class="panel-title">&#9881; 撞击参数</div>
+
+    <div class="control-group">
+      <div class="control-label"><span>忒伊亚质量比 &gamma;</span><span id="val-gamma">0.13</span></div>
+      <input type="range" id="slider-gamma" min="0.05" max="0.50" step="0.01" value="0.13">
+    </div>
+    <div class="control-group">
+      <div class="control-label"><span>撞击速度 v/v_esc</span><span id="val-velocity">1.05</span></div>
+      <input type="range" id="slider-velocity" min="0.8" max="2.5" step="0.05" value="1.05">
+    </div>
+    <div class="control-group">
+      <div class="control-label"><span>撞击参数 b = sin&theta;</span><span id="val-b">0.70</span></div>
+      <input type="range" id="slider-b" min="0.0" max="0.99" step="0.01" value="0.70">
+    </div>
+    <div class="control-group">
+      <div class="control-label"><span>粒子数 N</span><span id="val-n">1200</span></div>
+      <input type="range" id="slider-n" min="400" max="5000" step="200" value="1200">
+    </div>
+    <div class="control-group">
+      <div class="control-label"><span>模拟速度</span><span id="val-speed">4&times;</span></div>
+      <input type="range" id="slider-speed" min="1" max="20" step="1" value="4">
+    </div>
+
+    <div class="toggle-row">
+      <span>显示粒子尾迹</span>
+      <div class="toggle-switch" id="toggle-trail"></div>
+    </div>
+    <div class="toggle-row">
+      <span>相机跟踪质心</span>
+      <div class="toggle-switch" id="toggle-track"></div>
+    </div>
+
+    <div class="btn-row">
+      <div class="btn btn-accent" id="btn-start">&#9654; 开始</div>
+      <div class="btn btn-accent2" id="btn-pause">&#9208; 暂停</div>
+      <div class="btn" id="btn-reset">&#8634; 重置</div>
+    </div>
+
+    <div class="panel-title" style="margin-top:12px">预设场景</div>
+    <div class="preset-grid">
+      <div class="preset-btn" data-preset="graze">擦边撞击</div>
+      <div class="preset-btn" data-preset="headon">正面撞击</div>
+      <div class="preset-btn" data-preset="fast">高速撞击</div>
+      <div class="preset-btn" data-preset="merge">低速并合</div>
+    </div>
+
+    <div class="panel-title" style="margin-top:12px">粒子图例</div>
+    <div class="legend-item"><div class="dot" style="background:#e65c2c"></div>原地球 &mdash; 铁核</div>
+    <div class="legend-item"><div class="dot" style="background:#3366dd"></div>原地球 &mdash; 地幔硅酸盐</div>
+    <div class="legend-item"><div class="dot" style="background:#e6c82c"></div>忒伊亚 &mdash; 铁核</div>
+    <div class="legend-item"><div class="dot" style="background:#99cc33"></div>忒伊亚 &mdash; 地幔硅酸盐</div>
+    <div class="legend-item"><div class="dot" style="background:#cc66aa"></div>碎片盘 / 逃逸物质</div>
+
+    <div class="panel-title" style="margin-top:12px">能量历史</div>
+    <canvas id="energy-canvas" width="230" height="80"></canvas>
+  </div>
+</div>
+
+<!-- Right Drawer: Stats -->
+<div class="right-drawer" id="right-drawer">
+  <div class="drawer-toggle" id="right-toggle" onclick="toggleRightDrawer()" title="展开/收起状态面板">&#9654;</div>
+  <div class="right-drawer-inner">
+    <div class="panel-title">&#128202; 实时状态</div>
+    <div class="stat-row"><span class="stat-label">模拟时间</span><span class="stat-value" id="st-time">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">粒子总数</span><span class="stat-value" id="st-n">0</span></div>
+    <div class="stat-row"><span class="stat-label">系统总能量</span><span class="stat-value" id="st-etot">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">动能 KE</span><span class="stat-value" id="st-ke">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">势能 PE</span><span class="stat-value" id="st-pe">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">角动量 L</span><span class="stat-value" id="st-l">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">最大密度 &rho;</span><span class="stat-value" id="st-rhomax">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">轨道碎片数</span><span class="stat-value" id="st-debris">0</span></div>
+    <div class="stat-row"><span class="stat-label">温度峰值</span><span class="stat-value" id="st-tmax">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">FPS</span><span class="stat-value" id="st-fps">60</span></div>
+  </div>
+</div>
+
+<!-- Bottom Progress -->
+<div id="bottom-progress">
+  <div class="step active" id="step-0"><div class="step-dot"></div>初始化</div>
+  <div class="step-arrow">&#8250;</div>
+  <div class="step" id="step-1"><div class="step-dot"></div>接近</div>
+  <div class="step-arrow">&#8250;</div>
+  <div class="step" id="step-2"><div class="step-dot"></div>撞击</div>
+  <div class="step-arrow">&#8250;</div>
+  <div class="step" id="step-3"><div class="step-dot"></div>碎片盘形成</div>
+  <div class="step-arrow">&#8250;</div>
+  <div class="step" id="step-4"><div class="step-dot"></div>月球累积</div>
+</div>
+
+<div id="hint">拖动鼠标旋转视角 &middot; 滚轮缩放 &middot; 右键平移</div>
+
+<script>
+// ==========================================
+// Drawer toggle functions
+// ==========================================
+function toggleLeftDrawer() {
+  var drawer = document.getElementById('left-drawer');
+  var toggle = document.getElementById('left-toggle');
+  drawer.classList.toggle('collapsed');
+  toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9654;' : '&#9664;';
+}
+function toggleRightDrawer() {
+  var drawer = document.getElementById('right-drawer');
+  var toggle = document.getElementById('right-toggle');
+  drawer.classList.toggle('collapsed');
+  toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9664;' : '&#9654;';
+}
+
+// ==========================================
+// Theme helper: is dark background?
+// ==========================================
+function isDarkTheme() {
+  var theme = document.documentElement.getAttribute('data-theme') || 'academic';
+  return (theme === 'glass' || theme === 'cyber');
+}
+
+// ==========================================
+// 一、物理常数与全局配置
+// ==========================================
+const G = 6.57e-3;
+const H_SMOOTH = 0.32;
+const K_EOS = 0.04;
+const GAMMA_EOS = 1.4;
+const ALPHA_AV = 1.0;
+const BETA_AV = 2.0;
+const ROCHE = 2.9;
+const DT_BASE = 1.0e-3;
+const M_EARTH = 1.0;
+const R_EARTH = 1.0;
+const CORE_FRACTION = 0.30;
+
+const TYPE_EARTH_CORE = 0;
+const TYPE_EARTH_MANTLE = 1;
+const TYPE_THEIA_CORE = 2;
+const TYPE_THEIA_MANTLE = 3;
+const TYPE_DEBRIS = 4;
+
+const COLOR_EARTH_CORE = new THREE.Color(0xe65c2c);
+const COLOR_EARTH_MANTLE = new THREE.Color(0x3366dd);
+const COLOR_THEIA_CORE = new THREE.Color(0xe6c82c);
+const COLOR_THEIA_MANTLE = new THREE.Color(0x99cc33);
+const COLOR_DEBRIS = new THREE.Color(0xcc66aa);
+
+// ==========================================
+// 二、场景初始化
+// ==========================================
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+
+// Initial scene background will be set by applyTheme()
+scene.background = new THREE.Color(0xe8e8ee);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 200);
+camera.position.set(0, 8, 18);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.minDistance = 2;
+controls.maxDistance = 80;
+
+// 光照
+const ambientLight = new THREE.AmbientLight(0x223344, 1.0);
+scene.add(ambientLight);
+const pointLight = new THREE.PointLight(0xffeedd, 1.5, 100);
+pointLight.position.set(0, 0, 0);
+scene.add(pointLight);
+
+// Refs for theme-reactive objects
+let starsMesh = null;
+let rocheRingMesh = null;
+
+// 星空背景
+function createStars() {
+  if (starsMesh) { scene.remove(starsMesh); starsMesh.geometry.dispose(); starsMesh.material.dispose(); }
+  const count = 3000;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const r = 50 + Math.random() * 100;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    pos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+    pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    pos[i*3+2] = r * Math.cos(phi);
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const dark = isDarkTheme();
+  const mat = new THREE.PointsMaterial({
+    color: dark ? 0xffffff : 0x666688,
+    size: 0.15,
+    transparent: true,
+    opacity: dark ? 0.8 : 0.3,
+    sizeAttenuation: true
+  });
+  starsMesh = new THREE.Points(geo, mat);
+  scene.add(starsMesh);
+}
+
+// 洛希参考环
+function createRocheRing() {
+  if (rocheRingMesh) { scene.remove(rocheRingMesh); rocheRingMesh.geometry.dispose(); rocheRingMesh.material.dispose(); }
+  const geo = new THREE.RingGeometry(ROCHE - 0.05, ROCHE + 0.05, 128);
+  const dark = isDarkTheme();
+  const mat = new THREE.MeshBasicMaterial({
+    color: dark ? 0x4488ff : 0x6688bb,
+    transparent: true,
+    opacity: 0.25,
+    side: THREE.DoubleSide
+  });
+  rocheRingMesh = new THREE.Mesh(geo, mat);
+  rocheRingMesh.rotation.x = Math.PI / 2;
+  scene.add(rocheRingMesh);
+}
+createStars();
+createRocheRing();
+
+// ==========================================
+// 三、空间网格加速
+// ==========================================
+class SpatialGrid {
+  constructor(cellSize) {
+    this.cellSize = cellSize;
+    this.grid = new Map();
+  }
+  clear() { this.grid.clear(); }
+  hash(x, y, z) {
+    const cx = Math.floor(x / this.cellSize);
+    const cy = Math.floor(y / this.cellSize);
+    const cz = Math.floor(z / this.cellSize);
+    return `${cx},${cy},${cz}`;
+  }
+  insertParticle(idx, x, y, z) {
+    const key = this.hash(x, y, z);
+    if (!this.grid.has(key)) this.grid.set(key, []);
+    this.grid.get(key).push(idx);
+  }
+  queryNeighbors(px, py, pz, radius, callback) {
+    const r2 = radius * radius;
+    const cs = this.cellSize;
+    const cx0 = Math.floor((px - radius) / cs);
+    const cx1 = Math.floor((px + radius) / cs);
+    const cy0 = Math.floor((py - radius) / cs);
+    const cy1 = Math.floor((py + radius) / cs);
+    const cz0 = Math.floor((pz - radius) / cs);
+    const cz1 = Math.floor((pz + radius) / cs);
+    for (let cx = cx0; cx <= cx1; cx++) {
+      for (let cy = cy0; cy <= cy1; cy++) {
+        for (let cz = cz0; cz <= cz1; cz++) {
+          const key = `${cx},${cy},${cz}`;
+          const list = this.grid.get(key);
+          if (!list) continue;
+          for (let i = 0; i < list.length; i++) {
+            const idx = list[i];
+            const dx = sim.pos[idx*3] - px;
+            const dy = sim.pos[idx*3+1] - py;
+            const dz = sim.pos[idx*3+2] - pz;
+            const d2 = dx*dx + dy*dy + dz*dz;
+            if (d2 < r2 && d2 > 1e-12) callback(idx, Math.sqrt(d2));
+          }
+        }
+      }
+    }
+  }
+}
+
+// ==========================================
+// 四、SPH 核函数
+// ==========================================
+const H2 = H_SMOOTH * H_SMOOTH;
+const H3 = H2 * H_SMOOTH;
+const W_NORM = 8.0 / (Math.PI * H3);
+const DW_NORM = 48.0 / (Math.PI * H3 * H_SMOOTH);
+
+function W_fast(q) {
+  if (q >= 2.0) return 0.0;
+  if (q >= 1.0) {
+    const t = 2.0 - q;
+    return W_NORM * 0.25 * t * t * t;
+  }
+  const t1 = 1.0 - q;
+  const t2 = 0.5 - q;
+  return W_NORM * (t1*t1*t1 - 4.0*t2*t2*t2);
+}
+function dW_fast(q) {
+  if (q >= 2.0) return 0.0;
+  if (q >= 1.0) {
+    const t = 2.0 - q;
+    return -DW_NORM * 0.25 * t * t;
+  }
+  const t1 = 1.0 - q;
+  const t2 = 0.5 - q;
+  return DW_NORM * (t1*t1 - 4.0*t2*t2);
+}
+
+// ==========================================
+// 五、粒子系统与模拟状态
+// ==========================================
+const sim = {
+  n: 0,
+  pos: null,
+  vel: null,
+  velHalf: null,
+  acc: null,
+  rho: null,
+  p: null,
+  u: null,
+  mass: null,
+  type: null,
+  active: false,
+  paused: true,
+  time: 0,
+  flashIntensity: 0,
+  energyHistory: [],
+  keHistory: [],
+  frameCount: 0,
+  stage: 0,
+  contacted: false,
+  debrisCount: 0,
+  maxDensity: 0,
+  maxTemp: 0,
+  totalMass: 0,
+  trailEnabled: false,
+  trackCM: false,
+  speedMult: 4,
+  gamma: 0.13,
+  vRatio: 1.05,
+  bParam: 0.70,
+  targetN: 1200,
+  trailPoints: [],
+  trailGeo: null,
+  trailObj: null,
+  points: null,
+  flashLight: null,
+  spatial: new SpatialGrid(2.0 * H_SMOOTH),
+};
+
+// 自定义粒子着色器（完整保留）
+const particleVertexShader = `
+  attribute float size;
+  attribute vec3 customColor;
+  varying vec3 vColor;
+  varying float vAlpha;
+  void main() {
+    vColor = customColor;
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    float dist = length(mvPosition.xyz);
+    float pointSize = size * (300.0 / (dist + 1.0));
+    gl_PointSize = max(pointSize, 1.5);
+    gl_Position = projectionMatrix * mvPosition;
+    vAlpha = 0.85;
+  }
+`;
+const particleFragmentShader = `
+  varying vec3 vColor;
+  varying float vAlpha;
+  void main() {
+    vec2 coord = gl_PointCoord - vec2(0.5);
+    float dist = length(coord);
+    if (dist > 0.5) discard;
+    float glow = 1.0 - smoothstep(0.0, 0.5, dist);
+    glow = pow(glow, 1.4);
+    vec3 finalColor = vColor + vec3(0.15) * pow(glow, 3.0);
+    float alpha = vAlpha * glow;
+    gl_FragColor = vec4(finalColor, alpha);
+  }
+`;
+
+function initParticleSystem() {
+  if (sim.points) { scene.remove(sim.points); sim.points.geometry.dispose(); sim.points.material.dispose(); }
+  const n = sim.n;
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(n * 3);
+  const colors = new Float32Array(n * 3);
+  const sizes = new Float32Array(n);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
+  geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+  const dark = isDarkTheme();
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: particleVertexShader,
+    fragmentShader: particleFragmentShader,
+    transparent: true,
+    depthWrite: false,
+    blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending,
+  });
+  sim.points = new THREE.Points(geo, mat);
+  scene.add(sim.points);
+}
+
+function initTrailSystem() {
+  if (sim.trailObj) { scene.remove(sim.trailObj); sim.trailObj.geometry.dispose(); sim.trailObj.material.dispose(); }
+  sim.trailPoints = [];
+  const maxTrail = 3000;
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(maxTrail * 3);
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setDrawRange(0, 0);
+  const dark = isDarkTheme();
+  const mat = new THREE.PointsMaterial({
+    color: dark ? 0x4488ff : 0x6688bb,
+    size: 0.08, transparent: true, opacity: 0.4, depthWrite: false
+  });
+  sim.trailObj = new THREE.Points(geo, mat);
+  scene.add(sim.trailObj);
+}
+
+function initFlashLight() {
+  if (sim.flashLight) { scene.remove(sim.flashLight); }
+  sim.flashLight = new THREE.PointLight(0xffaa33, 0, 30);
+  sim.flashLight.position.set(0, 0, 0);
+  scene.add(sim.flashLight);
+}
+
+// ==========================================
+// 六、初始轨道与天体生成
+// ==========================================
+function generateBody(nParticles, totalMass, radius, centerX, centerY, centerZ, vx, vy, vz, typeCore, typeMantle) {
+  const coreRadius = radius * CORE_FRACTION;
+  const coreMass = totalMass * 0.325;
+  const mantleMass = totalMass - coreMass;
+  const coreN = Math.floor(nParticles * 0.325);
+  const mantleN = nParticles - coreN;
+  const positions = [];
+  const types = [];
+  const masses = [];
+
+  function sampleSphere(count, r, typ, mPerP) {
+    let placed = 0;
+    while (placed < count) {
+      const x = (Math.random() * 2 - 1) * r;
+      const y = (Math.random() * 2 - 1) * r;
+      const z = (Math.random() * 2 - 1) * r;
+      const d = Math.sqrt(x*x + y*y + z*z);
+      if (d <= r) {
+        positions.push(centerX + x, centerY + y, centerZ + z);
+        types.push(typ);
+        masses.push(mPerP);
+        placed++;
+      }
+    }
+  }
+  sampleSphere(coreN, coreRadius, typeCore, coreMass / coreN);
+  sampleSphere(mantleN, radius, typeMantle, mantleMass / mantleN);
+
+  return { positions, types, masses, n: nParticles };
+}
+
+function initSimulation() {
+  sim.active = true;
+  sim.paused = true;
+  sim.time = 0;
+  sim.frameCount = 0;
+  sim.stage = 0;
+  sim.contacted = false;
+  sim.flashIntensity = 0;
+  sim.energyHistory = [];
+  sim.keHistory = [];
+
+  const n = sim.targetN;
+  sim.n = n;
+
+  const mTheia = sim.gamma * M_EARTH;
+  const rTheia = R_EARTH * Math.pow(sim.gamma, 1.0/3.0);
+  const rEarth = R_EARTH;
+
+  const separation = 3.5 * (rEarth + rTheia);
+
+  const vEsc = Math.sqrt(2.0 * G * (M_EARTH + mTheia) / separation);
+  const vImpact = sim.vRatio * vEsc;
+
+  const earthX = -separation * mTheia / (M_EARTH + mTheia);
+  const theiaX = separation * M_EARTH / (M_EARTH + mTheia);
+
+  const b = sim.bParam;
+  const theta = Math.asin(Math.min(b, 0.999));
+  const vxTheia = -vImpact * Math.cos(theta);
+  const vyTheia = vImpact * Math.sin(theta);
+
+  const vxEarth = -vxTheia * mTheia / M_EARTH;
+  const vyEarth = -vyTheia * mTheia / M_EARTH;
+
+  const earthBody = generateBody(
+    Math.floor(n * M_EARTH / (M_EARTH + mTheia)),
+    M_EARTH, rEarth, earthX, 0, 0, vxEarth, vyEarth, 0,
+    TYPE_EARTH_CORE, TYPE_EARTH_MANTLE
+  );
+  const theiaBody = generateBody(
+    Math.floor(n * mTheia / (M_EARTH + mTheia)),
+    mTheia, rTheia, theiaX, 0, 0, vxTheia, vyTheia, 0,
+    TYPE_THEIA_CORE, TYPE_THEIA_MANTLE
+  );
+
+  const totalN = earthBody.n + theiaBody.n;
+  sim.n = totalN;
+
+  sim.pos = new Float32Array(totalN * 3);
+  sim.vel = new Float32Array(totalN * 3);
+  sim.velHalf = new Float32Array(totalN * 3);
+  sim.acc = new Float32Array(totalN * 3);
+  sim.rho = new Float32Array(totalN);
+  sim.p = new Float32Array(totalN);
+  sim.u = new Float32Array(totalN);
+  sim.mass = new Float32Array(totalN);
+  sim.type = new Uint8Array(totalN);
+
+  let idx = 0;
+  for (let i = 0; i < earthBody.n; i++) {
+    sim.pos[idx*3] = earthBody.positions[i*3];
+    sim.pos[idx*3+1] = earthBody.positions[i*3+1];
+    sim.pos[idx*3+2] = earthBody.positions[i*3+2];
+    sim.vel[idx*3] = vxEarth; sim.vel[idx*3+1] = vyEarth; sim.vel[idx*3+2] = 0;
+    sim.mass[idx] = earthBody.masses[i];
+    sim.type[idx] = earthBody.types[i];
+    idx++;
+  }
+  for (let i = 0; i < theiaBody.n; i++) {
+    sim.pos[idx*3] = theiaBody.positions[i*3];
+    sim.pos[idx*3+1] = theiaBody.positions[i*3+1];
+    sim.pos[idx*3+2] = theiaBody.positions[i*3+2];
+    sim.vel[idx*3] = vxTheia; sim.vel[idx*3+1] = vyTheia; sim.vel[idx*3+2] = 0;
+    sim.mass[idx] = theiaBody.masses[i];
+    sim.type[idx] = theiaBody.types[i];
+    idx++;
+  }
+
+  sim.totalMass = 0;
+  for (let i = 0; i < totalN; i++) sim.totalMass += sim.mass[i];
+
+  for (let i = 0; i < totalN * 3; i++) sim.velHalf[i] = sim.vel[i];
+
+  initParticleSystem();
+  initTrailSystem();
+  initFlashLight();
+
+  computeDensityPressure();
+  computeAcceleration();
+
+  updateStageDisplay();
+  updateStatsUI();
+}
+
+// ==========================================
+// 七、SPH 计算流程
+// ==========================================
+function computeDensityPressure() {
+  const n = sim.n;
+  sim.spatial.clear();
+  for (let i = 0; i < n; i++) {
+    sim.spatial.insertParticle(i, sim.pos[i*3], sim.pos[i*3+1], sim.pos[i*3+2]);
+  }
+
+  for (let i = 0; i < n; i++) {
+    let rho = 0;
+    const px = sim.pos[i*3], py = sim.pos[i*3+1], pz = sim.pos[i*3+2];
+    sim.spatial.queryNeighbors(px, py, pz, 2.0 * H_SMOOTH, (j, r) => {
+      const q = r / H_SMOOTH;
+      rho += sim.mass[j] * W_fast(q);
+    });
+    rho += sim.mass[i] * W_fast(0);
+    sim.rho[i] = Math.max(rho, 1e-6);
+    sim.p[i] = K_EOS * Math.pow(sim.rho[i], GAMMA_EOS);
+  }
+}
+
+function computeAcceleration() {
+  const n = sim.n;
+  for (let i = 0; i < n * 3; i++) sim.acc[i] = 0;
+
+  sim.maxDensity = 0;
+  sim.maxTemp = 0;
+
+  for (let i = 0; i < n; i++) {
+    sim.maxDensity = Math.max(sim.maxDensity, sim.rho[i]);
+    sim.u[i] = sim.p[i] / ((GAMMA_EOS - 1.0) * sim.rho[i]);
+    sim.maxTemp = Math.max(sim.maxTemp, sim.u[i]);
+
+    const px = sim.pos[i*3], py = sim.pos[i*3+1], pz = sim.pos[i*3+2];
+    const vxi = sim.vel[i*3], vyi = sim.vel[i*3+1], vzi = sim.vel[i*3+2];
+
+    sim.spatial.queryNeighbors(px, py, pz, 2.0 * H_SMOOTH, (j, r) => {
+      if (i === j) return;
+      const dx = sim.pos[j*3] - px;
+      const dy = sim.pos[j*3+1] - py;
+      const dz = sim.pos[j*3+2] - pz;
+      const q = r / H_SMOOTH;
+
+      const rhoAvg = (sim.rho[i] + sim.rho[j]) * 0.5;
+      const pTerm = -(sim.p[i] / (sim.rho[i]*sim.rho[i]) + sim.p[j] / (sim.rho[j]*sim.rho[j]));
+      const dw = dW_fast(q) / (H_SMOOTH * r + 1e-8);
+      const fPress = pTerm * dw;
+
+      const dvx = vxi - sim.vel[j*3];
+      const dvy = vyi - sim.vel[j*3+1];
+      const dvz = vzi - sim.vel[j*3+2];
+      const vdotr = dvx*dx + dvy*dy + dvz*dz;
+      let fVisc = 0;
+      if (vdotr < 0) {
+        const mu = H_SMOOTH * vdotr / (r*r + 0.01*H2);
+        const csi = Math.sqrt(GAMMA_EOS * sim.p[i] / sim.rho[i]);
+        const csj = Math.sqrt(GAMMA_EOS * sim.p[j] / sim.rho[j]);
+        const csAvg = (csi + csj) * 0.5;
+        fVisc = (-ALPHA_AV * csAvg * mu + BETA_AV * mu * mu) / rhoAvg;
+        fVisc *= dw;
+      }
+
+      const fx = (fPress + fVisc) * dx * sim.mass[j];
+      const fy = (fPress + fVisc) * dy * sim.mass[j];
+      const fz = (fPress + fVisc) * dz * sim.mass[j];
+
+      sim.acc[i*3] += fx;
+      sim.acc[i*3+1] += fy;
+      sim.acc[i*3+2] += fz;
+
+      sim.acc[j*3] -= fx * sim.mass[i] / sim.mass[j];
+      sim.acc[j*3+1] -= fy * sim.mass[i] / sim.mass[j];
+      sim.acc[j*3+2] -= fz * sim.mass[i] / sim.mass[j];
+    });
+
+    const dist2 = px*px + py*py + pz*pz;
+    const dist = Math.sqrt(dist2 + 0.01);
+    const fGrav = -G * sim.totalMass / (dist2 + 0.1);
+    sim.acc[i*3] += fGrav * px / dist;
+    sim.acc[i*3+1] += fGrav * py / dist;
+    sim.acc[i*3+2] += fGrav * pz / dist;
+  }
+}
+
+// ==========================================
+// 八、Leapfrog 积分器
+// ==========================================
+function leapfrogStep(dt) {
+  const n = sim.n;
+  const subSteps = sim.speedMult;
+  const subDt = dt / subSteps;
+
+  for (let s = 0; s < subSteps; s++) {
+    for (let i = 0; i < n; i++) {
+      sim.velHalf[i*3]   += sim.acc[i*3]   * subDt * 0.5;
+      sim.velHalf[i*3+1] += sim.acc[i*3+1] * subDt * 0.5;
+      sim.velHalf[i*3+2] += sim.acc[i*3+2] * subDt * 0.5;
+    }
+    for (let i = 0; i < n; i++) {
+      sim.pos[i*3]   += sim.velHalf[i*3]   * subDt;
+      sim.pos[i*3+1] += sim.velHalf[i*3+1] * subDt;
+      sim.pos[i*3+2] += sim.velHalf[i*3+2] * subDt;
+    }
+    computeDensityPressure();
+    computeAcceleration();
+    for (let i = 0; i < n; i++) {
+      sim.velHalf[i*3]   += sim.acc[i*3]   * subDt * 0.5;
+      sim.velHalf[i*3+1] += sim.acc[i*3+1] * subDt * 0.5;
+      sim.velHalf[i*3+2] += sim.acc[i*3+2] * subDt * 0.5;
+    }
+    for (let i = 0; i < n; i++) {
+      sim.vel[i*3]   = sim.velHalf[i*3];
+      sim.vel[i*3+1] = sim.velHalf[i*3+1];
+      sim.vel[i*3+2] = sim.velHalf[i*3+2];
+    }
+  }
+
+  sim.time += dt;
+  sim.frameCount++;
+}
+
+// ==========================================
+// 九、几何体更新与尾迹
+// ==========================================
+function getTypeColor(type, u) {
+  let base;
+  switch (type) {
+    case TYPE_EARTH_CORE: base = COLOR_EARTH_CORE; break;
+    case TYPE_EARTH_MANTLE: base = COLOR_EARTH_MANTLE; break;
+    case TYPE_THEIA_CORE: base = COLOR_THEIA_CORE; break;
+    case TYPE_THEIA_MANTLE: base = COLOR_THEIA_MANTLE; break;
+    default: base = COLOR_DEBRIS;
+  }
+  const tempFactor = Math.min(u * 2.0, 1.0);
+  const r = Math.min(base.r + tempFactor * (1.0 - base.r), 1.0);
+  const g = Math.min(base.g + tempFactor * (0.95 - base.g), 1.0);
+  const b = Math.min(base.b + tempFactor * (0.8 - base.b), 1.0);
+  return new THREE.Color(r, g, b);
+}
+
+function updateGeometry() {
+  if (!sim.points) return;
+  const geo = sim.points.geometry;
+  const posAttr = geo.attributes.position;
+  const colAttr = geo.attributes.customColor;
+  const sizeAttr = geo.attributes.size;
+  const n = sim.n;
+
+  for (let i = 0; i < n; i++) {
+    posAttr.array[i*3] = sim.pos[i*3];
+    posAttr.array[i*3+1] = sim.pos[i*3+1];
+    posAttr.array[i*3+2] = sim.pos[i*3+2];
+    const c = getTypeColor(sim.type[i], sim.u[i]);
+    colAttr.array[i*3] = c.r;
+    colAttr.array[i*3+1] = c.g;
+    colAttr.array[i*3+2] = c.b;
+    sizeAttr.array[i] = (sim.type[i] <= TYPE_THEIA_MANTLE) ? 0.18 : 0.14;
+  }
+  posAttr.needsUpdate = true;
+  colAttr.needsUpdate = true;
+  sizeAttr.needsUpdate = true;
+}
+
+function updateTrails() {
+  if (!sim.trailEnabled || !sim.trailObj) return;
+  if (sim.frameCount % 10 !== 0) return;
+
+  const sampleRate = Math.max(1, Math.floor(sim.n / 200));
+  for (let i = 0; i < sim.n; i += sampleRate) {
+    sim.trailPoints.push(sim.pos[i*3], sim.pos[i*3+1], sim.pos[i*3+2]);
+  }
+  const maxPts = 3000 * 3;
+  if (sim.trailPoints.length > maxPts) {
+    sim.trailPoints = sim.trailPoints.slice(sim.trailPoints.length - maxPts);
+  }
+
+  const geo = sim.trailObj.geometry;
+  const count = Math.min(sim.trailPoints.length / 3, geo.attributes.position.array.length / 3);
+  for (let i = 0; i < count; i++) {
+    geo.attributes.position.array[i*3] = sim.trailPoints[i*3];
+    geo.attributes.position.array[i*3+1] = sim.trailPoints[i*3+1];
+    geo.attributes.position.array[i*3+2] = sim.trailPoints[i*3+2];
+  }
+  geo.setDrawRange(0, count);
+  geo.attributes.position.needsUpdate = true;
+}
+
+function checkContact() {
+  if (sim.contacted) return;
+  const n = sim.n;
+  let cmEarth = new THREE.Vector3(), cmTheia = new THREE.Vector3();
+  let mE = 0, mT = 0;
+  for (let i = 0; i < n; i++) {
+    if (sim.type[i] <= TYPE_EARTH_MANTLE) {
+      cmEarth.x += sim.pos[i*3] * sim.mass[i];
+      cmEarth.y += sim.pos[i*3+1] * sim.mass[i];
+      cmEarth.z += sim.pos[i*3+2] * sim.mass[i];
+      mE += sim.mass[i];
+    } else if (sim.type[i] <= TYPE_THEIA_MANTLE) {
+      cmTheia.x += sim.pos[i*3] * sim.mass[i];
+      cmTheia.y += sim.pos[i*3+1] * sim.mass[i];
+      cmTheia.z += sim.pos[i*3+2] * sim.mass[i];
+      mT += sim.mass[i];
+    }
+  }
+  if (mE > 0) cmEarth.divideScalar(mE);
+  if (mT > 0) cmTheia.divideScalar(mT);
+  const dist = cmEarth.distanceTo(cmTheia);
+  const rEarth = R_EARTH;
+  const rTheia = R_EARTH * Math.pow(sim.gamma, 1.0/3.0);
+  if (dist < (rEarth + rTheia) * 1.1) {
+    sim.contacted = true;
+    sim.flashIntensity = 2.0;
+  }
+}
+
+function updateFlash() {
+  if (sim.flashIntensity > 0 && sim.flashLight) {
+    sim.flashLight.intensity = sim.flashIntensity;
+    sim.flashIntensity -= 2.0 / 30;
+    if (sim.flashIntensity < 0) sim.flashIntensity = 0;
+  }
+}
+
+// ==========================================
+// 十、统计计算
+// ==========================================
+function computeStats() {
+  const n = sim.n;
+  let ke = 0, pe = 0, am = 0;
+  let cmX = 0, cmY = 0, cmZ = 0;
+  for (let i = 0; i < n; i++) {
+    const m = sim.mass[i];
+    const vx = sim.vel[i*3], vy = sim.vel[i*3+1], vz = sim.vel[i*3+2];
+    const px = sim.pos[i*3], py = sim.pos[i*3+1], pz = sim.pos[i*3+2];
+    ke += 0.5 * m * (vx*vx + vy*vy + vz*vz);
+    pe += m * (-G * sim.totalMass / Math.sqrt(px*px + py*py + pz*pz + 0.1));
+    am += m * (px*vy - py*vx);
+    cmX += px * m; cmY += py * m; cmZ += pz * m;
+  }
+  const totalE = ke + pe;
+  sim.lastStats = { ke, pe, totalE, am, cmX: cmX/sim.totalMass, cmY: cmY/sim.totalMass, cmZ: cmZ/sim.totalMass };
+
+  sim.energyHistory.push(totalE);
+  sim.keHistory.push(ke);
+  if (sim.energyHistory.length > 200) {
+    sim.energyHistory.shift();
+    sim.keHistory.shift();
+  }
+
+  let debris = 0;
+  for (let i = 0; i < n; i++) {
+    const px = sim.pos[i*3], py = sim.pos[i*3+1];
+    const r = Math.sqrt(px*px + py*py);
+    if (r > ROCHE) debris++;
+  }
+  sim.debrisCount = debris;
+}
+
+function detectStage() {
+  const t = sim.time;
+  let stage = 0;
+  if (t < 0.5) stage = 0;
+  else if (!sim.contacted) stage = 1;
+  else if (t < 5.0) stage = 2;
+  else if (sim.debrisCount / sim.n > 0.15) stage = 3;
+  else stage = 4;
+  if (stage !== sim.stage) { sim.stage = stage; updateStageDisplay(); }
+}
+
+function updateStageDisplay() {
+  for (let i = 0; i < 5; i++) {
+    const el = document.getElementById('step-' + i);
+    el.classList.remove('active', 'done');
+    if (i < sim.stage) el.classList.add('done');
+    else if (i === sim.stage) el.classList.add('active');
+  }
+}
+
+// ==========================================
+// 十一、UI 更新
+// ==========================================
+function updateStatsUI() {
+  if (!sim.lastStats) return;
+  document.getElementById('st-time').textContent = sim.time.toFixed(2);
+  document.getElementById('st-n').textContent = sim.n;
+  document.getElementById('st-etot').textContent = sim.lastStats.totalE.toFixed(2);
+  document.getElementById('st-ke').textContent = sim.lastStats.ke.toFixed(2);
+  document.getElementById('st-pe').textContent = sim.lastStats.pe.toFixed(2);
+  document.getElementById('st-l').textContent = sim.lastStats.am.toFixed(2);
+  document.getElementById('st-rhomax').textContent = sim.maxDensity.toFixed(2);
+  document.getElementById('st-debris').textContent = sim.debrisCount;
+  document.getElementById('st-tmax').textContent = sim.maxTemp.toFixed(2);
+}
+
+const energyCtx = document.getElementById('energy-canvas').getContext('2d');
+function drawEnergyChart() {
+  const ctx = energyCtx;
+  const w = 230, h = 80;
+  ctx.clearRect(0, 0, w, h);
+  if (sim.energyHistory.length < 2) return;
+
+  const hist = sim.energyHistory;
+  const keHist = sim.keHistory;
+  let minE = hist[0], maxE = hist[0];
+  for (let i = 0; i < hist.length; i++) {
+    minE = Math.min(minE, hist[i], keHist[i]);
+    maxE = Math.max(maxE, hist[i], keHist[i]);
+  }
+  const range = maxE - minE || 1;
+
+  // Read accent colors from CSS variables
+  const style = getComputedStyle(document.documentElement);
+  const accent = style.getPropertyValue('--ti-accent').trim() || '#6b8cae';
+  const accent2 = style.getPropertyValue('--ti-accent-2').trim() || '#8a7ca8';
+
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let i = 0; i < hist.length; i++) {
+    const x = (i / (hist.length - 1)) * w;
+    const y = h - ((hist[i] - minE) / range) * (h - 10) - 5;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.strokeStyle = accent2;
+  ctx.beginPath();
+  for (let i = 0; i < keHist.length; i++) {
+    const x = (i / (keHist.length - 1)) * w;
+    const y = h - ((keHist[i] - minE) / range) * (h - 10) - 5;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+// ==========================================
+// 十二、UI 事件绑定
+// ==========================================
+function bindSlider(id, valId, simKey, suffix) {
+  const slider = document.getElementById(id);
+  const valSpan = document.getElementById(valId);
+  slider.addEventListener('input', () => {
+    const v = parseFloat(slider.value);
+    sim[simKey] = v;
+    valSpan.textContent = v + (suffix || '');
+  });
+}
+bindSlider('slider-gamma', 'val-gamma', 'gamma');
+bindSlider('slider-velocity', 'val-velocity', 'vRatio');
+bindSlider('slider-b', 'val-b', 'bParam');
+bindSlider('slider-n', 'val-n', 'targetN');
+document.getElementById('slider-speed').addEventListener('input', () => {
+  sim.speedMult = parseInt(document.getElementById('slider-speed').value);
+  document.getElementById('val-speed').textContent = sim.speedMult + '\u00d7';
+});
+
+document.getElementById('toggle-trail').addEventListener('click', function() {
+  sim.trailEnabled = !sim.trailEnabled;
+  this.classList.toggle('active');
+  if (sim.trailEnabled) initTrailSystem();
+});
+document.getElementById('toggle-track').addEventListener('click', function() {
+  sim.trackCM = !sim.trackCM;
+  this.classList.toggle('active');
+});
+
+document.getElementById('btn-start').addEventListener('click', () => {
+  if (sim.n === 0 || !sim.active) initSimulation();
+  sim.paused = false;
+});
+document.getElementById('btn-pause').addEventListener('click', () => {
+  sim.paused = !sim.paused;
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  initSimulation();
+});
+
+const presets = {
+  graze: { gamma: 0.13, v: 1.05, b: 0.85 },
+  headon: { gamma: 0.20, v: 1.20, b: 0.10 },
+  fast: { gamma: 0.10, v: 2.00, b: 0.60 },
+  merge: { gamma: 0.25, v: 0.90, b: 0.40 },
+};
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = presets[btn.dataset.preset];
+    if (!p) return;
+    sim.gamma = p.gamma; sim.vRatio = p.v; sim.bParam = p.b;
+    document.getElementById('slider-gamma').value = p.gamma;
+    document.getElementById('val-gamma').textContent = p.gamma;
+    document.getElementById('slider-velocity').value = p.v;
+    document.getElementById('val-velocity').textContent = p.v;
+    document.getElementById('slider-b').value = p.b;
+    document.getElementById('val-b').textContent = p.b;
+    initSimulation();
+  });
+});
+
+// 窗口自适应
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// 底部提示3秒淡出
+setTimeout(() => document.getElementById('hint').classList.add('fade'), 3000);
+
+// ==========================================
+// 十三、主题适配（Three.js 场景）
+// ==========================================
+function applyThemeToScene() {
+  const style = getComputedStyle(document.documentElement);
+  const sceneBg = style.getPropertyValue('--ti-scene-bg').trim();
+  if (sceneBg) {
+    scene.background = new THREE.Color(sceneBg);
+  }
+
+  const dark = isDarkTheme();
+
+  // 更新星空粒子
+  createStars();
+
+  // 更新洛希环颜色
+  if (rocheRingMesh) {
+    rocheRingMesh.material.color.set(dark ? 0x4488ff : 0x6688bb);
+  }
+
+  // 更新灯光强度
+  ambientLight.intensity = dark ? 0.5 : 1.0;
+  pointLight.intensity = dark ? 2.0 : 1.5;
+
+  // 重新创建粒子系统以切换 blending
+  if (sim.points && sim.active) {
+    initParticleSystem();
+  }
+  if (sim.trailObj && sim.trailEnabled) {
+    initTrailSystem();
+  }
+}
+
+// MutationObserver 监听主题切换
+const themeObserver = new MutationObserver(() => {
+  applyThemeToScene();
+});
+themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+// ==========================================
+// 十四、主循环
+// ==========================================
+let lastFpsTime = performance.now();
+let fpsFrames = 0;
+let fps = 60;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (sim.active && !sim.paused && sim.n > 0) {
+    leapfrogStep(DT_BASE);
+    updateGeometry();
+    updateTrails();
+    checkContact();
+    updateFlash();
+
+    if (sim.frameCount % 20 === 0) {
+      computeStats();
+      detectStage();
+      updateStatsUI();
+      drawEnergyChart();
+    }
+
+    if (sim.trackCM && sim.lastStats) {
+      const target = new THREE.Vector3(sim.lastStats.cmX, sim.lastStats.cmY, sim.lastStats.cmZ);
+      const offset = camera.position.clone().sub(controls.target);
+      controls.target.lerp(target, 0.05);
+      camera.position.copy(controls.target).add(offset);
+    }
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+
+  fpsFrames++;
+  const now = performance.now();
+  if (now - lastFpsTime > 1000) {
+    fps = fpsFrames;
+    fpsFrames = 0;
+    lastFpsTime = now;
+    document.getElementById('st-fps').textContent = fps;
+  }
+}
+
+// 初始状态
+initSimulation();
+updateStageDisplay();
+
+// 初始主题应用（延迟确保 shared-theme.js 已执行）
+setTimeout(() => {
+  applyThemeToScene();
+}, 100);
+
+animate();
+</script>
+
+<script src="shared-theme.js"></script>
+</body>
+</html>
