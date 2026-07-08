@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>克莱因瓶 (Klein Bottle) - 三维参数化可视化</title>
+  <link rel="stylesheet" href="shared-theme.css">
+
+  <!-- MathJax -->
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- Three.js importmap -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+        "lil-gui": "https://unpkg.com/lil-gui@0.19.1/dist/lil-gui.esm.min.js"
+      }
+    }
+  </script>
+
+  <style>
+    /* ========== Klein Bottle CSS Variables ========== */
+    :root {
+      --kb-bg: #f8f9fa;
+      --kb-scene-bg: #f0f0f5;
+      --kb-panel-bg: #ffffff;
+      --kb-panel-border: #e0e0e0;
+      --kb-text: #1a1a2e;
+      --kb-text-muted: #7a7a8a;
+      --kb-accent: #6b8cae;
+      --kb-accent-2: #8a7ca8;
+      --kb-radius: 4px;
+      --kb-backdrop: none;
+      --kb-border-width: 1px;
+      --kb-shadow: none;
+      --kb-gui-bg: rgba(255,255,255,0.95);
+      --kb-gui-text: #1a1a2e;
+      --kb-gui-border: #e0e0e0;
+      --kb-gui-widget: rgba(0,0,0,0.08);
+      --kb-gui-hover: rgba(0,0,0,0.12);
+      --kb-gui-focus: rgba(107,140,174,0.4);
+      --kb-card-bg: rgba(0,0,0,0.03);
+    }
+
+    [data-theme="glass"] {
+      --kb-bg: #0f1117;
+      --kb-scene-bg: #050508;
+      --kb-panel-bg: rgba(255,255,255,0.06);
+      --kb-panel-border: rgba(255,255,255,0.12);
+      --kb-text: #e0e6ed;
+      --kb-text-muted: #8b92a8;
+      --kb-accent: #74b9ff;
+      --kb-accent-2: #a29bfe;
+      --kb-radius: 20px;
+      --kb-backdrop: blur(20px) saturate(1.2);
+      --kb-border-width: 1px;
+      --kb-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+      --kb-gui-bg: rgba(15,17,23,0.9);
+      --kb-gui-text: #e0e6ed;
+      --kb-gui-border: rgba(255,255,255,0.15);
+      --kb-gui-widget: rgba(255,255,255,0.1);
+      --kb-gui-hover: rgba(255,255,255,0.18);
+      --kb-gui-focus: rgba(116,185,255,0.5);
+      --kb-card-bg: rgba(255,255,255,0.04);
+    }
+
+    [data-theme="cyber"] {
+      --kb-bg: #0a0014;
+      --kb-scene-bg: #0a0014;
+      --kb-panel-bg: rgba(20,0,40,0.6);
+      --kb-panel-border: rgba(189,0,255,0.4);
+      --kb-text: #f0e6ff;
+      --kb-text-muted: #a080c0;
+      --kb-accent: #bd00ff;
+      --kb-accent-2: #00f3ff;
+      --kb-radius: 8px;
+      --kb-backdrop: blur(12px);
+      --kb-border-width: 1px;
+      --kb-shadow: 0 0 20px rgba(189,0,255,0.15), inset 0 0 20px rgba(189,0,255,0.05);
+      --kb-gui-bg: rgba(10,0,20,0.9);
+      --kb-gui-text: #f0e6ff;
+      --kb-gui-border: rgba(189,0,255,0.3);
+      --kb-gui-widget: rgba(189,0,255,0.15);
+      --kb-gui-hover: rgba(189,0,255,0.25);
+      --kb-gui-focus: rgba(189,0,255,0.5);
+      --kb-card-bg: rgba(0,0,0,0.3);
+    }
+
+    [data-theme="cartoon"] {
+      --kb-bg: #fef6e4;
+      --kb-scene-bg: #fef6e4;
+      --kb-panel-bg: rgba(255,255,255,0.9);
+      --kb-panel-border: rgba(255,180,100,0.4);
+      --kb-text: #2d3436;
+      --kb-text-muted: #636e72;
+      --kb-accent: #ff6b6b;
+      --kb-accent-2: #4ecdc4;
+      --kb-radius: 24px;
+      --kb-backdrop: blur(16px);
+      --kb-border-width: 3px;
+      --kb-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(255,180,100,0.15);
+      --kb-gui-bg: rgba(254,246,228,0.95);
+      --kb-gui-text: #2d3436;
+      --kb-gui-border: rgba(255,180,100,0.3);
+      --kb-gui-widget: rgba(255,180,100,0.15);
+      --kb-gui-hover: rgba(255,180,100,0.25);
+      --kb-gui-focus: rgba(255,107,107,0.5);
+      --kb-card-bg: rgba(255,255,255,0.6);
+    }
+
+    [data-theme="soviet"] {
+      --kb-bg: #f0ebe4;
+      --kb-scene-bg: #f0ebe4;
+      --kb-panel-bg: #fffaf2;
+      --kb-panel-border: #c41e1e;
+      --kb-text: #1a1a1a;
+      --kb-text-muted: #6a5a4a;
+      --kb-accent: #c41e1e;
+      --kb-accent-2: #8b4513;
+      --kb-radius: 2px;
+      --kb-backdrop: none;
+      --kb-border-width: 2px;
+      --kb-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      --kb-gui-bg: #fffaf2;
+      --kb-gui-text: #1a1a1a;
+      --kb-gui-border: #c41e1e;
+      --kb-gui-widget: rgba(196,30,30,0.1);
+      --kb-gui-hover: rgba(196,30,30,0.18);
+      --kb-gui-focus: rgba(196,30,30,0.4);
+      --kb-card-bg: rgba(0,0,0,0.03);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+      background: var(--kb-bg);
+      color: var(--kb-text);
+      transition: background-color 0.6s ease, color 0.4s ease;
+    }
+
+    .exp-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: var(--kb-bg);
+      transition: background-color 0.6s ease;
+    }
+
+    /* Layout */
+    .main-layout {
+      position: fixed; inset: 0; z-index: 1;
+      padding-top: 56px;
+    }
+
+    .canvas-area {
+      position: absolute; inset: 0;
+      overflow: hidden;
+    }
+
+    #canvas-container {
+      width: 100%; height: 100%;
+    }
+
+    /* ========== Left Drawer (Controls) ========== */
+    .left-drawer {
+      position: fixed; top: 56px; left: 0; bottom: 0;
+      width: 300px; z-index: 20;
+      transform: translateX(0);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .left-drawer.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .left-drawer-inner {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--kb-panel-bg);
+      border-right: var(--kb-border-width) solid var(--kb-panel-border);
+      box-shadow: var(--kb-shadow);
+      backdrop-filter: var(--kb-backdrop);
+      -webkit-backdrop-filter: var(--kb-backdrop);
+      transition: all 0.4s ease;
+    }
+
+    .drawer-toggle {
+      position: absolute; top: 50%;
+      width: 28px; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 21;
+      background: var(--kb-panel-bg);
+      border: var(--kb-border-width) solid var(--kb-panel-border);
+      font-size: 0.7rem; color: var(--kb-text-muted);
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .drawer-toggle:hover {
+      color: var(--kb-accent);
+      background: var(--kb-card-bg);
+    }
+
+    .left-drawer .drawer-toggle {
+      left: 100%; top: 50%; transform: translateY(-50%);
+      border-left: none;
+      border-radius: 0 var(--kb-radius) var(--kb-radius) 0;
+    }
+
+    .left-drawer.collapsed .drawer-toggle {
+      left: 0; top: 50%;
+      border-left: var(--kb-border-width) solid var(--kb-panel-border);
+      border-radius: 0 var(--kb-radius) var(--kb-radius) 0;
+    }
+
+    /* ========== Right Drawer (Knowledge) ========== */
+    .right-drawer {
+      position: fixed; top: 56px; right: 0; bottom: 0;
+      width: 320px; z-index: 20;
+      transform: translateX(0);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .right-drawer.collapsed {
+      transform: translateX(100%);
+    }
+
+    .right-drawer-inner {
+      width: 100%; height: 100%;
+      padding: 16px;
+      overflow-y: auto;
+      background: var(--kb-panel-bg);
+      border-left: var(--kb-border-width) solid var(--kb-panel-border);
+      box-shadow: var(--kb-shadow);
+      backdrop-filter: var(--kb-backdrop);
+      -webkit-backdrop-filter: var(--kb-backdrop);
+      transition: all 0.4s ease;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .right-drawer .drawer-toggle {
+      right: 100%; top: 50%; transform: translateY(-50%);
+      border-right: none;
+      border-radius: var(--kb-radius) 0 0 var(--kb-radius);
+    }
+
+    .right-drawer.collapsed .drawer-toggle {
+      right: 0; top: 50%;
+      border-right: var(--kb-border-width) solid var(--kb-panel-border);
+      border-radius: var(--kb-radius) 0 0 var(--kb-radius);
+    }
+
+    /* Soviet theme drawer overrides */
+    [data-theme="soviet"] .left-drawer-inner {
+      border-right: 2px solid #c41e1e;
+    }
+    [data-theme="soviet"] .right-drawer-inner {
+      border-left: 2px solid #c41e1e;
+    }
+    [data-theme="soviet"] .drawer-toggle {
+      border-color: #c41e1e;
+    }
+
+    /* Knowledge cards */
+    .k-card {
+      padding: 14px;
+      border-radius: var(--kb-radius);
+      background: var(--kb-panel-bg);
+      border: var(--kb-border-width) solid var(--kb-panel-border);
+      box-shadow: var(--kb-shadow);
+      transition: all 0.4s ease;
+    }
+
+    [data-theme="glass"] .k-card {
+      background: var(--kb-card-bg);
+      border: 1px solid var(--kb-panel-border);
+    }
+    [data-theme="cyber"] .k-card {
+      background: var(--kb-card-bg);
+      border: 1px solid var(--kb-panel-border);
+    }
+
+    .k-card h4 {
+      margin: 0 0 8px 0; font-size: 0.95rem;
+      color: var(--kb-text);
+    }
+
+    .k-card p, .k-card li {
+      font-size: 0.82rem; color: var(--kb-text-muted);
+      line-height: 1.5;
+    }
+
+    .k-card ul { padding-left: 16px; margin: 6px 0; }
+
+    /* lil-gui style overrides */
+    .lil-gui {
+      --background-color: var(--kb-gui-bg) !important;
+      --text-color: var(--kb-gui-text) !important;
+      --title-background-color: var(--kb-gui-widget) !important;
+      --widget-color: var(--kb-gui-widget) !important;
+      --hover-color: var(--kb-gui-hover) !important;
+      --focus-color: var(--kb-gui-focus) !important;
+      --border-color: var(--kb-gui-border) !important;
+      --number-color: var(--kb-gui-text) !important;
+      --string-color: var(--kb-gui-text) !important;
+      font-family: inherit !important;
+      width: 100% !important;
+      border-radius: var(--kb-radius) !important;
+      --width: 300px;
+    }
+
+    .lil-gui .title {
+      font-size: 0.85rem;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--kb-panel-border); border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .left-drawer { width: 260px; }
+      .right-drawer { width: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+
+  <!-- Top nav is auto-created by shared-theme.js -->
+
+  <!-- Back button -->
+  <a href="index.html" class="back-btn" id="back-btn">&#8592; 返回首页</a>
+
+  <div class="main-layout">
+    <div class="canvas-area">
+      <div id="canvas-container"></div>
+    </div>
+
+    <!-- Left Drawer: Controls (lil-gui) -->
+    <div class="left-drawer" id="left-drawer">
+      <div class="drawer-toggle" id="left-toggle" onclick="toggleLeftDrawer()" title="展开/收起控制面板">&#9664;</div>
+      <div class="left-drawer-inner">
+        <div id="gui-container"></div>
+      </div>
+    </div>
+
+    <!-- Right Drawer: Knowledge -->
+    <div class="right-drawer" id="right-drawer">
+      <div class="drawer-toggle" id="right-toggle" onclick="toggleRightDrawer()" title="展开/收起知识面板">&#9654;</div>
+      <div class="right-drawer-inner">
+        <div class="k-card">
+          <h4>克莱因瓶 (Klein Bottle)</h4>
+        </div>
+
+        <div class="k-card">
+          <h4>数学定义</h4>
+          <p>
+            在拓扑学中，克莱因瓶是一种无边界、不可定向的二维流形（2-manifold）。其欧拉示性数（Euler characteristic）为 \(\chi = 0\)。由于其单侧特性，克莱因瓶没有内部与外部的区分。
+          </p>
+        </div>
+
+        <div class="k-card">
+          <h4>科学史记录</h4>
+          <p>
+            该结构由德国数学家费利克斯·克莱因（Felix Klein）于 1882 年首次提出。
+          </p>
+          <p>
+            其最初德文名称为 <i>Kleinsche Fläche</i>（克莱因面）。由于 "Fläche"（表面）在早期翻译中被错误地与德语词汇 "Flasche"（瓶子）混淆，最终在英文文献中定型为 "Klein Bottle" 并沿用至今。
+          </p>
+        </div>
+
+        <div class="k-card">
+          <h4>拓扑特性</h4>
+          <p>
+            将两个莫比乌斯带（Möbius strip）沿其边界相连（拓扑粘合），即可构造出克莱因瓶。等价地，它可表示为两个实射影平面的连通和。
+          </p>
+          <p>
+            克莱因瓶无法在三维欧几里得空间 \(\mathbb{R}^3\) 中无自交地嵌入（Embed）。在三维空间中的任何物理实现或可视化，必然表现出模型管壁穿过自身（即"自交"现象）。只有在四维及更高维度的空间中，克莱因瓶才能实现无自交的嵌入。
+          </p>
+        </div>
+
+        <div class="k-card">
+          <h4>交互控制说明</h4>
+          <ul>
+            <li><strong>鼠标右键</strong>：旋转视角</li>
+            <li><strong>鼠标中键</strong>：平移视角</li>
+            <li><strong>鼠标滚轮</strong>：缩放视图</li>
+            <li><strong>左侧面板</strong>：调节参数（细分、颜色、透明度、线框等）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js';
+    import GUI from 'lil-gui';
+
+    // ======================
+    // Drawer toggle functions (exposed to window for onclick)
+    // ======================
+    window.toggleLeftDrawer = function() {
+      const drawer = document.getElementById('left-drawer');
+      const toggle = document.getElementById('left-toggle');
+      drawer.classList.toggle('collapsed');
+      toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9654;' : '&#9664;';
+      setTimeout(onResize, 400);
+    };
+
+    window.toggleRightDrawer = function() {
+      const drawer = document.getElementById('right-drawer');
+      const toggle = document.getElementById('right-toggle');
+      drawer.classList.toggle('collapsed');
+      toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9664;' : '&#9654;';
+      setTimeout(onResize, 400);
+    };
+
+    // ======================
+    // Scene setup
+    // ======================
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 15);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // --- Lighting ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight1.position.set(10, 10, 10);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0xaaaaaa, 0.8);
+    dirLight2.position.set(-10, -10, -10);
+    scene.add(dirLight2);
+
+    // --- Parametric equation (classic tube self-intersecting Klein Bottle by Paul Bourke) ---
+    const classicKlein = function (u, v, target) {
+      const u1 = u * Math.PI * 2;
+      const v1 = v * Math.PI * 2;
+
+      const r = 4 * (1 - Math.cos(u1) / 2);
+      let x, y, z;
+
+      if (u1 < Math.PI) {
+        x = 6 * Math.cos(u1) * (1 + Math.sin(u1)) + r * Math.cos(u1) * Math.cos(v1);
+        y = 16 * Math.sin(u1) + r * Math.sin(u1) * Math.cos(v1);
+      } else {
+        x = 6 * Math.cos(u1) * (1 + Math.sin(u1)) + r * Math.cos(v1 + Math.PI);
+        y = 16 * Math.sin(u1);
+      }
+      z = r * Math.sin(v1);
+
+      // Scale 0.15 and center vertically
+      target.set(x * 0.15, (y - 8) * 0.15, z * 0.15);
+    };
+
+    // --- Material ---
+    const params = {
+      uSegments: 100,
+      vSegments: 100,
+      scale: 1.0,
+      color: '#6b8cae',
+      opacity: 0.7,
+      wireframe: false,
+      autoRotate: true
+    };
+
+    let mesh;
+    let geometry;
+    const material = new THREE.MeshPhysicalMaterial({
+      color: params.color,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: params.opacity,
+      wireframe: params.wireframe,
+      roughness: 0.2,
+      metalness: 0.1,
+      clearcoat: 0.3,
+      clearcoatRoughness: 0.2
+    });
+
+    function createMesh() {
+      if (mesh) {
+        scene.remove(mesh);
+        geometry.dispose();
+      }
+      geometry = new ParametricGeometry(classicKlein, params.uSegments, params.vSegments);
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.scale.set(params.scale, params.scale, params.scale);
+      scene.add(mesh);
+    }
+
+    createMesh();
+
+    // --- lil-gui ---
+    const guiContainer = document.getElementById('gui-container');
+    const gui = new GUI({ container: guiContainer, title: '模型参数配置' });
+
+    gui.add(params, 'uSegments', 20, 200, 1).name('u 轴细分').onChange(createMesh);
+    gui.add(params, 'vSegments', 20, 200, 1).name('v 轴细分').onChange(createMesh);
+
+    gui.add(params, 'scale', 0.5, 3).name('缩放 (Scale)').onChange((val) => {
+      mesh.scale.set(val, val, val);
+    });
+
+    gui.addColor(params, 'color').name('表面颜色').onChange((val) => {
+      material.color.set(val);
+    });
+
+    gui.add(params, 'opacity', 0.1, 1.0).name('不透明度').onChange((val) => {
+      material.opacity = val;
+    });
+
+    gui.add(params, 'wireframe').name('线框模式').onChange((val) => {
+      material.wireframe = val;
+    });
+
+    gui.add(params, 'autoRotate').name('自转 (Auto Rotate)');
+
+    // --- OrbitControls ---
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.NONE,
+      MIDDLE: THREE.MOUSE.PAN,
+      RIGHT: THREE.MOUSE.ROTATE
+    };
+
+    controls.addEventListener('start', () => {
+      if (params.autoRotate) {
+        params.autoRotate = false;
+        gui.controllersRecursive().forEach(c => {
+          if (c.property === 'autoRotate') c.updateDisplay();
+        });
+      }
+    });
+
+    // --- Theme application ---
+    function applyTheme() {
+      const style = getComputedStyle(document.documentElement);
+      const sceneBg = style.getPropertyValue('--kb-scene-bg').trim();
+      const accent = style.getPropertyValue('--kb-accent').trim();
+      if (sceneBg) {
+        scene.background = new THREE.Color(sceneBg);
+      }
+      // Only reset color to accent if user hasn't manually changed it
+      // We track user-changed color via a flag
+      if (!userChangedColor && accent) {
+        params.color = accent;
+        material.color.set(accent);
+        // Update gui color controller display
+        gui.controllersRecursive().forEach(c => {
+          if (c.property === 'color') c.updateDisplay();
+        });
+      }
+    }
+
+    let userChangedColor = false;
+    // Detect when user manually changes color via gui
+    const colorControllers = gui.controllersRecursive().filter(c => c.property === 'color');
+    colorControllers.forEach(c => {
+      const origChange = c._onChange;
+      c.onChange((val) => {
+        userChangedColor = true;
+      });
+    });
+
+    // Observe data-theme attribute changes
+    const observer = new MutationObserver(() => {
+      applyTheme();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    // Initial theme apply
+    applyTheme();
+
+    // --- Window resize ---
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onResize);
+
+    // --- Animation loop ---
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (params.autoRotate && mesh) {
+        mesh.rotation.y += 0.005;
+        mesh.rotation.x += 0.002;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+
+  <script src="shared-theme.js"></script>
+</body>
+</html>
