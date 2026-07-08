@@ -188,7 +188,7 @@
     }
 
     .drawer-toggle {
-      position: absolute; top: 50%;
+      position: fixed; top: 50%; transform: translateY(-50%);
       width: 28px; height: 60px;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; z-index: 21;
@@ -205,13 +205,13 @@
     }
 
     .left-drawer .drawer-toggle {
-      left: 100%; top: 50%; transform: translateY(-50%);
+      left: 300px;
       border-left: none;
       border-radius: 0 var(--kb-radius) var(--kb-radius) 0;
     }
 
     .left-drawer.collapsed .drawer-toggle {
-      left: 0; top: 50%;
+      left: 0;
       border-left: var(--kb-border-width) solid var(--kb-panel-border);
       border-radius: 0 var(--kb-radius) var(--kb-radius) 0;
     }
@@ -242,13 +242,13 @@
     }
 
     .right-drawer .drawer-toggle {
-      right: 100%; top: 50%; transform: translateY(-50%);
+      right: 320px;
       border-right: none;
       border-radius: var(--kb-radius) 0 0 var(--kb-radius);
     }
 
     .right-drawer.collapsed .drawer-toggle {
-      right: 0; top: 50%;
+      right: 0;
       border-right: var(--kb-border-width) solid var(--kb-panel-border);
       border-radius: var(--kb-radius) 0 0 var(--kb-radius);
     }
@@ -478,8 +478,12 @@
       scale: 1.0,
       color: '#6b8cae',
       opacity: 0.7,
+      roughness: 0.2,
+      metalness: 0.1,
+      clearcoat: 0.3,
       wireframe: false,
-      autoRotate: true
+      autoRotate: true,
+      rotateSpeed: 0.005
     };
 
     let mesh;
@@ -513,19 +517,33 @@
     const guiContainer = document.getElementById('gui-container');
     const gui = new GUI({ container: guiContainer, title: '模型参数配置' });
 
-    gui.add(params, 'uSegments', 20, 200, 1).name('u 轴细分').onChange(createMesh);
-    gui.add(params, 'vSegments', 20, 200, 1).name('v 轴细分').onChange(createMesh);
+    gui.add(params, 'uSegments', 10, 400, 1).name('u 轴细分').onChange(createMesh);
+    gui.add(params, 'vSegments', 10, 400, 1).name('v 轴细分').onChange(createMesh);
 
-    gui.add(params, 'scale', 0.5, 3).name('缩放 (Scale)').onChange((val) => {
+    gui.add(params, 'scale', 0.1, 5).name('缩放 (Scale)').onChange((val) => {
       mesh.scale.set(val, val, val);
     });
 
+    let userChangedColor = false;
     gui.addColor(params, 'color').name('表面颜色').onChange((val) => {
+      userChangedColor = true;
       material.color.set(val);
     });
 
-    gui.add(params, 'opacity', 0.1, 1.0).name('不透明度').onChange((val) => {
+    gui.add(params, 'opacity', 0.05, 1.0).name('不透明度').onChange((val) => {
       material.opacity = val;
+    });
+
+    gui.add(params, 'roughness', 0, 1).name('粗糙度 (Roughness)').onChange((val) => {
+      material.roughness = val;
+    });
+
+    gui.add(params, 'metalness', 0, 1).name('金属度 (Metalness)').onChange((val) => {
+      material.metalness = val;
+    });
+
+    gui.add(params, 'clearcoat', 0, 1).name('清漆层 (Clearcoat)').onChange((val) => {
+      material.clearcoat = val;
     });
 
     gui.add(params, 'wireframe').name('线框模式').onChange((val) => {
@@ -533,6 +551,7 @@
     });
 
     gui.add(params, 'autoRotate').name('自转 (Auto Rotate)');
+    gui.add(params, 'rotateSpeed', 0, 0.05).name('自转速度');
 
     // --- OrbitControls ---
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -573,15 +592,7 @@
       }
     }
 
-    let userChangedColor = false;
-    // Detect when user manually changes color via gui
-    const colorControllers = gui.controllersRecursive().filter(c => c.property === 'color');
-    colorControllers.forEach(c => {
-      const origChange = c._onChange;
-      c.onChange((val) => {
-        userChangedColor = true;
-      });
-    });
+
 
     // Observe data-theme attribute changes
     const observer = new MutationObserver(() => {
@@ -606,8 +617,8 @@
       requestAnimationFrame(animate);
 
       if (params.autoRotate && mesh) {
-        mesh.rotation.y += 0.005;
-        mesh.rotation.x += 0.002;
+        mesh.rotation.y += params.rotateSpeed;
+        mesh.rotation.x += params.rotateSpeed * 0.4;
       }
 
       controls.update();
