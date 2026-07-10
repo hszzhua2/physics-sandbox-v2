@@ -237,6 +237,41 @@
     }
     .control-btns button:hover { background: var(--panel-border); }
 
+    /* Scientist tag nodes */
+    .node.sci-node circle {
+      stroke-dasharray: 3 2;
+      transition: fill 0.4s ease, stroke 0.4s ease, stroke-width 0.3s ease;
+    }
+    .node.sci-node text {
+      font-size: 0.7rem !important;
+      font-style: italic;
+    }
+    .link.sci-link {
+      stroke-dasharray: 4 3;
+      stroke-opacity: 0.35;
+      transition: stroke 0.6s ease, stroke-opacity 0.6s ease;
+    }
+    .scientist-hidden .sci-node,
+    .scientist-hidden .sci-link { display: none !important; }
+
+    /* Toggle button for scientists */
+    .sci-toggle-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px;
+    }
+    .sci-toggle-btn .sci-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #fdcb6e; border: 1.5px dashed #e17055;
+      flex-shrink: 0;
+    }
+    .sci-toggle-btn.active .sci-dot {
+      background: #fdcb6e;
+    }
+    .sci-toggle-btn:not(.active) .sci-dot {
+      background: transparent;
+      opacity: 0.4;
+    }
+
     /* ---------- Tooltip ---------- */
     .tooltip {
       position: absolute; z-index: 200;
@@ -542,9 +577,13 @@
     <div class="legend-item"><span class="legend-dot" style="background:#4ecdc4"></span> 大分类</div>
     <div class="legend-item"><span class="legend-dot" style="background:#a29bfe"></span> 中间分类</div>
     <div class="legend-item"><span class="legend-dot" style="background:#2ecc71"></span> 实验</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#fdcb6e; border:1.5px dashed #e17055;"></span> 科学家</div>
     <div class="control-btns">
       <button onclick="resetZoom()">重置视图</button>
       <button onclick="togglePhysics()">暂停/继续</button>
+      <button class="sci-toggle-btn active" id="btn-sci-toggle" onclick="toggleScientists()">
+        <span class="sci-dot"></span> 科学家标签
+      </button>
     </div>
   </div>
 
@@ -694,7 +733,22 @@
       { id: "bicycle", name: "齿轮与自行车", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "齿轮传动比与自行车速度动力学", target: "exp-bicycle.html", parent: "mechanics" },
       { id: "gravitational-wave", name: "引力波探测", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "双黑洞合并与引力波生成探测模拟", target: "exp-gravitational-wave.html", parent: "astro" },
       { id: "klein-bottle", name: "克莱因瓶", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "克莱因瓶三维参数化可视化", target: "exp-klein-bottle.html", parent: "mechanics" },
-      { id: "theia-impact", name: "忒伊亚撞击", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "SPH光滑粒子流体动力学模拟地月系统形成", target: "exp-theia-impact.html", parent: "astro" }
+      { id: "theia-impact", name: "忒伊亚撞击", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "SPH光滑粒子流体动力学模拟地月系统形成", target: "exp-theia-impact.html", parent: "astro" },
+      // --- Scientists (group 8) ---
+      { id: "sci-newton", name: "牛顿", group: 8, level: 1, icon: "🍎", color: "#e17055", description: "经典力学奠基人 · 万有引力定律", experiments: ["spring", "gravity_exp", "matter"] },
+      { id: "sci-einstein", name: "爱因斯坦", group: 8, level: 1, icon: "🧠", color: "#fdcb6e", description: "相对论创立者 · 质能方程", experiments: ["blackhole", "blackhole_adv", "wormhole", "gravitational-wave"] },
+      { id: "sci-schrodinger", name: "薛定谔", group: 8, level: 1, icon: "🐱", color: "#a29bfe", description: "量子力学波动方程提出者", experiments: ["quantum_exp", "potential"] },
+      { id: "sci-lorenz", name: "洛伦兹", group: 8, level: 1, icon: "🦋", color: "#ff6b6b", description: "混沌理论先驱 · 蝴蝶效应", experiments: ["lorenz", "pendulum"] },
+      { id: "sci-bernoulli", name: "伯努利", group: 8, level: 1, icon: "🌊", color: "#4ecdc4", description: "流体力学奠基人 · 伯努利方程", experiments: ["bernoulli", "taylor"] },
+      { id: "sci-chladni", name: "克拉尼", group: 8, level: 1, icon: "🎵", color: "#fd79a8", description: "声学振动模式可视化先驱", experiments: ["chladni"] },
+      { id: "sci-tesla", name: "特斯拉", group: 8, level: 1, icon: "⚡", color: "#ffeaa7", description: "交流电与高频电力先驱", experiments: ["tesla"] },
+      { id: "sci-galton", name: "高尔顿", group: 8, level: 1, icon: "📊", color: "#fab1a0", description: "统计学与回归分析先驱", experiments: ["galton"] },
+      { id: "sci-brown", name: "布朗", group: 8, level: 1, icon: "🔬", color: "#74b9ff", description: "布朗运动发现者", experiments: ["brownian"] },
+      { id: "sci-ising", name: "伊辛", group: 8, level: 1, icon: "🧲", color: "#55efc4", description: "相变统计模型提出者", experiments: ["ising"] },
+      { id: "sci-klein", name: "克莱因", group: 8, level: 1, icon: "🫙", color: "#8a7ca8", description: "拓扑学与几何学大师", experiments: ["klein-bottle"] },
+      { id: "sci-euler", name: "欧拉", group: 8, level: 1, icon: "📐", color: "#dfe6e9", description: "微积分与梁理论奠基人", experiments: ["cantilever", "bicycle"] },
+      { id: "sci-helbing", name: "Helbing", group: 8, level: 1, icon: "🚶", color: "#a8e6cf", description: "社会力模型提出者", experiments: ["socialforce"] },
+      { id: "sci-canup", name: "Canup", group: 8, level: 1, icon: "🌙", color: "#dfe6e9", description: "大撞击假说数值模拟先驱", experiments: ["theia-impact"] }
     ];
 
     // Build links from parent relationships
@@ -707,6 +761,14 @@
     });
     nodes.filter(n => n.group === 7).forEach(n => {
       if (n.parent) links.push({ source: n.parent, target: n.id });
+    });
+    // Scientist-to-experiment links (dashed)
+    nodes.filter(n => n.group === 8).forEach(sci => {
+      if (sci.experiments) {
+        sci.experiments.forEach(expId => {
+          links.push({ source: sci.id, target: expId, type: "scientist" });
+        });
+      }
     });
 
     // ==========================================
@@ -754,6 +816,7 @@
         if (d.group === 0) return -1200;
         if (d.group === 1) return -900;
         if (d.group === 6) return -500;
+        if (d.group === 8) return -200;
         return -350;
       }))
       .force("center", d3.forceCenter(width / 2, height / 2))
@@ -767,8 +830,9 @@
       .selectAll("line")
       .data(links)
       .enter().append("line")
-      .attr("class", "link")
+      .attr("class", d => d.type === "scientist" ? "link sci-link" : "link")
       .attr("stroke-width", d => {
+        if (d.type === "scientist") return 1;
         if (d.source.group === 0) return 2.5;
         if (d.source.group === 1) return 1.5;
         return 1;
@@ -780,7 +844,7 @@
       .selectAll("g")
       .data(nodes)
       .enter().append("g")
-      .attr("class", "node")
+      .attr("class", d => d.group === 8 ? "node sci-node" : "node")
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
@@ -801,6 +865,7 @@
         if (d.group === 0) return "26px";
         if (d.group === 1) return "20px";
         if (d.group === 6) return "16px";
+        if (d.group === 8) return "12px";
         return "14px";
       })
       .style("pointer-events", "none")
@@ -810,7 +875,7 @@
     node.append("text")
       .attr("dy", d => getNodeRadius(d) + 16)
       .attr("text-anchor", "middle")
-      .style("font-size", d => d.group === 7 ? "10px" : (d.group === 0 ? "14px" : "12px"))
+      .style("font-size", d => d.group === 7 ? "10px" : (d.group === 8 ? "9px" : (d.group === 0 ? "14px" : "12px")))
       .style("font-weight", d => d.group <= 1 ? "700" : "500")
       .style("pointer-events", "none")
       .style("fill", getTextColor())
@@ -837,8 +902,18 @@
         .transition().duration(200)
         .attr("r", getNodeRadius(d) + 5);
 
+      let html = `<h4>${d.icon} ${d.name}</h4><p>${d.description}</p>`;
+      if (d.group === 8 && d.experiments && d.experiments.length) {
+        const expNames = d.experiments.map(eid => {
+          const exp = nodes.find(n => n.id === eid);
+          return exp ? exp.name : eid;
+        });
+        html += `<div class="hint">关联实验：${expNames.join(' · ')}</div>`;
+      } else if (d.target) {
+        html += '<div class="hint">点击进入实验</div>';
+      }
       tooltip.style("opacity", 1)
-        .html(`<h4>${d.icon} ${d.name}</h4><p>${d.description}</p>${d.target ? '<div class="hint">\u70B9\u51FB\u8FDB\u5165\u5B9E\u9A8C</div>' : ''}`)
+        .html(html)
         .style("left", (event.pageX + 15) + "px")
         .style("top", (event.pageY + 15) + "px");
     })
@@ -882,6 +957,7 @@
       if (d.group === 0) return 48;
       if (d.group === 1) return 38;
       if (d.group === 6) return 30;
+      if (d.group === 8) return 16;
       return 22;
     }
 
@@ -915,6 +991,7 @@
 
     function getNodeStrokeWidth(d) {
       const theme = getCurrentTheme();
+      if (d.group === 8) return 1.5;
       if (theme === 'cartoon') return d.group === 7 ? 3 : 4;
       if (theme === 'academic') return 1.5;
       if (theme === 'soviet') return 2;
@@ -954,9 +1031,18 @@
       const linkColor = getLinkColor();
       const linkOpacity = getLinkOpacity();
 
-      g.selectAll(".link")
+      g.selectAll(".link:not(.sci-link)")
         .attr("stroke", linkColor)
         .attr("stroke-opacity", linkOpacity);
+
+      // Scientist links use a distinct warm color
+      const sciLinkColors = {
+        academic: '#e17055', glass: '#fdcb6e', cyber: '#ff9d00',
+        cartoon: '#ff6b6b', soviet: '#c41e1e'
+      };
+      g.selectAll(".sci-link")
+        .attr("stroke", sciLinkColors[theme] || '#e17055')
+        .attr("stroke-opacity", 0.35);
 
       g.selectAll(".node circle")
         .attr("fill", d => getNodeFill(d))
@@ -983,6 +1069,21 @@
       } else {
         simulation.stop();
       }
+    }
+
+    let scientistsVisible = true;
+    function toggleScientists() {
+      scientistsVisible = !scientistsVisible;
+      const svgEl = document.getElementById('graph-svg');
+      const btn = document.getElementById('btn-sci-toggle');
+      if (scientistsVisible) {
+        svgEl.classList.remove('scientist-hidden');
+        btn.classList.add('active');
+      } else {
+        svgEl.classList.add('scientist-hidden');
+        btn.classList.remove('active');
+      }
+      simulation.alpha(0.3).restart();
     }
 
     // ==========================================
