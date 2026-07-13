@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识图谱 — 3D 探索器</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      width:100%; height:100%; overflow:hidden;
+      font-family:'Segoe UI','Microsoft YaHei','Noto Sans CJK SC',system-ui,sans-serif;
+      background:#0a0e1a; color:#e0e6ed;
+      transition:background-color .6s ease,color .4s ease;
+    }
+
+    /* ===== 主题变量 ===== */
+    :root,[data-theme="academic"]{
+      --bg:#f0f2f5; --bg2:#e8eaf0; --fg:#1a1a2e; --muted:#7a7a8a;
+      --panel:#ffffff; --border:#d8dce4; --accent:#5b8def;
+      --grid:rgba(0,0,0,.06); --link:rgba(100,110,130,.3); --fog:0xf0f2f5;
+      --radius:4px; --shadow:0 2px 8px rgba(0,0,0,.06);
+    }
+    [data-theme="glass"]{
+      --bg:#0f1117; --bg2:#161a24; --fg:#e0e6ed; --muted:#8b92a8;
+      --panel:rgba(255,255,255,.06); --border:rgba(255,255,255,.12);
+      --accent:#74b9ff; --grid:rgba(255,255,255,.04);
+      --link:rgba(116,185,255,.18); --fog:0x0f1117; --radius:20px;
+      --shadow:0 8px 32px rgba(0,0,0,.3);
+    }
+    [data-theme="cyber"]{
+      --bg:#0a0014; --bg2:#140028; --fg:#f0e6ff; --muted:#a080c0;
+      --panel:rgba(20,0,40,.6); --border:rgba(189,0,255,.35);
+      --accent:#bd00ff; --grid:rgba(189,0,255,.06);
+      --link:rgba(189,0,255,.2); --fog:0x0a0014; --radius:8px;
+      --shadow:0 0 24px rgba(189,0,255,.12);
+    }
+    [data-theme="cartoon"]{
+      --bg:#fef6e4; --bg2:#f9efd0; --fg:#2d3436; --muted:#636e72;
+      --panel:rgba(255,255,255,.92); --border:rgba(255,180,100,.4);
+      --accent:#ff6b6b; --grid:rgba(0,0,0,.05);
+      --link:rgba(255,180,100,.3); --fog:0xfef6e4; --radius:24px;
+      --shadow:0 8px 32px rgba(0,0,0,.06);
+    }
+    [data-theme="soviet"]{
+      --bg:#f0ebe4; --bg2:#e8e0d4; --fg:#1a1a1a; --muted:#6a5a4a;
+      --panel:rgba(255,250,242,.92); --border:#c41e1e;
+      --accent:#c41e1e; --grid:rgba(196,30,30,.06);
+      --link:rgba(196,30,30,.2); --fog:0xf0ebe4; --radius:2px;
+      --shadow:0 4px 16px rgba(0,0,0,.08);
+    }
+
+    /* ===== 顶部导航 (统一风格) ===== */
+    .top-nav{
+      position:fixed;top:0;left:0;right:0;z-index:999;
+      display:flex;align-items:center;justify-content:center;gap:4px;
+      padding:10px 20px;transition:background .6s,border-color .4s;
+      backdrop-filter:blur(12px);
+    }
+    [data-theme="academic"] .top-nav{
+      background:rgba(248,249,250,.95);border-bottom:1px solid #e0e0e0;
+    }
+    [data-theme="glass"] .top-nav{
+      background:rgba(15,17,23,.85);border-bottom:1px solid rgba(255,255,255,.1);
+      backdrop-filter:blur(16px);
+    }
+    [data-theme="cyber"] .top-nav{
+      background:rgba(10,0,20,.9);border-bottom:1px solid rgba(189,0,255,.3);
+      box-shadow:0 0 20px rgba(189,0,255,.1);
+    }
+    [data-theme="cartoon"] .top-nav{
+      background:rgba(254,246,228,.92);border-bottom:3px solid rgba(255,180,100,.3);
+      backdrop-filter:blur(12px);
+    }
+    [data-theme="soviet"] .top-nav{
+      background:rgba(240,235,228,.95);border-bottom:2px solid #c41e1e;
+    }
+    .top-nav a{
+      padding:8px 20px;text-decoration:none;font-weight:600;
+      font-size:.9rem;border-radius:var(--radius);transition:all .3s ease;
+      font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;
+    }
+    [data-theme="academic"] .top-nav a{color:#7a7a8a;border-radius:4px;}
+    [data-theme="academic"] .top-nav a:hover,
+    [data-theme="academic"] .top-nav a.active{color:#1a1a2e;background:rgba(26,26,46,.06);}
+    [data-theme="glass"] .top-nav a{color:var(--muted);}
+    [data-theme="glass"] .top-nav a:hover,
+    [data-theme="glass"] .top-nav a.active{color:#74b9ff;background:rgba(116,185,255,.1);}
+    [data-theme="cyber"] .top-nav a{color:var(--muted);}
+    [data-theme="cyber"] .top-nav a:hover,
+    [data-theme="cyber"] .top-nav a.active{color:#00f3ff;background:rgba(0,243,255,.1);text-shadow:0 0 8px rgba(0,243,255,.4);}
+    [data-theme="cartoon"] .top-nav a{color:var(--muted);}
+    [data-theme="cartoon"] .top-nav a:hover,
+    [data-theme="cartoon"] .top-nav a.active{color:#ff6b6b;background:rgba(255,107,107,.1);}
+    [data-theme="soviet"] .top-nav a{color:#6a5a4a;border-radius:2px;}
+    [data-theme="soviet"] .top-nav a:hover,
+    [data-theme="soviet"] .top-nav a.active{color:#c41e1e;background:rgba(196,30,30,.08);}
+
+    .nav-dropdown{position:relative;}
+    .nav-dropdown-menu{
+      position:absolute;top:calc(100% + 8px);left:50%;
+      transform:translateX(-50%) scale(.95);transform-origin:top center;
+      opacity:0;pointer-events:none;padding:8px 0;border-radius:var(--radius);
+      min-width:220px;transition:all .25s ease;z-index:1001;
+    }
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown-menu:hover{
+      transform:translateX(-50%) scale(1);opacity:1;pointer-events:auto;
+    }
+    [data-theme="academic"] .nav-dropdown-menu{background:#fff;border:1px solid #e0e0e0;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.08);}
+    [data-theme="glass"] .nav-dropdown-menu{background:rgba(26,29,38,.95);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
+    [data-theme="cyber"] .nav-dropdown-menu{background:rgba(20,0,40,.95);border:1px solid rgba(189,0,255,.4);box-shadow:0 0 30px rgba(189,0,255,.15);}
+    [data-theme="cartoon"] .nav-dropdown-menu{background:rgba(255,255,255,.95);border:3px solid rgba(255,180,100,.3);box-shadow:0 8px 32px rgba(0,0,0,.1);}
+    [data-theme="soviet"] .nav-dropdown-menu{background:#fffaf2;border:2px solid #c41e1e;border-radius:2px;box-shadow:0 4px 16px rgba(0,0,0,.12);}
+    .nav-dropdown-menu a{
+      display:block;padding:10px 20px;text-decoration:none;font-size:.85rem;
+      font-weight:500;white-space:nowrap;border-radius:0!important;background:transparent!important;
+    }
+    [data-theme="academic"] .nav-dropdown-menu a{color:#7a7a8a;}
+    [data-theme="academic"] .nav-dropdown-menu a:hover{color:#1a1a2e;background:#f5f5f5!important;}
+    [data-theme="glass"] .nav-dropdown-menu a{color:var(--muted);}
+    [data-theme="glass"] .nav-dropdown-menu a:hover{color:#74b9ff;background:rgba(116,185,255,.08)!important;}
+    [data-theme="cyber"] .nav-dropdown-menu a{color:var(--muted);}
+    [data-theme="cyber"] .nav-dropdown-menu a:hover{color:#00f3ff;background:rgba(0,243,255,.08)!important;text-shadow:0 0 6px rgba(0,243,255,.3);}
+    [data-theme="cartoon"] .nav-dropdown-menu a{color:var(--muted);}
+    [data-theme="cartoon"] .nav-dropdown-menu a:hover{color:#ff6b6b;background:rgba(255,107,107,.08)!important;}
+    [data-theme="soviet"] .nav-dropdown-menu a{color:#6a5a4a;}
+    [data-theme="soviet"] .nav-dropdown-menu a:hover{color:#c41e1e;background:rgba(196,30,30,.06)!important;}
+
+    /* ===== 统计栏 ===== */
+    .stats-bar{
+      position:fixed;top:56px;left:0;right:0;z-index:150;
+      display:flex;align-items:center;justify-content:center;gap:20px;
+      padding:5px 20px;font-size:.75rem;
+      background:var(--panel);border-bottom:1px solid var(--border);
+      transition:background .6s,border-color .4s;
+    }
+    .stat{display:flex;align-items:center;gap:5px;color:var(--muted);}
+    .stat .n{font-weight:700;font-size:.9rem;color:var(--fg);}
+    .stat .na{color:var(--accent);}
+
+    /* ===== 3D 画布 ===== */
+    #canvas3d{position:fixed;top:90px;left:0;width:100vw;height:calc(100vh - 90px);z-index:1;}
+
+    /* ===== 主题切换器 ===== */
+    .theme-switcher{
+      position:fixed;bottom:16px;right:16px;z-index:200;
+      display:flex;gap:4px;padding:4px;
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:50px;box-shadow:var(--shadow);
+      transition:background .6s,border-color .4s;
+    }
+    .theme-switcher button{
+      padding:5px 10px;border:none;background:transparent;
+      color:var(--muted);cursor:pointer;font-size:.78rem;
+      border-radius:50px;transition:all .2s;font-family:inherit;
+    }
+    .theme-switcher button:hover{color:var(--fg);}
+    .theme-switcher button.active{
+      background:var(--accent);color:#fff;font-weight:600;
+    }
+    [data-theme="soviet"] .theme-switcher button.active{color:#fff;}
+
+    /* ===== 左侧面板 ===== */
+    .panel-left{
+      position:fixed;top:100px;left:12px;z-index:100;
+      width:210px;max-height:calc(100vh - 130px);overflow-y:auto;
+      padding:12px;font-size:.8rem;
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+      transition:background .6s,border-color .4s;
+    }
+    [data-theme="glass"] .panel-left,[data-theme="cyber"] .panel-left{backdrop-filter:blur(16px);}
+    .panel-left h3{margin:0 0 8px;font-size:.9rem;color:var(--fg);}
+    .panel-left h4{margin:10px 0 4px;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+    .search-box{
+      width:100%;padding:6px 8px;border:1px solid var(--border);
+      border-radius:var(--radius);background:transparent;color:var(--fg);
+      font-size:.8rem;font-family:inherit;
+    }
+    .search-box:focus{outline:none;border-color:var(--accent);}
+    .grp-filter{
+      display:flex;align-items:center;gap:6px;padding:3px 4px;
+      cursor:pointer;border-radius:var(--radius);user-select:none;transition:background .15s;
+    }
+    .grp-filter:hover{background:var(--border);}
+    .grp-filter input{cursor:pointer;accent-color:var(--accent);}
+    .grp-filter .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .grp-filter .nm{flex:1;color:var(--fg);font-size:.78rem;}
+    .grp-filter .ct{font-size:.68rem;color:var(--muted);}
+    .btn{
+      width:100%;padding:5px 8px;margin-top:3px;border:1px solid var(--border);
+      background:transparent;color:var(--fg);border-radius:var(--radius);
+      cursor:pointer;font-size:.76rem;font-family:inherit;transition:background .15s;
+    }
+    .btn:hover{background:var(--border);}
+    .btn-exp{
+      width:100%;padding:8px;margin-top:6px;border:none;
+      background:var(--accent);color:#fff;border-radius:var(--radius);
+      cursor:pointer;font-size:.82rem;font-family:inherit;font-weight:600;transition:opacity .15s;
+    }
+    .btn-exp:hover{opacity:.85;}
+
+    /* ===== 右侧详情面板 ===== */
+    .panel-right{
+      position:fixed;top:100px;right:12px;z-index:100;
+      width:330px;max-height:calc(100vh - 130px);overflow-y:auto;
+      padding:16px;
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+      transition:transform .4s cubic-bezier(.4,0,.2,1),background .6s,border-color .4s;
+    }
+    .panel-right.collapsed{transform:translateX(calc(100% + 24px));}
+    [data-theme="glass"] .panel-right,[data-theme="cyber"] .panel-right{backdrop-filter:blur(16px);}
+    .toggle-right{
+      position:fixed;top:100px;right:0;z-index:101;width:26px;height:34px;
+      background:var(--panel);border:1px solid var(--border);border-right:none;
+      color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;
+      font-size:11px;border-radius:var(--radius) 0 0 var(--radius);transition:right .4s,background .15s;
+    }
+    .toggle-right:hover{background:var(--border);}
+    .toggle-right[data-open="true"]{right:354px;}
+
+    .empty{text-align:center;padding:30px 8px;color:var(--muted);font-size:.85rem;line-height:1.8;}
+    .empty .ic{font-size:2rem;display:block;margin-bottom:8px;opacity:.4;}
+    .dh{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;}
+    .dh .bdg{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+    .dh h2{margin:0;font-size:1rem;color:var(--fg);line-height:1.3;}
+    .dh .tg{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+    .chip{font-size:.7rem;padding:2px 7px;border-radius:50px;background:var(--border);color:var(--fg);}
+    .sec{margin-bottom:10px;}
+    .sec h4{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+    .sec p{font-size:.8rem;color:var(--fg);line-height:1.55;}
+    .plist{list-style:none;padding:0;}
+    .plist li{font-size:.78rem;color:var(--fg);padding:3px 6px;margin:2px 0;border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s;}
+    .plist li:hover{background:var(--border);}
+    .plist li .pd{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+    .plist li .ic{font-size:.85rem;}
+
+    /* ===== Tooltip ===== */
+    .tooltip{
+      position:fixed;z-index:300;padding:8px 12px;border-radius:var(--radius);
+      font-size:.78rem;pointer-events:none;opacity:0;transition:opacity .15s;
+      max-width:260px;line-height:1.5;
+      background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow);
+      color:var(--fg);
+    }
+    .tooltip h4{margin:0 0 3px;font-size:.88rem;}
+    .tooltip p{margin:0;color:var(--muted);font-size:.72rem;}
+    .tooltip .ht{margin-top:4px;font-size:.7rem;color:var(--accent);font-weight:600;}
+
+    /* ===== 面包屑 ===== */
+    .crumb{
+      position:fixed;top:92px;left:50%;transform:translateX(-50%);z-index:99;
+      padding:3px 14px;font-size:.74rem;color:var(--muted);
+      border-radius:0 0 var(--radius) var(--radius);
+      background:var(--panel);border:1px solid var(--border);border-top:none;display:none;
+    }
+    .crumb.show{display:block;}
+
+    /* ===== Scrollbar ===== */
+    ::-webkit-scrollbar{width:5px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+    /* ===== Loading ===== */
+    .loading{
+      position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:500;
+      text-align:center;color:var(--muted);
+    }
+    .loading .spin{
+      width:48px;height:48px;border:3px solid var(--border);
+      border-top-color:var(--accent);border-radius:50%;
+      animation:spin 1s linear infinite;margin:0 auto 12px;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .loading.hide{display:none;}
+
+    @media(max-width:900px){
+      .panel-left{display:none;}
+      .panel-right{width:calc(100vw - 24px);}
+      .toggle-right[data-open="true"]{right:calc(100vw - 50px);}
+      .stats-bar{font-size:.65rem;gap:8px;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 导航栏 -->
+  <nav class="top-nav" id="top-nav">
+    <a href="index.html">首页</a>
+    <a href="knowledge-graph.html">知识图谱</a>
+    <a href="taxonomy.html" class="active">知识分类</a>
+    <div class="nav-dropdown">
+      <a href="#">图书馆 ▾</a>
+      <div class="nav-dropdown-menu">
+        <a href="https://arxiv.org/" target="_blank">arXiv</a>
+        <a href="http://chinaxiv.org/home.htm" target="_blank">ChinaXiv</a>
+        <a href="https://sci-hub.sg/" target="_blank">Sci-Hub</a>
+        <a href="https://www.biorxiv.org/" target="_blank">bioRxiv</a>
+        <a href="https://www.medrxiv.org/" target="_blank">medRxiv</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <a href="#">关于 ▾</a>
+      <div class="nav-dropdown-menu">
+        <a href="https://www.instagram.com/zf_zhuang/" target="_blank">📷 Instagram</a>
+        <a href="https://www.linkedin.com/in/zefeng-zhuang-266a9b204/" target="_blank">💼 LinkedIn</a>
+        <a href="https://www.feishu.cn/invitation/page/add_contact/?token=f9bg037f-c9e4-4455-9dc0-724176121788&amp;unique_id=XuGE2TPEcoSXmTb6i3Q9Gg==" target="_blank">🚀 飞书</a>
+        <a href="https://github.com/hszzhua2" target="_blank">🐙 GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 统计栏 -->
+  <div class="stats-bar">
+    <span class="stat">📚 <span class="n na">5</span> 物理分类</span>
+    <span class="stat">🔬 <span class="n na">16</span> 学科</span>
+    <span class="stat">🧪 <span class="n na">30</span> 实验</span>
+    <span class="stat">👨‍🔬 <span class="n na">22</span> 科学家</span>
+    <span class="stat">🔗 <span class="n">79</span> 关联</span>
+  </div>
+
+  <!-- 3D 画布 -->
+  <canvas id="canvas3d"></canvas>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spin"></div>
+    <div>正在构建 3D 知识图谱…</div>
+  </div>
+
+  <!-- 面包屑 -->
+  <div class="crumb" id="crumb"></div>
+
+  <!-- 左侧控制面板 -->
+  <div class="panel-left" id="panel-left">
+    <h3>🔍 筛选与控制</h3>
+    <input type="text" class="search-box" id="search" placeholder="搜索节点…">
+    <h4>类型</h4>
+    <div id="grp-filters"></div>
+    <h4>视图</h4>
+    <button class="btn" id="btn-reset">🔄 重置视角</button>
+    <button class="btn" id="btn-clear">✕ 清除追踪</button>
+    <button class="btn" id="btn-rotate">🔄 自动旋转</button>
+  </div>
+
+  <!-- 右侧详情面板 -->
+  <div class="panel-right collapsed" id="panel-right"></div>
+  <div class="toggle-right" id="toggle-right">◀</div>
+
+  <!-- Tooltip -->
+  <div class="tooltip" id="tooltip"></div>
+
+  <!-- 主题切换器 -->
+  <div class="theme-switcher" id="theme-switcher"></div>
+
+  <script type="module">
+  import * as THREE from './lib/three.module.js';
+  import { OrbitControls } from './lib/OrbitControls.js';
+
+  // ==========================================
+  // 主题引擎
+  // ==========================================
+  const THEMES = ['academic','glass','cyber','cartoon','soviet'];
+  const THEME_KEY = 'psu-theme-v1';
+  function getTheme(){
+    try{ const s=localStorage.getItem(THEME_KEY); if(s&&THEMES.includes(s)) return s; }catch(e){}
+    const p=new URLSearchParams(location.search); const t=p.get('theme');
+    if(t&&THEMES.includes(t)) return t;
+    return 'academic';
+  }
+  function setTheme(t){
+    if(!THEMES.includes(t)) t='academic';
+    document.documentElement.setAttribute('data-theme',t);
+    try{localStorage.setItem(THEME_KEY,t);}catch(e){}
+    updateThemeUI(t);
+    applySceneTheme(t);
+  }
+  function updateThemeUI(t){
+    document.querySelectorAll('#theme-switcher button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+  }
+  function buildSwitcher(){
+    const c=document.getElementById('theme-switcher');
+    const items=[['academic','📐 学术'],['glass','🧊 玻璃'],['cartoon','🎨 卡通'],['cyber','👾 赛博'],['soviet','☭ 苏维埃']];
+    const cur=getTheme();
+    items.forEach(([k,l])=>{
+      const b=document.createElement('button');
+      b.textContent=l; b.dataset.t=k;
+      if(k===cur) b.classList.add('active');
+      b.addEventListener('click',()=>setTheme(k));
+      c.appendChild(b);
+    });
+  }
+
+  // ==========================================
+  // 节点分组定义
+  // ==========================================
+  const GROUPS = {
+    1: { name:'物理分类', hex:'#4ecdc4', y:160,  radius:90,  size:8,   icon:'📚' },
+    6: { name:'学科',     hex:'#74b9ff', y:30,   radius:250, size:6,   icon:'🔬' },
+    7: { name:'实验',     hex:'#2ecc71', y:-90,  radius:390, size:4.5, icon:'🧪' },
+    8: { name:'科学家',   hex:'#fdcb6e', y:-210, radius:490, size:3.5, icon:'👨‍🔬' }
+  };
+  const GROUP_LIST = [1,6,7,8];
+
+  function hexToInt(h){ return parseInt(h.replace('#',''),16); }
+
+  // ==========================================
+  // 知识图谱节点数据
+  // ==========================================
+  const NODES = [
+    // ===== 物理分类 (group:1) =====
+    { id:"classical",     name:"经典物理",       group:1, icon:"⚙️",  color:"#4ecdc4", description:"牛顿力学、电磁学、热力学与光学" },
+    { id:"quantum",       name:"量子物理",       group:1, icon:"⚛️",  color:"#a29bfe", description:"微观世界的量子力学现象" },
+    { id:"relativity",    name:"相对论与宇宙学", group:1, icon:"🌠",  color:"#ff9f43", description:"爱因斯坦的相对论与宇宙学" },
+    { id:"chaos",         name:"统计与混沌",     group:1, icon:"🦋",  color:"#ff6b6b", description:"混沌理论、统计物理与概率模型" },
+    { id:"computational", name:"计算物理",       group:1, icon:"💻",  color:"#55efc4", description:"计算机模拟与数值方法" },
+
+    // ===== 学科 (group:6) =====
+    { id:"fluid",         name:"流体力学",   group:6, icon:"🌊",  color:"#4ecdc4", description:"流体运动规律与现象", parent:"classical" },
+    { id:"mechanics",     name:"经典力学",   group:6, icon:"🏗️",  color:"#4ecdc4", description:"牛顿力学与刚体运动", parent:"classical" },
+    { id:"electromag",    name:"电磁学",     group:6, icon:"⚡",  color:"#4ecdc4", description:"电场、磁场与电磁波", parent:"classical" },
+    { id:"optics",        name:"波动光学",   group:6, icon:"🔦",  color:"#4ecdc4", description:"光的波动性质与干涉衍射", parent:"classical" },
+    { id:"harmonic",      name:"简谐共振",   group:6, icon:"〰️",  color:"#4ecdc4", description:"简谐振动与共振现象", parent:"classical" },
+    { id:"acoustic",      name:"声学驻波",   group:6, icon:"🔊",  color:"#4ecdc4", description:"声波传播与驻波现象", parent:"classical" },
+    { id:"wave_particle", name:"波粒二象性", group:6, icon:"✨",  color:"#a29bfe", description:"微观粒子的波粒二象性", parent:"quantum" },
+    { id:"schrodinger",   name:"薛定谔方程", group:6, icon:"📐",  color:"#a29bfe", description:"量子力学的基本方程", parent:"quantum" },
+    { id:"relativity_gr", name:"广义相对论", group:6, icon:"🕳️",  color:"#ff9f43", description:"弯曲时空与引力理论", parent:"relativity" },
+    { id:"astro",         name:"天体物理",   group:6, icon:"🪐",  color:"#ff9f43", description:"天体与宇宙物理现象", parent:"relativity" },
+    { id:"gravity",       name:"引力",       group:6, icon:"🍎",  color:"#ff9f43", description:"万有引力与引力相互作用", parent:"relativity" },
+    { id:"chaos_theory",  name:"混沌理论",   group:6, icon:"🌀",  color:"#ff6b6b", description:"非线性动力学与混沌现象", parent:"chaos" },
+    { id:"prob",          name:"概率统计",   group:6, icon:"📊",  color:"#ff6b6b", description:"概率论与统计分析方法", parent:"chaos" },
+    { id:"phase",         name:"相变与临界", group:6, icon:"🧲",  color:"#ff6b6b", description:"物质相变与临界行为", parent:"chaos" },
+    { id:"manybody",      name:"多体系统",   group:6, icon:"🧊",  color:"#55efc4", description:"多粒子相互作用系统", parent:"computational" },
+    { id:"vision3d",      name:"三维视觉",   group:6, icon:"👁️",  color:"#55efc4", description:"三维数据处理与可视化", parent:"computational" },
+
+    // ===== 实验 (group:7) =====
+    { id:"taylor",             name:"泰勒-库埃特流",    group:7, icon:"🧪", color:"#2ecc71", description:"旋转圆柱间的流体不稳定性", target:"exp-taylor.html", parent:"fluid" },
+    { id:"galton",             name:"高尔顿钉板",        group:7, icon:"🧪", color:"#2ecc71", description:"中心极限定理的可视化演示", target:"exp-galton.html", parent:"prob" },
+    { id:"lissajous",          name:"利萨茹曲线",        group:7, icon:"🧪", color:"#2ecc71", description:"两个正交简谐振动的合成轨迹", target:"exp-lissajous.html", parent:"harmonic" },
+    { id:"chladni",            name:"克拉尼图形",        group:7, icon:"🧪", color:"#2ecc71", description:"薄板上的驻波振动模式", target:"exp-chladni.html", parent:"acoustic" },
+    { id:"pendulum",           name:"混沌双摆",          group:7, icon:"🧪", color:"#2ecc71", description:"双摆系统的混沌动力学", target:"exp-pendulum.html", parent:"chaos_theory" },
+    { id:"matter",             name:"刚体沙盒",          group:7, icon:"🧪", color:"#2ecc71", description:"刚体碰撞与链式反应模拟", target:"exp-matter.html", parent:"mechanics" },
+    { id:"quantum_exp",        name:"双缝干涉",          group:7, icon:"🧪", color:"#2ecc71", description:"电子双缝干涉实验模拟", target:"exp-quantum.html", parent:"wave_particle" },
+    { id:"potential",          name:"一维势阱",          group:7, icon:"🧪", color:"#2ecc71", description:"量子粒子在势阱中的行为", target:"exp-potential.html", parent:"schrodinger" },
+    { id:"gravity_exp",        name:"万有引力",          group:7, icon:"🧪", color:"#2ecc71", description:"N体引力系统模拟", target:"exp-gravity.html", parent:"gravity" },
+    { id:"lorenz",             name:"洛伦兹吸引子",      group:7, icon:"🧪", color:"#2ecc71", description:"三维混沌吸引子轨迹", target:"exp-lorenz.html", parent:"chaos_theory" },
+    { id:"bernoulli",          name:"伯努利原理",        group:7, icon:"🧪", color:"#2ecc71", description:"流体速度与压强关系", target:"exp-bernoulli.html", parent:"fluid" },
+    { id:"blackhole",         name:"黑洞吸积盘",        group:7, icon:"🧪", color:"#2ecc71", description:"黑洞周围物质吸积过程", target:"exp-blackhole.html", parent:"relativity_gr" },
+    { id:"blackhole_adv",     name:"黑洞吸积盘(高级)",  group:7, icon:"🧪", color:"#2ecc71", description:"高级黑洞吸积盘模拟", target:"exp-blackhole-advanced.html", parent:"relativity_gr" },
+    { id:"wormhole",           name:"爱因斯坦-罗森桥",   group:7, icon:"🧪", color:"#2ecc71", description:"虫洞时空结构可视化", target:"exp-wormhole.html", parent:"relativity_gr" },
+    { id:"tesla",              name:"特斯拉线圈",        group:7, icon:"🧪", color:"#2ecc71", description:"高频共振变压器原理", target:"exp-tesla.html", parent:"electromag" },
+    { id:"wave",               name:"波的干涉",          group:7, icon:"🧪", color:"#2ecc71", description:"波的叠加与干涉图样", target:"exp-wave.html", parent:"optics" },
+    { id:"spring",             name:"弹簧振子",          group:7, icon:"🧪", color:"#2ecc71", description:"简谐振动与阻尼振荡", target:"exp-spring.html", parent:"mechanics" },
+    { id:"medical",            name:"名医的诞生",        group:7, icon:"🧪", color:"#2ecc71", description:"医疗诊断中的概率模型", target:"exp-medical.html", parent:"prob" },
+    { id:"pluchino",           name:"成功随机性",        group:7, icon:"🧪", color:"#2ecc71", description:"才能与运气关系的随机模型", target:"exp-pluchino.html", parent:"prob" },
+    { id:"brownian",           name:"布朗运动",          group:7, icon:"🧪", color:"#2ecc71", description:"随机游走与扩散现象", target:"exp-brownian.html", parent:"prob" },
+    { id:"pointcloud",         name:"点云探索",          group:7, icon:"🧪", color:"#2ecc71", description:"三维点云数据交互可视化", target:"exp-pointcloud.html", parent:"vision3d" },
+    { id:"ising",               name:"伊辛模型",          group:7, icon:"🧪", color:"#2ecc71", description:"铁磁相变的格点模型", target:"exp-ising.html", parent:"phase" },
+    { id:"ca3d",                name:"3D元胞自动机",      group:7, icon:"🧪", color:"#2ecc71", description:"三维细胞自动机演化", target:"exp-ca3d.html", parent:"manybody" },
+    { id:"socialforce",         name:"社会力模型",        group:7, icon:"🧪", color:"#2ecc71", description:"基于社会力模型的行人流仿真", target:"exp-social-force.html", parent:"manybody" },
+    { id:"solar",               name:"太阳系沙盘",       group:7, icon:"🧪", color:"#2ecc71", description:"太阳系行星运动模拟", target:"exp-solar.html", parent:"astro" },
+    { id:"cantilever",          name:"悬臂梁分析",       group:7, icon:"🧪", color:"#2ecc71", description:"悬臂梁受力与变形分析", target:"exp-cantilever.html", parent:"mechanics" },
+    { id:"bicycle",             name:"齿轮与自行车",     group:7, icon:"🧪", color:"#2ecc71", description:"齿轮传动比与自行车速度动力学", target:"exp-bicycle.html", parent:"mechanics" },
+    { id:"gravitational-wave",  name:"引力波探测",       group:7, icon:"🧪", color:"#2ecc71", description:"双黑洞合并与引力波生成探测模拟", target:"exp-gravitational-wave.html", parent:"astro" },
+    { id:"klein-bottle",        name:"克莱因瓶",          group:7, icon:"🧪", color:"#2ecc71", description:"克莱因瓶三维参数化可视化", target:"exp-klein-bottle.html", parent:"mechanics" },
+    { id:"theia-impact",        name:"忒伊亚撞击",       group:7, icon:"🧪", color:"#2ecc71", description:"SPH光滑粒子流体动力学模拟地月系统形成", target:"exp-theia-impact.html", parent:"astro" },
+
+    // ===== 科学家 (group:8) =====
+    { id:"sci-newton",      name:"牛顿",       group:8, icon:"🍎", color:"#e17055", description:"经典力学奠基人 · 万有引力定律", experiments:["spring","gravity_exp","matter","solar"] },
+    { id:"sci-einstein",    name:"爱因斯坦",   group:8, icon:"🧠", color:"#fdcb6e", description:"相对论创立者 · 质能方程", experiments:["blackhole","blackhole_adv","wormhole","gravitational-wave"] },
+    { id:"sci-schrodinger", name:"薛定谔",     group:8, icon:"🐱", color:"#a29bfe", description:"量子力学波动方程提出者", experiments:["quantum_exp","potential"] },
+    { id:"sci-lorenz",      name:"洛伦兹",     group:8, icon:"🦋", color:"#ff6b6b", description:"混沌理论先驱 · 蝴蝶效应", experiments:["lorenz","pendulum"] },
+    { id:"sci-bernoulli",   name:"伯努利",     group:8, icon:"🌊", color:"#4ecdc4", description:"流体力学奠基人 · 伯努利方程", experiments:["bernoulli","taylor"] },
+    { id:"sci-chladni",     name:"克拉尼",     group:8, icon:"🎵", color:"#fd79a8", description:"声学振动模式可视化先驱", experiments:["chladni"] },
+    { id:"sci-tesla",       name:"特斯拉",     group:8, icon:"⚡", color:"#ffeaa7", description:"交流电与高频电力先驱", experiments:["tesla"] },
+    { id:"sci-galton",      name:"高尔顿",     group:8, icon:"📊", color:"#fab1a0", description:"统计学与回归分析先驱", experiments:["galton"] },
+    { id:"sci-brown",       name:"布朗",       group:8, icon:"🔬", color:"#74b9ff", description:"布朗运动发现者", experiments:["brownian"] },
+    { id:"sci-ising",        name:"伊辛",       group:8, icon:"🧲", color:"#55efc4", description:"相变统计模型提出者", experiments:["ising"] },
+    { id:"sci-klein",       name:"克莱因",     group:8, icon:"🫙", color:"#8a7ca8", description:"拓扑学与几何学大师", experiments:["klein-bottle"] },
+    { id:"sci-euler",       name:"欧拉",       group:8, icon:"📐", color:"#dfe6e9", description:"微积分与梁理论奠基人", experiments:["cantilever","bicycle"] },
+    { id:"sci-helbing",     name:"Helbing",    group:8, icon:"🚶", color:"#a8e6cf", description:"社会力模型提出者", experiments:["socialforce"] },
+    { id:"sci-canup",       name:"Canup",      group:8, icon:"🌙", color:"#dfe6e9", description:"大撞击假说数值模拟先驱", experiments:["theia-impact"] },
+    { id:"sci-lissajous",   name:"利萨如",     group:8, icon:"🎵", color:"#fd79a8", description:"利萨茹曲线发现者 · 声学振动可视化", experiments:["lissajous"] },
+    { id:"sci-pluchino",    name:"Pluchino",   group:8, icon:"🎲", color:"#fdcb6e", description:"随机才能模型提出者 · 运气与成功", experiments:["pluchino"] },
+    { id:"sci-galileo",     name:"伽利略",     group:8, icon:"🔭", color:"#f0c060", description:"现代天文学之父 · 望远镜观测与运动学", experiments:["solar","matter","spring"] },
+    { id:"sci-kepler",      name:"开普勒",     group:8, icon:"🪐", color:"#4ecdc4", description:"行星运动三定律提出者", experiments:["solar","gravity_exp"] },
+    { id:"sci-copernicus",  name:"哥白尼",     group:8, icon:"☀️", color:"#fdcb6e", description:"日心说创立者 · 现代天文学奠基人", experiments:["solar"] },
+    { id:"sci-vonneumann",  name:"冯·诺依曼",  group:8, icon:"🧮", color:"#74b9ff", description:"元胞自动机创始人 · 计算机科学先驱", experiments:["ca3d"] },
+    { id:"sci-conway",      name:"Conway",     group:8, icon:"🎮", color:"#55efc4", description:"生命游戏发明者 · 元胞自动机先驱", experiments:["ca3d"] },
+    { id:"sci-sutherland",  name:"Sutherland", group:8, icon:"💻", color:"#a29bfe", description:"计算机图形学之父 · 三维交互先驱", experiments:["pointcloud"] }
+  ];
+
+  // ==========================================
+  // 构建链接关系
+  // ==========================================
+  const LINKS = [];
+  // 物理分类 → 学科
+  NODES.filter(n => n.group === 6 && n.parent).forEach(n => {
+    LINKS.push({ source:n.parent, target:n.id, type:'normal' });
+  });
+  // 学科 → 实验
+  NODES.filter(n => n.group === 7 && n.parent).forEach(n => {
+    LINKS.push({ source:n.parent, target:n.id, type:'normal' });
+  });
+  // 科学家 → 实验
+  NODES.filter(n => n.group === 8 && n.experiments).forEach(sci => {
+    sci.experiments.forEach(expId => {
+      LINKS.push({ source:sci.id, target:expId, type:'scientist' });
+    });
+  });
+
+  const nodeMap = new Map(NODES.map(n => [n.id, n]));
+
+  // ==========================================
+  // Three.js 场景初始化
+  // ==========================================
+  const canvas = document.getElementById('canvas3d');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight - 90);
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x0a0e1a, 300, 1200);
+
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth/(window.innerHeight-90), 0.1, 3000);
+  camera.position.set(0, 0, 650);
+
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.minDistance = 100;
+  controls.maxDistance = 1500;
+  controls.autoRotateSpeed = 0.5;
+
+  // 光照
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambient);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(100, 200, 150);
+  scene.add(dirLight);
+  const pointLight = new THREE.PointLight(0x74b9ff, 0.5, 800);
+  pointLight.position.set(0, 100, 0);
+  scene.add(pointLight);
+
+  // ==========================================
+  // 3D 节点定位 — 按分组分层圆形排列
+  // ==========================================
+  const nodesByGroup = {};
+  GROUP_LIST.forEach(g => { nodesByGroup[g] = NODES.filter(n => n.group === g); });
+
+  NODES.forEach(node => {
+    const g = node.group;
+    const gDef = GROUPS[g];
+    const groupNodes = nodesByGroup[g];
+    const idx = groupNodes.indexOf(node);
+    const angle = (idx / groupNodes.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.25;
+    const r = gDef.radius + (Math.random() - 0.5) * 50;
+    node._x = Math.cos(angle) * r;
+    node._y = gDef.y + (Math.random() - 0.5) * 25;
+    node._z = Math.sin(angle) * r;
+  });
+
+  // 分层环形参考线
+  const ringGroup = new THREE.Group();
+  GROUP_LIST.forEach(g => {
+    const gDef = GROUPS[g];
+    const ringGeo = new THREE.RingGeometry(gDef.radius - 3, gDef.radius + 3, 64);
+    const ringMat = new THREE.MeshBasicMaterial({color:hexToInt(gDef.hex), transparent:true, opacity:0.06, side:THREE.DoubleSide});
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = gDef.y;
+    ringGroup.add(ring);
+  });
+  scene.add(ringGroup);
+
+  // ==========================================
+  // 节点球体
+  // ==========================================
+  const nodeGroup = new THREE.Group();
+  const nodeMeshes = [];
+  const nodeMaterial = new THREE.MeshPhongMaterial({shininess:60, transparent:true, opacity:0.92});
+
+  const geoCache = {};
+  GROUP_LIST.forEach(g => {
+    const s = GROUPS[g].size;
+    geoCache[g] = new THREE.SphereGeometry(s, 20, 16);
+  });
+
+  NODES.forEach(node => {
+    const g = node.group;
+    const geo = geoCache[g];
+    const mat = nodeMaterial.clone();
+    mat.color = new THREE.Color(hexToInt(node.color));
+
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(node._x, node._y, node._z);
+    mesh.userData = { node:node, originalScale:1, originalColor:new THREE.Color(hexToInt(node.color)) };
+    nodeGroup.add(mesh);
+    nodeMeshes.push(mesh);
+  });
+  scene.add(nodeGroup);
+
+  // ==========================================
+  // 连线
+  // ==========================================
+  const linkGroup = new THREE.Group();
+  const linkMeshes = [];
+
+  LINKS.forEach(link => {
+    const sMesh = nodeMeshes.find(m => m.userData.node.id === link.source);
+    const tMesh = nodeMeshes.find(m => m.userData.node.id === link.target);
+    if (!sMesh || !tMesh) return;
+
+    const positions = new Float32Array(6);
+    positions[0]=sMesh.position.x; positions[1]=sMesh.position.y; positions[2]=sMesh.position.z;
+    positions[3]=tMesh.position.x; positions[4]=tMesh.position.y; positions[5]=tMesh.position.z;
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const isSci = link.type === 'scientist';
+    const mat = new THREE.LineBasicMaterial({
+      color: isSci ? 0xe17055 : 0x666688,
+      transparent:true,
+      opacity: isSci ? 0.12 : 0.22
+    });
+
+    const line = new THREE.Line(geo, mat);
+    line.userData = { link:link, sourceMesh:sMesh, targetMesh:tMesh };
+    linkGroup.add(line);
+    linkMeshes.push(line);
+  });
+  scene.add(linkGroup);
+
+  // ==========================================
+  // 节点标签 (Sprite)
+  // ==========================================
+  const labelGroup = new THREE.Group();
+  const labels = [];
+
+  function makeLabel(text, color){
+    const cv = document.createElement('canvas');
+    cv.width = 256; cv.height = 64;
+    const ctx = cv.getContext('2d');
+    ctx.font = 'bold 28px Microsoft YaHei, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = color;
+    ctx.fillText(text, 128, 32);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
+    const sp = new THREE.Sprite(mat);
+    sp.scale.set(40, 10, 1);
+    return sp;
+  }
+
+  nodeMeshes.forEach(m => {
+    const label = makeLabel(m.userData.node.name, '#cccccc');
+    label.position.copy(m.position);
+    label.position.y += GROUPS[m.userData.node.group].size + 8;
+    label.userData = { nodeMesh:m };
+    labelGroup.add(label);
+    labels.push(label);
+  });
+  scene.add(labelGroup);
+
+  // ==========================================
+  // Raycasting 交互
+  // ==========================================
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  let hoveredMesh = null;
+  let selectedId = null;
+  let tracedIds = new Set();
+  let tracedLinks = new Set();
+  let activeGroups = new Set(GROUP_LIST);
+  let autoRotate = false;
+
+  const tooltip = document.getElementById('tooltip');
+
+  function onMouseMove(event){
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(nodeMeshes.filter(m => m.visible));
+
+    if (intersects.length > 0){
+      const m = intersects[0].object;
+      if (hoveredMesh !== m){
+        if (hoveredMesh) hoveredMesh.scale.setScalar(hoveredMesh.userData.originalScale);
+        hoveredMesh = m;
+        hoveredMesh.scale.setScalar(1.4);
+      }
+      const node = m.userData.node;
+      const gDef = GROUPS[node.group];
+      tooltip.style.opacity = 1;
+      let extra = '';
+      if (node.target) extra = '<div class="ht">点击追踪关联 · 详情中进入实验</div>';
+      else extra = '<div class="ht">点击追踪关联节点</div>';
+      tooltip.innerHTML = `<h4>${node.icon} ${node.name}</h4><p style="color:${node.color}">${gDef.name}</p><p>${node.description}</p>${extra}`;
+      tooltip.style.left = (event.clientX + 15) + 'px';
+      tooltip.style.top = (event.clientY + 15) + 'px';
+      canvas.style.cursor = 'pointer';
+    } else {
+      if (hoveredMesh){
+        hoveredMesh.scale.setScalar(hoveredMesh.userData.originalScale);
+        hoveredMesh = null;
+      }
+      tooltip.style.opacity = 0;
+      canvas.style.cursor = 'grab';
+    }
+  }
+
+  function onClick(event){
+    if (hoveredMesh){
+      selectNode(hoveredMesh.userData.node.id);
+    }
+  }
+
+  canvas.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('click', onClick);
+
+  // ==========================================
+  // 选择与关联追踪 (双向)
+  // ==========================================
+  function selectNode(id){
+    selectedId = id;
+    tracedIds.clear();
+    tracedLinks.clear();
+
+    // 双向追踪: 找出所有与该节点直接相连的节点和连线
+    LINKS.forEach(link => {
+      if (link.source === id){
+        tracedIds.add(link.target);
+        tracedLinks.add(link.source + '->' + link.target);
+      } else if (link.target === id){
+        tracedIds.add(link.source);
+        tracedLinks.add(link.source + '->' + link.target);
+      }
+    });
+
+    updateHighlight();
+    showDetail(nodeMap.get(id));
+    showCrumb(nodeMap.get(id));
+  }
+
+  function updateHighlight(){
+    nodeMeshes.forEach(m => {
+      const id = m.userData.node.id;
+      if (!selectedId){
+        m.material.opacity = 0.92;
+        m.material.emissive = new THREE.Color(0x000000);
+        m.scale.setScalar(m.userData.originalScale);
+      } else if (id === selectedId || tracedIds.has(id)){
+        m.material.opacity = 1.0;
+        m.material.emissive = new THREE.Color(m.userData.originalColor).multiplyScalar(0.3);
+        m.scale.setScalar(id === selectedId ? 1.5 : 1.2);
+      } else {
+        m.material.opacity = 0.12;
+        m.material.emissive = new THREE.Color(0x000000);
+        m.scale.setScalar(m.userData.originalScale);
+      }
+    });
+
+    linkMeshes.forEach(l => {
+      const key = l.userData.link.source + '->' + l.userData.link.target;
+      if (!selectedId){
+        const isSci = l.userData.link.type === 'scientist';
+        l.material.opacity = isSci ? 0.12 : 0.22;
+        l.material.color.setHex(isSci ? 0xe17055 : 0x666688);
+      } else if (tracedLinks.has(key)){
+        l.material.opacity = 0.8;
+        l.material.color.setHex(l.userData.link.type === 'scientist' ? 0xfdcb6e : 0xff9f43);
+      } else {
+        l.material.opacity = 0.03;
+      }
+    });
+
+    labels.forEach(l => {
+      l.visible = !selectedId || l.userData.nodeMesh.userData.node.id === selectedId || tracedIds.has(l.userData.nodeMesh.userData.node.id);
+    });
+  }
+
+  function clearTrace(){
+    selectedId = null;
+    tracedIds.clear();
+    tracedLinks.clear();
+    updateHighlight();
+    hideDetail();
+    hideCrumb();
+  }
+
+  function showCrumb(node){
+    const c = document.getElementById('crumb');
+    const gDef = GROUPS[node.group];
+    c.innerHTML = `追踪模式 · <strong style="color:${node.color}">${node.icon} ${node.name}</strong> · 已高亮 ${tracedIds.size} 个关联节点`;
+    c.classList.add('show');
+  }
+  function hideCrumb(){ document.getElementById('crumb').classList.remove('show'); }
+
+  // ==========================================
+  // 详情面板
+  // ==========================================
+  function showDetail(node){
+    const panel = document.getElementById('panel-right');
+    const gDef = GROUPS[node.group];
+
+    // 找出关联节点
+    const parents = [];
+    const children = [];
+    LINKS.forEach(link => {
+      if (link.target === node.id) {
+        const p = nodeMap.get(link.source);
+        if (p) parents.push({node:p, type:link.type});
+      }
+      if (link.source === node.id) {
+        const c = nodeMap.get(link.target);
+        if (c) children.push({node:c, type:link.type});
+      }
+    });
+
+    let h = '';
+
+    // 头部
+    h += `<div class="dh">
+      <div class="bdg" style="background:${node.color}33">${node.icon}</div>
+      <div><h2>${node.name}</h2><div class="tg">${gDef.name}</div></div>
+    </div>`;
+
+    // 描述
+    h += `<div class="sec"><h4>描述</h4><p>${node.description}</p></div>`;
+
+    // 实验入口按钮
+    if (node.target){
+      h += `<div class="sec"><button class="btn-exp" id="btn-go-exp">🧪 进入实验 →</button></div>`;
+    }
+
+    // 上级
+    if (parents.length){
+      const label = node.group === 8 ? '关联实验' : '上级';
+      h += `<div class="sec"><h4>${label} (${parents.length})</h4><ul class="plist">`;
+      parents.forEach(p => {
+        h += `<li data-id="${p.node.id}"><span class="pd" style="background:${p.node.color}"></span><span class="ic">${p.node.icon}</span><span>${p.node.name}</span></li>`;
+      });
+      h += '</ul></div>';
+    }
+
+    // 下级
+    if (children.length){
+      const label = node.group === 7 ? '关联科学家' : '下级';
+      h += `<div class="sec"><h4>${label} (${children.length})</h4><ul class="plist">`;
+      children.forEach(c => {
+        h += `<li data-id="${c.node.id}"><span class="pd" style="background:${c.node.color}"></span><span class="ic">${c.node.icon}</span><span>${c.node.name}</span></li>`;
+      });
+      h += '</ul></div>';
+    }
+
+    // 科学家的实验列表 (从 experiments 属性)
+    if (node.experiments && node.experiments.length){
+      const exps = node.experiments.map(eid => nodeMap.get(eid)).filter(Boolean);
+      if (exps.length){
+        h += `<div class="sec"><h4>关联实验 (${exps.length})</h4><ul class="plist">`;
+        exps.forEach(e => {
+          h += `<li data-id="${e.id}"><span class="pd" style="background:${e.color}"></span><span class="ic">${e.icon}</span><span>${e.name}</span></li>`;
+        });
+        h += '</ul></div>';
+      }
+    }
+
+    panel.innerHTML = h;
+    panel.classList.remove('collapsed');
+    document.getElementById('toggle-right').setAttribute('data-open','true');
+    document.getElementById('toggle-right').textContent = '▶';
+
+    // 列表项点击
+    panel.querySelectorAll('.plist li').forEach(li => {
+      li.addEventListener('click', () => {
+        const id = li.dataset.id;
+        if (id) selectNode(id);
+      });
+    });
+
+    // 进入实验按钮
+    const expBtn = document.getElementById('btn-go-exp');
+    if (expBtn){
+      expBtn.addEventListener('click', () => {
+        const theme = getTheme();
+        window.location.href = node.target + '?theme=' + theme;
+      });
+    }
+  }
+
+  function hideDetail(){
+    const p = document.getElementById('panel-right');
+    p.classList.add('collapsed');
+    p.innerHTML = '';
+    document.getElementById('toggle-right').setAttribute('data-open','false');
+    document.getElementById('toggle-right').textContent = '◀';
+  }
+
+  document.getElementById('toggle-right').addEventListener('click', () => {
+    const p = document.getElementById('panel-right');
+    if (p.classList.contains('collapsed')){
+      if (!selectedId){
+        p.innerHTML = `<div class="empty"><span class="ic">🧭</span>点击任意节点<br>查看详情与关联追踪</div>`;
+      }
+      p.classList.remove('collapsed');
+      document.getElementById('toggle-right').setAttribute('data-open','true');
+      document.getElementById('toggle-right').textContent = '▶';
+    } else {
+      p.classList.add('collapsed');
+      document.getElementById('toggle-right').setAttribute('data-open','false');
+      document.getElementById('toggle-right').textContent = '◀';
+    }
+  });
+
+  // ==========================================
+  // 筛选
+  // ==========================================
+  function buildGroupFilters(){
+    const c = document.getElementById('grp-filters');
+    GROUP_LIST.forEach(g => {
+      const gDef = GROUPS[g];
+      const count = nodesByGroup[g].length;
+      const d = document.createElement('div');
+      d.className = 'grp-filter';
+      d.innerHTML = `<input type="checkbox" checked data-g="${g}"><span class="dot" style="background:${gDef.hex}"></span><span class="nm">${gDef.icon} ${gDef.name}</span><span class="ct">${count}</span>`;
+      d.querySelector('input').addEventListener('change', e => {
+        if (e.target.checked) activeGroups.add(g);
+        else activeGroups.delete(g);
+        applyFilters();
+      });
+      c.appendChild(d);
+    });
+  }
+
+  function applyFilters(){
+    const term = document.getElementById('search').value.toLowerCase().trim();
+    nodeMeshes.forEach((m, i) => {
+      const node = m.userData.node;
+      let vis = true;
+      if (!activeGroups.has(node.group)) vis = false;
+      if (term && !node.name.toLowerCase().includes(term) && !node.description.toLowerCase().includes(term)) vis = false;
+      m.visible = vis;
+      labels[i].visible = vis && (!selectedId || node.id === selectedId || tracedIds.has(node.id));
+    });
+    linkMeshes.forEach(l => {
+      l.visible = l.userData.sourceMesh.visible && l.userData.targetMesh.visible;
+    });
+  }
+
+  document.getElementById('search').addEventListener('input', applyFilters);
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    camera.position.set(0, 0, 650);
+    controls.target.set(0, 0, 0);
+    controls.update();
+  });
+  document.getElementById('btn-clear').addEventListener('click', clearTrace);
+  document.getElementById('btn-rotate').addEventListener('click', function(){
+    autoRotate = !autoRotate;
+    controls.autoRotate = autoRotate;
+    this.textContent = autoRotate ? '⏸ 停止旋转' : '🔄 自动旋转';
+  });
+
+  // ESC 键清除追踪
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && selectedId) {
+      clearTrace();
+    }
+  });
+
+  // ==========================================
+  // 主题应用
+  // ==========================================
+  const THEME_COLORS = {
+    academic:{bg:0xf0f2f5, fog:0xf0f2f5, ringOp:0.06, link:0x666688, sciLink:0xe17055, label:'#1a1a2e', nodeEm:0},
+    glass:{bg:0x0f1117, fog:0x0f1117, ringOp:0.08, link:0x74b9ff, sciLink:0xfdcb6e, label:'#e0e6ed', nodeEm:0.15},
+    cyber:{bg:0x0a0014, fog:0x0a0014, ringOp:0.08, link:0xbd00ff, sciLink:0xff9d00, label:'#f0e6ff', nodeEm:0.15},
+    cartoon:{bg:0xfef6e4, fog:0xfef6e4, ringOp:0.07, link:0xffb464, sciLink:0xff6b6b, label:'#2d3436', nodeEm:0},
+    soviet:{bg:0xf0ebe4, fog:0xf0ebe4, ringOp:0.06, link:0xc41e1e, sciLink:0xc41e1e, label:'#1a1a1a', nodeEm:0}
+  };
+
+  function applySceneTheme(themeName){
+    const tc = THEME_COLORS[themeName] || THEME_COLORS.academic;
+    scene.background = new THREE.Color(tc.bg);
+    scene.fog.color = new THREE.Color(tc.fog);
+
+    // 环形参考线
+    ringGroup.children.forEach((ring, i) => {
+      const g = GROUP_LIST[i];
+      ring.material.color.setHex(hexToInt(GROUPS[g].hex));
+      ring.material.opacity = tc.ringOp;
+    });
+
+    // 连线颜色 (非高亮)
+    linkMeshes.forEach(l => {
+      const key = l.userData.link.source + '->' + l.userData.link.target;
+      if (!tracedLinks.has(key)){
+        const isSci = l.userData.link.type === 'scientist';
+        l.material.color.setHex(isSci ? tc.sciLink : tc.link);
+        l.material.opacity = isSci ?
+          (themeName === 'glass' || themeName === 'cyber' ? 0.1 : 0.12) :
+          (themeName === 'glass' || themeName === 'cyber' ? 0.18 : 0.22);
+      }
+    });
+
+    // 重建标签
+    labels.forEach((l, i) => {
+      const tex = l.material.map;
+      if (tex) tex.dispose();
+      const cv = document.createElement('canvas');
+      cv.width = 256; cv.height = 64;
+      const ctx = cv.getContext('2d');
+      ctx.font = 'bold 28px Microsoft YaHei, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = tc.label;
+      ctx.fillText(nodeMeshes[i].userData.node.name, 128, 32);
+      const newTex = new THREE.CanvasTexture(cv);
+      newTex.minFilter = THREE.LinearFilter;
+      l.material.map = newTex;
+      l.material.needsUpdate = true;
+    });
+
+    // 节点发光
+    nodeMeshes.forEach(m => {
+      if (tc.nodeEm > 0){
+        m.material.emissive = new THREE.Color(m.userData.originalColor).multiplyScalar(tc.nodeEm);
+      } else {
+        m.material.emissive = new THREE.Color(0x000000);
+      }
+    });
+
+    if (selectedId) updateHighlight();
+  }
+
+  // ==========================================
+  // 窗口大小变化
+  // ==========================================
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight - 90;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+
+  // ==========================================
+  // 动画循环
+  // ==========================================
+  function animate(){
+    requestAnimationFrame(animate);
+    controls.update();
+
+    // 节点轻微浮动
+    const time = performance.now() * 0.001;
+    nodeMeshes.forEach((m, i) => {
+      if (m.visible && m !== hoveredMesh && (!selectedId || m.userData.node.id !== selectedId)){
+        m.position.y += Math.sin(time * 0.5 + i * 0.3) * 0.04;
+      }
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  // ==========================================
+  // 初始化
+  // ==========================================
+  const initTheme = getTheme();
+  document.documentElement.setAttribute('data-theme', initTheme);
+  buildSwitcher();
+  buildGroupFilters();
+  applySceneTheme(initTheme);
+  updateThemeUI(initTheme);
+
+  // 隐藏 loading 并启动动画
+  setTimeout(() => {
+    document.getElementById('loading').classList.add('hide');
+  }, 300);
+
+  animate();
+  </script>
+</body>
+</html>

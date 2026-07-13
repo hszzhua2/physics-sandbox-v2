@@ -123,6 +123,13 @@
     if (currentPage === 'knowledge-graph.html') kgLink.classList.add('active');
     nav.appendChild(kgLink);
 
+    // Taxonomy
+    const taxLink = document.createElement('a');
+    taxLink.href = 'taxonomy.html';
+    taxLink.textContent = '知识分类';
+    if (currentPage === 'taxonomy.html') taxLink.classList.add('active');
+    nav.appendChild(taxLink);
+
     // Library dropdown
     const libDropdown = document.createElement('div');
     libDropdown.className = 'nav-dropdown';
