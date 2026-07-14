@@ -642,18 +642,18 @@
 
   function makeLabel(text, color){
     const cv = document.createElement('canvas');
-    cv.width = 256; cv.height = 64;
+    cv.width = 384; cv.height = 96;
     const ctx = cv.getContext('2d');
-    ctx.font = 'bold 28px Microsoft YaHei, sans-serif';
+    ctx.font = 'bold 42px Microsoft YaHei, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = color;
-    ctx.fillText(text, 128, 32);
+    ctx.fillText(text, 192, 48);
     const tex = new THREE.CanvasTexture(cv);
     tex.minFilter = THREE.LinearFilter;
     const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
     const sp = new THREE.Sprite(mat);
-    sp.scale.set(40, 10, 1);
+    sp.scale.set(60, 15, 1);
     return sp;
   }
 
@@ -1014,13 +1014,13 @@
       const tex = l.material.map;
       if (tex) tex.dispose();
       const cv = document.createElement('canvas');
-      cv.width = 256; cv.height = 64;
+      cv.width = 384; cv.height = 96;
       const ctx = cv.getContext('2d');
-      ctx.font = 'bold 28px Microsoft YaHei, sans-serif';
+      ctx.font = 'bold 42px Microsoft YaHei, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = tc.label;
-      ctx.fillText(nodeMeshes[i].userData.node.name, 128, 32);
+      ctx.fillText(nodeMeshes[i].userData.node.name, 192, 48);
       const newTex = new THREE.CanvasTexture(cv);
       newTex.minFilter = THREE.LinearFilter;
       l.material.map = newTex;
