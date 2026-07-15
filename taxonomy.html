@@ -343,7 +343,7 @@
     <h4>视图</h4>
     <button class="btn" id="btn-reset">🔄 重置视角</button>
     <button class="btn" id="btn-clear">✕ 清除追踪</button>
-    <button class="btn" id="btn-rotate">🔄 自动旋转</button>
+    <button class="btn" id="btn-rotate">⏸ 停止旋转</button>
   </div>
 
   <!-- 右侧详情面板 -->
@@ -538,6 +538,7 @@
   controls.minDistance = 80;
   controls.maxDistance = 1000;
   controls.autoRotateSpeed = 0.5;
+  controls.autoRotate = true;
 
   // 光照
   const ambient = new THREE.AmbientLight(0xffffff, 0.6);
@@ -682,7 +683,7 @@
   let tracedIds = new Set();
   let tracedLinks = new Set();
   let activeGroups = new Set(GROUP_LIST);
-  let autoRotate = false;
+  let autoRotate = true;
 
   const tooltip = document.getElementById('tooltip');
 
