@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分形几何可视化 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <!-- KaTeX CSS & JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <style>
+    .exp-bg { z-index: -1; }
+    #fractal-canvas {
+      position: fixed; inset: 0; z-index: 0;
+      width: 100vw; height: 100vh;
+      cursor: grab; display: block;
+    }
+    #fractal-canvas:active { cursor: grabbing; }
+
+    /* ===== 顶部状态栏 ===== */
+    .stats-top {
+      position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
+      z-index: 10; display: flex; align-items: center; gap: 12px;
+      padding: 4px 16px; font-size: .72rem; font-family: monospace;
+      border-radius: 50px; transition: var(--theme-transition);
+    }
+    .stats-top .sep { width:1px; height:12px; background:var(--panel-border); }
+    .stats-top .val { font-weight: 700; }
+
+    /* ===== 左侧控制面板 ===== */
+    #left-panel {
+      position: absolute; top: 80px; left: 20px;
+      width: 340px; z-index: 10;
+      max-height: calc(100vh - 110px);
+      display: flex; flex-direction: column;
+      overflow: hidden; transition: var(--theme-transition);
+    }
+    #left-panel .panel-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    #left-panel .panel-header .ic {
+      width: 32px; height: 32px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    #left-panel .panel-header h1 {
+      margin: 0; font-size: .95rem; font-weight: 700;
+      transition: var(--theme-transition);
+    }
+    #left-panel .panel-header .sub {
+      font-size: .68rem; color: var(--text-muted); margin-top: 1px;
+    }
+    #left-panel .panel-body {
+      flex: 1; overflow-y: auto; padding: 14px 16px;
+    }
+    #left-panel .panel-footer {
+      padding: 10px 16px; border-top: 1px solid var(--panel-border);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+
+    .field-group {
+      margin-bottom: 12px; padding: 10px 12px;
+      border-radius: calc(var(--radius) * 0.75);
+      border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.04);
+      transition: var(--theme-transition);
+    }
+    .field-group .grp-title {
+      font-size: .78rem; font-weight: 700; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 5px;
+      transition: var(--theme-transition);
+    }
+    .field-label {
+      font-size: .72rem; color: var(--text-muted); font-weight: 600;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 3px;
+    }
+    .field-label .val-badge {
+      font-family: monospace; font-weight: 700; font-size: .72rem;
+      padding: 1px 8px; border-radius: var(--radius);
+      border: 1px solid var(--panel-border);
+    }
+    select, input[type="text"], input[type="number"], textarea {
+      width: 100%; padding: 6px 10px;
+      background: transparent; color: var(--text-color);
+      border: 1px solid var(--panel-border); border-radius: var(--radius);
+      font-size: .78rem; font-family: var(--font-main);
+      transition: var(--theme-transition);
+    }
+    select:focus, input:focus, textarea:focus {
+      outline: none; border-color: var(--accent-1);
+    }
+    textarea { resize: none; font-family: monospace; }
+    input[type="range"] {
+      width: 100%; height: 4px; border-radius: 2px;
+      -webkit-appearance: none; appearance: none;
+      background: var(--panel-border); cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--accent-1); cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px; border: none;
+      border-radius: 50%; background: var(--accent-1); cursor: pointer;
+    }
+    input[type="color"] {
+      width: 32px; height: 28px; border: 1px solid var(--panel-border);
+      border-radius: var(--radius); cursor: pointer; padding: 0; background: none;
+    }
+
+    .btn {
+      padding: 8px 12px; border: 1px solid var(--panel-border);
+      background: transparent; color: var(--text-color);
+      border-radius: var(--radius); cursor: pointer;
+      font-size: .78rem; font-family: var(--font-main);
+      font-weight: 600; transition: var(--theme-transition);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .btn:hover { background: var(--accent-1); color: #fff; border-color: var(--accent-1); }
+    .btn-primary {
+      background: var(--accent-1); color: #fff; border-color: var(--accent-1);
+    }
+    .btn-primary:hover { opacity: .85; }
+    .color-row { display: flex; gap: 8px; align-items: center; }
+    .color-row input[type="text"] { flex: 1; }
+
+    /* ===== 右侧理论面板 ===== */
+    #right-panel {
+      position: absolute; top: 80px; right: 20px;
+      width: 340px; z-index: 10;
+      max-height: calc(100vh - 110px);
+      display: flex; flex-direction: column;
+      overflow: hidden; transition: var(--theme-transition);
+    }
+    #right-panel .panel-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    #right-panel .panel-header .ic {
+      width: 32px; height: 32px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    #right-panel .panel-header h2 {
+      margin: 0; font-size: .95rem; font-weight: 700;
+      transition: var(--theme-transition);
+    }
+    #right-panel .panel-header .sub {
+      font-size: .68rem; color: var(--text-muted); margin-top: 1px;
+    }
+    #right-panel .panel-body {
+      flex: 1; overflow-y: auto; padding: 14px 16px;
+      font-size: .78rem; line-height: 1.7;
+    }
+    .theory-section {
+      margin-bottom: 12px; padding: 12px;
+      border-radius: calc(var(--radius) * 0.75);
+      border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.04);
+      transition: var(--theme-transition);
+    }
+    .theory-section h3 {
+      font-size: .78rem; font-weight: 700; margin: 0 0 6px 0;
+      display: flex; align-items: center; gap: 5px;
+      transition: var(--theme-transition);
+    }
+    .theory-section p {
+      color: var(--text-color); margin: 4px 0;
+      font-size: .76rem; line-height: 1.65;
+    }
+    .theory-section .muted {
+      color: var(--text-muted); font-size: .72rem;
+    }
+    .math-box {
+      padding: 8px; margin: 6px 0;
+      border-radius: var(--radius); border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.06);
+      text-align: center; font-family: monospace;
+    }
+    .bio-box {
+      padding: 8px 10px; border-radius: var(--radius);
+      border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.06);
+      margin-top: 4px;
+    }
+    .bio-box .bio-name {
+      font-weight: 700; font-size: .76rem; color: var(--text-color);
+    }
+    .bio-box .bio-desc {
+      font-size: .7rem; color: var(--text-muted); margin-top: 2px;
+    }
+    .crit-list {
+      list-style: none; padding: 0; margin: 4px 0;
+    }
+    .crit-list li {
+      font-size: .72rem; color: var(--text-muted); padding: 3px 0;
+      padding-left: 14px; position: relative;
+    }
+    .crit-list li::before {
+      content: '▸'; position: absolute; left: 0; color: var(--accent-1);
+    }
+    .crit-list li strong { color: var(--text-color); }
+
+    /* ===== 移动端面板切换 ===== */
+    .mobile-toggles { display: none; }
+    @media(max-width: 900px) {
+      #left-panel, #right-panel {
+        width: calc(100vw - 40px); max-width: 380px;
+      }
+      .mobile-toggles {
+        display: flex; position: fixed; bottom: 16px; left: 50%;
+        transform: translateX(-50%); z-index: 11; gap: 8px;
+      }
+      .mobile-toggles .btn { padding: 8px 16px; }
+      #left-panel.collapsed, #right-panel.collapsed {
+        transform: translateX(-110%);
+      }
+      #left-panel { transition: transform .3s ease; }
+      #right-panel { transition: transform .3s ease; }
+    }
+
+    /* ===== 滚动条 ===== */
+    .panel-body::-webkit-scrollbar { width: 5px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb {
+      background: var(--panel-border); border-radius: 3px;
+    }
+
+    /* ===== 主题特化覆盖 ===== */
+    [data-theme="cartoon"] .field-group .grp-title { color: var(--accent-2); }
+    [data-theme="cartoon"] .panel-header .ic { background: rgba(255,107,107,.12); }
+    [data-theme="glass"] .field-group .grp-title { color: #74b9ff; }
+    [data-theme="glass"] .panel-header .ic { background: rgba(116,185,255,.12); }
+    [data-theme="cyber"] .field-group .grp-title { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,.3); }
+    [data-theme="cyber"] .panel-header .ic { background: rgba(189,0,255,.15); }
+    [data-theme="academic"] .field-group .grp-title { color: var(--accent-1); }
+    [data-theme="academic"] .panel-header .ic { background: rgba(107,140,174,.12); }
+    [data-theme="soviet"] .field-group .grp-title { color: var(--accent-1); }
+    [data-theme="soviet"] .panel-header .ic { background: rgba(196,30,30,.1); }
+
+    [data-theme="cartoon"] #left-panel .panel-header h1 { color: var(--accent-1); }
+    [data-theme="glass"] #left-panel .panel-header h1 { color: #ff6b6b; }
+    [data-theme="cyber"] #left-panel .panel-header h1 { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.4); }
+    [data-theme="academic"] #left-panel .panel-header h1 { color: #1a1a2e; }
+    [data-theme="soviet"] #left-panel .panel-header h1 { color: var(--accent-1); }
+
+    [data-theme="cartoon"] #right-panel .panel-header h2 { color: var(--accent-2); }
+    [data-theme="glass"] #right-panel .panel-header h2 { color: #74b9ff; }
+    [data-theme="cyber"] #right-panel .panel-header h2 { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,.3); }
+    [data-theme="academic"] #right-panel .panel-header h2 { color: var(--accent-1); }
+    [data-theme="soviet"] #right-panel .panel-header h2 { color: var(--accent-1); }
+
+    /* ===== 提示 ===== */
+    .hint-bar {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 5; font-size: .68rem; color: var(--text-muted);
+      display: flex; gap: 16px; pointer-events: none;
+    }
+    .hint-bar kbd {
+      padding: 1px 6px; border-radius: var(--radius);
+      border: 1px solid var(--panel-border); font-size: .65rem;
+    }
+    @media(max-width: 900px) { .hint-bar { display: none; } }
+
+    /* ===== 入场提示 ===== */
+    #entrance-toast {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      z-index: 20; padding: 24px 36px; text-align: center; pointer-events: none;
+      opacity: 1; transition: opacity .8s ease;
+    }
+    #entrance-toast .et-title {
+      font-size: 1.2rem; font-weight: 700; margin-bottom: 6px;
+      color: var(--text-color);
+    }
+    #entrance-toast .et-sub {
+      font-size: .85rem; color: var(--text-muted); line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <canvas id="fractal-canvas"></canvas>
+
+  <!-- 顶部状态栏 -->
+  <div class="stats-top glass-panel">
+    <span>渲染: <strong class="val" id="stats-time" style="color:var(--accent-2)">0.0ms</strong></span>
+    <span class="sep"></span>
+    <span>线段: <strong class="val" id="stats-segments" style="color:var(--accent-1)">0</strong></span>
+    <span class="sep"></span>
+    <span>缩放: <strong class="val" id="stats-zoom" style="color:var(--accent-4)">1.0x</strong></span>
+  </div>
+
+  <!-- 左侧控制面板 -->
+  <aside id="left-panel" class="glass-panel">
+    <div class="panel-header">
+      <div class="ic">🌀</div>
+      <div>
+        <h1>分形几何</h1>
+        <div class="sub">L-System 文法 · 连续折叠插值</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <!-- 预设选择 -->
+      <div class="field-group">
+        <div class="grp-title">📌 分形模型预设</div>
+        <select id="preset-selector"></select>
+      </div>
+
+      <!-- L-System 文法 -->
+      <div class="field-group">
+        <div class="grp-title">🔀 L-System 文法规则</div>
+        <div class="field-label"><span>公理 (Axiom)</span></div>
+        <input type="text" id="input-axiom" placeholder="F--F--F">
+        <div class="field-label" style="margin-top:6px"><span>产生式 (Rules)</span><span class="muted" style="font-size:.66rem">一行一个</span></div>
+        <textarea id="input-rules" rows="3" placeholder="F -> F+F--F+F"></textarea>
+      </div>
+
+      <!-- 迭代与角度 -->
+      <div class="field-group">
+        <div class="grp-title">🎚️ 迭代与角度</div>
+        <div class="field-label"><span>实数级连续迭代</span><span class="val-badge" id="val-iterations">3.00</span></div>
+        <input type="range" id="input-iterations" min="0" max="6" step="0.01" value="3">
+        <div class="field-label" style="margin-top:8px"><span>基本旋转角度</span><span class="val-badge" id="val-angle">60°</span></div>
+        <input type="range" id="input-angle" min="0" max="360" step="1" value="60">
+      </div>
+
+      <!-- 维度估算 -->
+      <div class="field-group">
+        <div class="grp-title">📐 自相似维度</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <div class="field-label"><span>分支数 N</span></div>
+            <input type="number" id="input-param-n" min="1" step="any" value="4">
+          </div>
+          <div>
+            <div class="field-label"><span>收缩比 S</span></div>
+            <input type="number" id="input-param-s" min="1" step="any" value="3">
+          </div>
+        </div>
+      </div>
+
+      <!-- 视觉样式 -->
+      <div class="field-group">
+        <div class="grp-title">🎨 视觉样式</div>
+        <select id="input-draw-mode">
+          <option value="gradient">多阶渐变</option>
+          <option value="rainbow">虹彩全谱</option>
+          <option value="solid">单色实体</option>
+        </select>
+        <div id="solid-color-container" style="display:none;margin-top:6px">
+          <div class="color-row">
+            <input type="color" id="input-color" value="#10b981">
+            <input type="text" id="input-color-hex" value="#10b981">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary" id="btn-play">▶ 动态演变</button>
+      <button class="btn" id="btn-reset">🔄 复位</button>
+    </div>
+  </aside>
+
+  <!-- 右侧理论面板 -->
+  <aside id="right-panel" class="glass-panel">
+    <div class="panel-header">
+      <div class="ic">📖</div>
+      <div>
+        <h2>数学知识</h2>
+        <div class="sub">分形理论与维度分析</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="theory-section">
+        <h3>✨ 折叠演变模型</h3>
+        <p>对最后一次展开进行角度的线性插值，实现实数级连续折叠：</p>
+        <div class="math-box" id="interpolation-math"></div>
+        <p class="muted">当深度小数部分从 0→1 渐变时，末级分叉角度从 0° 逐渐偏转到设定角度，直观展示直线如何"折叠"生成分数维曲线。</p>
+      </div>
+      <div class="theory-section">
+        <h3>📐 豪斯多夫分形维度</h3>
+        <p>自相似维度 D 定义为：</p>
+        <div class="math-box" id="dim-math"></div>
+        <p class="muted">N 为自相似分支数，S 为尺度收缩比倒数。维数反映图形对空间的"填充"效率。</p>
+      </div>
+      <div class="theory-section">
+        <h3>⚠️ 测度悖论</h3>
+        <div id="paradox-content"></div>
+      </div>
+      <div class="theory-section">
+        <h3>📜 历史背景</h3>
+        <p id="history-content"></p>
+      </div>
+      <div class="theory-section">
+        <h3>👤 数学家档案</h3>
+        <div class="bio-box">
+          <div class="bio-name" id="bio-title"></div>
+          <div class="bio-desc" id="bio-content"></div>
+        </div>
+      </div>
+      <div class="theory-section">
+        <h3>🛡️ 算法极限与边界</h3>
+        <ul class="crit-list">
+          <li><strong>端点不守恒：</strong>角度折叠插值仅在整数值时严格闭合，浮点状态会出现轻微膨胀收缩。</li>
+          <li><strong>浮点精度流失：</strong>递归深度增加使坐标增量接近双精度极限，导致微观尺度退化。</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 移动端切换 -->
+  <div class="mobile-toggles">
+    <button class="btn" onclick="togglePanel('left-panel')">🌀 参数</button>
+    <button class="btn" id="mt-right">📖 理论</button>
+  </div>
+
+  <!-- 交互提示 -->
+  <div class="hint-bar">
+    <span><kbd>左键拖动</kbd> 移位</span>
+    <span><kbd>滚轮</kbd> 缩放</span>
+  </div>
+
+  <!-- 入场提示 -->
+  <div id="entrance-toast" class="glass-panel">
+    <div class="et-title">🌀 分形几何 · L-System 可视化</div>
+    <div class="et-sub">拖动平移 · 滚轮缩放 · 调节参数探索自相似世界</div>
+  </div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+    // ---- 初始化共享 UI ----
+    PSUTheme.createSwitcher();
+    PSUTheme.createBackButton('index.html');
+
+    // ---- 预设数据库 ----
+    const PRESETS = {
+      koch_snowflake: {
+        name: '科赫雪花 (Koch Snowflake)',
+        axiom: 'F--F--F', rules: 'F -> F+F--F+F',
+        angle: 60, maxIter: 5.5, defaultIter: 3.0,
+        N: 4, S: 3,
+        dimFormula: 'D = \\frac{\\ln(4)}{\\ln(3)} \\approx 1.2619',
+        paradox: '<p>当 d 沿非整数连续演变时，一条一维线段在局域平面里生出无数个"微型折皱"：</p><div class="math-box" style="font-size:.68rem">P_n = 3 · (4/3)^n → ∞</div><p class="muted">极限态具有处处连续却处处不可微的特征。</p>',
+        history: '1904年由瑞典数学家科赫提出。在经典数学界追求"平滑流形"的时代，该曲线因处处无切线被称为打破欧氏直觉的"怪物"。',
+        bio: '海里格·冯·科赫 (1870–1924)',
+        bio_content: '瑞典数学家。他的构造颠覆了微积分建立在"曲线可局部线性化"这一基石上的经典设想。'
+      },
+      koch_curve: {
+        name: '科赫单线 (Koch Curve)',
+        axiom: 'F', rules: 'F -> F+F--F+F',
+        angle: 60, maxIter: 5.5, defaultIter: 3.0,
+        N: 4, S: 3,
+        dimFormula: 'D = \\frac{\\ln(4)}{\\ln(3)} \\approx 1.2619',
+        paradox: '<p>角度从 0° 开始平滑展开，一根原始线段被折叠成由四个微型分支组成的帐篷结构。</p>',
+        history: '作为分形测度分析的核心基准，展示了最基本的欧氏距离测度如何在连续折叠下失效。',
+        bio: '海里格·冯·科赫',
+        bio_content: '在数论与不规则几何方面有深厚贡献，坚信不平滑的几何更接近客观现实。'
+      },
+      sierpinski_gasket: {
+        name: '谢尔宾斯基三角形',
+        axiom: 'F-G-G', rules: 'F -> F-G+F+G-F\nG -> GG',
+        angle: 120, maxIter: 6.0, defaultIter: 3.5,
+        N: 3, S: 2,
+        dimFormula: 'D = \\frac{\\ln(3)}{\\ln(2)} \\approx 1.5850',
+        paradox: '<p>迭代值平滑过渡时，三角形内部的平面块通过自我旋转，将自己"撕裂"、"镂空"。</p>',
+        history: '1915年由波兰数学家谢尔宾斯基构造，展示了平面区域经过无穷挖空后，面积严格化为 0 而边界长度收敛到无限。',
+        bio: '瓦茨瓦夫·谢尔宾斯基 (1882–1969)',
+        bio_content: '波兰数学学派奠基人之一，在实变函数、拓扑空间以及集合论领域发表过数以百计的重要论著。'
+      },
+      dragon_curve: {
+        name: '龙形分形 (Dragon Curve)',
+        axiom: 'FA', rules: 'A -> A+BF+\nB -> -FA-B',
+        angle: 90, maxIter: 11.0, defaultIter: 7.0,
+        N: 2, S: 1.4142,
+        dimFormula: 'D = 2.0000',
+        paradox: '<p>连续折弯使这条直线自我盘旋纠缠。其极限维数严格等于 2，代表一条由线组成的构造能完全填满二维平面。</p>',
+        history: 'NASA物理学家 John Heighway 在研究纸带对折时发现。随着折叠次数上升，复杂的纠缠平面构型会逐渐自发浮现。',
+        bio: '本华·曼德博 (1924–2010)',
+        bio_content: '现代"分形几何学之父"。揭示了看似病态的缠绕形态在流体力学湍流与自相似大自然结构中的普适规律。'
+      }
+    };
+
+    // ---- 全局状态 ----
+    const state = {
+      preset: 'koch_snowflake', axiom: '', rules: '',
+      iterations: 3.0, angle: 60,
+      drawMode: 'gradient', solidColor: '#10b981',
+      isPlaying: false, N: 4, S: 3
+    };
+    let panX = 0, panY = 0, zoom = 1.0;
+    let isDragging = false, lastMouseX = 0, lastMouseY = 0;
+    let rulesMap = {};
+    const canvas = document.getElementById('fractal-canvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    const MAX_SEGMENTS_LIMIT = 200000;
+    let animationFrameId = null, lastAnimTime = 0, animationDirection = 1;
+
+    // ---- 主题颜色获取 ----
+    function getThemeColors() {
+      const cs = getComputedStyle(document.documentElement);
+      const bg = cs.getPropertyValue('--bg-color').trim() || '#0a0014';
+      const accent1 = cs.getPropertyValue('--accent-1').trim() || '#ff6b6b';
+      const accent2 = cs.getPropertyValue('--accent-2').trim() || '#4ecdc4';
+      const accent4 = cs.getPropertyValue('--accent-4').trim() || '#a29bfe';
+      const grid = cs.getPropertyValue('--panel-border').trim() || 'rgba(255,255,255,.1)';
+      const muted = cs.getPropertyValue('--text-muted').trim() || '#888';
+      return { bg, accent1, accent2, accent4, grid, muted };
+    }
+
+    // ---- 初始化 ----
+    window.addEventListener('DOMContentLoaded', function() {
+      initPresetSelector();
+      applyPreset(state.preset);
+      setupEventListeners();
+      resizeCanvas();
+      render();
+
+      // KaTeX 渲染
+      if (window.katex) {
+        katex.render('\\theta(t) = \\theta_{\\text{target}} \\times (d - \\lfloor d \\rfloor)', document.getElementById('interpolation-math'), { throwOnError: false });
+      }
+
+      // 入场提示淡出
+      setTimeout(() => {
+        const t = document.getElementById('entrance-toast');
+        if (t) { t.style.opacity = '0'; setTimeout(() => t.remove(), 800); }
+      }, 2500);
+    });
+
+    window.addEventListener('resize', () => { resizeCanvas(); render(); });
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initPresetSelector() {
+      const select = document.getElementById('preset-selector');
+      for (let key in PRESETS) {
+        const opt = document.createElement('option');
+        opt.value = key; opt.textContent = PRESETS[key].name;
+        select.appendChild(opt);
+      }
+    }
+
+    function applyPreset(key) {
+      const p = PRESETS[key];
+      if (!p) return;
+      if (state.isPlaying) togglePlay();
+      state.preset = key;
+      state.axiom = p.axiom; state.rules = p.rules;
+      state.iterations = p.defaultIter; state.angle = p.angle;
+      state.N = p.N; state.S = p.S;
+
+      document.getElementById('preset-selector').value = key;
+      document.getElementById('input-axiom').value = p.axiom;
+      document.getElementById('input-rules').value = p.rules;
+      const slider = document.getElementById('input-iterations');
+      slider.max = p.maxIter; slider.value = p.defaultIter;
+      document.getElementById('val-iterations').textContent = p.defaultIter.toFixed(2);
+      document.getElementById('input-angle').value = p.angle;
+      document.getElementById('val-angle').textContent = p.angle + '°';
+      document.getElementById('input-param-n').value = p.N;
+      document.getElementById('input-param-s').value = p.S;
+
+      resetViewport();
+      updateEducationPanel(p);
+    }
+
+    function resetViewport() {
+      panX = 0; panY = 0; zoom = 1.0;
+      document.getElementById('stats-zoom').textContent = '1.0x';
+    }
+
+    // ---- L-System 解析 ----
+    function parseRules(rulesString) {
+      const map = {};
+      const lines = rulesString.split('\n');
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        const parts = line.split(/->|=/);
+        if (parts.length >= 2) {
+          const key = parts[0].trim();
+          const val = parts[1].trim().replace(/\s+/g, '');
+          if (key) map[key] = val;
+        }
+      }
+      return map;
+    }
+
+    let turtle = { x: 0, y: 0, angle: 0, stack: [] };
+    let minX = 0, maxX = 0, minY = 0, maxY = 0;
+    let segmentCount = 0;
+
+    function runBoundsRecursion(symbol, remainingDepth, angleRad, stepSize) {
+      if (segmentCount > MAX_SEGMENTS_LIMIT) return;
+      const rep = rulesMap[symbol];
+      if (!rep || remainingDepth <= 0) {
+        if (symbol === 'F' || symbol === 'G') {
+          const nx = turtle.x + Math.cos(turtle.angle) * stepSize;
+          const ny = turtle.y + Math.sin(turtle.angle) * stepSize;
+          turtle.x = nx; turtle.y = ny;
+          if (turtle.x < minX) minX = turtle.x;
+          if (turtle.x > maxX) maxX = turtle.x;
+          if (turtle.y < minY) minY = turtle.y;
+          if (turtle.y > maxY) maxY = turtle.y;
+          segmentCount++;
+        } else if (symbol === '+') { turtle.angle += angleRad; }
+        else if (symbol === '-') { turtle.angle -= angleRad; }
+        else if (symbol === '[') { turtle.stack.push({ x: turtle.x, y: turtle.y, angle: turtle.angle }); }
+        else if (symbol === ']') { const p = turtle.stack.pop(); if (p) { turtle.x = p.x; turtle.y = p.y; turtle.angle = p.angle; } }
+        return;
+      }
+      if (remainingDepth > 0 && remainingDepth < 1) {
+        const morph = remainingDepth;
+        for (let i = 0; i < rep.length; i++) runBoundsRecursion(rep[i], 0, angleRad * morph, stepSize);
+      } else {
+        for (let i = 0; i < rep.length; i++) runBoundsRecursion(rep[i], remainingDepth - 1, angleRad, stepSize);
+      }
+    }
+
+    function runDrawSolidRecursion(symbol, remainingDepth, angleRad, stepSize) {
+      const rep = rulesMap[symbol];
+      if (!rep || remainingDepth <= 0) {
+        if (symbol === 'F' || symbol === 'G') {
+          const nx = turtle.x + Math.cos(turtle.angle) * stepSize;
+          const ny = turtle.y + Math.sin(turtle.angle) * stepSize;
+          ctx.lineTo(nx, ny); turtle.x = nx; turtle.y = ny;
+        } else if (symbol === '+') { turtle.angle += angleRad; }
+        else if (symbol === '-') { turtle.angle -= angleRad; }
+        else if (symbol === '[') { turtle.stack.push({ x: turtle.x, y: turtle.y, angle: turtle.angle }); }
+        else if (symbol === ']') { const p = turtle.stack.pop(); if (p) { turtle.x = p.x; turtle.y = p.y; turtle.angle = p.angle; ctx.moveTo(turtle.x, turtle.y); } }
+        return;
+      }
+      if (remainingDepth > 0 && remainingDepth < 1) {
+        const morph = remainingDepth;
+        for (let i = 0; i < rep.length; i++) runDrawSolidRecursion(rep[i], 0, angleRad * morph, stepSize);
+      } else {
+        for (let i = 0; i < rep.length; i++) runDrawSolidRecursion(rep[i], remainingDepth - 1, angleRad, stepSize);
+      }
+    }
+
+    let currentDrawIndex = 0;
+    function runDrawColorRecursion(symbol, remainingDepth, angleRad, stepSize, totalSegs, mode, tc) {
+      const rep = rulesMap[symbol];
+      if (!rep || remainingDepth <= 0) {
+        if (symbol === 'F' || symbol === 'G') {
+          const nx = turtle.x + Math.cos(turtle.angle) * stepSize;
+          const ny = turtle.y + Math.sin(turtle.angle) * stepSize;
+          ctx.beginPath(); ctx.moveTo(turtle.x, turtle.y); ctx.lineTo(nx, ny);
+          const ratio = currentDrawIndex / Math.max(1, totalSegs);
+          if (mode === 'rainbow') {
+            ctx.strokeStyle = `hsl(${ratio * 360}, 80%, 55%)`;
+          } else {
+            // gradient: blend accent1 → accent2
+            ctx.strokeStyle = blendColors(tc.accent1, tc.accent2, ratio);
+          }
+          ctx.stroke();
+          turtle.x = nx; turtle.y = ny; currentDrawIndex++;
+        } else if (symbol === '+') { turtle.angle += angleRad; }
+        else if (symbol === '-') { turtle.angle -= angleRad; }
+        else if (symbol === '[') { turtle.stack.push({ x: turtle.x, y: turtle.y, angle: turtle.angle }); }
+        else if (symbol === ']') { const p = turtle.stack.pop(); if (p) { turtle.x = p.x; turtle.y = p.y; turtle.angle = p.angle; } }
+        return;
+      }
+      if (remainingDepth > 0 && remainingDepth < 1) {
+        const morph = remainingDepth;
+        for (let i = 0; i < rep.length; i++) runDrawColorRecursion(rep[i], 0, angleRad * morph, stepSize, totalSegs, mode, tc);
+      } else {
+        for (let i = 0; i < rep.length; i++) runDrawColorRecursion(rep[i], remainingDepth - 1, angleRad, stepSize, totalSegs, mode, tc);
+      }
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#','');
+      if (hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+      const n = parseInt(hex, 16);
+      return { r: (n>>16)&255, g: (n>>8)&255, b: n&255 };
+    }
+    function blendColors(c1, c2, t) {
+      const a = hexToRgb(c1), b = hexToRgb(c2);
+      const r = Math.round(a.r + (b.r - a.r) * t);
+      const g = Math.round(a.g + (b.g - a.g) * t);
+      const bl = Math.round(a.b + (b.b - a.b) * t);
+      return `rgb(${r},${g},${bl})`;
+    }
+
+    // ---- 渲染主入口 ----
+    function render() {
+      const tc = getThemeColors();
+      ctx.fillStyle = tc.bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const axiom = state.axiom.trim();
+      if (!axiom) return;
+
+      rulesMap = parseRules(state.rules);
+      const angleRad = (state.angle * Math.PI) / 180;
+      const depth = parseFloat(state.iterations);
+
+      // 边界探测
+      turtle.x = 0; turtle.y = 0; turtle.angle = 0; turtle.stack = [];
+      minX = 0; maxX = 0; minY = 0; maxY = 0; segmentCount = 0;
+      const baseStepSize = 10;
+      const startT = performance.now();
+      for (let i = 0; i < axiom.length; i++) runBoundsRecursion(axiom[i], depth, angleRad, baseStepSize);
+
+      const totalSegs = segmentCount;
+      document.getElementById('stats-segments').textContent = totalSegs.toLocaleString();
+
+      if (totalSegs > MAX_SEGMENTS_LIMIT) return;
+
+      // 自适应
+      const W = maxX - minX || 1;
+      const H = maxY - minY || 1;
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+      const fitScaleX = (canvas.width * 0.75) / W;
+      const fitScaleY = (canvas.height * 0.75) / H;
+      const baseFitScale = Math.min(fitScaleX, fitScaleY);
+
+      // 背景网格
+      drawSpaceGrid(baseFitScale, tc);
+
+      // 渲染
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.translate(panX, panY);
+      ctx.scale(zoom * baseFitScale, zoom * baseFitScale);
+      ctx.translate(-cx, -cy);
+
+      let lw = 1.2 / (zoom * baseFitScale);
+      lw = Math.max(0.15, Math.min(lw, 4.0));
+      ctx.lineWidth = lw;
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+      turtle.x = 0; turtle.y = 0; turtle.angle = 0; turtle.stack = [];
+
+      if (state.drawMode === 'solid' || totalSegs > 15000) {
+        ctx.beginPath();
+        ctx.strokeStyle = state.solidColor;
+        ctx.moveTo(turtle.x, turtle.y);
+        for (let i = 0; i < axiom.length; i++) runDrawSolidRecursion(axiom[i], depth, angleRad, baseStepSize);
+        ctx.stroke();
+      } else {
+        currentDrawIndex = 0;
+        for (let i = 0; i < axiom.length; i++) runDrawColorRecursion(axiom[i], depth, angleRad, baseStepSize, totalSegs, state.drawMode, tc);
+      }
+      ctx.restore();
+
+      const endT = performance.now();
+      document.getElementById('stats-time').textContent = (endT - startT).toFixed(1) + 'ms';
+    }
+
+    function drawSpaceGrid(baseScale, tc) {
+      ctx.save();
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.translate(panX, panY);
+
+      ctx.strokeStyle = tc.grid;
+      ctx.globalAlpha = 0.3;
+      ctx.lineWidth = 1.0;
+      const step = 100 * zoom;
+      ctx.beginPath();
+      for (let x = -canvas.width * 2; x <= canvas.width * 2; x += step) { ctx.moveTo(x, -canvas.height * 2); ctx.lineTo(x, canvas.height * 2); }
+      for (let y = -canvas.height * 2; y <= canvas.height * 2; y += step) { ctx.moveTo(-canvas.width * 2, y); ctx.lineTo(canvas.width * 2, y); }
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath();
+      const maxR = Math.max(canvas.width, canvas.height) * 2;
+      for (let r = 200 * zoom; r < maxR; r += 200 * zoom) ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-canvas.width, 0); ctx.lineTo(canvas.width, 0);
+      ctx.moveTo(0, -canvas.height); ctx.lineTo(0, canvas.height);
+      ctx.stroke();
+
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // ---- 事件 ----
+    function setupEventListeners() {
+      document.getElementById('preset-selector').addEventListener('change', e => { applyPreset(e.target.value); render(); });
+      document.getElementById('input-axiom').addEventListener('input', e => { state.axiom = e.target.value; render(); });
+      document.getElementById('input-rules').addEventListener('input', e => { state.rules = e.target.value; render(); });
+      document.getElementById('input-iterations').addEventListener('input', e => {
+        state.iterations = parseFloat(e.target.value);
+        document.getElementById('val-iterations').textContent = state.iterations.toFixed(2);
+        render();
+      });
+      document.getElementById('input-angle').addEventListener('input', e => {
+        state.angle = parseFloat(e.target.value);
+        document.getElementById('val-angle').textContent = state.angle + '°';
+        render();
+      });
+      document.getElementById('input-param-n').addEventListener('input', e => { state.N = parseFloat(e.target.value) || 1; updateMathFormula(); });
+      document.getElementById('input-param-s').addEventListener('input', e => { state.S = parseFloat(e.target.value) || 1; updateMathFormula(); });
+      document.getElementById('input-draw-mode').addEventListener('change', e => {
+        state.drawMode = e.target.value;
+        document.getElementById('solid-color-container').style.display = state.drawMode === 'solid' ? 'block' : 'none';
+        render();
+      });
+      document.getElementById('input-color').addEventListener('input', e => {
+        state.solidColor = e.target.value;
+        document.getElementById('input-color-hex').value = e.target.value;
+        render();
+      });
+      document.getElementById('input-color-hex').addEventListener('input', e => {
+        state.solidColor = e.target.value;
+        document.getElementById('input-color').value = e.target.value;
+        render();
+      });
+      document.getElementById('btn-play').addEventListener('click', togglePlay);
+      document.getElementById('btn-reset').addEventListener('click', () => { resetViewport(); render(); });
+      document.getElementById('mt-right')?.addEventListener('click', () => togglePanel('right-panel'));
+
+      canvas.addEventListener('mousedown', e => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; });
+      window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        panX += e.clientX - lastMouseX; panY += e.clientY - lastMouseY;
+        lastMouseX = e.clientX; lastMouseY = e.clientY; render();
+      });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        zoom *= e.deltaY < 0 ? 1.1 : 1/1.1;
+        zoom = Math.max(0.01, Math.min(zoom, 1000));
+        document.getElementById('stats-zoom').textContent = zoom.toFixed(1) + 'x';
+        render();
+      }, { passive: false });
+
+      // Touch
+      let touchStartDist = 0, touchStartZoom = 1, isTouchPanning = false;
+      canvas.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) { isTouchPanning = true; lastMouseX = e.touches[0].clientX; lastMouseY = e.touches[0].clientY; }
+        else if (e.touches.length === 2) { isTouchPanning = false; const dx = e.touches[0].clientX - e.touches[1].clientX; const dy = e.touches[0].clientY - e.touches[1].clientY; touchStartDist = Math.sqrt(dx*dx + dy*dy); touchStartZoom = zoom; }
+      });
+      canvas.addEventListener('touchmove', e => {
+        if (isTouchPanning && e.touches.length === 1) { const dx = e.touches[0].clientX - lastMouseX; const dy = e.touches[0].clientY - lastMouseY; panX += dx; panY += dy; lastMouseX = e.touches[0].clientX; lastMouseY = e.touches[0].clientY; render(); }
+        else if (e.touches.length === 2) { const dx = e.touches[0].clientX - e.touches[1].clientX; const dy = e.touches[0].clientY - e.touches[1].clientY; const dist = Math.sqrt(dx*dx + dy*dy); if (touchStartDist > 0) { zoom = Math.max(0.01, Math.min(1000, touchStartZoom * dist / touchStartDist)); document.getElementById('stats-zoom').textContent = zoom.toFixed(1) + 'x'; render(); } }
+      });
+      canvas.addEventListener('touchend', () => { isTouchPanning = false; touchStartDist = 0; });
+    }
+
+    function animateLoop(timestamp) {
+      if (!state.isPlaying) return;
+      if (!lastAnimTime) lastAnimTime = timestamp;
+      const elapsed = timestamp - lastAnimTime;
+      const maxIter = PRESETS[state.preset]?.maxIter || 5.0;
+      let current = state.iterations + (0.00075 * elapsed * animationDirection);
+      if (current >= maxIter) { current = maxIter; animationDirection = -1; }
+      else if (current <= 0.0) { current = 0.0; animationDirection = 1; }
+      state.iterations = current; lastAnimTime = timestamp;
+      document.getElementById('input-iterations').value = current;
+      document.getElementById('val-iterations').textContent = current.toFixed(2);
+      render();
+      animationFrameId = requestAnimationFrame(animateLoop);
+    }
+
+    function togglePlay() {
+      const btn = document.getElementById('btn-play');
+      if (state.isPlaying) {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        state.isPlaying = false; lastAnimTime = 0;
+        btn.textContent = '▶ 动态演变';
+        btn.classList.add('btn-primary');
+      } else {
+        state.isPlaying = true; lastAnimTime = 0;
+        btn.textContent = '⏸ 停止演变';
+        btn.classList.remove('btn-primary');
+        animationFrameId = requestAnimationFrame(animateLoop);
+      }
+    }
+
+    function updateEducationPanel(presetData) {
+      document.getElementById('paradox-content').innerHTML = presetData.paradox;
+      document.getElementById('history-content').textContent = presetData.history;
+      document.getElementById('bio-title').textContent = presetData.bio;
+      document.getElementById('bio-content').textContent = presetData.bio_content;
+      updateMathFormula();
+    }
+
+    function updateMathFormula() {
+      const n = parseFloat(state.N), s = parseFloat(state.S);
+      const container = document.getElementById('dim-math');
+      if (isNaN(n) || isNaN(s) || s <= 1 || n <= 0) {
+        if (window.katex) katex.render(`D = \\frac{\\ln(N)}{\\ln(S)} \\implies \\text{不确定}`, container, { throwOnError: false, displayMode: true });
+        return;
+      }
+      const dVal = (Math.log(n) / Math.log(s)).toFixed(4);
+      if (window.katex) katex.render(`D = \\frac{\\ln(${n})}{\\ln(${s.toFixed(2)})} \\approx ${dVal}`, container, { throwOnError: false, displayMode: true });
+    }
+
+    function togglePanel(id) {
+      const panel = document.getElementById(id);
+      if (panel) panel.classList.toggle('collapsed');
+    }
+
+    // 主题切换时重绘
+    window.addEventListener('storage', e => {
+      if (e.key === 'psu-theme-v1') render();
+    });
+    // 监听 setTheme 调用
+    const origSetTheme = window.PSUTheme?.setTheme;
+    if (window.PSUTheme && origSetTheme) {
+      window.PSUTheme.setTheme = function(t) {
+        origSetTheme.call(this, t);
+        setTimeout(render, 100);
+      };
+    }
+    // 也监听 DOM 属性变化
+    const themeObserver = new MutationObserver(() => { render(); });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  </script>
+</body>
+</html>
