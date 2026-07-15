@@ -67,6 +67,14 @@
       padding: 1px 8px; border-radius: var(--radius);
       border: 1px solid var(--panel-border);
     }
+    select, input[type="text"], input[type="number"] {
+      width: 100%; padding: 6px 10px;
+      background: transparent; color: var(--text-color);
+      border: 1px solid var(--panel-border); border-radius: var(--radius);
+      font-size: .78rem; font-family: var(--font-main);
+      transition: var(--theme-transition);
+    }
+    select:focus, input:focus { outline: none; border-color: var(--accent-1); }
     input[type="range"] {
       width: 100%; height: 4px; border-radius: 2px;
       -webkit-appearance: none; appearance: none;
@@ -104,6 +112,19 @@
       background: var(--accent-1); color: #fff; border-color: var(--accent-1);
     }
     .btn-primary:hover { opacity: .85; }
+
+    .shape-btn-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+    .shape-btn {
+      padding: 8px 4px; border: 1px solid var(--panel-border);
+      background: transparent; color: var(--text-color);
+      border-radius: var(--radius); cursor: pointer;
+      font-size: .72rem; font-family: inherit;
+      text-align: center; transition: all .15s;
+    }
+    .shape-btn:hover { background: rgba(128,128,128,.1); }
+    .shape-btn.active {
+      background: var(--accent-1); color: #fff; border-color: var(--accent-1); font-weight: 600;
+    }
 
     /* ===== 右侧理论面板 ===== */
     #right-panel {
@@ -150,27 +171,20 @@
       color: var(--text-color); margin: 4px 0;
       font-size: .76rem; line-height: 1.65;
     }
-    .info-card .muted {
-      color: var(--text-muted); font-size: .72rem;
-    }
+    .info-card .muted { color: var(--text-muted); font-size: .72rem; }
     .formula {
       padding: 8px; margin: 6px 0;
       border-radius: var(--radius); border: 1px solid var(--panel-border);
       background: rgba(128,128,128,.06);
-      font-family: monospace; font-size: .76rem;
-      text-align: center;
+      font-family: monospace; font-size: .76rem; text-align: center;
     }
     .bio-box {
       padding: 8px 10px; border-radius: var(--radius);
       border: 1px solid var(--panel-border);
       background: rgba(128,128,128,.06);
     }
-    .bio-box .bio-name {
-      font-weight: 700; font-size: .76rem; color: var(--text-color);
-    }
-    .bio-box .bio-desc {
-      font-size: .7rem; color: var(--text-muted); margin-top: 2px;
-    }
+    .bio-box .bio-name { font-weight: 700; font-size: .76rem; color: var(--text-color); }
+    .bio-box .bio-desc { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
 
     /* ===== 顶部状态栏 ===== */
     .stats-top {
@@ -182,29 +196,62 @@
     .stats-top .sep { width:1px; height:12px; background:var(--panel-border); }
     .stats-top .val { font-weight: 700; }
 
+    /* ===== 图例栏 ===== */
+    #legend-bar {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 10; display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; border-radius: var(--radius);
+      border: 1px solid var(--panel-border);
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      transition: var(--theme-transition);
+    }
+    #legend-bar .lb-label {
+      font-size: .68rem; color: var(--text-muted); white-space: nowrap;
+    }
+    #legend-bar .lb-gradient {
+      width: 180px; height: 12px; border-radius: 6px;
+      border: 1px solid var(--panel-border);
+      background: linear-gradient(to right, #1a1a2e, #0d47a1, #1976d2, #42a5f5, #66bb6a, #fff176, #ff6f00, #d32f2f);
+    }
+    #legend-bar .lb-values {
+      display: flex; justify-content: space-between; width: 180px; font-size: .62rem;
+      color: var(--text-muted); font-family: monospace;
+    }
+    #legend-bar .lb-range { display: flex; flex-direction: column; }
+
+    /* ===== 切面轴选择 ===== */
+    .axis-btn-group { display: flex; gap: 4px; }
+    .axis-btn {
+      flex: 1; padding: 5px; border: 1px solid var(--panel-border);
+      background: transparent; color: var(--text-color);
+      border-radius: var(--radius); cursor: pointer;
+      font-size: .72rem; font-family: inherit; transition: all .15s;
+    }
+    .axis-btn:hover { background: rgba(128,128,128,.1); }
+    .axis-btn.active {
+      background: var(--accent-2); color: #fff; border-color: var(--accent-2); font-weight: 600;
+    }
+
     /* ===== 滚动条 ===== */
     .panel-body::-webkit-scrollbar { width: 5px; }
     .panel-body::-webkit-scrollbar-track { background: transparent; }
-    .panel-body::-webkit-scrollbar-thumb {
-      background: var(--panel-border); border-radius: 3px;
-    }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 3px; }
 
     /* ===== 移动端 ===== */
     .mobile-toggles { display: none; }
     @media(max-width: 900px) {
-      #left-panel, #right-panel {
-        width: calc(100vw - 40px); max-width: 380px;
-      }
+      #left-panel, #right-panel { width: calc(100vw - 40px); max-width: 380px; }
       .mobile-toggles {
-        display: flex; position: fixed; bottom: 16px; left: 50%;
+        display: flex; position: fixed; bottom: 60px; left: 50%;
         transform: translateX(-50%); z-index: 11; gap: 8px;
       }
       .mobile-toggles .btn { padding: 8px 16px; }
-      #left-panel.collapsed, #right-panel.collapsed {
-        transform: translateX(-110%);
-      }
+      #left-panel.collapsed, #right-panel.collapsed { transform: translateX(-110%); }
       #left-panel { transition: transform .3s ease; }
       #right-panel { transition: transform .3s ease; }
+      #legend-bar { bottom: 10px; }
+      #legend-bar .lb-gradient { width: 120px; }
     }
 
     /* ===== 主题特化 ===== */
@@ -213,25 +260,21 @@
     [data-theme="cartoon"] #left-panel .panel-header h1 { color: var(--accent-1); }
     [data-theme="cartoon"] #right-panel .panel-header h2 { color: var(--accent-2); }
     [data-theme="cartoon"] .info-card h3 { color: var(--accent-1); }
-
     [data-theme="glass"] .field-group .grp-title { color: #74b9ff; }
     [data-theme="glass"] .panel-header .ic { background: rgba(116,185,255,.12); }
     [data-theme="glass"] #left-panel .panel-header h1 { color: #ff6b6b; }
     [data-theme="glass"] #right-panel .panel-header h2 { color: #74b9ff; }
     [data-theme="glass"] .info-card h3 { color: #74b9ff; }
-
     [data-theme="cyber"] .field-group .grp-title { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,.3); }
     [data-theme="cyber"] .panel-header .ic { background: rgba(189,0,255,.15); }
     [data-theme="cyber"] #left-panel .panel-header h1 { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.4); }
     [data-theme="cyber"] #right-panel .panel-header h2 { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,.3); }
     [data-theme="cyber"] .info-card h3 { color: #00f3ff; }
-
     [data-theme="academic"] .field-group .grp-title { color: var(--accent-1); }
     [data-theme="academic"] .panel-header .ic { background: rgba(107,140,174,.12); }
     [data-theme="academic"] #left-panel .panel-header h1 { color: #1a1a2e; }
     [data-theme="academic"] #right-panel .panel-header h2 { color: var(--accent-1); }
     [data-theme="academic"] .info-card h3 { color: var(--accent-1); }
-
     [data-theme="soviet"] .field-group .grp-title { color: var(--accent-1); }
     [data-theme="soviet"] .panel-header .ic { background: rgba(196,30,30,.1); }
     [data-theme="soviet"] #left-panel .panel-header h1 { color: var(--accent-1); }
@@ -245,9 +288,11 @@
 
   <!-- 顶部状态栏 -->
   <div class="stats-top glass-panel">
-    <span>模式: <strong class="val" id="stats-mode" style="color:var(--accent-2)">磁感线</strong></span>
+    <span>形状: <strong class="val" id="stats-shape" style="color:var(--accent-2)">条形</strong></span>
     <span class="sep"></span>
-    <span>粒子: <strong class="val" id="stats-particles" style="color:var(--accent-1)">0</strong></span>
+    <span>模式: <strong class="val" id="stats-mode" style="color:var(--accent-1)">磁感线</strong></span>
+    <span class="sep"></span>
+    <span>粒子: <strong class="val" id="stats-particles" style="color:var(--accent-4)">0</strong></span>
     <span class="sep"></span>
     <span>FPS: <strong class="val" id="stats-fps" style="color:var(--accent-4)">60</strong></span>
   </div>
@@ -258,38 +303,62 @@
       <div class="ic">🧲</div>
       <div>
         <h1>磁场模拟器</h1>
-        <div class="sub">磁偶极子模型 · 铁粉分布可视化</div>
+        <div class="sub">多形状磁铁 · 切面分析 · 铁粉分布</div>
       </div>
     </div>
     <div class="panel-body">
+      <!-- 磁铁形状选择 -->
       <div class="field-group">
-        <div class="grp-title">📐 磁铁尺寸</div>
-        <div class="field-label"><span>长度 (L)</span><span class="val-badge" id="val-length">6.0</span></div>
-        <input type="range" id="param-length" min="1" max="10" step="0.5" value="6">
-        <div class="field-label" style="margin-top:8px"><span>宽度 (W)</span><span class="val-badge" id="val-width">2.0</span></div>
-        <input type="range" id="param-width" min="1" max="10" step="0.5" value="2">
-        <div class="field-label" style="margin-top:8px"><span>高度 (H)</span><span class="val-badge" id="val-height">2.0</span></div>
-        <input type="range" id="param-height" min="1" max="10" step="0.5" value="2">
+        <div class="grp-title">🔶 磁铁形状</div>
+        <div class="shape-btn-group">
+          <button class="shape-btn active" data-shape="bar">━━ 条形</button>
+          <button class="shape-btn" data-shape="u">⌒ U型</button>
+          <button class="shape-btn" data-shape="ring">◯ 环形</button>
+        </div>
       </div>
 
+      <!-- 几何参数 (动态显示) -->
+      <div id="geo-params"></div>
+
+      <!-- 磁场强度 -->
       <div class="field-group">
         <div class="grp-title">⚡ 磁场参数</div>
         <div class="field-label"><span>磁场强度权重</span><span class="val-badge" id="val-strength">5</span></div>
         <input type="range" id="param-strength" min="1" max="10" step="1" value="5">
       </div>
 
+      <!-- 渲染模式 -->
       <div class="field-group">
         <div class="grp-title">🎨 渲染模式</div>
         <div class="radio-group">
           <label class="radio-label">
             <input type="radio" name="mode" value="lines" checked>
-            <span>磁感线渲染 · 流动粒子</span>
+            <span>磁感线 · 流动粒子</span>
           </label>
           <label class="radio-label">
             <input type="radio" name="mode" value="powder">
-            <span>铁粉分布 · 散落吸附动画</span>
+            <span>铁粉分布 · 散落吸附</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="mode" value="cross">
+            <span>场切面 · 强度热力图</span>
           </label>
         </div>
+      </div>
+
+      <!-- 切面参数 -->
+      <div class="field-group" id="cross-section-controls" style="display:none;">
+        <div class="grp-title">📐 切面设置</div>
+        <div class="field-label"><span>切面轴</span></div>
+        <div class="axis-btn-group">
+          <button class="axis-btn active" data-axis="y">XY 平面</button>
+          <button class="axis-btn" data-axis="x">YZ 平面</button>
+          <button class="axis-btn" data-axis="z">XZ 平面</button>
+        </div>
+        <div class="field-label" style="margin-top:8px"><span>切面位置</span><span class="val-badge" id="val-slice">0.0</span></div>
+        <input type="range" id="param-slice" min="-8" max="8" step="0.5" value="0">
+        <div class="field-label" style="margin-top:8px"><span>网格分辨率</span><span class="val-badge" id="val-res">120</span></div>
+        <input type="range" id="param-res" min="40" max="200" step="10" value="120">
       </div>
     </div>
     <div class="panel-footer">
@@ -310,11 +379,17 @@
     <div class="panel-body">
       <div class="info-card">
         <h3>📜 磁学历史简述</h3>
-        <p>人类对磁现象的认识始于公元前，古希腊人与中国古人都发现了天然磁石（Lodestone）吸铁的特性。中国发明的司南是世界上最早的指南针。19世纪，奥斯特发现电流的磁效应，法拉第提出磁力线概念，麦克斯韦最终统一了电磁学理论。</p>
+        <p>人类对磁现象的认识始于公元前，古希腊人与中国古人都发现了天然磁石吸铁的特性。中国发明的司南是世界上最早的指南针。19世纪，奥斯特发现电流的磁效应，法拉第提出磁力线概念，麦克斯韦最终统一了电磁学理论。</p>
       </div>
       <div class="info-card">
         <h3>🔄 闭合回路特性</h3>
-        <p>与电荷不同，磁单极子在自然界中尚未被证实存在。磁感线总是从磁体的<strong>北极（N）</strong>出发，经过外部空间进入<strong>南极（S）</strong>，然后在磁体内部由南极回到北极，形成一个连续、无头无尾的闭合回路。</p>
+        <p>磁感线总是从磁体的<strong>北极（N）</strong>出发，经过外部空间进入<strong>南极（S）</strong>，在磁体内部由南极回到北极，形成无头无尾的闭合回路。磁单极子在自然界中尚未被证实存在。</p>
+      </div>
+      <div class="info-card" id="shape-info-card">
+        <h3>🔷 磁铁形状对比</h3>
+        <p><strong>条形磁铁</strong>：两极在两端，磁场呈偶极子分布，外部场线从 N 极弯曲到 S 极。</p>
+        <p><strong>U型磁铁</strong>：两极平行相对，极间形成强且均匀的磁场区域，广泛用于实验和工业。</p>
+        <p><strong>环形磁铁</strong>：磁极在上下两个环形面，场线穿过环心形成轴向对称磁场，常用于扬声器、电机等。</p>
       </div>
       <div class="info-card">
         <h3>📐 数学公式</h3>
@@ -329,7 +404,7 @@
         <h3>👤 科学家档案</h3>
         <div class="bio-box">
           <div class="bio-name">迈克尔·法拉第 (1791–1867)</div>
-          <div class="bio-desc">英国物理学家、化学家。提出了磁力线（场线）的概念，发现了电磁感应定律，奠定了现代电气工程的基础。</div>
+          <div class="bio-desc">英国物理学家。提出磁力线概念，发现电磁感应定律，奠定现代电气工程基础。</div>
         </div>
         <div class="bio-box" style="margin-top:6px">
           <div class="bio-name">汉斯·奥斯特 (1777–1851)</div>
@@ -338,6 +413,20 @@
       </div>
     </div>
   </aside>
+
+  <!-- 图例栏 -->
+  <div id="legend-bar">
+    <span class="lb-label">磁场强度</span>
+    <div class="lb-range">
+      <div class="lb-gradient"></div>
+      <div class="lb-values">
+        <span id="lb-min">弱</span>
+        <span>·</span>
+        <span>·</span>
+        <span id="lb-max">强</span>
+      </div>
+    </div>
+  </div>
 
   <!-- 移动端切换 -->
   <div class="mobile-toggles">
@@ -350,14 +439,27 @@
   import * as THREE from './lib/three.module.js';
   import { OrbitControls } from './lib/OrbitControls.js';
 
-  // 全局变量和配置
+  // ==========================================
+  // 全局配置
+  // ==========================================
   const config = {
-    length: 6, width: 2, height: 2, strength: 5, mode: 'lines'
+    shape: 'bar',
+    // bar params
+    length: 6, width: 2, height: 2,
+    // u-shape params
+    gap: 4, armLength: 5, armWidth: 1.5,
+    // ring params
+    outerRadius: 4, innerRadius: 2, ringHeight: 2,
+    // common
+    strength: 5, mode: 'lines',
+    // cross-section params
+    crossAxis: 'y', slicePos: 0, resolution: 120
   };
 
   let scene, camera, renderer, controls;
-  let magnetGroup, nMesh, sMesh;
+  let magnetGroup = new THREE.Group();
   let fieldVisuals = new THREE.Group();
+  let crossSectionMesh = null;
   let clock;
   let paths = [];
   let fluxMesh = null;
@@ -366,17 +468,621 @@
   let powderProgress = 1;
   let frameCount = 0, lastFpsTime = 0, currentFps = 60;
 
+  // 当前磁极列表 (由 getPoles 动态生成)
+  let cachedPoles = [];
+
+  // ==========================================
   // 主题颜色获取
+  // ==========================================
   function getThemeColors() {
     const cs = getComputedStyle(document.documentElement);
-    const bg = cs.getPropertyValue('--bg-color').trim() || '#1a1a1a';
-    const accent1 = cs.getPropertyValue('--accent-1').trim() || '#ff6b6b';
-    const accent2 = cs.getPropertyValue('--accent-2').trim() || '#4ecdc4';
-    const accent4 = cs.getPropertyValue('--accent-4').trim() || '#a29bfe';
-    const panelBorder = cs.getPropertyValue('--panel-border').trim() || 'rgba(255,255,255,.1)';
-    return { bg, accent1, accent2, accent4, panelBorder };
+    return {
+      bg: cs.getPropertyValue('--bg-color').trim() || '#1a1a1a',
+      accent1: cs.getPropertyValue('--accent-1').trim() || '#ff6b6b',
+      accent2: cs.getPropertyValue('--accent-2').trim() || '#4ecdc4',
+      accent4: cs.getPropertyValue('--accent-4').trim() || '#a29bfe',
+      panelBorder: cs.getPropertyValue('--panel-border').trim() || 'rgba(255,255,255,.1)'
+    };
   }
 
+  // ==========================================
+  // 磁极定义 — 每种形状的磁极分布
+  // ==========================================
+  function getPoles() {
+    const poles = [];
+    const s = config.strength;
+
+    if (config.shape === 'bar') {
+      const offset = config.length / 2 * 0.9;
+      poles.push({ pos: new THREE.Vector3(offset, 0, 0), charge: s });
+      poles.push({ pos: new THREE.Vector3(-offset, 0, 0), charge: -s });
+    }
+    else if (config.shape === 'u') {
+      const halfGap = config.gap / 2;
+      const armH = config.armLength;
+      // N pole: top of right arm
+      poles.push({ pos: new THREE.Vector3(halfGap, armH, 0), charge: s });
+      // S pole: top of left arm
+      poles.push({ pos: new THREE.Vector3(-halfGap, armH, 0), charge: -s });
+      // sub-poles along arms for realistic field
+      const subCount = 4;
+      for (let i = 1; i <= subCount; i++) {
+        const y = (i / (subCount + 1)) * armH * 0.9;
+        const w = s * 0.15;
+        poles.push({ pos: new THREE.Vector3(halfGap, y, 0), charge: w });
+        poles.push({ pos: new THREE.Vector3(-halfGap, y, 0), charge: -w });
+      }
+    }
+    else if (config.shape === 'ring') {
+      const R = (config.outerRadius + config.innerRadius) / 2;
+      const h = config.ringHeight / 2;
+      const segments = 12;
+      const chargePerSeg = s / segments;
+      for (let i = 0; i < segments; i++) {
+        const angle = (i / segments) * Math.PI * 2;
+        poles.push({ pos: new THREE.Vector3(Math.cos(angle) * R, h, Math.sin(angle) * R), charge: chargePerSeg });
+        poles.push({ pos: new THREE.Vector3(Math.cos(angle) * R, -h, Math.sin(angle) * R), charge: -chargePerSeg });
+      }
+    }
+    return poles;
+  }
+
+  // ==========================================
+  // 磁场计算 — 多极叠加
+  // ==========================================
+  function getBField(x, y, z) {
+    let Bx = 0, By = 0, Bz = 0;
+    for (const pole of cachedPoles) {
+      const dx = x - pole.pos.x;
+      const dy = y - pole.pos.y;
+      const dz = z - pole.pos.z;
+      const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      const softDist = Math.pow(dist + 0.1, 3);
+      Bx += pole.charge * dx / softDist;
+      By += pole.charge * dy / softDist;
+      Bz += pole.charge * dz / softDist;
+    }
+    return new THREE.Vector3(Bx, By, Bz);
+  }
+
+  // ==========================================
+  // 磁铁几何体创建
+  // ==========================================
+  function createMagnetMesh() {
+    while (magnetGroup.children.length > 0) {
+      const child = magnetGroup.children[0];
+      magnetGroup.remove(child);
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) child.material.dispose();
+    }
+
+    const nMat = new THREE.MeshPhongMaterial({ color: 0xd32f2f, shininess: 50 });
+    const sMat = new THREE.MeshPhongMaterial({ color: 0x1976d2, shininess: 50 });
+    const connectorMat = new THREE.MeshPhongMaterial({ color: 0x616161, shininess: 30 });
+
+    if (config.shape === 'bar') {
+      const halfL = config.length / 2;
+      const nMesh = new THREE.Mesh(new THREE.BoxGeometry(halfL, config.height, config.width), nMat);
+      nMesh.position.x = halfL / 2;
+      const sMesh = new THREE.Mesh(new THREE.BoxGeometry(halfL, config.height, config.width), sMat);
+      sMesh.position.x = -halfL / 2;
+      magnetGroup.add(nMesh, sMesh);
+    }
+    else if (config.shape === 'u') {
+      const halfGap = config.gap / 2;
+      const armH = config.armLength;
+      const aw = config.armWidth;
+      // Right arm (N)
+      const nArm = new THREE.Mesh(new THREE.BoxGeometry(aw, armH, aw), nMat);
+      nArm.position.set(halfGap, armH / 2, 0);
+      magnetGroup.add(nArm);
+      // Left arm (S)
+      const sArm = new THREE.Mesh(new THREE.BoxGeometry(aw, armH, aw), sMat);
+      sArm.position.set(-halfGap, armH / 2, 0);
+      magnetGroup.add(sArm);
+      // Bottom connector
+      const conn = new THREE.Mesh(new THREE.BoxGeometry(config.gap, aw, aw), connectorMat);
+      conn.position.set(0, aw / 2, 0);
+      magnetGroup.add(conn);
+      // N/S labels (small spheres)
+      const nTop = new THREE.Mesh(new THREE.SphereGeometry(aw * 0.4, 12, 8), nMat);
+      nTop.position.set(halfGap, armH, 0);
+      magnetGroup.add(nTop);
+      const sTop = new THREE.Mesh(new THREE.SphereGeometry(aw * 0.4, 12, 8), sMat);
+      sTop.position.set(-halfGap, armH, 0);
+      magnetGroup.add(sTop);
+    }
+    else if (config.shape === 'ring') {
+      const R = (config.outerRadius + config.innerRadius) / 2;
+      const tube = (config.outerRadius - config.innerRadius) / 2;
+      const h = config.ringHeight;
+      // Torus for the ring body
+      const ringGeom = new THREE.CylinderGeometry(R + tube, R + tube, h / 2, 32, 1, true);
+      const ringOuter = new THREE.Mesh(ringGeom, nMat);
+      ringOuter.position.y = h / 4;
+      magnetGroup.add(ringOuter);
+      // Bottom half (S)
+      const ringGeom2 = new THREE.CylinderGeometry(R + tube, R + tube, h / 2, 32, 1, true);
+      const ringBottom = new THREE.Mesh(ringGeom2, sMat);
+      ringBottom.position.y = -h / 4;
+      magnetGroup.add(ringBottom);
+      // Inner hole
+      const innerGeom = new THREE.CylinderGeometry(R - tube, R - tube, h, 32, 1, true);
+      const innerMesh = new THREE.Mesh(innerGeom, new THREE.MeshPhongMaterial({ color: 0x424242, shininess: 20, side: THREE.BackSide }));
+      magnetGroup.add(innerMesh);
+      // Top face ring (N)
+      const topRing = new THREE.Mesh(
+        new THREE.RingGeometry(R - tube, R + tube, 32),
+        new THREE.MeshPhongMaterial({ color: 0xd32f2f, side: THREE.DoubleSide })
+      );
+      topRing.rotation.x = -Math.PI / 2;
+      topRing.position.y = h / 2;
+      magnetGroup.add(topRing);
+      // Bottom face ring (S)
+      const botRing = topRing.clone();
+      botRing.material = new THREE.MeshPhongMaterial({ color: 0x1976d2, side: THREE.DoubleSide });
+      botRing.position.y = -h / 2;
+      magnetGroup.add(botRing);
+    }
+  }
+
+  // ==========================================
+  // 磁感线生成
+  // ==========================================
+  function generateLines() {
+    const linesGroup = new THREE.Group();
+    paths = [];
+    const seeds = [];
+
+    if (config.shape === 'bar') {
+      const pOffset = config.length / 2;
+      const wH = config.width / 2;
+      const hH = config.height / 2;
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+        for (let r = 0.2; r <= Math.max(wH, hH); r += 0.4) {
+          seeds.push(new THREE.Vector3(pOffset, Math.cos(angle) * r, Math.sin(angle) * r));
+        }
+      }
+      for (let x = 0; x <= pOffset; x += config.length / 4) {
+        seeds.push(new THREE.Vector3(x, wH + 0.1, 0));
+        seeds.push(new THREE.Vector3(x, -wH - 0.1, 0));
+        seeds.push(new THREE.Vector3(x, 0, hH + 0.1));
+        seeds.push(new THREE.Vector3(x, 0, -hH - 0.1));
+      }
+    }
+    else if (config.shape === 'u') {
+      const halfGap = config.gap / 2;
+      const armH = config.armLength;
+      // Seeds from N pole top
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+        for (let r = 0.2; r <= config.armWidth; r += 0.4) {
+          seeds.push(new THREE.Vector3(halfGap, armH + r * Math.cos(angle), r * Math.sin(angle)));
+          seeds.push(new THREE.Vector3(-halfGap, armH + r * Math.cos(angle), r * Math.sin(angle)));
+        }
+      }
+      // Seeds in the gap between poles
+      for (let y = 0; y <= armH; y += 1) {
+        seeds.push(new THREE.Vector3(halfGap - 0.2, y, 0));
+        seeds.push(new THREE.Vector3(-halfGap + 0.2, y, 0));
+      }
+    }
+    else if (config.shape === 'ring') {
+      const R = (config.outerRadius + config.innerRadius) / 2;
+      const h = config.ringHeight / 2;
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 6) {
+        seeds.push(new THREE.Vector3(Math.cos(angle) * R, h + 0.2, Math.sin(angle) * R));
+        seeds.push(new THREE.Vector3(Math.cos(angle) * R, -h - 0.2, Math.sin(angle) * R));
+        seeds.push(new THREE.Vector3(Math.cos(angle) * (R + 0.3), 0, Math.sin(angle) * (R + 0.3)));
+      }
+      // Center seeds
+      seeds.push(new THREE.Vector3(0, h + 0.2, 0));
+      seeds.push(new THREE.Vector3(0, -h - 0.2, 0));
+    }
+
+    const stepSize = 0.2;
+    const maxSteps = 300;
+    const colorRed = new THREE.Color(0xff4444);
+    const colorBlue = new THREE.Color(0x4444ff);
+
+    seeds.forEach(seed => {
+      const points = [];
+      const colors = [];
+      const pathPoints = [];
+      let currentPos = seed.clone();
+
+      for (let i = 0; i < maxSteps; i++) {
+        points.push(currentPos.x, currentPos.y, currentPos.z);
+        pathPoints.push(currentPos.clone());
+        const B = getBField(currentPos.x, currentPos.y, currentPos.z);
+        const intensity = Math.min(1, B.length() * config.strength * 2);
+        const vc = colorBlue.clone().lerp(colorRed, intensity);
+        vc.multiplyScalar(0.3 + 0.7 * intensity);
+        colors.push(vc.r, vc.g, vc.b);
+        if (B.length() < 0.0001) break;
+        B.normalize();
+        currentPos.addScaledVector(B, stepSize);
+        if (currentPos.length() > 30) break;
+        // Check if reached any S pole
+        let reached = false;
+        for (const p of cachedPoles) {
+          if (p.charge < 0 && currentPos.distanceTo(p.pos) < 0.5) { reached = true; break; }
+        }
+        if (reached) break;
+      }
+
+      if (points.length > 6) {
+        paths.push(pathPoints);
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        const material = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.8, linewidth: 1 });
+        linesGroup.add(new THREE.Line(geometry, material));
+      }
+    });
+
+    if (paths.length > 0) {
+      const fluxGeom = new THREE.SphereGeometry(0.08, 8, 8);
+      const fluxMat = new THREE.MeshBasicMaterial({ color: 0xffdd44, transparent: true, opacity: 0.8 });
+      fluxMesh = new THREE.InstancedMesh(fluxGeom, fluxMat, paths.length);
+      const dummy = new THREE.Object3D();
+      dummy.position.set(999, 999, 999);
+      dummy.updateMatrix();
+      for (let i = 0; i < paths.length; i++) fluxMesh.setMatrixAt(i, dummy.matrix);
+      linesGroup.add(fluxMesh);
+    }
+
+    fieldVisuals.add(linesGroup);
+    document.getElementById('stats-particles').textContent = paths.length;
+  }
+
+  // ==========================================
+  // 铁粉分布生成
+  // ==========================================
+  function generatePowder() {
+    powderData = [];
+    powderProgress = 0;
+    powderMesh = null;
+    const particleCount = 10000;
+    const geometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 4);
+    geometry.rotateX(Math.PI / 2);
+    const material = new THREE.MeshPhongMaterial({ color: 0x88888a, shininess: 10 });
+    const instancedMesh = new THREE.InstancedMesh(geometry, material, particleCount);
+    const dummy = new THREE.Object3D();
+    const zAxis = new THREE.Vector3(0, 0, 1);
+    let validCount = 0, attempts = 0;
+    const maxAttempts = 100000;
+
+    while (validCount < particleCount && attempts < maxAttempts) {
+      attempts++;
+      const x = (Math.random() - 0.5) * 30;
+      const y = (Math.random() - 0.5) * 25;
+      const z = (Math.random() - 0.5) * 25;
+      // Skip inside magnet
+      if (isInsideMagnet(x, y, z)) continue;
+      const B = getBField(x, y, z);
+      const mag = B.length();
+      const threshold = (config.strength / 5) * 1.5;
+      const probability = Math.pow(mag, 0.4) * threshold;
+      if (Math.random() < probability) {
+        const endPos = new THREE.Vector3(x, y, z);
+        B.normalize();
+        const endQuat = new THREE.Quaternion().setFromUnitVectors(zAxis, B);
+        const startPos = new THREE.Vector3(x + (Math.random() - 0.5) * 5, y + 15 + Math.random() * 10, z + (Math.random() - 0.5) * 5);
+        const startEuler = new THREE.Euler(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
+        const startQuat = new THREE.Quaternion().setFromEuler(startEuler);
+        powderData.push({ startPos, endPos, startQuat, endQuat });
+        dummy.position.copy(startPos);
+        dummy.quaternion.copy(startQuat);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(validCount, dummy.matrix);
+        validCount++;
+      }
+    }
+    instancedMesh.count = validCount;
+    instancedMesh.instanceMatrix.needsUpdate = true;
+    powderMesh = instancedMesh;
+    fieldVisuals.add(instancedMesh);
+    document.getElementById('stats-particles').textContent = validCount.toLocaleString();
+  }
+
+  function isInsideMagnet(x, y, z) {
+    if (config.shape === 'bar') {
+      return Math.abs(x) < config.length / 2 && Math.abs(y) < config.height / 2 && Math.abs(z) < config.width / 2;
+    }
+    if (config.shape === 'u') {
+      const halfGap = config.gap / 2;
+      const inRightArm = Math.abs(x - halfGap) < config.armWidth / 2 && y > 0 && y < config.armLength;
+      const inLeftArm = Math.abs(x + halfGap) < config.armWidth / 2 && y > 0 && y < config.armLength;
+      const inConn = y < config.armWidth && Math.abs(x) < halfGap;
+      return inRightArm || inLeftArm || inConn;
+    }
+    if (config.shape === 'ring') {
+      const R = (config.outerRadius + config.innerRadius) / 2;
+      const tube = (config.outerRadius - config.innerRadius) / 2;
+      const r = Math.sqrt(x * x + z * z);
+      return Math.abs(r - R) < tube && Math.abs(y) < config.ringHeight / 2;
+    }
+    return false;
+  }
+
+  // ==========================================
+  // 场切面生成 — 2D 热力图
+  // ==========================================
+  function generateCrossSection() {
+    const res = config.resolution;
+    const canvas2d = document.createElement('canvas');
+    canvas2d.width = res;
+    canvas2d.height = res;
+    const ctx2d = canvas2d.getContext('2d');
+    const imgData = ctx2d.createImageData(res, res);
+    const range = 12; // spatial range [-range, range]
+    let maxMag = 0;
+    const magnitudes = new Float32Array(res * res);
+
+    for (let i = 0; i < res; i++) {
+      for (let j = 0; j < res; j++) {
+        let x, y, z;
+        const u = (i / (res - 1)) * 2 * range - range;
+        const v = (j / (res - 1)) * 2 * range - range;
+        if (config.crossAxis === 'y') { x = u; y = config.slicePos; z = v; }
+        else if (config.crossAxis === 'x') { x = config.slicePos; y = u; z = v; }
+        else { x = u; y = v; z = config.slicePos; }
+
+        const B = getBField(x, y, z);
+        const mag = B.length();
+        magnitudes[i * res + j] = mag;
+        if (mag > maxMag) maxMag = mag;
+      }
+    }
+
+    // Normalize and colorize
+    for (let i = 0; i < res * res; i++) {
+      const t = Math.min(1, magnitudes[i] / (maxMag * 0.3 + 0.001));
+      const [r, g, b] = fieldToColor(t);
+      imgData.data[i * 4] = r;
+      imgData.data[i * 4 + 1] = g;
+      imgData.data[i * 4 + 2] = b;
+      imgData.data[i * 4 + 3] = 255;
+    }
+    ctx2d.putImageData(imgData, 0, 0);
+
+    // Create Three.js texture on a plane
+    const texture = new THREE.CanvasTexture(canvas2d);
+    texture.minFilter = THREE.LinearFilter;
+    const planeGeom = new THREE.PlaneGeometry(range * 2, range * 2);
+    const planeMat = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+    crossSectionMesh = new THREE.Mesh(planeGeom, planeMat);
+
+    // Orient plane based on axis
+    if (config.crossAxis === 'y') {
+      crossSectionMesh.rotation.x = -Math.PI / 2;
+      crossSectionMesh.position.y = config.slicePos;
+    } else if (config.crossAxis === 'x') {
+      crossSectionMesh.rotation.y = Math.PI / 2;
+      crossSectionMesh.position.x = config.slicePos;
+    } else {
+      crossSectionMesh.position.z = config.slicePos;
+    }
+
+    fieldVisuals.add(crossSectionMesh);
+
+    // Update legend values
+    document.getElementById('lb-min').textContent = '0';
+    document.getElementById('lb-max').textContent = maxMag.toFixed(2);
+    document.getElementById('stats-particles').textContent = res + '×' + res;
+  }
+
+  function fieldToColor(t) {
+    // Color map: dark blue -> blue -> cyan -> green -> yellow -> orange -> red
+    const stops = [
+      [0.00, 26, 26, 46],
+      [0.15, 13, 71, 161],
+      [0.30, 25, 118, 210],
+      [0.45, 66, 165, 245],
+      [0.55, 102, 187, 106],
+      [0.70, 255, 241, 118],
+      [0.85, 255, 111, 0],
+      [1.00, 211, 47, 47]
+    ];
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (t <= stops[i + 1][0]) {
+        const f = (t - stops[i][0]) / (stops[i + 1][0] - stops[i][0]);
+        return [
+          Math.round(stops[i][1] + (stops[i + 1][1] - stops[i][1]) * f),
+          Math.round(stops[i][2] + (stops[i + 1][2] - stops[i][2]) * f),
+          Math.round(stops[i][3] + (stops[i + 1][3] - stops[i][3]) * f)
+        ];
+      }
+    }
+    return [211, 47, 47];
+  }
+
+  // ==========================================
+  // 更新场可视化
+  // ==========================================
+  function updateField() {
+    // Clear
+    while (fieldVisuals.children.length > 0) {
+      const child = fieldVisuals.children[0];
+      fieldVisuals.remove(child);
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) { if (child.material.map) child.material.map.dispose(); child.material.dispose(); }
+    }
+    fluxMesh = null;
+    powderMesh = null;
+    crossSectionMesh = null;
+
+    // Recompute poles
+    cachedPoles = getPoles();
+
+    // Show/hide cross-section controls
+    document.getElementById('cross-section-controls').style.display = config.mode === 'cross' ? 'block' : 'none';
+
+    if (config.mode === 'lines') {
+      generateLines();
+      document.getElementById('stats-mode').textContent = '磁感线';
+      document.getElementById('legend-bar').style.display = 'flex';
+    } else if (config.mode === 'powder') {
+      generatePowder();
+      document.getElementById('stats-mode').textContent = '铁粉分布';
+      document.getElementById('legend-bar').style.display = 'flex';
+    } else if (config.mode === 'cross') {
+      generateCrossSection();
+      document.getElementById('stats-mode').textContent = '场切面';
+      document.getElementById('legend-bar').style.display = 'flex';
+    }
+  }
+
+  // ==========================================
+  // 几何参数面板 (根据形状动态生成)
+  // ==========================================
+  function updateGeoParams() {
+    const container = document.getElementById('geo-params');
+    let html = '<div class="field-group"><div class="grp-title">📐 几何参数</div>';
+
+    if (config.shape === 'bar') {
+      html += `
+        <div class="field-label"><span>长度 L</span><span class="val-badge" id="val-length">${config.length.toFixed(1)}</span></div>
+        <input type="range" id="param-length" min="1" max="10" step="0.5" value="${config.length}">
+        <div class="field-label" style="margin-top:8px"><span>宽度 W</span><span class="val-badge" id="val-width">${config.width.toFixed(1)}</span></div>
+        <input type="range" id="param-width" min="1" max="10" step="0.5" value="${config.width}">
+        <div class="field-label" style="margin-top:8px"><span>高度 H</span><span class="val-badge" id="val-height">${config.height.toFixed(1)}</span></div>
+        <input type="range" id="param-height" min="1" max="10" step="0.5" value="${config.height}">
+      `;
+    } else if (config.shape === 'u') {
+      html += `
+        <div class="field-label"><span>极间距 G</span><span class="val-badge" id="val-gap">${config.gap.toFixed(1)}</span></div>
+        <input type="range" id="param-gap" min="1" max="10" step="0.5" value="${config.gap}">
+        <div class="field-label" style="margin-top:8px"><span>臂长 A</span><span class="val-badge" id="val-armLength">${config.armLength.toFixed(1)}</span></div>
+        <input type="range" id="param-armLength" min="2" max="10" step="0.5" value="${config.armLength}">
+        <div class="field-label" style="margin-top:8px"><span>臂宽 W</span><span class="val-badge" id="val-armWidth">${config.armWidth.toFixed(1)}</span></div>
+        <input type="range" id="param-armWidth" min="0.5" max="4" step="0.5" value="${config.armWidth}">
+      `;
+    } else if (config.shape === 'ring') {
+      html += `
+        <div class="field-label"><span>外半径 R</span><span class="val-badge" id="val-outerRadius">${config.outerRadius.toFixed(1)}</span></div>
+        <input type="range" id="param-outerRadius" min="2" max="8" step="0.5" value="${config.outerRadius}">
+        <div class="field-label" style="margin-top:8px"><span>内半径 r</span><span class="val-badge" id="val-innerRadius">${config.innerRadius.toFixed(1)}</span></div>
+        <input type="range" id="param-innerRadius" min="0.5" max="6" step="0.5" value="${config.innerRadius}">
+        <div class="field-label" style="margin-top:8px"><span>环高 H</span><span class="val-badge" id="val-ringHeight">${config.ringHeight.toFixed(1)}</span></div>
+        <input type="range" id="param-ringHeight" min="0.5" max="5" step="0.5" value="${config.ringHeight}">
+      `;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+    bindGeoEvents();
+  }
+
+  function bindGeoEvents() {
+    const params = config.shape === 'bar'
+      ? [['length','val-length'],['width','val-width'],['height','val-height']]
+      : config.shape === 'u'
+      ? [['gap','val-gap'],['armLength','val-armLength'],['armWidth','val-armWidth']]
+      : [['outerRadius','val-outerRadius'],['innerRadius','val-innerRadius'],['ringHeight','val-ringHeight']];
+
+    params.forEach(([key, valId]) => {
+      const el = document.getElementById('param-' + key);
+      const valEl = document.getElementById(valId);
+      if (el) {
+        el.addEventListener('input', (e) => {
+          const v = parseFloat(e.target.value);
+          config[key] = v;
+          if (valEl) valEl.textContent = v.toFixed(1).replace(/\.0$/, '') || v.toFixed(1);
+          // Validate ring params
+          if (config.shape === 'ring' && config.innerRadius >= config.outerRadius) {
+            if (key === 'innerRadius') config.innerRadius = config.outerRadius - 0.5;
+            if (key === 'outerRadius') config.outerRadius = config.innerRadius + 0.5;
+            if (valEl) valEl.textContent = config[key].toFixed(1).replace(/\.0$/, '') || config[key].toFixed(1);
+            el.value = config[key];
+          }
+          createMagnetMesh();
+          updateField();
+        });
+      }
+    });
+  }
+
+  // ==========================================
+  // 事件绑定
+  // ==========================================
+  function bindUIEvents() {
+    // Strength slider
+    const strengthEl = document.getElementById('param-strength');
+    const strengthVal = document.getElementById('val-strength');
+    strengthEl.addEventListener('input', (e) => {
+      config.strength = parseFloat(e.target.value);
+      strengthVal.textContent = config.strength;
+      createMagnetMesh();
+      updateField();
+    });
+
+    // Shape buttons
+    document.querySelectorAll('.shape-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        config.shape = btn.dataset.shape;
+        const labels = { bar: '条形', u: 'U型', ring: '环形' };
+        document.getElementById('stats-shape').textContent = labels[config.shape];
+        updateGeoParams();
+        createMagnetMesh();
+        updateField();
+      });
+    });
+
+    // Mode radios
+    document.getElementsByName('mode').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        config.mode = e.target.value;
+        updateField();
+      });
+    });
+
+    // Cross-section axis buttons
+    document.querySelectorAll('.axis-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.axis-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        config.crossAxis = btn.dataset.axis;
+        updateField();
+      });
+    });
+
+    // Slice position
+    const sliceEl = document.getElementById('param-slice');
+    const sliceVal = document.getElementById('val-slice');
+    sliceEl.addEventListener('input', (e) => {
+      config.slicePos = parseFloat(e.target.value);
+      sliceVal.textContent = config.slicePos.toFixed(1);
+      if (config.mode === 'cross') updateField();
+    });
+
+    // Resolution
+    const resEl = document.getElementById('param-res');
+    const resVal = document.getElementById('val-res');
+    resEl.addEventListener('input', (e) => {
+      config.resolution = parseInt(e.target.value);
+      resVal.textContent = config.resolution;
+      if (config.mode === 'cross') updateField();
+    });
+
+    // Buttons
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      camera.position.set(15, 10, 15);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    });
+
+    document.getElementById('btn-replay').addEventListener('click', () => {
+      if (config.mode === 'powder') powderProgress = 0;
+    });
+
+    document.getElementById('mt-right')?.addEventListener('click', () => togglePanel('right-panel'));
+  }
+
+  // ==========================================
+  // 初始化
+  // ==========================================
   function init() {
     const container = document.getElementById('canvas-container');
     scene = new THREE.Scene();
@@ -399,23 +1105,22 @@
 
     clock = new THREE.Clock();
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
     dirLight.position.set(10, 20, 10);
     scene.add(dirLight);
 
-    magnetGroup = new THREE.Group();
     scene.add(magnetGroup);
     scene.add(fieldVisuals);
 
+    cachedPoles = getPoles();
+    updateGeoParams();
     createMagnetMesh();
     updateField();
 
     window.addEventListener('resize', onWindowResize);
     bindUIEvents();
 
-    // 主题切换监听
     const themeObserver = new MutationObserver(() => { applySceneTheme(); });
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   }
@@ -425,241 +1130,6 @@
     scene.background = new THREE.Color(tc.bg);
   }
 
-  function createMagnetMesh() {
-    while(magnetGroup.children.length > 0){
-      const child = magnetGroup.children[0];
-      magnetGroup.remove(child);
-      if(child.geometry) child.geometry.dispose();
-      if(child.material) child.material.dispose();
-    }
-
-    const halfL = config.length / 2;
-
-    const nGeom = new THREE.BoxGeometry(halfL, config.height, config.width);
-    const nMat = new THREE.MeshPhongMaterial({ color: 0xd32f2f, shininess: 50 });
-    nMesh = new THREE.Mesh(nGeom, nMat);
-    nMesh.position.x = halfL / 2;
-
-    const sGeom = new THREE.BoxGeometry(halfL, config.height, config.width);
-    const sMat = new THREE.MeshPhongMaterial({ color: 0x1976d2, shininess: 50 });
-    sMesh = new THREE.Mesh(sGeom, sMat);
-    sMesh.position.x = -halfL / 2;
-
-    magnetGroup.add(nMesh);
-    magnetGroup.add(sMesh);
-  }
-
-  function getBField(x, y, z) {
-    const poleOffset = config.length / 2 * 0.9;
-    const rN = new THREE.Vector3(x - poleOffset, y, z);
-    const rS = new THREE.Vector3(x + poleOffset, y, z);
-    const distN = rN.length();
-    const distS = rS.length();
-    const softDistN = Math.pow(distN + 0.1, 3);
-    const softDistS = Math.pow(distS + 0.1, 3);
-    const Bx = (rN.x / softDistN) - (rS.x / softDistS);
-    const By = (rN.y / softDistN) - (rS.y / softDistS);
-    const Bz = (rN.z / softDistN) - (rS.z / softDistS);
-    return new THREE.Vector3(Bx, By, Bz);
-  }
-
-  function generateLines() {
-    const linesGroup = new THREE.Group();
-    const seeds = [];
-    paths = [];
-
-    const pOffset = config.length / 2;
-    const wH = config.width / 2;
-    const hH = config.height / 2;
-
-    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-      for (let r = 0.2; r <= Math.max(wH, hH); r += 0.4) {
-        seeds.push(new THREE.Vector3(pOffset, Math.cos(angle) * r, Math.sin(angle) * r));
-      }
-    }
-    for (let x = 0; x <= pOffset; x += config.length/4) {
-      seeds.push(new THREE.Vector3(x, wH + 0.1, 0));
-      seeds.push(new THREE.Vector3(x, -wH - 0.1, 0));
-      seeds.push(new THREE.Vector3(x, 0, hH + 0.1));
-      seeds.push(new THREE.Vector3(x, 0, -hH - 0.1));
-    }
-
-    const stepSize = 0.2;
-    const maxSteps = 300;
-    const colorRed = new THREE.Color(0xff4444);
-    const colorBlue = new THREE.Color(0x4444ff);
-
-    seeds.forEach(seed => {
-      const points = [];
-      const colors = [];
-      const pathPoints = [];
-      let currentPos = seed.clone();
-
-      for (let i = 0; i < maxSteps; i++) {
-        points.push(currentPos.x, currentPos.y, currentPos.z);
-        pathPoints.push(currentPos.clone());
-
-        const t = Math.max(0, Math.min(1, (currentPos.x + pOffset) / config.length));
-        const vertexColor = colorBlue.clone().lerp(colorRed, t);
-        const B = getBField(currentPos.x, currentPos.y, currentPos.z);
-        const intensity = Math.min(1, B.length() * config.strength * 2);
-        vertexColor.multiplyScalar(0.3 + 0.7 * intensity);
-        colors.push(vertexColor.r, vertexColor.g, vertexColor.b);
-
-        if (B.length() < 0.0001) break;
-        B.normalize();
-        currentPos.addScaledVector(B, stepSize);
-        if (currentPos.distanceTo(new THREE.Vector3(-pOffset, 0, 0)) < 0.5) break;
-        if (currentPos.length() > 30) break;
-      }
-
-      if (points.length > 6) {
-        paths.push(pathPoints);
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        const material = new THREE.LineBasicMaterial({
-          vertexColors: true, transparent: true, opacity: 0.8, linewidth: 1
-        });
-        const line = new THREE.Line(geometry, material);
-        linesGroup.add(line);
-      }
-    });
-
-    if (paths.length > 0) {
-      const fluxGeom = new THREE.SphereGeometry(0.08, 8, 8);
-      const fluxMat = new THREE.MeshBasicMaterial({ color: 0xffdd44, transparent: true, opacity: 0.8 });
-      fluxMesh = new THREE.InstancedMesh(fluxGeom, fluxMat, paths.length);
-      const dummy = new THREE.Object3D();
-      dummy.position.set(999, 999, 999);
-      dummy.updateMatrix();
-      for(let i=0; i<paths.length; i++) {
-        fluxMesh.setMatrixAt(i, dummy.matrix);
-      }
-      linesGroup.add(fluxMesh);
-    }
-
-    fieldVisuals.add(linesGroup);
-    document.getElementById('stats-particles').textContent = paths.length;
-  }
-
-  function generatePowder() {
-    powderData = [];
-    powderProgress = 0;
-    powderMesh = null;
-
-    const particleCount = 10000;
-    const geometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 4);
-    geometry.rotateX(Math.PI / 2);
-    const material = new THREE.MeshPhongMaterial({ color: 0x88888a, shininess: 10 });
-    const instancedMesh = new THREE.InstancedMesh(geometry, material, particleCount);
-
-    const dummy = new THREE.Object3D();
-    const zAxis = new THREE.Vector3(0, 0, 1);
-    let validCount = 0;
-    let attempts = 0;
-    const maxAttempts = 100000;
-
-    const halfL = config.length / 2;
-    const halfW = config.width / 2;
-    const halfH = config.height / 2;
-
-    while(validCount < particleCount && attempts < maxAttempts) {
-      attempts++;
-      const x = (Math.random() - 0.5) * 40;
-      const y = (Math.random() - 0.5) * 30;
-      const z = (Math.random() - 0.5) * 30;
-      if (Math.abs(x) < halfL && Math.abs(y) < halfW && Math.abs(z) < halfH) continue;
-      const B = getBField(x, y, z);
-      const mag = B.length();
-      const threshold = (config.strength / 5) * 1.5;
-      const probability = Math.pow(mag, 0.4) * threshold;
-      if (Math.random() < probability) {
-        const endPos = new THREE.Vector3(x, y, z);
-        B.normalize();
-        const endQuat = new THREE.Quaternion().setFromUnitVectors(zAxis, B);
-        const startPos = new THREE.Vector3(x + (Math.random()-0.5)*5, y + 15 + Math.random()*10, z + (Math.random()-0.5)*5);
-        const startEuler = new THREE.Euler(
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2,
-          Math.random() * Math.PI * 2
-        );
-        const startQuat = new THREE.Quaternion().setFromEuler(startEuler);
-        powderData.push({ startPos, endPos, startQuat, endQuat });
-        dummy.position.copy(startPos);
-        dummy.quaternion.copy(startQuat);
-        dummy.updateMatrix();
-        instancedMesh.setMatrixAt(validCount, dummy.matrix);
-        validCount++;
-      }
-    }
-
-    instancedMesh.count = validCount;
-    instancedMesh.instanceMatrix.needsUpdate = true;
-    powderMesh = instancedMesh;
-    fieldVisuals.add(instancedMesh);
-    document.getElementById('stats-particles').textContent = validCount.toLocaleString();
-  }
-
-  function updateField() {
-    while(fieldVisuals.children.length > 0){
-      const child = fieldVisuals.children[0];
-      fieldVisuals.remove(child);
-      if(child.geometry) child.geometry.dispose();
-      if(child.material) child.material.dispose();
-    }
-    if (config.mode === 'lines') {
-      generateLines();
-      document.getElementById('stats-mode').textContent = '磁感线';
-    } else {
-      generatePowder();
-      document.getElementById('stats-mode').textContent = '铁粉分布';
-    }
-  }
-
-  function bindUIEvents() {
-    const mapping = [
-      { id: 'param-length', valId: 'val-length', key: 'length' },
-      { id: 'param-width',  valId: 'val-width',  key: 'width' },
-      { id: 'param-height', valId: 'val-height', key: 'height' },
-      { id: 'param-strength', valId: 'val-strength', key: 'strength' }
-    ];
-
-    mapping.forEach(item => {
-      const el = document.getElementById(item.id);
-      const valEl = document.getElementById(item.valId);
-      el.addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        config[item.key] = value;
-        valEl.textContent = value.toFixed(1).replace(/\.0$/, '') || value.toFixed(1);
-        createMagnetMesh();
-        updateField();
-      });
-    });
-
-    const radios = document.getElementsByName('mode');
-    radios.forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        config.mode = e.target.value;
-        updateField();
-      });
-    });
-
-    document.getElementById('btn-reset').addEventListener('click', () => {
-      camera.position.set(15, 10, 15);
-      controls.target.set(0, 0, 0);
-      controls.update();
-    });
-
-    document.getElementById('btn-replay').addEventListener('click', () => {
-      if (config.mode === 'powder') {
-        powderProgress = 0;
-      }
-    });
-
-    document.getElementById('mt-right')?.addEventListener('click', () => togglePanel('right-panel'));
-  }
-
   function onWindowResize() {
     const container = document.getElementById('canvas-container');
     camera.aspect = container.clientWidth / container.clientHeight;
@@ -667,13 +1137,14 @@
     renderer.setSize(container.clientWidth, container.clientHeight);
   }
 
+  // ==========================================
+  // 动画循环
+  // ==========================================
   function animate() {
     requestAnimationFrame(animate);
     controls.update();
-
     const time = clock.getElapsedTime();
 
-    // FPS 计算
     frameCount++;
     if (time - lastFpsTime >= 1.0) {
       currentFps = Math.round(frameCount / (time - lastFpsTime));
@@ -682,14 +1153,12 @@
       lastFpsTime = time;
     }
 
-    // 悬浮动效
     if (magnetGroup && fieldVisuals) {
       const floatY = Math.sin(time * 1.5) * 0.2;
       magnetGroup.position.y = floatY;
       fieldVisuals.position.y = floatY;
     }
 
-    // 磁感线流动粒子
     if (config.mode === 'lines' && fluxMesh && paths.length > 0) {
       const dummy = new THREE.Object3D();
       const flowSpeed = time * 8;
@@ -711,7 +1180,6 @@
       fluxMesh.instanceMatrix.needsUpdate = true;
     }
 
-    // 铁粉散落动画
     if (config.mode === 'powder' && powderProgress < 1 && powderMesh) {
       powderProgress += 0.015;
       if (powderProgress > 1) powderProgress = 1;
@@ -735,17 +1203,14 @@
     if (panel) panel.classList.toggle('collapsed');
   }
 
-  // 暴露给全局
   window.togglePanel = togglePanel;
 
   init();
   animate();
   </script>
 
-  <!-- 共享主题脚本 -->
   <script src="shared-theme.js"></script>
   <script>
-    // 初始化共享 UI (需在 DOMContentLoaded 后)
     window.addEventListener('DOMContentLoaded', function() {
       if (window.PSUTheme) {
         PSUTheme.createSwitcher();
