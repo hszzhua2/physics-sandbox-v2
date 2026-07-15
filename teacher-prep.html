@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教师备课 — 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      width:100%; height:100%; overflow:hidden;
+      font-family:'Segoe UI','Microsoft YaHei','Noto Sans CJK SC',system-ui,sans-serif;
+      background:var(--bg-color); color:var(--text-color);
+      transition:var(--theme-transition);
+    }
+
+    /* ===== 顶部导航覆盖 ===== */
+    .top-nav { z-index:999; }
+
+    /* ===== 统计栏 ===== */
+    .stats-bar {
+      position:fixed; top:56px; left:0; right:0; z-index:150;
+      display:flex; align-items:center; justify-content:center; gap:20px;
+      padding:5px 20px; font-size:.75rem;
+      background:var(--panel-bg); border-bottom:1px solid var(--panel-border);
+      transition:var(--theme-transition); backdrop-filter:blur(12px);
+    }
+    .stat { display:flex; align-items:center; gap:5px; color:var(--text-muted); }
+    .stat .n { font-weight:700; font-size:.9rem; color:var(--accent-1); }
+
+    /* ===== 左侧知识树 ===== */
+    #tree-panel {
+      position:fixed; top:90px; left:0; bottom:0; width:280px; z-index:100;
+      display:flex; flex-direction:column;
+      background:var(--panel-bg); border-right:1px solid var(--panel-border);
+      transition:var(--theme-transition);
+    }
+    .tree-header {
+      padding:12px 16px; border-bottom:1px solid var(--panel-border);
+      font-size:.9rem; font-weight:700; display:flex; align-items:center; gap:6px;
+      transition:var(--theme-transition);
+    }
+    .tree-search {
+      padding:8px 12px; border-bottom:1px solid var(--panel-border);
+    }
+    .tree-search input {
+      width:100%; padding:6px 10px; border:1px solid var(--panel-border);
+      border-radius:var(--radius); background:transparent; color:var(--text-color);
+      font-size:.8rem; font-family:inherit;
+    }
+    .tree-search input:focus { outline:none; border-color:var(--accent-1); }
+    .tree-body {
+      flex:1; overflow-y:auto; padding:4px 0;
+    }
+    .tree-item {
+      padding:5px 12px; cursor:pointer; font-size:.78rem;
+      display:flex; align-items:center; gap:6px;
+      border-left:3px solid transparent;
+      transition:background .15s, border-color .15s;
+      color:var(--text-color);
+    }
+    .tree-item:hover { background:rgba(128,128,128,.08); }
+    .tree-item.active {
+      background:rgba(128,128,128,.1); border-left-color:var(--accent-1);
+      font-weight:600;
+    }
+    .tree-item .ti-icon { font-size:.85rem; flex-shrink:0; }
+    .tree-item .ti-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tree-item .ti-badge {
+      font-size:.6rem; padding:1px 5px; border-radius:8px;
+      background:rgba(128,128,128,.15); color:var(--text-muted);
+    }
+    .tree-group-header {
+      padding:6px 12px; font-size:.68rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:1px;
+      color:var(--text-muted); margin-top:4px;
+      display:flex; align-items:center; gap:5px;
+    }
+    .tree-group-header .gh-dot { width:8px; height:8px; border-radius:50%; }
+
+    /* ===== 主内容区 ===== */
+    #main-area {
+      position:fixed; top:90px; left:280px; right:340px; bottom:0;
+      overflow-y:auto; padding:20px 24px;
+      transition:var(--theme-transition);
+    }
+
+    /* 模式切换标签 */
+    .mode-tabs {
+      display:flex; gap:2px; margin-bottom:16px;
+      border-bottom:1px solid var(--panel-border);
+    }
+    .mode-tab {
+      padding:8px 18px; cursor:pointer; font-size:.82rem; font-weight:600;
+      border:none; background:transparent; color:var(--text-muted);
+      border-bottom:2px solid transparent; transition:all .2s;
+      font-family:inherit;
+    }
+    .mode-tab:hover { color:var(--text-color); }
+    .mode-tab.active {
+      color:var(--accent-1); border-bottom-color:var(--accent-1);
+    }
+
+    /* 知识点卡片 */
+    .kp-card {
+      background:var(--panel-bg); border:1px solid var(--panel-border);
+      border-radius:var(--radius); padding:16px; margin-bottom:14px;
+      transition:var(--theme-transition);
+    }
+    .kp-card h3 {
+      font-size:.88rem; font-weight:700; margin-bottom:8px;
+      display:flex; align-items:center; gap:6px;
+      transition:var(--theme-transition);
+    }
+    .kp-card p {
+      font-size:.8rem; line-height:1.7; color:var(--text-color); margin:4px 0;
+    }
+    .kp-card ul { list-style:none; padding:0; }
+    .kp-card li {
+      font-size:.78rem; padding:3px 0 3px 16px; position:relative;
+      line-height:1.6; color:var(--text-color);
+    }
+    .kp-card li::before {
+      content:'▸'; position:absolute; left:0; color:var(--accent-1);
+    }
+
+    /* 知识点标题 */
+    .topic-header {
+      display:flex; align-items:center; gap:10px; margin-bottom:16px;
+    }
+    .topic-header .th-icon {
+      width:40px; height:40px; border-radius:var(--radius);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.3rem; flex-shrink:0;
+    }
+    .topic-header h1 {
+      font-size:1.3rem; font-weight:700; margin:0;
+      transition:var(--theme-transition);
+    }
+    .topic-header .th-sub {
+      font-size:.72rem; color:var(--text-muted); margin-top:2px;
+    }
+    .topic-breadcrumb {
+      font-size:.7rem; color:var(--text-muted); margin-bottom:14px;
+      display:flex; align-items:center; gap:4px; flex-wrap:wrap;
+    }
+    .topic-breadcrumb .bc-sep { opacity:.5; }
+    .topic-breadcrumb .bc-link {
+      cursor:pointer; color:var(--accent-2);
+    }
+    .topic-breadcrumb .bc-link:hover { text-decoration:underline; }
+
+    /* 实验链接卡片 */
+    .exp-link-card {
+      display:flex; align-items:center; gap:10px; padding:10px 14px;
+      background:rgba(128,128,128,.06); border:1px solid var(--panel-border);
+      border-radius:var(--radius); cursor:pointer; margin-bottom:8px;
+      transition:all .2s; text-decoration:none; color:var(--text-color);
+    }
+    .exp-link-card:hover {
+      border-color:var(--accent-1); background:rgba(128,128,128,.1);
+      transform:translateX(4px);
+    }
+    .exp-link-card .elc-icon { font-size:1.2rem; flex-shrink:0; }
+    .exp-link-card .elc-info { flex:1; }
+    .exp-link-card .elc-name { font-size:.82rem; font-weight:600; }
+    .exp-link-card .elc-desc { font-size:.7rem; color:var(--text-muted); }
+    .exp-link-card .elc-arrow { color:var(--accent-1); font-size:.9rem; }
+
+    /* ===== 右侧时间线 ===== */
+    #right-panel {
+      position:fixed; top:90px; right:0; bottom:0; width:340px; z-index:100;
+      display:flex; flex-direction:column;
+      background:var(--panel-bg); border-left:1px solid var(--panel-border);
+      transition:var(--theme-transition);
+    }
+    .rp-header {
+      padding:12px 16px; border-bottom:1px solid var(--panel-border);
+      font-size:.9rem; font-weight:700; display:flex; align-items:center; gap:6px;
+      transition:var(--theme-transition);
+    }
+    .rp-body {
+      flex:1; overflow-y:auto; padding:12px 16px;
+    }
+
+    /* 时间线 */
+    .timeline { position:relative; padding-left:20px; }
+    .timeline::before {
+      content:''; position:absolute; left:6px; top:0; bottom:0;
+      width:2px; background:var(--panel-border);
+    }
+    .tl-item {
+      position:relative; margin-bottom:14px; padding-left:0;
+    }
+    .tl-item::before {
+      content:''; position:absolute; left:-18px; top:4px;
+      width:10px; height:10px; border-radius:50%;
+      background:var(--accent-1); border:2px solid var(--bg-color);
+    }
+    .tl-year {
+      font-size:.72rem; font-weight:700; color:var(--accent-1);
+      font-family:monospace; margin-bottom:2px;
+    }
+    .tl-title {
+      font-size:.8rem; font-weight:600; color:var(--text-color);
+      margin-bottom:2px;
+    }
+    .tl-desc {
+      font-size:.72rem; color:var(--text-muted); line-height:1.5;
+    }
+
+    /* 科学家卡片 */
+    .sci-mini-card {
+      display:flex; align-items:center; gap:8px; padding:8px;
+      border-radius:var(--radius); border:1px solid var(--panel-border);
+      background:rgba(128,128,128,.04); margin-bottom:6px;
+      cursor:pointer; transition:all .15s;
+    }
+    .sci-mini-card:hover { background:rgba(128,128,128,.1); }
+    .sci-mini-card .smc-icon { font-size:1rem; flex-shrink:0; }
+    .sci-mini-card .smc-name { font-size:.76rem; font-weight:600; }
+    .sci-mini-card .smc-desc { font-size:.66rem; color:var(--text-muted); }
+
+    /* 公式框 */
+    .formula-box {
+      padding:8px 12px; margin:6px 0; border-radius:var(--radius);
+      border:1px solid var(--panel-border); background:rgba(128,128,128,.06);
+      font-family:monospace; font-size:.76rem; text-align:center;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      text-align:center; padding:40px 20px; color:var(--text-muted);
+    }
+    .empty-state .es-icon { font-size:2.5rem; opacity:.3; margin-bottom:8px; }
+    .empty-state .es-text { font-size:.85rem; line-height:1.8; }
+
+    /* 滚动条 */
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--panel-border); border-radius:3px; }
+
+    /* ===== 主题特化 ===== */
+    [data-theme="cartoon"] .tree-header { color:var(--accent-1); }
+    [data-theme="cartoon"] .rp-header { color:var(--accent-2); }
+    [data-theme="cartoon"] .topic-header h1 { color:var(--accent-1); }
+    [data-theme="cartoon"] .kp-card h3 { color:var(--accent-1); }
+    [data-theme="cartoon"] .topic-header .th-icon { background:rgba(255,107,107,.12); }
+
+    [data-theme="glass"] .tree-header { color:#74b9ff; }
+    [data-theme="glass"] .rp-header { color:#74b9ff; }
+    [data-theme="glass"] .topic-header h1 { color:#ff6b6b; }
+    [data-theme="glass"] .kp-card h3 { color:#74b9ff; }
+    [data-theme="glass"] .topic-header .th-icon { background:rgba(116,185,255,.12); }
+
+    [data-theme="cyber"] .tree-header { color:#00f3ff; text-shadow:0 0 6px rgba(0,243,255,.3); }
+    [data-theme="cyber"] .rp-header { color:#00f3ff; text-shadow:0 0 6px rgba(0,243,255,.3); }
+    [data-theme="cyber"] .topic-header h1 { color:#ff6b6b; text-shadow:0 0 10px rgba(255,107,107,.4); }
+    [data-theme="cyber"] .kp-card h3 { color:#00f3ff; text-shadow:0 0 6px rgba(0,243,255,.3); }
+    [data-theme="cyber"] .topic-header .th-icon { background:rgba(189,0,255,.15); }
+
+    [data-theme="academic"] .tree-header { color:var(--accent-1); }
+    [data-theme="academic"] .rp-header { color:var(--accent-1); }
+    [data-theme="academic"] .topic-header h1 { color:#1a1a2e; }
+    [data-theme="academic"] .kp-card h3 { color:var(--accent-1); }
+    [data-theme="academic"] .topic-header .th-icon { background:rgba(107,140,174,.12); }
+
+    [data-theme="soviet"] .tree-header { color:var(--accent-1); }
+    [data-theme="soviet"] .rp-header { color:var(--accent-1); }
+    [data-theme="soviet"] .topic-header h1 { color:var(--accent-1); }
+    [data-theme="soviet"] .kp-card h3 { color:var(--accent-1); }
+    [data-theme="soviet"] .topic-header .th-icon { background:rgba(196,30,30,.1); }
+
+    /* 移动端 */
+    .mobile-toggle { display:none; }
+    @media(max-width:1024px) {
+      #right-panel { display:none; }
+      #main-area { right:0; }
+    }
+    @media(max-width:768px) {
+      #tree-panel { transform:translateX(-100%); transition:transform .3s; }
+      #tree-panel.show { transform:translateX(0); }
+      #main-area { left:0; }
+      .mobile-toggle {
+        display:flex; position:fixed; bottom:16px; left:50%;
+        transform:translateX(-50%); z-index:200; gap:8px;
+      }
+      .mobile-toggle button {
+        padding:8px 16px; border:1px solid var(--panel-border);
+        background:var(--panel-bg); color:var(--text-color);
+        border-radius:var(--radius); cursor:pointer; font-size:.78rem;
+        font-family:inherit;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 统计栏 -->
+  <div class="stats-bar">
+    <span class="stat">📚 <span class="n" id="cnt-cat">5</span> 物理分类</span>
+    <span class="stat">🔬 <span class="n" id="cnt-sub">16</span> 学科</span>
+    <span class="stat">🧪 <span class="n" id="cnt-exp">34</span> 实验</span>
+    <span class="stat">👨‍🔬 <span class="n" id="cnt-sci">24</span> 科学家</span>
+  </div>
+
+  <!-- 左侧知识树 -->
+  <div id="tree-panel">
+    <div class="tree-header">📚 知识体系导航</div>
+    <div class="tree-search">
+      <input type="text" id="tree-search" placeholder="搜索知识点…">
+    </div>
+    <div class="tree-body" id="tree-body"></div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div id="main-area">
+    <div class="empty-state" id="empty-state">
+      <div class="es-icon">📋</div>
+      <div class="es-text">请从左侧选择一个知识点<br>开始备课、讲课、预习或复习</div>
+    </div>
+    <div id="topic-content" style="display:none;"></div>
+  </div>
+
+  <!-- 右侧时间线 -->
+  <div id="right-panel">
+    <div class="rp-header">📜 知识历史时间线</div>
+    <div class="rp-body" id="rp-body">
+      <div class="empty-state">
+        <div class="es-icon">⏳</div>
+        <div class="es-text">选择知识点后<br>显示相关历史发展</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动端切换 -->
+  <div class="mobile-toggle">
+    <button onclick="document.getElementById('tree-panel').classList.toggle('show')">📚 导航</button>
+  </div>
+
+  <!-- 主题切换器 -->
+  <div class="theme-switcher" id="theme-switcher"></div>
+
+  <script src="shared-theme.js"></script>
+  <script>
+  // 初始化主题切换器
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.PSUTheme) PSUTheme.createSwitcher();
+  });
+  </script>
+  <script>
+  // ==========================================
+  // 知识数据 (与知识图谱同步)
+  // ==========================================
+  const CATEGORIES = [
+    { id:'classical', name:'经典物理', icon:'⚙️', color:'#4ecdc4', desc:'牛顿力学、电磁学、热力学与光学' },
+    { id:'quantum', name:'量子物理', icon:'⚛️', color:'#a29bfe', desc:'微观世界的量子力学现象' },
+    { id:'relativity', name:'相对论与宇宙学', icon:'🌠', color:'#ff9f43', desc:'爱因斯坦的相对论与宇宙学' },
+    { id:'chaos', name:'统计与混沌', icon:'🦋', color:'#ff6b6b', desc:'混沌理论、统计物理与概率模型' },
+    { id:'computational', name:'计算物理', icon:'💻', color:'#55efc4', desc:'计算机模拟与数值方法' }
+  ];
+
+  const SUBJECTS = [
+    { id:'fluid', name:'流体力学', parent:'classical', icon:'🌊', color:'#4ecdc4', desc:'流体运动规律与现象' },
+    { id:'mechanics', name:'经典力学', parent:'classical', icon:'🏗️', color:'#4ecdc4', desc:'牛顿力学与刚体运动' },
+    { id:'electromag', name:'电磁学', parent:'classical', icon:'⚡', color:'#4ecdc4', desc:'电场、磁场与电磁波' },
+    { id:'optics', name:'波动光学', parent:'classical', icon:'🔦', color:'#4ecdc4', desc:'光的波动性质与干涉衍射' },
+    { id:'harmonic', name:'简谐共振', parent:'classical', icon:'〰️', color:'#4ecdc4', desc:'简谐振动与共振现象' },
+    { id:'acoustic', name:'声学驻波', parent:'classical', icon:'🔊', color:'#4ecdc4', desc:'声波传播与驻波现象' },
+    { id:'wave_particle', name:'波粒二象性', parent:'quantum', icon:'✨', color:'#a29bfe', desc:'微观粒子的波粒二象性' },
+    { id:'schrodinger', name:'薛定谔方程', parent:'quantum', icon:'📐', color:'#a29bfe', desc:'量子力学的基本方程' },
+    { id:'relativity_gr', name:'广义相对论', parent:'relativity', icon:'🕳️', color:'#ff9f43', desc:'弯曲时空与引力理论' },
+    { id:'astro', name:'天体物理', parent:'relativity', icon:'🪐', color:'#ff9f43', desc:'天体与宇宙物理现象' },
+    { id:'gravity', name:'引力', parent:'relativity', icon:'🍎', color:'#ff9f43', desc:'万有引力与引力相互作用' },
+    { id:'chaos_theory', name:'混沌理论', parent:'chaos', icon:'🌀', color:'#ff6b6b', desc:'非线性动力学与混沌现象' },
+    { id:'prob', name:'概率统计', parent:'chaos', icon:'📊', color:'#ff6b6b', desc:'概率论与统计分析方法' },
+    { id:'phase', name:'相变与临界', parent:'chaos', icon:'🧲', color:'#ff6b6b', desc:'物质相变与临界行为' },
+    { id:'manybody', name:'多体系统', parent:'computational', icon:'🧊', color:'#55efc4', desc:'多粒子相互作用系统' },
+    { id:'vision3d', name:'三维视觉', parent:'computational', icon:'👁️', color:'#55efc4', desc:'三维数据处理与可视化' }
+  ];
+
+  const EXPERIMENTS = [
+    { id:'taylor', name:'泰勒-库埃特流', parent:'fluid', target:'exp-taylor.html', desc:'旋转圆柱间的流体不稳定性', year:1923, history:'泰勒通过实验发现了旋转圆柱间流体的不稳定性，为流体力学稳定性理论奠定了基础。' },
+    { id:'bernoulli', name:'伯努利原理', parent:'fluid', target:'exp-bernoulli.html', desc:'流体速度与压强关系', year:1738, history:'丹尼尔·伯努利在《流体动力学》中提出伯努利方程，描述了流体能量守恒。' },
+    { id:'matter', name:'刚体沙盒', parent:'mechanics', target:'exp-matter.html', desc:'刚体碰撞与链式反应模拟', year:1687, history:'牛顿在《自然哲学的数学原理》中确立了运动定律，为刚体动力学提供了基础。' },
+    { id:'spring', name:'弹簧振子', parent:'mechanics', target:'exp-spring.html', desc:'简谐振动与阻尼振荡', year:1676, history:'胡克发现弹性定律 F=kx，成为简谐运动的理论基础。' },
+    { id:'cantilever', name:'悬臂梁分析', parent:'mechanics', target:'exp-cantilever.html', desc:'悬臂梁受力与变形分析', year:1744, history:'欧拉和伯努利共同发展了梁理论，描述了细长杆件的弯曲行为。' },
+    { id:'bicycle', name:'齿轮与自行车', parent:'mechanics', target:'exp-bicycle.html', desc:'齿轮传动比与自行车速度动力学', year:1860, history:'19世纪自行车的发展推动了齿轮传动理论的实际应用。' },
+    { id:'klein-bottle', name:'克莱因瓶', parent:'mechanics', target:'exp-klein-bottle.html', desc:'克莱因瓶三维参数化可视化', year:1882, history:'克莱因发现了一种无边界、不可定向的曲面，挑战了传统几何直觉。' },
+    { id:'tesla', name:'特斯拉线圈', parent:'electromag', target:'exp-tesla.html', desc:'高频共振变压器原理', year:1891, history:'特斯拉发明了特斯拉线圈，展示了高频高压电的奇妙特性。' },
+    { id:'magnetic', name:'磁场与铁粉', parent:'electromag', target:'exp-magnetic.html', desc:'磁偶极子模型与铁粉分布', year:1831, history:'法拉第提出磁力线概念，用铁粉可视化磁场分布，开创了场论的思想。' },
+    { id:'wave', name:'波的干涉', parent:'optics', target:'exp-wave.html', desc:'波的叠加与干涉图样', year:1801, history:'杨氏双缝实验首次展示了光的干涉现象，支持了光的波动说。' },
+    { id:'lissajous', name:'利萨茹曲线', parent:'harmonic', target:'exp-lissajous.html', desc:'两个正交简谐振动的合成轨迹', year:1857, history:'利萨如通过光学方法观察到两个垂直振动的合成曲线，用于频率比测量。' },
+    { id:'chladni', name:'克拉尼图形', parent:'acoustic', target:'exp-chladni.html', desc:'薄板上的驻波振动模式', year:1787, history:'克拉尼通过在金属板上撒沙发现了振动模式，使声波可视化。' },
+    { id:'quantum_exp', name:'双缝干涉', parent:'wave_particle', target:'exp-quantum.html', desc:'电子双缝干涉实验模拟', year:1961, history:'电子双缝实验展示了物质的波粒二象性，是量子力学最核心的实验之一。' },
+    { id:'potential', name:'一维势阱', parent:'schrodinger', target:'exp-potential.html', desc:'量子粒子在势阱中的行为', year:1926, history:'薛定谔提出了量子力学的波动方程，一维势阱是最基本的量子模型。' },
+    { id:'gravity_exp', name:'万有引力', parent:'gravity', target:'exp-gravity.html', desc:'N体引力系统模拟', year:1687, history:'牛顿提出万有引力定律，统一了天上和地上的力学规律。' },
+    { id:'blackhole', name:'黑洞吸积盘', parent:'relativity_gr', target:'exp-blackhole.html', desc:'黑洞周围物质吸积过程', year:1916, history:'史瓦西从爱因斯坦场方程导出了第一个黑洞解。' },
+    { id:'blackhole_adv', name:'黑洞吸积盘(高级)', parent:'relativity_gr', target:'exp-blackhole-advanced.html', desc:'高级黑洞吸积盘模拟', year:2019, history:'2019年事件视界望远镜首次拍摄到黑洞图像。' },
+    { id:'wormhole', name:'爱因斯坦-罗森桥', parent:'relativity_gr', target:'exp-wormhole.html', desc:'虫洞时空结构可视化', year:1935, history:'爱因斯坦和罗森发现了连接两个时空区域的几何结构。' },
+    { id:'solar', name:'太阳系沙盘', parent:'astro', target:'exp-solar.html', desc:'太阳系行星运动模拟', year:1543, history:'哥白尼提出日心说，开普勒发现行星运动三定律，牛顿最终给出引力解释。' },
+    { id:'gravitational-wave', name:'引力波探测', parent:'astro', target:'exp-gravitational-wave.html', desc:'双黑洞合并与引力波生成', year:2015, history:'LIGO在2015年首次直接探测到引力波，验证了爱因斯坦百年前的预言。' },
+    { id:'theia-impact', name:'忒伊亚撞击', parent:'astro', target:'exp-theia-impact.html', desc:'SPH模拟地月系统形成', year:1975, history:'大撞击假说提出月球是地球与忒伊亚碰撞后形成的。' },
+    { id:'pendulum', name:'混沌双摆', parent:'chaos_theory', target:'exp-pendulum.html', desc:'双摆系统的混沌动力学', year:1963, history:'双摆是最简单的混沌系统之一，展示了确定性系统中的不可预测性。' },
+    { id:'lorenz', name:'洛伦兹吸引子', parent:'chaos_theory', target:'exp-lorenz.html', desc:'三维混沌吸引子轨迹', year:1963, history:'洛伦兹在研究大气对流时发现了蝴蝶效应，开创了混沌理论。' },
+    { id:'fractal', name:'分形几何', parent:'chaos_theory', target:'exp-fractal.html', desc:'L-System分形生成与连续折叠', year:1975, history:'曼德博提出分形几何学，揭示了自然界中的自相似结构。' },
+    { id:'galton', name:'高尔顿钉板', parent:'prob', target:'exp-galton.html', desc:'中心极限定理可视化', year:1894, history:'高尔顿通过钉板实验直观展示了中心极限定理，成为统计学的经典演示。' },
+    { id:'medical', name:'名医的诞生', parent:'prob', target:'exp-medical.html', desc:'医疗诊断中的概率模型', year:1763, history:'贝叶斯定理为医疗诊断中的概率推理提供了数学基础。' },
+    { id:'pluchino', name:'成功随机性', parent:'prob', target:'exp-pluchino.html', desc:'才能与运气关系的随机模型', year:2018, history:'Pluchino提出随机才能模型，揭示了运气在成功中的重要作用。' },
+    { id:'brownian', name:'布朗运动', parent:'prob', target:'exp-brownian.html', desc:'随机游走与扩散现象', year:1827, history:'布朗通过显微镜观察到花粉颗粒的随机运动，爱因斯坦后来给出了理论解释。' },
+    { id:'ising', name:'伊辛模型', parent:'phase', target:'exp-ising.html', desc:'铁磁相变的格点模型', year:1925, history:'伊辛提出了一维铁磁模型，后来二维模型被昂萨格严格求解。' },
+    { id:'ca3d', name:'3D元胞自动机', parent:'manybody', target:'exp-ca3d.html', desc:'三维细胞自动机演化', year:1948, history:'冯·诺依曼提出元胞自动机概念，Conway的生命游戏使其广为人知。' },
+    { id:'socialforce', name:'社会力模型', parent:'manybody', target:'exp-social-force.html', desc:'基于社会力模型的行人流仿真', year:1995, history:'Helbing提出社会力模型，用于模拟人群运动和疏散。' },
+    { id:'pointcloud', name:'点云探索', parent:'vision3d', target:'exp-pointcloud.html', desc:'三维点云数据交互可视化', year:1963, history:'Sutherland开创了计算机图形学，为三维数据可视化奠定了基础。' }
+  ];
+
+  const SCIENTISTS = [
+    { id:'sci-newton', name:'牛顿', icon:'🍎', color:'#e17055', desc:'经典力学奠基人 · 万有引力定律', experiments:['spring','gravity_exp','matter','solar'], years:'1643-1727' },
+    { id:'sci-einstein', name:'爱因斯坦', icon:'🧠', color:'#fdcb6e', desc:'相对论创立者 · 质能方程', experiments:['blackhole','blackhole_adv','wormhole','gravitational-wave'], years:'1879-1955' },
+    { id:'sci-schrodinger', name:'薛定谔', icon:'🐱', color:'#a29bfe', desc:'量子力学波动方程提出者', experiments:['quantum_exp','potential'], years:'1887-1961' },
+    { id:'sci-lorenz', name:'洛伦兹', icon:'🦋', color:'#ff6b6b', desc:'混沌理论先驱 · 蝴蝶效应', experiments:['lorenz','pendulum'], years:'1917-2008' },
+    { id:'sci-mandelbrot', name:'曼德博', icon:'🌀', color:'#fdcb6e', desc:'分形几何学之父 · 自相似理论', experiments:['fractal'], years:'1924-2010' },
+    { id:'sci-bernoulli', name:'伯努利', icon:'🌊', color:'#4ecdc4', desc:'流体力学奠基人 · 伯努利方程', experiments:['bernoulli','taylor'], years:'1700-1782' },
+    { id:'sci-chladni', name:'克拉尼', icon:'🎵', color:'#fd79a8', desc:'声学振动模式可视化先驱', experiments:['chladni'], years:'1756-1827' },
+    { id:'sci-tesla', name:'特斯拉', icon:'⚡', color:'#ffeaa7', desc:'交流电与高频电力先驱', experiments:['tesla'], years:'1856-1943' },
+    { id:'sci-faraday', name:'法拉第', icon:'🧲', color:'#fdcb6e', desc:'电磁感应之父 · 磁力线提出者', experiments:['magnetic'], years:'1791-1867' },
+    { id:'sci-galton', name:'高尔顿', icon:'📊', color:'#fab1a0', desc:'统计学与回归分析先驱', experiments:['galton'], years:'1822-1911' },
+    { id:'sci-brown', name:'布朗', icon:'🔬', color:'#74b9ff', desc:'布朗运动发现者', experiments:['brownian'], years:'1773-1858' },
+    { id:'sci-ising', name:'伊辛', icon:'🧲', color:'#55efc4', desc:'相变统计模型提出者', experiments:['ising'], years:'1900-1998' },
+    { id:'sci-klein', name:'克莱因', icon:'🫙', color:'#8a7ca8', desc:'拓扑学与几何学大师', experiments:['klein-bottle'], years:'1849-1925' },
+    { id:'sci-euler', name:'欧拉', icon:'📐', color:'#dfe6e9', desc:'微积分与梁理论奠基人', experiments:['cantilever','bicycle'], years:'1707-1783' },
+    { id:'sci-helbing', name:'Helbing', icon:'🚶', color:'#a8e6cf', desc:'社会力模型提出者', experiments:['socialforce'], years:'1965-' },
+    { id:'sci-canup', name:'Canup', icon:'🌙', color:'#dfe6e9', desc:'大撞击假说数值模拟先驱', experiments:['theia-impact'], years:'1963-' },
+    { id:'sci-lissajous', name:'利萨如', icon:'🎵', color:'#fd79a8', desc:'利萨茹曲线发现者', experiments:['lissajous'], years:'1822-1880' },
+    { id:'sci-pluchino', name:'Pluchino', icon:'🎲', color:'#fdcb6e', desc:'随机才能模型提出者', experiments:['pluchino'], years:'1968-' },
+    { id:'sci-galileo', name:'伽利略', icon:'🔭', color:'#f0c060', desc:'现代天文学之父', experiments:['solar','matter','spring'], years:'1564-1642' },
+    { id:'sci-kepler', name:'开普勒', icon:'🪐', color:'#4ecdc4', desc:'行星运动三定律提出者', experiments:['solar','gravity_exp'], years:'1571-1630' },
+    { id:'sci-copernicus', name:'哥白尼', icon:'☀️', color:'#fdcb6e', desc:'日心说创立者', experiments:['solar'], years:'1473-1543' },
+    { id:'sci-vonneumann', name:'冯·诺依曼', icon:'🧮', color:'#74b9ff', desc:'元胞自动机创始人', experiments:['ca3d'], years:'1903-1957' },
+    { id:'sci-conway', name:'Conway', icon:'🎮', color:'#55efc4', desc:'生命游戏发明者', experiments:['ca3d'], years:'1937-2020' },
+    { id:'sci-sutherland', name:'Sutherland', icon:'💻', color:'#a29bfe', desc:'计算机图形学之父', experiments:['pointcloud'], years:'1938-' }
+  ];
+
+  // 辅助查找
+  const catMap = new Map(CATEGORIES.map(c => [c.id, c]));
+  const subMap = new Map(SUBJECTS.map(s => [s.id, s]));
+  const expMap = new Map(EXPERIMENTS.map(e => [e.id, e]));
+  const sciMap = new Map(SCIENTISTS.map(s => [s.id, s]));
+
+  // ==========================================
+  // 当前状态
+  // ==========================================
+  let currentTopic = null; // { type:'category'|'subject'|'experiment', id:xxx }
+  let currentMode = 'prep'; // prep/teach/preview/review
+
+  // ==========================================
+  // 构建知识树
+  // ==========================================
+  function buildTree() {
+    const body = document.getElementById('tree-body');
+    body.innerHTML = '';
+
+    CATEGORIES.forEach(cat => {
+      // 分类标题
+      const gh = document.createElement('div');
+      gh.className = 'tree-group-header';
+      gh.innerHTML = `<span class="gh-dot" style="background:${cat.color}"></span>${cat.icon} ${cat.name}`;
+      body.appendChild(gh);
+
+      // 分类本身
+      appendTreeItem(body, cat.id, cat.icon, cat.name, 'category', cat.color);
+
+      // 子学科
+      const subs = SUBJECTS.filter(s => s.parent === cat.id);
+      subs.forEach(sub => {
+        const exps = EXPERIMENTS.filter(e => e.parent === sub.id);
+        appendTreeItem(body, sub.id, sub.icon, sub.name, 'subject', sub.color, exps.length);
+
+        // 实验
+        exps.forEach(exp => {
+          appendTreeItem(body, exp.id, '🧪', exp.name, 'experiment', '#2ecc71', null, true);
+        });
+      });
+    });
+
+    // 更新统计
+    document.getElementById('cnt-exp').textContent = EXPERIMENTS.length;
+    document.getElementById('cnt-sci').textContent = SCIENTISTS.length;
+  }
+
+  function appendTreeItem(parent, id, icon, name, type, color, badge, indent) {
+    const item = document.createElement('div');
+    item.className = 'tree-item';
+    item.dataset.id = id;
+    item.dataset.type = type;
+    if (indent) item.style.paddingLeft = '24px';
+    item.innerHTML = `
+      <span class="ti-icon">${icon}</span>
+      <span class="ti-name" style="color:${indent ? '' : color}">${name}</span>
+      ${badge ? `<span class="ti-badge">${badge}</span>` : ''}
+    `;
+    item.addEventListener('click', () => selectTopic(type, id));
+    parent.appendChild(item);
+  }
+
+  // ==========================================
+  // 选择知识点
+  // ==========================================
+  function selectTopic(type, id) {
+    currentTopic = { type, id };
+
+    // 高亮
+    document.querySelectorAll('.tree-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.id === id && el.dataset.type === type);
+    });
+
+    // 渲染内容
+    renderContent(type, id);
+    renderTimeline(type, id);
+  }
+
+  // ==========================================
+  // 渲染主内容
+  // ==========================================
+  function renderContent(type, id) {
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('topic-content').style.display = 'block';
+
+    const container = document.getElementById('topic-content');
+    let topicData, breadcrumb, experiments = [], scientists = [];
+
+    if (type === 'category') {
+      topicData = catMap.get(id);
+      const subs = SUBJECTS.filter(s => s.parent === id);
+      subs.forEach(sub => {
+        experiments.push(...EXPERIMENTS.filter(e => e.parent === sub.id));
+      });
+      breadcrumb = [{ name: topicData.name, type: 'category', id }];
+    } else if (type === 'subject') {
+      topicData = subMap.get(id);
+      const cat = catMap.get(topicData.parent);
+      experiments = EXPERIMENTS.filter(e => e.parent === id);
+      breadcrumb = [
+        { name: cat.name, type: 'category', id: cat.id },
+        { name: topicData.name, type: 'subject', id }
+      ];
+    } else if (type === 'experiment') {
+      topicData = expMap.get(id);
+      const sub = subMap.get(topicData.parent);
+      const cat = catMap.get(sub.parent);
+      experiments = [topicData];
+      breadcrumb = [
+        { name: cat.name, type: 'category', id: cat.id },
+        { name: sub.name, type: 'subject', id: sub.id },
+        { name: topicData.name, type: 'experiment', id }
+      ];
+    }
+
+    // 查找关联科学家
+    scientists = SCIENTISTS.filter(s =>
+      s.experiments.some(eid => experiments.some(e => e.id === eid))
+    );
+
+    // 构建 HTML
+    let h = '';
+
+    // 面包屑
+    h += '<div class="topic-breadcrumb">';
+    breadcrumb.forEach((bc, i) => {
+      if (i > 0) h += '<span class="bc-sep">›</span>';
+      h += `<span class="bc-link" onclick="selectTopic('${bc.type}','${bc.id}')">${bc.name}</span>`;
+    });
+    h += '</div>';
+
+    // 标题
+    h += `<div class="topic-header">
+      <div class="th-icon">${topicData.icon || '🧪'}</div>
+      <div>
+        <h1>${topicData.name}</h1>
+        <div class="th-sub">${topicData.desc || ''}</div>
+      </div>
+    </div>`;
+
+    // 模式标签
+    h += `<div class="mode-tabs">
+      <button class="mode-tab ${currentMode==='prep'?'active':''}" onclick="switchMode('prep')">📋 备课</button>
+      <button class="mode-tab ${currentMode==='teach'?'active':''}" onclick="switchMode('teach')">🎤 讲课</button>
+      <button class="mode-tab ${currentMode==='preview'?'active':''}" onclick="switchMode('preview')">📖 预习</button>
+      <button class="mode-tab ${currentMode==='review'?'active':''}" onclick="switchMode('review')">📝 复习</button>
+    </div>`;
+
+    // 模式内容
+    h += renderModeContent(type, topicData, experiments, scientists);
+
+    container.innerHTML = h;
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    if (currentTopic) renderContent(currentTopic.type, currentTopic.id);
+  }
+
+  // ==========================================
+  // 各模式内容
+  // ==========================================
+  function renderModeContent(type, topicData, experiments, scientists) {
+    const isExp = type === 'experiment';
+    const isSub = type === 'subject';
+    const isCat = type === 'category';
+
+    if (currentMode === 'prep') {
+      return `
+        <div class="kp-card">
+          <h3>🎯 教学目标</h3>
+          <ul>
+            <li>理解 ${topicData.name} 的核心概念与物理意义</li>
+            <li>${isExp ? '掌握实验原理与操作方法' : '掌握该领域的基本分析方法'}</li>
+            <li>能够运用所学知识解决相关问题</li>
+            ${isCat ? '<li>建立各子学科之间的知识联系</li>' : ''}
+            ${isSub ? '<li>理解该学科在物理学体系中的位置</li>' : ''}
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>📌 教学重点</h3>
+          <ul>
+            <li>${topicData.desc || topicData.name + '的基本概念'}</li>
+            ${isExp ? `<li>实验现象的观察与分析方法</li><li>关键参数对结果的影响</li>` : ''}
+            ${isSub ? `<li>该学科的核心理论与公式</li><li>典型物理现象的解释</li>` : ''}
+            ${isCat ? `<li>该领域的统一思想与方法论</li><li>各子学科之间的逻辑关系</li>` : ''}
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>⚠️ 教学难点</h3>
+          <ul>
+            <li>抽象概念的形象化理解</li>
+            ${isExp ? '<li>实验数据的处理与误差分析</li>' : ''}
+            ${isSub || isCat ? '<li>数学工具的适当运用</li>' : ''}
+            <li>物理直觉的培养与直觉陷阱的避免</li>
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>⏱️ 建议课时</h3>
+          <p>${isCat ? '8-12课时（含实验）' : isSub ? '3-5课时（含实验）' : '1-2课时'}</p>
+        </div>
+        ${renderExperimentLinks(experiments)}
+        ${renderScientistLinks(scientists)}
+      `;
+    }
+
+    if (currentMode === 'teach') {
+      return `
+        <div class="kp-card">
+          <h3>🎤 讲授提纲</h3>
+          <ul>
+            <li>引入：从日常生活或历史故事引入 ${topicData.name}</li>
+            <li>概念：核心定义与物理图像</li>
+            ${isExp ? '<li>演示：运行实验页面进行实时演示</li><li>分析：引导学生观察关键现象</li>' : ''}
+            ${isSub ? '<li>推导：核心公式推导过程</li><li>例题：典型问题的解题示范</li>' : ''}
+            ${isCat ? '<li>体系：构建知识框架图</li><li>联系：与其他物理分支的联系</li>' : ''}
+            <li>总结：回顾要点，提出思考</li>
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>💬 课堂提问设计</h3>
+          <ul>
+            <li>"你能用自己的语言描述${topicData.name}吗？"</li>
+            <li>"如果改变${isExp ? '实验参数' : '某个条件'}，结果会怎样？"</li>
+            <li>"${topicData.name}在现实中有哪些应用？"</li>
+            <li>"这个概念与之前学过的什么知识有联系？"</li>
+          </ul>
+        </div>
+        ${renderExperimentLinks(experiments)}
+        ${renderScientistLinks(scientists)}
+      `;
+    }
+
+    if (currentMode === 'preview') {
+      return `
+        <div class="kp-card">
+          <h3>📖 预习要求</h3>
+          <ul>
+            <li>阅读教材相关章节，了解 ${topicData.name} 的基本概念</li>
+            <li>${isExp ? '了解实验目的、原理和步骤' : '梳理核心知识点清单'}</li>
+            <li>标记不理解的内容，带着问题听课</li>
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>✅ 预习自测</h3>
+          <ul>
+            <li>${topicData.name} 的定义是什么？</li>
+            <li>${topicData.desc || '其核心特征是什么？'}</li>
+            <li>${isExp ? '该实验需要测量哪些物理量？' : '涉及哪些基本公式？'}</li>
+            <li>${isSub || isCat ? '该知识领域解决了什么物理问题？' : '该知识的适用条件是什么？'}</li>
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>🔑 关键术语</h3>
+          <ul>
+            <li>${topicData.name} — ${topicData.desc || '核心概念'}</li>
+            ${experiments.slice(0, 3).map(e => `<li>${e.name} — ${e.desc}</li>`).join('')}
+          </ul>
+        </div>
+        ${renderExperimentLinks(experiments)}
+      `;
+    }
+
+    if (currentMode === 'review') {
+      return `
+        <div class="kp-card">
+          <h3>📝 知识梳理</h3>
+          <ul>
+            <li>${topicData.name}: ${topicData.desc || '核心概念回顾'}</li>
+            ${experiments.slice(0, 5).map(e => `<li>${e.name}: ${e.desc}</li>`).join('')}
+            ${scientists.slice(0, 3).map(s => `<li>${s.name} (${s.years}): ${s.desc}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>❌ 常见误区</h3>
+          <ul>
+            <li>混淆 ${topicData.name} 与相似概念的区别</li>
+            <li>忽略物理量的单位和量纲</li>
+            ${isExp ? '<li>实验操作中的常见错误</li>' : ''}
+            <li>公式适用条件的误用</li>
+          </ul>
+        </div>
+        <div class="kp-card">
+          <h3>🧪 拓展练习</h3>
+          <ul>
+            <li>分析一个与 ${topicData.name} 相关的实际问题</li>
+            ${isExp ? `<li>改变实验参数，预测并验证结果</li>` : '<li>推导相关公式并理解物理含义</li>'}
+            <li>查阅文献，了解最新研究进展</li>
+          </ul>
+        </div>
+        ${renderExperimentLinks(experiments)}
+        ${renderScientistLinks(scientists)}
+      `;
+    }
+  }
+
+  // ==========================================
+  // 实验链接
+  // ==========================================
+  function renderExperimentLinks(experiments) {
+    if (!experiments.length) return '';
+    return `
+      <div class="kp-card">
+        <h3>🧪 关联实验 (${experiments.length})</h3>
+        ${experiments.map(e => `
+          <a class="exp-link-card" href="${e.target}?theme=${getCurrentTheme()}" target="_blank">
+            <span class="elc-icon">🧪</span>
+            <div class="elc-info">
+              <div class="elc-name">${e.name}</div>
+              <div class="elc-desc">${e.desc}</div>
+            </div>
+            <span class="elc-arrow">→</span>
+          </a>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // 科学家链接
+  // ==========================================
+  function renderScientistLinks(scientists) {
+    if (!scientists.length) return '';
+    return `
+      <div class="kp-card">
+        <h3>👨‍🔬 相关科学家 (${scientists.length})</h3>
+        ${scientists.map(s => `
+          <div class="sci-mini-card" onclick="selectTopic('experiment','${s.experiments[0]}')">
+            <span class="smc-icon">${s.icon}</span>
+            <div style="flex:1">
+              <div class="smc-name">${s.name} <span style="font-size:.66rem;color:var(--text-muted)">(${s.years})</span></div>
+              <div class="smc-desc">${s.desc}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // 右侧时间线
+  // ==========================================
+  function renderTimeline(type, id) {
+    const body = document.getElementById('rp-body');
+    let timelineItems = [];
+
+    if (type === 'experiment') {
+      const exp = expMap.get(id);
+      timelineItems.push({ year: exp.year, title: exp.name, desc: exp.history });
+      // 添加相关科学家
+      SCIENTISTS.filter(s => s.experiments.includes(id)).forEach(s => {
+        const birthYear = parseInt(s.years.match(/\d{4}/)?.[0] || '0');
+        timelineItems.push({ year: birthYear, title: s.name + ' 出生', desc: s.desc });
+      });
+    } else if (type === 'subject') {
+      const subs = EXPERIMENTS.filter(e => e.parent === id);
+      subs.forEach(e => {
+        timelineItems.push({ year: e.year, title: e.name, desc: e.history });
+      });
+    } else if (type === 'category') {
+      const cat = catMap.get(id);
+      const subs = SUBJECTS.filter(s => s.parent === id);
+      subs.forEach(sub => {
+        const exps = EXPERIMENTS.filter(e => e.parent === sub.id);
+        exps.forEach(e => {
+          timelineItems.push({ year: e.year, title: e.name, desc: `${sub.name}: ${e.history}` });
+        });
+      });
+    }
+
+    // 按年份排序
+    timelineItems.sort((a, b) => a.year - b.year);
+
+    if (!timelineItems.length) {
+      body.innerHTML = `<div class="empty-state"><div class="es-icon">⏳</div><div class="es-text">暂无历史数据</div></div>`;
+      return;
+    }
+
+    body.innerHTML = '<div class="timeline">' +
+      timelineItems.map(item => `
+        <div class="tl-item">
+          <div class="tl-year">${item.year}</div>
+          <div class="tl-title">${item.title}</div>
+          <div class="tl-desc">${item.desc}</div>
+        </div>
+      `).join('') + '</div>';
+  }
+
+  // ==========================================
+  // 搜索
+  // ==========================================
+  document.getElementById('tree-search').addEventListener('input', e => {
+    const term = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.tree-item').forEach(item => {
+      const name = item.querySelector('.ti-name').textContent.toLowerCase();
+      item.style.display = !term || name.includes(term) ? '' : 'none';
+    });
+  });
+
+  // ==========================================
+  // 工具函数
+  // ==========================================
+  function getCurrentTheme() {
+    try {
+      const t = localStorage.getItem('psu-theme-v1');
+      return (window.PSUTheme?.themes || []).includes(t) ? t : 'academic';
+    } catch(e) { return 'academic'; }
+  }
+
+  // 暴露给全局
+  window.selectTopic = selectTopic;
+  window.switchMode = switchMode;
+
+  // ==========================================
+  // 初始化
+  // ==========================================
+  buildTree();
+
+  // 默认选择第一个分类
+  setTimeout(() => selectTopic('category', 'classical'), 100);
+  </script>
+</body>
+</html>

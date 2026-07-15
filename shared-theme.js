@@ -130,6 +130,13 @@
     if (currentPage === 'taxonomy.html') taxLink.classList.add('active');
     nav.appendChild(taxLink);
 
+    // Teacher prep
+    const teachLink = document.createElement('a');
+    teachLink.href = 'teacher-prep.html';
+    teachLink.textContent = '教师备课';
+    if (currentPage === 'teacher-prep.html') teachLink.classList.add('active');
+    nav.appendChild(teachLink);
+
     // Library dropdown
     const libDropdown = document.createElement('div');
     libDropdown.className = 'nav-dropdown';
