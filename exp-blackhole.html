@@ -2,63 +2,324 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>黑洞吸积盘 - 物理沙盒宇宙</title>
     <link rel="stylesheet" href="shared-theme.css">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
-        #info {
-            position: absolute; top: 10px; left: 10px; color: #fff;
-            font-family: monospace; font-size: 12px; z-index: 100;
-            pointer-events: none;
-        }
-        #bh-ui {
-            position: absolute; top: 80px; left: 30px; width: 320px; padding: 18px;
-            z-index: 10; font-family: 'Courier New', monospace; color: #ccc;
-        }
-        .bh-slider-group { margin-bottom: 14px; }
-        .bh-slider-group label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 4px; }
-        .bh-val { color: #60a5fa; font-weight: bold; }
-        input[type=range] { width: 100%; cursor: pointer; accent-color: #3b82f6; }
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif; }
+        canvas { display: block; }
+        #bh-canvas-container { position: fixed; inset: 0; z-index: 0; }
 
-        /* Theme overrides */
-        [data-theme="academic"] #bh-ui { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; color: #1a1a2e; }
-        [data-theme="academic"] .bh-val { color: #1a1a2e; }
-        [data-theme="academic"] input[type=range] { accent-color: #6b8cae; }
-        [data-theme="cartoon"] #bh-ui { background: rgba(254,246,228,0.92); border: 2px solid rgba(255,107,107,0.3); border-radius: 16px; color: #2d3436; }
-        [data-theme="cartoon"] .bh-val { color: #ff6b6b; }
-        [data-theme="glass"] #bh-ui { background: rgba(15,17,23,0.85); border: 1px solid rgba(116,185,255,0.2); border-radius: 12px; color: #e0e6ed; }
-        [data-theme="glass"] .bh-val { color: #74b9ff; }
-        [data-theme="cyber"] #bh-ui { background: rgba(10,0,20,0.9); border: 1px solid rgba(189,0,255,0.3); border-radius: 8px; color: #f0e6ff; box-shadow: 0 0 20px rgba(189,0,255,0.1); }
-        [data-theme="cyber"] .bh-val { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,0.3); }
-        [data-theme="cyber"] input[type=range] { accent-color: #bd00ff; }
-        [data-theme="soviet"] #bh-ui { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; backdrop-filter: none; color: #1a1a1a; }
-        [data-theme="soviet"] .bh-val { color: #c41e1e; }
-        [data-theme="soviet"] input[type=range] { accent-color: #c41e1e; }
+        #loading {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.9); font-size: 1.1rem; font-weight: 300;
+            letter-spacing: 2px; z-index: 1000; pointer-events: none; transition: opacity 0.5s;
+            text-shadow: 0 0 10px rgba(116, 185, 255, 0.5);
+        }
+
+        /* ===== 左侧参数面板 ===== */
+        #bh-ui {
+            position: absolute; top: 70px; left: 20px; width: 310px;
+            z-index: 10; max-height: calc(100vh - 100px);
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: var(--theme-transition, background-color .5s, border-color .4s);
+        }
+        #bh-ui .lp-header {
+            padding: 12px 16px; border-bottom: 1px solid var(--panel-border, rgba(116,185,255,0.15));
+            display: flex; align-items: center; gap: 8px;
+        }
+        #bh-ui .lp-header .ic {
+            width: 32px; height: 32px; border-radius: var(--radius, 8px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        #bh-ui .lp-header h1 {
+            margin: 0; font-size: .92rem; font-weight: 700;
+        }
+        #bh-ui .lp-header .sub {
+            font-size: .68rem; color: var(--text-muted, #64748b); margin-top: 1px;
+        }
+        #bh-ui .lp-body {
+            flex: 1; overflow-y: auto; padding: 14px 16px;
+        }
+        #bh-ui .lp-body::-webkit-scrollbar { width: 4px; }
+        #bh-ui .lp-body::-webkit-scrollbar-thumb { background: var(--panel-border, rgba(116,185,255,0.3)); border-radius: 2px; }
+
+        .section-label {
+            font-family: monospace; font-size: .65rem; font-weight: 400;
+            text-transform: uppercase; letter-spacing: 2px;
+            color: var(--accent-1, #74b9ff); margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .section-label::before {
+            content: ''; width: 3px; height: 12px; background: var(--accent-1, #74b9ff);
+            border-radius: 2px; flex-shrink: 0;
+        }
+
+        .mode-selector { margin-bottom: 14px; }
+        .mode-selector select {
+            width: 100%; padding: 7px 10px; background: transparent;
+            color: var(--text-color, #e0e6ed);
+            border: 1px solid var(--panel-border, rgba(116, 185, 255, 0.25));
+            border-radius: var(--radius, 8px);
+            font-size: .8rem; outline: none; cursor: pointer;
+            font-family: inherit; font-weight: 600;
+            transition: var(--theme-transition, all .3s);
+        }
+        .mode-selector select:focus { border-color: var(--accent-1, #74b9ff); }
+
+        .bh-slider-group { margin-bottom: 12px; }
+        .bh-slider-group label {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: .78rem; margin-bottom: 4px; font-weight: 500;
+            color: var(--text-color, #e0e6ed);
+        }
+        .bh-val {
+            color: var(--accent-1, #74b9ff);
+            font-family: monospace; font-size: .78rem; font-weight: 700;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; height: 4px;
+            border-radius: 2px; background: var(--panel-border, rgba(255,255,255,0.15));
+            cursor: pointer; transition: background .4s;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
+            background: var(--accent-1, #74b9ff); cursor: pointer;
+            box-shadow: 0 0 8px rgba(116, 185, 255, 0.6); transition: transform 0.1s;
+        }
+        input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+        input[type=range]::-moz-range-thumb {
+            height: 14px; width: 14px; border-radius: 50%; border: none;
+            background: var(--accent-1, #74b9ff); cursor: pointer;
+        }
+
+        .toggle-container {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: .78rem; font-weight: 500; margin-top: 8px; padding-top: 8px;
+            border-top: 1px solid var(--panel-border, rgba(255, 255, 255, 0.08));
+            color: var(--text-color, #e0e6ed);
+        }
+        .toggle-switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider-tg {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--panel-border, rgba(255,255,255,0.1));
+            transition: .3s; border-radius: 20px;
+        }
+        .slider-tg:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: var(--text-muted, #8b9bb4); transition: .3s; border-radius: 50%;
+        }
+        input:checked + .slider-tg {
+            background-color: var(--accent-1, #0984e3);
+        }
+        input:checked + .slider-tg:before {
+            transform: translateX(18px); background-color: #fff;
+        }
+        .jet-label { color: var(--accent-2, #a29bfe); }
+
+        /* ===== 右侧知识面板 ===== */
+        #knowledge-panel {
+            position: absolute; top: 70px; right: 20px; width: 330px;
+            max-height: calc(100vh - 100px);
+            z-index: 10; display: flex; flex-direction: column; overflow: hidden;
+            transition: var(--theme-transition, background-color .5s, border-color .4s);
+        }
+        #knowledge-panel .kp-header {
+            padding: 12px 16px; border-bottom: 1px solid var(--panel-border, rgba(116,185,255,0.15));
+            display: flex; align-items: center; gap: 8px;
+        }
+        #knowledge-panel .kp-header .ic {
+            width: 32px; height: 32px; border-radius: var(--radius, 8px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        #knowledge-panel .kp-header h2 {
+            margin: 0; font-size: .92rem; font-weight: 700;
+        }
+        #knowledge-panel .kp-header .sub {
+            font-size: .68rem; color: var(--text-muted, #64748b); margin-top: 1px;
+        }
+        #knowledge-panel .kp-body {
+            flex: 1; overflow-y: auto; padding: 14px 16px;
+            font-size: .8rem; line-height: 1.7;
+        }
+        #knowledge-panel .kp-body::-webkit-scrollbar { width: 4px; }
+        #knowledge-panel .kp-body::-webkit-scrollbar-thumb { background: var(--panel-border, rgba(116,185,255,0.3)); border-radius: 2px; }
+
+        .k-section { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--panel-border, rgba(255,255,255,0.06)); }
+        .k-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .k-section h3 {
+            font-size: .82rem; margin: 0 0 5px 0; font-weight: 700;
+            color: var(--accent-1, #74b9ff);
+        }
+        .k-section p {
+            margin: 0 0 6px 0; color: var(--text-muted, #b2becd);
+            font-size: .76rem; line-height: 1.65; text-align: justify;
+        }
+        .formula {
+            background: rgba(128,128,128,0.06); padding: 8px 10px; border-radius: var(--radius, 8px);
+            text-align: center; margin: 8px 0; border: 1px solid var(--panel-border, rgba(255,255,255,0.06));
+            color: var(--text-color, #fff); font-size: .82rem; overflow-x: auto;
+        }
+        .history-tag {
+            display: inline-block; background: rgba(162, 155, 254, 0.12);
+            color: var(--accent-2, #a29bfe); padding: 2px 8px; border-radius: 10px;
+            font-size: .68rem; margin-bottom: 6px; font-weight: 500;
+            border: 1px solid rgba(162, 155, 254, 0.25);
+        }
+
+        /* ===== 顶部状态栏 ===== */
+        .stats-top {
+            position: fixed; top: 54px; left: 50%; transform: translateX(-50%);
+            z-index: 10; display: flex; align-items: center; gap: 12px;
+            padding: 4px 16px; font-size: .72rem; font-family: monospace;
+            border-radius: 50px;
+        }
+        .stats-top .sep { width:1px; height:12px; background: var(--panel-border, rgba(255,255,255,0.1)); }
+        .stats-top .val { font-weight: 700; }
+
+        /* ===== 主题特化 ===== */
+        [data-theme="cartoon"] .k-section h3 { color: var(--accent-1); }
+        [data-theme="cartoon"] #bh-ui .lp-header .ic { background: rgba(255,107,107,.12); }
+        [data-theme="cartoon"] #bh-ui .lp-header h1 { color: var(--accent-1); }
+        [data-theme="cartoon"] #knowledge-panel .kp-header .ic { background: rgba(78,205,196,.12); }
+        [data-theme="cartoon"] #knowledge-panel .kp-header h2 { color: var(--accent-2); }
+        [data-theme="glass"] .k-section h3 { color: #74b9ff; }
+        [data-theme="glass"] #bh-ui .lp-header .ic { background: rgba(116,185,255,.12); }
+        [data-theme="glass"] #bh-ui .lp-header h1 { color: #ff6b6b; }
+        [data-theme="glass"] #knowledge-panel .kp-header .ic { background: rgba(116,185,255,.12); }
+        [data-theme="glass"] #knowledge-panel .kp-header h2 { color: #74b9ff; }
+        [data-theme="cyber"] .k-section h3 { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,.3); }
+        [data-theme="cyber"] #bh-ui .lp-header .ic { background: rgba(189,0,255,.15); }
+        [data-theme="cyber"] #bh-ui .lp-header h1 { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.4); }
+        [data-theme="cyber"] #knowledge-panel .kp-header .ic { background: rgba(189,0,255,.15); }
+        [data-theme="cyber"] #knowledge-panel .kp-header h2 { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,.3); }
+        [data-theme="academic"] .k-section h3 { color: var(--accent-1); }
+        [data-theme="academic"] #bh-ui .lp-header .ic { background: rgba(107,140,174,.12); }
+        [data-theme="academic"] #bh-ui .lp-header h1 { color: #1a1a2e; }
+        [data-theme="academic"] #knowledge-panel .kp-header .ic { background: rgba(107,140,174,.12); }
+        [data-theme="academic"] #knowledge-panel .kp-header h2 { color: var(--accent-1); }
+        [data-theme="soviet"] .k-section h3 { color: var(--accent-1); }
+        [data-theme="soviet"] #bh-ui .lp-header .ic { background: rgba(196,30,30,.1); }
+        [data-theme="soviet"] #bh-ui .lp-header h1 { color: var(--accent-1); }
+        [data-theme="soviet"] #knowledge-panel .kp-header .ic { background: rgba(196,30,30,.1); }
+        [data-theme="soviet"] #knowledge-panel .kp-header h2 { color: var(--accent-1); }
+
+        /* ===== 移动端 ===== */
+        @media (max-width: 900px) {
+            #knowledge-panel { display: none; }
+            #bh-ui { width: calc(100vw - 40px); max-width: 340px; }
+        }
+        @media (max-width: 600px) {
+            #bh-ui { top: auto; bottom: 20px; left: 15px; right: 15px; width: auto; max-width: none; }
+            .stats-top { font-size: .65rem; gap: 8px; padding: 3px 12px; }
+        }
     </style>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
-    <div id="info">正在初始化 WebGL 与 GPGPU 计算环境...</div>
+    <div id="loading">初始化双引擎渲染管线中...</div>
+    <div id="bh-canvas-container"></div>
 
-    <div id="bh-ui" class="glass-panel">
-        <div style="font-size:1rem; font-weight:bold; margin-bottom:12px; color:inherit;">🌌 黑洞吸积盘</div>
-        <div class="bh-slider-group">
-            <label><span>粒子流速</span><span id="val-speed" class="bh-val">1.00x</span></label>
-            <input type="range" id="slider-speed" min="0.05" max="3.0" step="0.05" value="1.0">
-        </div>
-        <div class="bh-slider-group">
-            <label><span>多普勒强度</span><span id="val-doppler" class="bh-val">1.20</span></label>
-            <input type="range" id="slider-doppler" min="0" max="3.0" step="0.1" value="1.2">
-        </div>
-        <div class="bh-slider-group">
-            <label><span>黑洞质量</span><span id="val-gmass" class="bh-val">2.50</span></label>
-            <input type="range" id="slider-gmass" min="0.5" max="8.0" step="0.1" value="2.5">
-        </div>
-        <div class="bh-slider-group">
-            <label><span>引力透镜</span><span id="val-lensing" class="bh-val">ON</span></label>
-            <input type="range" id="slider-lensing" min="0" max="1" step="1" value="1">
-        </div>
+    <!-- 顶部状态栏 -->
+    <div class="stats-top glass-panel">
+        <span>引擎: <strong class="val" id="stats-engine" style="color:var(--accent-1)">Raymarching</strong></span>
+        <span class="sep"></span>
+        <span>FPS: <strong class="val" id="stats-fps" style="color:var(--accent-4)">60</strong></span>
+        <span class="sep"></span>
+        <span>透镜: <strong class="val" id="stats-lensing" style="color:var(--accent-2)">ON</strong></span>
+        <span class="sep"></span>
+        <span>喷流: <strong class="val" id="stats-jets" style="color:var(--accent-2)">ON</strong></span>
     </div>
+
+    <!-- 左侧参数面板 -->
+    <aside id="bh-ui" class="glass-panel">
+        <div class="lp-header">
+            <div class="ic">🌌</div>
+            <div>
+                <h1>Gargantua 模拟器</h1>
+                <div class="sub">双引擎 · 体积测地线 · GPGPU粒子</div>
+            </div>
+        </div>
+        <div class="lp-body">
+            <div class="section-label">渲染引擎</div>
+            <div class="mode-selector">
+                <select id="engine-mode">
+                    <option value="raymarch">模式 A: 连续体积测地线追踪 (Raymarching)</option>
+                    <option value="particle">模式 B: GPGPU 离散粒子演化 (Particles)</option>
+                </select>
+            </div>
+
+            <div class="section-label">物理参数</div>
+            <div class="bh-slider-group">
+                <label><span>黑洞质量 (引力半径)</span><span id="val-gmass" class="bh-val">1.00 Rs</span></label>
+                <input type="range" id="slider-gmass" min="0.5" max="2.0" step="0.05" value="1.0">
+            </div>
+            <div class="bh-slider-group">
+                <label><span>吸积盘自转流速</span><span id="val-speed" class="bh-val">1.00 c</span></label>
+                <input type="range" id="slider-speed" min="0.0" max="3.0" step="0.1" value="1.0">
+            </div>
+            <div class="bh-slider-group">
+                <label><span>多普勒集束强度</span><span id="val-doppler" class="bh-val">2.00</span></label>
+                <input type="range" id="slider-doppler" min="0.0" max="4.0" step="0.1" value="2.0">
+            </div>
+
+            <div class="section-label">视觉特效</div>
+            <div class="toggle-container">
+                <span>引力透镜弯曲</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="slider-lensing" checked>
+                    <span class="slider-tg"></span>
+                </label>
+            </div>
+            <div class="toggle-container" style="border-top: none; margin-top: 4px; padding-top: 0;">
+                <span class="jet-label">两极相对论性喷流</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="slider-jets" checked>
+                    <span class="slider-tg"></span>
+                </label>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 右侧知识面板 -->
+    <aside id="knowledge-panel" class="glass-panel">
+        <div class="kp-header">
+            <div class="ic">📐</div>
+            <div>
+                <h2>理论物理与天文史</h2>
+                <div class="sub">公式讲解 · 历史脉络 · 科学家档案</div>
+            </div>
+        </div>
+        <div class="kp-body">
+            <div class="k-section">
+                <h3>1. 史瓦西半径</h3>
+                <div class="history-tag">1916年 · 卡尔·史瓦西</div>
+                <p>一战期间，史瓦西在德军前线给出了爱因斯坦场方程的第一个精确解，定义了不旋转黑洞的事件视界边界。任何物质（包括光）进入此范围都将无法逃逸。</p>
+                <div class="formula">\[ R_s = \frac{2GM}{c^2} \]</div>
+            </div>
+            <div class="k-section">
+                <h3>2. 强引力透镜</h3>
+                <div class="history-tag">1919年 · 爱丁顿</div>
+                <p>大质量天体会严重扭曲周围时空，迫使光线沿测地线弯折。这就是为什么你能看到本应被黑洞遮挡的背面吸积盘——它们的光线被引力场弯折后射入你的眼睛。</p>
+                <div class="formula">\[ \alpha \approx \frac{4GM}{rc^2} \]</div>
+            </div>
+            <div class="k-section">
+                <h3>3. 相对论性多普勒集束</h3>
+                <div class="history-tag">1979年 · M87星系喷流观测</div>
+                <p>吸积盘物质以极高速度旋转。朝向你运动的物质侧光度被指数级放大（蓝移极亮），背离侧严重削弱（红移极暗），导致M87*首张黑洞照片呈现不对称"新月形"光环。</p>
+                <div class="formula">\[ D = \frac{1}{\gamma(1 - \beta \cos\theta)} \]</div>
+            </div>
+            <div class="k-section">
+                <h3>4. 相对论性喷流</h3>
+                <div class="history-tag">1977年 · Blandford-Znajek 机制</div>
+                <p>高自旋黑洞通过能层的参考系拖拽效应，极度扭曲穿过其周围的强磁场。此过程像巨型发电机一样将黑洞旋转动能提取出来，将等离子体以接近光速向两极猛烈喷射。</p>
+            </div>
+        </div>
+    </aside>
 
     <script src="shared-theme.js"></script>
     <script type="importmap">
@@ -69,7 +330,6 @@
             }
         }
     </script>
-
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -78,332 +338,467 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-        // 物理与渲染参数标定
-        const PARAMS = {
-            PARTICLE_RES: 512, // 512x512 = 262,144 粒子
-            BH_RADIUS: 1.0,    // 史瓦西半径 R
-            DISK_MIN: 1.5,     // 吸积盘内边缘 1.5R
-            DISK_MAX: 5.0,     // 吸积盘外边缘 5.0R
-            G_MASS: 2.5,       // 引力系数常数近似
-            DOPPLER_FACTOR: 1.2// 多普勒频移视觉缩放系数
-        };
+        // ==========================================
+        // 模式A：体积光线追踪着色器 (Raymarching)
+        // ==========================================
+        const rmVertexShader = `
+            varying vec2 vUv;
+            void main() { vUv = uv; gl_Position = vec4(position, 1.0); }
+        `;
 
-        let scene, camera, renderer, composer, controls;
-        let gpuCompute, posVariable, velVariable;
-        let particleSystem;
-        let lensingPass;
-        
-        // GPGPU: 速度更新着色器
+        const rmFragmentShader = `
+            #define MAX_STEPS 200
+            #define MAX_DIST 40.0
+            #define PI 3.14159265359
+
+            varying vec2 vUv;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+            uniform vec3 u_cameraPos;
+            uniform mat4 u_cameraWorldMatrix;
+            uniform mat4 u_cameraProjectionMatrixInverse;
+            uniform float u_mass;
+            uniform float u_speed;
+            uniform float u_doppler;
+            uniform int u_lensing;
+            uniform int u_jets;
+
+            float hash(vec2 p) {
+                p = fract(p * vec2(123.34, 456.21));
+                p += dot(p, p + 45.32);
+                return fract(p.x * p.y);
+            }
+
+            float noise(vec2 p) {
+                vec2 i = floor(p); vec2 f = fract(p);
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+                           mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+            }
+
+            mat2 rot(float a) { float s = sin(a), c = cos(a); return mat2(c, -s, s, c); }
+
+            float fbm(vec2 p) {
+                float v = 0.0; float a = 0.5;
+                for(int i = 0; i < 4; i++) { v += a * noise(p); p = p * 2.0 * rot(0.5); a *= 0.5; }
+                return v;
+            }
+
+            vec3 getBackground(vec3 dir) {
+                vec2 uv = vec2(atan(dir.z, dir.x), asin(dir.y));
+                float s = hash(uv * 200.0);
+                float star = smoothstep(0.995, 1.0, s) * 2.0;
+                float band = exp(-abs(dir.y) * 8.0) * fbm(uv * 5.0) * 0.4;
+                return vec3(star) + vec3(0.1, 0.2, 0.5) * band;
+            }
+
+            void main() {
+                vec2 ndc = vUv * 2.0 - 1.0;
+                vec4 target = u_cameraProjectionMatrixInverse * vec4(ndc, 1.0, 1.0);
+                vec3 rayDir = (u_cameraWorldMatrix * vec4(normalize(target.xyz / target.w), 0.0)).xyz;
+                vec3 ro = u_cameraPos; vec3 rd = normalize(rayDir);
+                vec3 col = vec3(0.0); float totalAlpha = 0.0;
+
+                vec3 L = cross(ro, rd); float h2 = dot(L, L);
+                float rs = u_mass;
+                vec3 p = ro; vec3 v = rd; float dt = 0.05;
+                float diskInner = rs * 2.2;
+                float diskOuter = rs * 12.0;
+
+                for(int i = 0; i < MAX_STEPS; i++) {
+                    float r = length(p);
+                    if(r < rs) { col += vec3(0.0); totalAlpha = 1.0; break; }
+                    if(r > MAX_DIST) { col += getBackground(v) * (1.0 - totalAlpha); break; }
+
+                    vec3 p_next; vec3 v_next;
+                    if (u_lensing == 1) {
+                        vec3 accel = -1.5 * rs * h2 * p / pow(r, 5.0);
+                        v_next = normalize(v + accel * dt);
+                        p_next = p + v_next * dt;
+                    } else {
+                        v_next = v; p_next = p + v * dt;
+                    }
+
+                    // 吸积盘相交检测
+                    if(sign(p.y) != sign(p_next.y)) {
+                        float t = abs(p.y) / (abs(p.y) + abs(p_next.y));
+                        vec3 hit = mix(p, p_next, t);
+                        float hr = length(hit);
+                        if(hr > diskInner && hr < diskOuter) {
+                            vec3 diskVel = normalize(vec3(-hit.z, 0.0, hit.x)) * sqrt(rs / (2.0 * hr));
+                            float doppler = dot(-v, diskVel);
+                            float D = sqrt((1.0 + doppler) / max(1.0 - doppler, 0.01));
+                            D = pow(D, u_doppler + 1.0);
+                            float angle = atan(hit.z, hit.x);
+                            float omega = u_speed * 1.5 * pow(rs / hr, 1.5);
+                            vec2 uv = vec2(hr * 2.0, angle * 3.0 - u_time * omega);
+                            float n = fbm(uv * 2.0);
+                            float density = smoothstep(diskOuter, diskOuter - rs * 3.0, hr) *
+                                            smoothstep(diskInner, diskInner + rs * 0.8, hr);
+                            density *= (n * 0.8 + 0.2);
+                            float temp = smoothstep(diskOuter, diskInner, hr);
+                            vec3 baseColor = mix(vec3(0.9, 0.3, 0.0), vec3(1.0, 0.95, 1.0), temp);
+                            vec3 shiftColor = mix(vec3(1.0, 0.1, 0.0), vec3(0.2, 0.6, 1.0), (doppler + 1.0) * 0.5);
+                            vec3 finalColor = mix(baseColor, shiftColor, 0.6) * D * 5.0;
+                            float alphaSample = density * 0.8;
+                            col += finalColor * alphaSample * (1.0 - totalAlpha);
+                            totalAlpha += alphaSample * (1.0 - totalAlpha);
+                        }
+                    }
+
+                    // 相对论喷流
+                    if (u_jets == 1) {
+                        float r_cyl = length(p.xz);
+                        float y_abs = abs(p.y);
+                        float jetRadius = rs * 0.4 + pow(y_abs * 0.1, 1.5);
+                        if (r_cyl < jetRadius && y_abs > rs * 0.9 && y_abs < 25.0) {
+                            vec3 jetVel = vec3(0.0, sign(p.y) * 0.95, 0.0);
+                            float dopplerJet = dot(-v, jetVel);
+                            float Dj = sqrt((1.0 + dopplerJet) / max(1.0 - dopplerJet, 0.01));
+                            Dj = pow(Dj, u_doppler * 0.8 + 1.0);
+                            float intensity = smoothstep(jetRadius, 0.0, r_cyl) * exp(-y_abs * 0.15);
+                            float swirl = fbm(vec2(r_cyl * 5.0, p.y * 2.0 - u_time * sign(p.y) * 5.0));
+                            intensity *= (swirl * 0.5 + 0.5);
+                            vec3 jetColor = vec3(0.4, 0.2, 1.0) * mix(vec3(1.0), vec3(0.4, 0.8, 1.0), swirl);
+                            jetColor *= intensity * Dj * 8.0;
+                            float alphaSample = intensity * 0.06;
+                            col += jetColor * alphaSample * (1.0 - totalAlpha);
+                            totalAlpha += alphaSample * (1.0 - totalAlpha);
+                        }
+                    }
+
+                    p = p_next; v = v_next;
+                    float stepSize = max(0.01, r * 0.03);
+                    if (u_jets == 1 && length(p.xz) < rs * 2.0) stepSize *= 0.5;
+                    dt = stepSize;
+                    if(totalAlpha >= 0.99) break;
+                }
+
+                col = col / (1.0 + col * 0.4);
+                col = pow(col, vec3(1.0 / 2.2));
+                gl_FragColor = vec4(col, 1.0);
+            }
+        `;
+
+        // ==========================================
+        // 模式B：GPGPU 粒子更新着色器
+        // ==========================================
         const computeVelocityShader = `
             #define PI 3.14159265359
-            uniform float u_GM;
-            uniform float u_R;
-            uniform float u_Time;
+            uniform float u_GM; uniform float u_R; uniform float u_Time; uniform float u_JetsEnabled;
 
-            // 伪随机与噪声函数
-            float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
-            
             void main() {
                 vec2 uv = gl_FragCoord.xy / resolution.xy;
                 vec4 posData = texture2D(texturePosition, uv);
                 vec4 velData = texture2D(textureVelocity, uv);
-                
-                vec3 pos = posData.xyz;
-                vec3 vel = velData.xyz;
-                
+                vec3 pos = posData.xyz; vec3 vel = velData.xyz;
                 float r = length(pos);
-                if(r < u_R || r > 6.0) {
-                    // 生命周期终结或逃逸，重置速度
-                    vel = vec3(0.0);
+                bool isJet = uv.y > 0.85;
+
+                if (isJet) {
+                    if (u_JetsEnabled < 0.5 || pos.y == 9999.0) {
+                        vel = vec3(0.0);
+                    } else {
+                        float y_sign = sign(pos.y);
+                        vec3 outward = vec3(pos.x * 0.5, y_sign * 20.0 * sqrt(u_GM), pos.z * 0.5);
+                        vec3 twist = cross(vec3(0.0, y_sign, 0.0), pos) * 15.0;
+                        vel = outward + twist + vec3(sin(u_Time+pos.y)*0.5, 0.0, cos(u_Time-pos.y)*0.5);
+                    }
                 } else {
-                    // 开普勒轨道速度近似: v = sqrt(GM/r)
-                    float vMag = sqrt(u_GM / r);
-                    
-                    // 计算切向向量 (基于 Y 轴旋转)
-                    vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), pos));
-                    
-                    // 向心吸积漂移 (随距离黑洞变近而加速)
-                    vec3 inward = -normalize(pos) * (0.05 / (r - u_R + 0.1));
-                    
-                    // 添加微小湍流扰动
-                    vec3 noiseVec = vec3(
-                        sin(pos.z * 10.0 + u_Time) * 0.02,
-                        cos(pos.x * 12.0 - u_Time) * 0.05, // 垂直于盘面的轻微波动
-                        cos(pos.x * 10.0 + u_Time) * 0.02
-                    );
-                    
-                    // 速度合成
-                    vel = tangent * vMag + inward + noiseVec;
+                    if(r < u_R || r > 8.0) {
+                        vel = vec3(0.0);
+                    } else {
+                        float vMag = sqrt(u_GM / r);
+                        vec3 tangent = normalize(cross(vec3(0.0, 1.0, 0.0), pos));
+                        vec3 inward = -normalize(pos) * (0.05 / max(r - u_R, 0.1));
+                        vel = tangent * vMag * 1.5 + inward;
+                    }
                 }
-                
                 gl_FragColor = vec4(vel, 1.0);
             }
         `;
 
-        // GPGPU: 位置更新着色器
         const computePositionShader = `
-            uniform float u_R;
-            uniform float u_DiskMin;
-            uniform float u_DiskMax;
-            uniform float u_Speed;
-            
+            uniform float u_R; uniform float u_DiskMin; uniform float u_DiskMax;
+            uniform float u_Speed; uniform float u_JetsEnabled;
             float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 
             void main() {
                 vec2 uv = gl_FragCoord.xy / resolution.xy;
-                vec4 posData = texture2D(texturePosition, uv);
-                vec3 pos = posData.xyz;
-                
-                vec4 velData = texture2D(textureVelocity, uv);
-                vec3 vel = velData.xyz;
-                
-                pos += vel * 0.016 * u_Speed;
-                
-                float r = length(pos);
-                // 粒子落入视界或飞离吸积盘，进行重置
-                if(r < u_R || r > u_DiskMax) {
-                    float angle = hash(uv * pos.xy) * 2.0 * 3.1415926;
-                    float radius = mix(u_DiskMin, u_DiskMax, pow(hash(uv.yx), 1.5)); // 更多粒子集中在内侧
-                    pos = vec3(cos(angle) * radius, (hash(uv)-0.5)*0.1, sin(angle) * radius);
+                vec3 pos = texture2D(texturePosition, uv).xyz;
+                vec3 vel = texture2D(textureVelocity, uv).xyz;
+                bool isJet = uv.y > 0.85;
+
+                if (isJet) {
+                    if (u_JetsEnabled < 0.5) {
+                        pos = vec3(9999.0);
+                    } else {
+                        pos += vel * 0.016 * u_Speed;
+                        if (abs(pos.y) > 15.0 || pos.y == 9999.0) {
+                            float angle = hash(uv * pos.xy) * 2.0 * 3.1415926;
+                            float r_jet = u_R * (0.1 + 0.6 * hash(uv.yx));
+                            float y_start = (hash(uv.xx) > 0.5 ? 1.0 : -1.0) * u_R * 1.05;
+                            pos = vec3(cos(angle) * r_jet, y_start, sin(angle) * r_jet);
+                        }
+                    }
+                } else {
+                    pos += vel * 0.016 * u_Speed;
+                    float r = length(pos);
+                    if(r < u_R || r > u_DiskMax) {
+                        float angle = hash(uv * pos.xy) * 2.0 * 3.1415926;
+                        float radius = mix(u_DiskMin, u_DiskMax, pow(hash(uv.yx), 2.0));
+                        pos = vec3(cos(angle) * radius, (hash(uv)-0.5)*0.05, sin(angle) * radius);
+                    }
                 }
-                
                 gl_FragColor = vec4(pos, 1.0);
             }
         `;
 
-        // 粒子渲染: 顶点着色器
         const particleVertexShader = `
-            uniform sampler2D u_posTexture;
-            uniform sampler2D u_velTexture;
-            uniform vec3 u_cameraPos;
-            uniform float u_dopplerFactor;
-            
-            varying vec3 vColor;
-            
+            uniform sampler2D u_posTexture; uniform sampler2D u_velTexture;
+            uniform vec3 u_cameraPos; uniform float u_dopplerFactor;
+            varying vec3 vColor; varying float vAlpha;
+
             void main() {
                 vec4 posData = texture2D(u_posTexture, position.xy);
-                vec4 velData = texture2D(u_velTexture, position.xy);
-                
                 vec3 worldPos = posData.xyz;
-                vec3 vel = velData.xyz;
-                
+                vec3 vel = texture2D(u_velTexture, position.xy).xyz;
+
+                if(worldPos.y == 9999.0) {
+                    gl_Position = vec4(9999.0); gl_PointSize = 0.0; return;
+                }
+
                 vec4 mvPosition = modelViewMatrix * vec4(worldPos, 1.0);
                 gl_Position = projectionMatrix * mvPosition;
-                
-                // 大小衰减
-                gl_PointSize = 2.0 * (10.0 / -mvPosition.z);
-                
-                // 多普勒效应计算 (点乘相机方向与速度方向)
+                gl_PointSize = 3.5 * (12.0 / -mvPosition.z);
+
                 vec3 viewDir = normalize(u_cameraPos - worldPos);
-                vec3 velDir = normalize(vel);
-                float dopplerShift = dot(viewDir, velDir); // >0 为朝向(蓝移), <0 为背离(红移)
-                
-                // 基础色彩映射 (内侧蓝白, 外侧红橙)
+                vec3 velDir = length(vel) > 0.0 ? normalize(vel) : vec3(0.0);
+                float dopplerShift = dot(viewDir, velDir);
+
                 float r = length(worldPos);
-                float heat = smoothstep(5.0, 1.5, r);
-                vec3 baseColor = mix(vec3(0.8, 0.2, 0.0), vec3(0.8, 0.9, 1.0), heat);
-                
-                // 应用相对论性光束效应调整亮度和颜色
+                bool isJetParticle = abs(worldPos.y) > length(worldPos.xz) && abs(worldPos.y) > 1.0;
+
+                vec3 baseColor;
+                if (isJetParticle) {
+                    baseColor = vec3(0.4, 0.3, 1.0);
+                    vAlpha = exp(-abs(worldPos.y) * 0.15) * 0.6;
+                } else {
+                    float heat = smoothstep(8.0, 1.5, r);
+                    baseColor = mix(vec3(0.9, 0.2, 0.0), vec3(0.9, 0.95, 1.0), heat);
+                    vAlpha = 0.8;
+                }
+
                 float dopplerMultiplier = 1.0 + dopplerShift * u_dopplerFactor;
-                dopplerMultiplier = max(0.1, dopplerMultiplier); // 限制最低亮度
-                
-                vec3 shiftColor = dopplerShift > 0.0 ? vec3(0.2, 0.5, 1.0) : vec3(1.0, 0.2, 0.0);
-                vColor = mix(baseColor, shiftColor, abs(dopplerShift) * 0.5) * dopplerMultiplier;
+                dopplerMultiplier = max(0.05, dopplerMultiplier);
+                vec3 shiftColor = dopplerShift > 0.0 ? vec3(0.1, 0.5, 1.0) : vec3(1.0, 0.1, 0.0);
+                vColor = mix(baseColor, shiftColor, abs(dopplerShift) * 0.6) * dopplerMultiplier * 3.0;
             }
         `;
 
-        // 粒子渲染: 片元着色器
         const particleFragmentShader = `
-            varying vec3 vColor;
+            varying vec3 vColor; varying float vAlpha;
             void main() {
-                // 圆形粒子遮罩
                 vec2 pt = gl_PointCoord - vec2(0.5);
                 if(dot(pt, pt) > 0.25) discard;
-                
-                // 核心高亮，边缘衰减
-                float alpha = smoothstep(0.5, 0.0, length(pt));
-                gl_FragColor = vec4(vColor, alpha * 0.8);
+                float alpha = smoothstep(0.5, 0.0, length(pt)) * vAlpha;
+                gl_FragColor = vec4(vColor, alpha);
             }
         `;
 
-        // 后处理: 引力透镜 (屏幕空间近似)
         const LensingShader = {
             uniforms: {
-                "tDiffuse": { value: null },
-                "u_aspect": { value: 1.0 },
-                "u_bhCenter": { value: new THREE.Vector2(0.5, 0.5) },
-                "u_bhRadius": { value: 0.1 } // 屏幕空间的视网膜半径
+                "tDiffuse": { value: null }, "u_aspect": { value: 1.0 },
+                "u_bhCenter": { value: new THREE.Vector2(0.5, 0.5) }, "u_bhRadius": { value: 0.1 },
+                "u_enabled": { value: 1 }
             },
-            vertexShader: `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
+            vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
             fragmentShader: `
-                uniform sampler2D tDiffuse;
-                uniform float u_aspect;
-                uniform vec2 u_bhCenter;
-                uniform float u_bhRadius;
+                uniform sampler2D tDiffuse; uniform float u_aspect;
+                uniform vec2 u_bhCenter; uniform float u_bhRadius; uniform int u_enabled;
                 varying vec2 vUv;
-
                 void main() {
-                    vec2 uv = vUv;
-                    vec2 delta = uv - u_bhCenter;
-                    delta.x *= u_aspect;
-                    
+                    if (u_enabled == 0) { gl_FragColor = texture2D(tDiffuse, vUv); return; }
+                    vec2 uv = vUv; vec2 delta = uv - u_bhCenter; delta.x *= u_aspect;
                     float dist = length(delta);
-                    
-                    // 视界内部处理：全黑，产生光子环截断
-                    if(dist < u_bhRadius) {
-                        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-                        return;
-                    }
-                    
-                    // 屏幕空间史瓦西透镜近似: alpha = 4GM / (c^2 * b)
-                    // 简化为坐标偏移: offset = (R^2 / r^2) * r_vec
+                    if(dist < u_bhRadius) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
                     float lensingForce = (u_bhRadius * u_bhRadius) / dist;
-                    vec2 offset = normalize(delta) * lensingForce;
-                    offset.x /= u_aspect; // 还原宽高比
-                    
-                    vec2 sampleUV = uv - offset * 0.8; // 采样被弯曲的远端像素
-                    
-                    // 光子环辉光衰减
+                    vec2 offset = normalize(delta) * lensingForce; offset.x /= u_aspect;
+                    vec2 sampleUV = uv - offset * 0.8;
                     vec4 color = texture2D(tDiffuse, sampleUV);
-                    float ringGlow = smoothstep(u_bhRadius * 1.5, u_bhRadius, dist);
-                    color += vec4(0.8, 0.9, 1.0, 1.0) * ringGlow * 0.2;
-                    
+                    float ringGlow = smoothstep(u_bhRadius * 1.3, u_bhRadius, dist);
+                    color += vec4(0.9, 0.95, 1.0, 1.0) * ringGlow * 0.4;
                     gl_FragColor = color;
                 }
             `
         };
 
-        init();
-        animate();
+        // ==========================================
+        // 系统状态
+        // ==========================================
+        let currentMode = 'raymarch';
+        let camera, renderer, controls;
+        let sceneRM, materialRM, quadRM;
+        const PARTICLE_RES = 512;
+        let scenePT, gpuCompute, posVariable, velVariable;
+        let particleSystem, composerPT, lensingPass;
 
-        // ---- Theme & UI Controls ----
+        const PARAMS = {
+            mass: 1.0, speed: 1.0, doppler: 2.0, lensing: 1, jets: 1
+        };
+
+        const html = document.documentElement;
+        let themeObs = new MutationObserver(function(){ updateThemeColors(); });
+        themeObs.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // UI 绑定
+        const elMode = document.getElementById('engine-mode');
+        const elSpeed = document.getElementById('slider-speed');
+        const elDoppler = document.getElementById('slider-doppler');
+        const elGmass = document.getElementById('slider-gmass');
+        const elLensing = document.getElementById('slider-lensing');
+        const elJets = document.getElementById('slider-jets');
+
+        const canvasContainer = document.getElementById('bh-canvas-container');
+
         PSUTheme.createSwitcher();
         PSUTheme.createBackButton('index.html');
 
-        const sliderSpeed = document.getElementById('slider-speed');
-        const sliderDoppler = document.getElementById('slider-doppler');
-        const sliderGmass = document.getElementById('slider-gmass');
-        const sliderLensing = document.getElementById('slider-lensing');
+        let frameCount = 0, lastFpsTime = performance.now(), fps = 60;
 
-        sliderSpeed.addEventListener('input', () => {
-            const v = parseFloat(sliderSpeed.value);
-            document.getElementById('val-speed').textContent = v.toFixed(2) + 'x';
-            if (posVariable) posVariable.material.uniforms.u_Speed.value = v;
-        });
-        sliderDoppler.addEventListener('input', () => {
-            const v = parseFloat(sliderDoppler.value);
-            document.getElementById('val-doppler').textContent = v.toFixed(2);
-            if (particleSystem) particleSystem.material.uniforms.u_dopplerFactor.value = v;
-        });
-        sliderGmass.addEventListener('input', () => {
-            const v = parseFloat(sliderGmass.value);
-            document.getElementById('val-gmass').textContent = v.toFixed(2);
-            if (velVariable) velVariable.material.uniforms.u_GM.value = v;
-        });
-        sliderLensing.addEventListener('input', () => {
-            const v = parseInt(sliderLensing.value);
-            document.getElementById('val-lensing').textContent = v ? 'ON' : 'OFF';
-            if (lensingPass) lensingPass.enabled = !!v;
-        });
+        init();
+        animate();
+
+        function updateThemeColors() {
+            // 主题切换时强制重新渲染一帧
+            if (materialRM) {
+                materialRM.uniforms.u_time.value = performance.now() * 0.001;
+            }
+        }
 
         function init() {
-            scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-            camera.position.set(0, 2, 8);
-            camera.lookAt(0, 0, 0);
+            camera.position.set(0, 3, 14);
 
             renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 限制像素比以保性能
-            document.body.appendChild(renderer.domElement);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+            canvasContainer.appendChild(renderer.domElement);
 
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.maxDistance = 20;
+            controls.dampingFactor = 0.05;
+            controls.maxDistance = 35;
             controls.minDistance = 3;
+            controls.zoomSpeed = 0.35;
 
-            initGPGPU();
-            initParticles();
-            initPostProcessing();
+            initRaymarchScene();
+            initParticleScene();
 
             window.addEventListener('resize', onWindowResize);
-            document.getElementById('info').innerText = `粒子数: ${PARAMS.PARTICLE_RES * PARAMS.PARTICLE_RES} | 可滚动鼠标缩放观察多普勒/引力透镜`;
+            setupUIListeners();
+
+            setTimeout(() => { document.getElementById('loading').style.opacity = '0'; }, 500);
         }
 
-        function initGPGPU() {
-            gpuCompute = new GPUComputationRenderer(PARAMS.PARTICLE_RES, PARAMS.PARTICLE_RES, renderer);
-            
+        function initRaymarchScene() {
+            sceneRM = new THREE.Scene();
+            materialRM = new THREE.ShaderMaterial({
+                vertexShader: rmVertexShader,
+                fragmentShader: rmFragmentShader,
+                uniforms: {
+                    u_time: { value: 0.0 },
+                    u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                    u_cameraPos: { value: new THREE.Vector3() },
+                    u_cameraWorldMatrix: { value: new THREE.Matrix4() },
+                    u_cameraProjectionMatrixInverse: { value: new THREE.Matrix4() },
+                    u_mass: { value: PARAMS.mass },
+                    u_speed: { value: PARAMS.speed },
+                    u_doppler: { value: PARAMS.doppler },
+                    u_lensing: { value: PARAMS.lensing },
+                    u_jets: { value: PARAMS.jets }
+                },
+                depthWrite: false,
+                depthTest: false
+            });
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            quadRM = new THREE.Mesh(geometry, materialRM);
+            quadRM.frustumCulled = false;
+            sceneRM.add(quadRM);
+        }
+
+        function initParticleScene() {
+            scenePT = new THREE.Scene();
+
+            // 背景星空
+            const bgGeo = new THREE.BufferGeometry();
+            const bgPos = [];
+            for(let i=0; i<3000; i++) {
+                const r = 40 + Math.random() * 20;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(Math.random() * 2 - 1);
+                bgPos.push(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+            }
+            bgGeo.setAttribute('position', new THREE.Float32BufferAttribute(bgPos, 3));
+            const bgMat = new THREE.PointsMaterial({color: 0x88bbff, size: 0.1, transparent: true, opacity: 0.8});
+            scenePT.add(new THREE.Points(bgGeo, bgMat));
+
+            // GPGPU
+            gpuCompute = new GPUComputationRenderer(PARTICLE_RES, PARTICLE_RES, renderer);
             const dtPosition = gpuCompute.createTexture();
             const dtVelocity = gpuCompute.createTexture();
-            
-            // 初始化粒子位置与速度
             const posArray = dtPosition.image.data;
             const velArray = dtVelocity.image.data;
-            
+
             for (let i = 0; i < posArray.length; i += 4) {
                 const angle = Math.random() * Math.PI * 2;
-                const radius = PARAMS.DISK_MIN + Math.pow(Math.random(), 1.5) * (PARAMS.DISK_MAX - PARAMS.DISK_MIN);
-                
-                posArray[i + 0] = Math.cos(angle) * radius;
-                posArray[i + 1] = (Math.random() - 0.5) * 0.1; // 极薄的盘面
-                posArray[i + 2] = Math.sin(angle) * radius;
-                posArray[i + 3] = 1;
-                
-                velArray[i + 0] = 0;
-                velArray[i + 1] = 0;
-                velArray[i + 2] = 0;
-                velArray[i + 3] = 1;
+                const radius = 2.0 + Math.pow(Math.random(), 1.5) * 6.0;
+                posArray[i] = Math.cos(angle) * radius;
+                posArray[i+1] = (Math.random() - 0.5) * 0.1;
+                posArray[i+2] = Math.sin(angle) * radius;
+                posArray[i+3] = 1;
+                velArray[i] = 0; velArray[i+1] = 0; velArray[i+2] = 0; velArray[i+3] = 1;
             }
-            
+
             velVariable = gpuCompute.addVariable("textureVelocity", computeVelocityShader, dtVelocity);
             posVariable = gpuCompute.addVariable("texturePosition", computePositionShader, dtPosition);
-            
             gpuCompute.setVariableDependencies(velVariable, [posVariable, velVariable]);
             gpuCompute.setVariableDependencies(posVariable, [posVariable, velVariable]);
-            
-            velVariable.material.uniforms.u_GM = { value: PARAMS.G_MASS };
-            velVariable.material.uniforms.u_R = { value: PARAMS.BH_RADIUS };
-            velVariable.material.uniforms.u_Time = { value: 0.0 };
-            
-            posVariable.material.uniforms.u_R = { value: PARAMS.BH_RADIUS };
-            posVariable.material.uniforms.u_DiskMin = { value: PARAMS.DISK_MIN };
-            posVariable.material.uniforms.u_DiskMax = { value: PARAMS.DISK_MAX };
-            posVariable.material.uniforms.u_Speed = { value: 1.0 };
-            
-            const error = gpuCompute.init();
-            if (error !== null) {
-                console.error(error);
-                document.getElementById('info').innerText = "GPGPU 初始化失败: 硬件不支持";
-            }
-        }
 
-        function initParticles() {
+            velVariable.material.uniforms.u_GM = { value: PARAMS.mass * 2.5 };
+            velVariable.material.uniforms.u_R = { value: PARAMS.mass };
+            velVariable.material.uniforms.u_Time = { value: 0.0 };
+            velVariable.material.uniforms.u_JetsEnabled = { value: PARAMS.jets };
+
+            posVariable.material.uniforms.u_R = { value: PARAMS.mass };
+            posVariable.material.uniforms.u_DiskMin = { value: PARAMS.mass * 1.5 };
+            posVariable.material.uniforms.u_DiskMax = { value: 8.0 };
+            posVariable.material.uniforms.u_Speed = { value: PARAMS.speed };
+            posVariable.material.uniforms.u_JetsEnabled = { value: PARAMS.jets };
+
+            const initError = gpuCompute.init();
+            if (initError !== null) {
+                console.error('GPGPU init error:', initError);
+            }
+
+            // 粒子系统
             const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(PARAMS.PARTICLE_RES * PARAMS.PARTICLE_RES * 3);
-            const uvs = new Float32Array(PARAMS.PARTICLE_RES * PARAMS.PARTICLE_RES * 2);
-            
+            const uvs = new Float32Array(PARTICLE_RES * PARTICLE_RES * 2);
             let p = 0;
-            for (let j = 0; j < PARAMS.PARTICLE_RES; j++) {
-                for (let i = 0; i < PARAMS.PARTICLE_RES; i++) {
-                    uvs[p++] = i / (PARAMS.PARTICLE_RES - 1);
-                    uvs[p++] = j / (PARAMS.PARTICLE_RES - 1);
+            for (let j = 0; j < PARTICLE_RES; j++) {
+                for (let i = 0; i < PARTICLE_RES; i++) {
+                    uvs[p++] = i / (PARTICLE_RES - 1);
+                    uvs[p++] = j / (PARTICLE_RES - 1);
                 }
             }
-            
-            geometry.setAttribute('position', new THREE.BufferAttribute(uvs, 2)); // 传入 UV 作为 position
-            
-            const material = new THREE.ShaderMaterial({
+            geometry.setAttribute('position', new THREE.BufferAttribute(uvs, 2));
+
+            const pMat = new THREE.ShaderMaterial({
                 uniforms: {
                     u_posTexture: { value: null },
                     u_velTexture: { value: null },
                     u_cameraPos: { value: new THREE.Vector3() },
-                    u_dopplerFactor: { value: PARAMS.DOPPLER_FACTOR }
+                    u_dopplerFactor: { value: PARAMS.doppler }
                 },
                 vertexShader: particleVertexShader,
                 fragmentShader: particleFragmentShader,
@@ -411,61 +806,116 @@
                 depthWrite: false,
                 transparent: true
             });
-            
-            particleSystem = new THREE.Points(geometry, material);
-            // 禁用包围盒剔除，因为顶点是在着色器中计算的
-            particleSystem.frustumCulled = false; 
-            scene.add(particleSystem);
-        }
+            particleSystem = new THREE.Points(geometry, pMat);
+            particleSystem.frustumCulled = false;
+            scenePT.add(particleSystem);
 
-        function initPostProcessing() {
-            composer = new EffectComposer(renderer);
-            composer.addPass(new RenderPass(scene, camera));
-            
+            // 后处理
+            composerPT = new EffectComposer(renderer);
+            composerPT.addPass(new RenderPass(scenePT, camera));
             lensingPass = new ShaderPass(LensingShader);
             lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
-            composer.addPass(lensingPass);
+            lensingPass.uniforms['u_enabled'].value = PARAMS.lensing;
+            composerPT.addPass(lensingPass);
+        }
+
+        function setupUIListeners() {
+            elMode.addEventListener('change', (e) => {
+                currentMode = e.target.value;
+                const label = currentMode === 'raymarch' ? 'Raymarching' : 'GPGPU Particles';
+                document.getElementById('stats-engine').textContent = label;
+            });
+
+            elSpeed.addEventListener('input', (e) => {
+                PARAMS.speed = parseFloat(e.target.value);
+                document.getElementById('val-speed').textContent = PARAMS.speed.toFixed(2) + ' c';
+                materialRM.uniforms.u_speed.value = PARAMS.speed;
+                if(posVariable) posVariable.material.uniforms.u_Speed.value = PARAMS.speed;
+            });
+            elDoppler.addEventListener('input', (e) => {
+                PARAMS.doppler = parseFloat(e.target.value);
+                document.getElementById('val-doppler').textContent = PARAMS.doppler.toFixed(2);
+                materialRM.uniforms.u_doppler.value = PARAMS.doppler;
+                if(particleSystem) particleSystem.material.uniforms.u_dopplerFactor.value = PARAMS.doppler;
+            });
+            elGmass.addEventListener('input', (e) => {
+                PARAMS.mass = parseFloat(e.target.value);
+                document.getElementById('val-gmass').textContent = PARAMS.mass.toFixed(2) + ' Rs';
+                materialRM.uniforms.u_mass.value = PARAMS.mass;
+                if(velVariable) {
+                    velVariable.material.uniforms.u_GM.value = PARAMS.mass * 2.5;
+                    velVariable.material.uniforms.u_R.value = PARAMS.mass;
+                }
+                if(posVariable) posVariable.material.uniforms.u_R.value = PARAMS.mass;
+            });
+            elLensing.addEventListener('change', (e) => {
+                PARAMS.lensing = e.target.checked ? 1 : 0;
+                document.getElementById('stats-lensing').textContent = PARAMS.lensing ? 'ON' : 'OFF';
+                materialRM.uniforms.u_lensing.value = PARAMS.lensing;
+                if(lensingPass) lensingPass.uniforms.u_enabled.value = PARAMS.lensing;
+            });
+            elJets.addEventListener('change', (e) => {
+                PARAMS.jets = e.target.checked ? 1 : 0;
+                document.getElementById('stats-jets').textContent = PARAMS.jets ? 'ON' : 'OFF';
+                materialRM.uniforms.u_jets.value = PARAMS.jets;
+                if(velVariable) velVariable.material.uniforms.u_JetsEnabled.value = PARAMS.jets;
+                if(posVariable) posVariable.material.uniforms.u_JetsEnabled.value = PARAMS.jets;
+            });
         }
 
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
-            lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
+            materialRM.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
+            if(composerPT) {
+                composerPT.setSize(window.innerWidth, window.innerHeight);
+                lensingPass.uniforms['u_aspect'].value = window.innerWidth / window.innerHeight;
+            }
         }
 
-        function animate() {
+        function animate(time) {
             requestAnimationFrame(animate);
-            
             controls.update();
-            
-            // 运行 GPGPU 步进
-            velVariable.material.uniforms.u_Time.value = performance.now() * 0.001;
-            gpuCompute.compute();
-            
-            // 将 GPGPU 结果纹理传给粒子系统
-            particleSystem.material.uniforms.u_posTexture.value = gpuCompute.getCurrentRenderTarget(posVariable).texture;
-            particleSystem.material.uniforms.u_velTexture.value = gpuCompute.getCurrentRenderTarget(velVariable).texture;
-            particleSystem.material.uniforms.u_cameraPos.value.copy(camera.position);
-            
-            // 计算屏幕空间的黑洞参数用于后处理
-            // 黑洞中心在世界坐标 (0,0,0)
-            const bhPosition = new THREE.Vector3(0, 0, 0);
-            bhPosition.project(camera);
-            const screenX = (bhPosition.x + 1) / 2;
-            const screenY = (bhPosition.y + 1) / 2;
-            
-            // 计算屏幕空间的视界半径 (基础三角学近似)
-            const dist = camera.position.length();
-            const fov = camera.fov * (Math.PI / 180);
-            const visibleHeight = 2 * Math.tan(fov / 2) * dist;
-            const screenRadius = (PARAMS.BH_RADIUS * 2 / visibleHeight) * 0.5;
-            
-            lensingPass.uniforms['u_bhCenter'].value.set(screenX, screenY);
-            lensingPass.uniforms['u_bhRadius'].value = screenRadius;
-            
-            composer.render();
+            const tSec = time * 0.001;
+
+            if (currentMode === 'raymarch') {
+                materialRM.uniforms.u_time.value = tSec;
+                materialRM.uniforms.u_cameraPos.value.copy(camera.position);
+                materialRM.uniforms.u_cameraWorldMatrix.value.copy(camera.matrixWorld);
+                materialRM.uniforms.u_cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
+                renderer.render(sceneRM, camera);
+            } else if (currentMode === 'particle') {
+                velVariable.material.uniforms.u_Time.value = tSec;
+                gpuCompute.compute();
+                particleSystem.material.uniforms.u_posTexture.value = gpuCompute.getCurrentRenderTarget(posVariable).texture;
+                particleSystem.material.uniforms.u_velTexture.value = gpuCompute.getCurrentRenderTarget(velVariable).texture;
+                particleSystem.material.uniforms.u_cameraPos.value.copy(camera.position);
+
+                if (PARAMS.lensing === 1) {
+                    const bhPosition = new THREE.Vector3(0, 0, 0);
+                    bhPosition.project(camera);
+                    const screenX = (bhPosition.x + 1) / 2;
+                    const screenY = (bhPosition.y + 1) / 2;
+                    const dist = camera.position.length();
+                    const fov = camera.fov * (Math.PI / 180);
+                    const visibleHeight = 2 * Math.tan(fov / 2) * dist;
+                    const screenRadius = (PARAMS.mass * 2.2 / visibleHeight) * 0.5;
+                    lensingPass.uniforms['u_bhCenter'].value.set(screenX, screenY);
+                    lensingPass.uniforms['u_bhRadius'].value = screenRadius;
+                }
+                composerPT.render();
+            }
+
+            // FPS
+            frameCount++;
+            const now = performance.now();
+            if(now - lastFpsTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsTime = now;
+                document.getElementById('stats-fps').textContent = fps;
+            }
         }
     </script>
 </body>
