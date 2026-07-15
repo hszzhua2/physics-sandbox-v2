@@ -397,10 +397,10 @@
   // 节点分组定义
   // ==========================================
   const GROUPS = {
-    1: { name:'物理分类', hex:'#4ecdc4', y:160,  radius:90,  size:8,   icon:'📚' },
-    6: { name:'学科',     hex:'#74b9ff', y:30,   radius:250, size:6,   icon:'🔬' },
-    7: { name:'实验',     hex:'#2ecc71', y:-90,  radius:390, size:4.5, icon:'🧪' },
-    8: { name:'科学家',   hex:'#fdcb6e', y:-210, radius:490, size:3.5, icon:'👨‍🔬' }
+    1: { name:'物理分类', hex:'#4ecdc4', y:120,  radius:200, size:8,   icon:'📚' },
+    6: { name:'学科',     hex:'#74b9ff', y:40,   radius:230, size:6,   icon:'🔬' },
+    7: { name:'实验',     hex:'#2ecc71', y:-40,  radius:260, size:4.5, icon:'🧪' },
+    8: { name:'科学家',   hex:'#fdcb6e', y:-120, radius:290, size:3.5, icon:'👨‍🔬' }
   };
   const GROUP_LIST = [1,6,7,8];
 
@@ -524,16 +524,16 @@
   renderer.setSize(window.innerWidth, window.innerHeight - 90);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x0a0e1a, 300, 1200);
+  scene.fog = new THREE.Fog(0x0a0e1a, 200, 800);
 
   const camera = new THREE.PerspectiveCamera(55, window.innerWidth/(window.innerHeight-90), 0.1, 3000);
-  camera.position.set(0, 0, 650);
+  camera.position.set(0, 0, 450);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.minDistance = 100;
-  controls.maxDistance = 1500;
+  controls.minDistance = 80;
+  controls.maxDistance = 1000;
   controls.autoRotateSpeed = 0.5;
 
   // 光照
@@ -558,7 +558,7 @@
     const groupNodes = nodesByGroup[g];
     const idx = groupNodes.indexOf(node);
     const angle = (idx / groupNodes.length) * Math.PI * 2 + (Math.random() - 0.5) * 0.25;
-    const r = gDef.radius + (Math.random() - 0.5) * 50;
+    const r = gDef.radius + (Math.random() - 0.5) * 30;
     node._x = Math.cos(angle) * r;
     node._y = gDef.y + (Math.random() - 0.5) * 25;
     node._z = Math.sin(angle) * r;
@@ -958,7 +958,7 @@
 
   document.getElementById('search').addEventListener('input', applyFilters);
   document.getElementById('btn-reset').addEventListener('click', () => {
-    camera.position.set(0, 0, 650);
+    camera.position.set(0, 0, 450);
     controls.target.set(0, 0, 0);
     controls.update();
   });
