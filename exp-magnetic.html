@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>磁场与铁粉分布 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #canvas-container {
+      position: fixed; inset: 0; z-index: 0;
+      width: 100vw; height: 100vh;
+    }
+
+    /* ===== 左侧面板 ===== */
+    #left-panel {
+      position: absolute; top: 80px; left: 20px;
+      width: 320px; z-index: 10;
+      max-height: calc(100vh - 110px);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transition: var(--theme-transition);
+    }
+    #left-panel .panel-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    #left-panel .panel-header .ic {
+      width: 32px; height: 32px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    #left-panel .panel-header h1 {
+      margin: 0; font-size: .95rem; font-weight: 700;
+      transition: var(--theme-transition);
+    }
+    #left-panel .panel-header .sub {
+      font-size: .68rem; color: var(--text-muted); margin-top: 1px;
+    }
+    #left-panel .panel-body {
+      flex: 1; overflow-y: auto; padding: 14px 16px;
+    }
+    #left-panel .panel-footer {
+      padding: 10px 16px; border-top: 1px solid var(--panel-border);
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+
+    .field-group {
+      margin-bottom: 12px; padding: 10px 12px;
+      border-radius: calc(var(--radius) * 0.75);
+      border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.04);
+      transition: var(--theme-transition);
+    }
+    .field-group .grp-title {
+      font-size: .78rem; font-weight: 700; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 5px;
+      transition: var(--theme-transition);
+    }
+    .field-label {
+      font-size: .72rem; color: var(--text-muted); font-weight: 600;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 3px;
+    }
+    .field-label .val-badge {
+      font-family: monospace; font-weight: 700; font-size: .72rem;
+      padding: 1px 8px; border-radius: var(--radius);
+      border: 1px solid var(--panel-border);
+    }
+    input[type="range"] {
+      width: 100%; height: 4px; border-radius: 2px;
+      -webkit-appearance: none; appearance: none;
+      background: var(--panel-border); cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--accent-1); cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px; border: none;
+      border-radius: 50%; background: var(--accent-1); cursor: pointer;
+    }
+    .radio-group {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 8px 10px; border-radius: calc(var(--radius) * 0.75);
+      border: 1px solid var(--panel-border); background: rgba(128,128,128,.04);
+    }
+    .radio-label {
+      display: flex; align-items: center; gap: 6px;
+      cursor: pointer; font-size: .76rem; color: var(--text-color);
+    }
+    .radio-label input { accent-color: var(--accent-1); }
+
+    .btn {
+      padding: 8px 12px; border: 1px solid var(--panel-border);
+      background: transparent; color: var(--text-color);
+      border-radius: var(--radius); cursor: pointer;
+      font-size: .78rem; font-family: var(--font-main);
+      font-weight: 600; transition: var(--theme-transition);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .btn:hover { background: var(--accent-1); color: #fff; border-color: var(--accent-1); }
+    .btn-primary {
+      background: var(--accent-1); color: #fff; border-color: var(--accent-1);
+    }
+    .btn-primary:hover { opacity: .85; }
+
+    /* ===== 右侧理论面板 ===== */
+    #right-panel {
+      position: absolute; top: 80px; right: 20px;
+      width: 320px; z-index: 10;
+      max-height: calc(100vh - 110px);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transition: var(--theme-transition);
+    }
+    #right-panel .panel-header {
+      padding: 14px 16px; border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    #right-panel .panel-header .ic {
+      width: 32px; height: 32px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    #right-panel .panel-header h2 {
+      margin: 0; font-size: .95rem; font-weight: 700;
+      transition: var(--theme-transition);
+    }
+    #right-panel .panel-header .sub {
+      font-size: .68rem; color: var(--text-muted); margin-top: 1px;
+    }
+    #right-panel .panel-body {
+      flex: 1; overflow-y: auto; padding: 14px 16px;
+      font-size: .78rem; line-height: 1.7;
+    }
+    .info-card {
+      margin-bottom: 10px; padding: 12px;
+      border-radius: calc(var(--radius) * 0.75);
+      border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.04);
+      transition: var(--theme-transition);
+    }
+    .info-card h3 {
+      font-size: .78rem; font-weight: 700; margin: 0 0 6px 0;
+      display: flex; align-items: center; gap: 5px;
+      transition: var(--theme-transition);
+    }
+    .info-card p {
+      color: var(--text-color); margin: 4px 0;
+      font-size: .76rem; line-height: 1.65;
+    }
+    .info-card .muted {
+      color: var(--text-muted); font-size: .72rem;
+    }
+    .formula {
+      padding: 8px; margin: 6px 0;
+      border-radius: var(--radius); border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.06);
+      font-family: monospace; font-size: .76rem;
+      text-align: center;
+    }
+    .bio-box {
+      padding: 8px 10px; border-radius: var(--radius);
+      border: 1px solid var(--panel-border);
+      background: rgba(128,128,128,.06);
+    }
+    .bio-box .bio-name {
+      font-weight: 700; font-size: .76rem; color: var(--text-color);
+    }
+    .bio-box .bio-desc {
+      font-size: .7rem; color: var(--text-muted); margin-top: 2px;
+    }
+
+    /* ===== 顶部状态栏 ===== */
+    .stats-top {
+      position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
+      z-index: 10; display: flex; align-items: center; gap: 12px;
+      padding: 4px 16px; font-size: .72rem; font-family: monospace;
+      border-radius: 50px; transition: var(--theme-transition);
+    }
+    .stats-top .sep { width:1px; height:12px; background:var(--panel-border); }
+    .stats-top .val { font-weight: 700; }
+
+    /* ===== 滚动条 ===== */
+    .panel-body::-webkit-scrollbar { width: 5px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb {
+      background: var(--panel-border); border-radius: 3px;
+    }
+
+    /* ===== 移动端 ===== */
+    .mobile-toggles { display: none; }
+    @media(max-width: 900px) {
+      #left-panel, #right-panel {
+        width: calc(100vw - 40px); max-width: 380px;
+      }
+      .mobile-toggles {
+        display: flex; position: fixed; bottom: 16px; left: 50%;
+        transform: translateX(-50%); z-index: 11; gap: 8px;
+      }
+      .mobile-toggles .btn { padding: 8px 16px; }
+      #left-panel.collapsed, #right-panel.collapsed {
+        transform: translateX(-110%);
+      }
+      #left-panel { transition: transform .3s ease; }
+      #right-panel { transition: transform .3s ease; }
+    }
+
+    /* ===== 主题特化 ===== */
+    [data-theme="cartoon"] .field-group .grp-title { color: var(--accent-2); }
+    [data-theme="cartoon"] .panel-header .ic { background: rgba(255,107,107,.12); }
+    [data-theme="cartoon"] #left-panel .panel-header h1 { color: var(--accent-1); }
+    [data-theme="cartoon"] #right-panel .panel-header h2 { color: var(--accent-2); }
+    [data-theme="cartoon"] .info-card h3 { color: var(--accent-1); }
+
+    [data-theme="glass"] .field-group .grp-title { color: #74b9ff; }
+    [data-theme="glass"] .panel-header .ic { background: rgba(116,185,255,.12); }
+    [data-theme="glass"] #left-panel .panel-header h1 { color: #ff6b6b; }
+    [data-theme="glass"] #right-panel .panel-header h2 { color: #74b9ff; }
+    [data-theme="glass"] .info-card h3 { color: #74b9ff; }
+
+    [data-theme="cyber"] .field-group .grp-title { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,.3); }
+    [data-theme="cyber"] .panel-header .ic { background: rgba(189,0,255,.15); }
+    [data-theme="cyber"] #left-panel .panel-header h1 { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.4); }
+    [data-theme="cyber"] #right-panel .panel-header h2 { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,.3); }
+    [data-theme="cyber"] .info-card h3 { color: #00f3ff; }
+
+    [data-theme="academic"] .field-group .grp-title { color: var(--accent-1); }
+    [data-theme="academic"] .panel-header .ic { background: rgba(107,140,174,.12); }
+    [data-theme="academic"] #left-panel .panel-header h1 { color: #1a1a2e; }
+    [data-theme="academic"] #right-panel .panel-header h2 { color: var(--accent-1); }
+    [data-theme="academic"] .info-card h3 { color: var(--accent-1); }
+
+    [data-theme="soviet"] .field-group .grp-title { color: var(--accent-1); }
+    [data-theme="soviet"] .panel-header .ic { background: rgba(196,30,30,.1); }
+    [data-theme="soviet"] #left-panel .panel-header h1 { color: var(--accent-1); }
+    [data-theme="soviet"] #right-panel .panel-header h2 { color: var(--accent-1); }
+    [data-theme="soviet"] .info-card h3 { color: var(--accent-1); }
+  </style>
+</head>
+<body>
+  <div class="exp-bg"></div>
+  <div id="canvas-container"></div>
+
+  <!-- 顶部状态栏 -->
+  <div class="stats-top glass-panel">
+    <span>模式: <strong class="val" id="stats-mode" style="color:var(--accent-2)">磁感线</strong></span>
+    <span class="sep"></span>
+    <span>粒子: <strong class="val" id="stats-particles" style="color:var(--accent-1)">0</strong></span>
+    <span class="sep"></span>
+    <span>FPS: <strong class="val" id="stats-fps" style="color:var(--accent-4)">60</strong></span>
+  </div>
+
+  <!-- 左侧控制面板 -->
+  <aside id="left-panel" class="glass-panel">
+    <div class="panel-header">
+      <div class="ic">🧲</div>
+      <div>
+        <h1>磁场模拟器</h1>
+        <div class="sub">磁偶极子模型 · 铁粉分布可视化</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="field-group">
+        <div class="grp-title">📐 磁铁尺寸</div>
+        <div class="field-label"><span>长度 (L)</span><span class="val-badge" id="val-length">6.0</span></div>
+        <input type="range" id="param-length" min="1" max="10" step="0.5" value="6">
+        <div class="field-label" style="margin-top:8px"><span>宽度 (W)</span><span class="val-badge" id="val-width">2.0</span></div>
+        <input type="range" id="param-width" min="1" max="10" step="0.5" value="2">
+        <div class="field-label" style="margin-top:8px"><span>高度 (H)</span><span class="val-badge" id="val-height">2.0</span></div>
+        <input type="range" id="param-height" min="1" max="10" step="0.5" value="2">
+      </div>
+
+      <div class="field-group">
+        <div class="grp-title">⚡ 磁场参数</div>
+        <div class="field-label"><span>磁场强度权重</span><span class="val-badge" id="val-strength">5</span></div>
+        <input type="range" id="param-strength" min="1" max="10" step="1" value="5">
+      </div>
+
+      <div class="field-group">
+        <div class="grp-title">🎨 渲染模式</div>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="mode" value="lines" checked>
+            <span>磁感线渲染 · 流动粒子</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="mode" value="powder">
+            <span>铁粉分布 · 散落吸附动画</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary" id="btn-reset">🔄 重置</button>
+      <button class="btn" id="btn-replay">▶ 重新散落</button>
+    </div>
+  </aside>
+
+  <!-- 右侧理论面板 -->
+  <aside id="right-panel" class="glass-panel">
+    <div class="panel-header">
+      <div class="ic">📖</div>
+      <div>
+        <h2>磁学百科</h2>
+        <div class="sub">磁场理论与历史</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="info-card">
+        <h3>📜 磁学历史简述</h3>
+        <p>人类对磁现象的认识始于公元前，古希腊人与中国古人都发现了天然磁石（Lodestone）吸铁的特性。中国发明的司南是世界上最早的指南针。19世纪，奥斯特发现电流的磁效应，法拉第提出磁力线概念，麦克斯韦最终统一了电磁学理论。</p>
+      </div>
+      <div class="info-card">
+        <h3>🔄 闭合回路特性</h3>
+        <p>与电荷不同，磁单极子在自然界中尚未被证实存在。磁感线总是从磁体的<strong>北极（N）</strong>出发，经过外部空间进入<strong>南极（S）</strong>，然后在磁体内部由南极回到北极，形成一个连续、无头无尾的闭合回路。</p>
+      </div>
+      <div class="info-card">
+        <h3>📐 数学公式</h3>
+        <p><strong>磁偶极子磁场分布 (B):</strong></p>
+        <div class="formula">B(r) = (μ₀/4π) [ 3r(m·r)/r⁵ - m/r³ ]</div>
+        <p class="muted">其中 m 为磁矩，r 为空间位置矢量。</p>
+        <p><strong>洛伦兹力公式 (F):</strong></p>
+        <div class="formula">F = q(E + v × B)</div>
+        <p class="muted">描述运动电荷在电磁场中受到的力，v 为速度，B 为磁场矢量。</p>
+      </div>
+      <div class="info-card">
+        <h3>👤 科学家档案</h3>
+        <div class="bio-box">
+          <div class="bio-name">迈克尔·法拉第 (1791–1867)</div>
+          <div class="bio-desc">英国物理学家、化学家。提出了磁力线（场线）的概念，发现了电磁感应定律，奠定了现代电气工程的基础。</div>
+        </div>
+        <div class="bio-box" style="margin-top:6px">
+          <div class="bio-name">汉斯·奥斯特 (1777–1851)</div>
+          <div class="bio-desc">丹麦物理学家。1820年发现电流的磁效应，首次揭示电与磁之间的联系。</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 移动端切换 -->
+  <div class="mobile-toggles">
+    <button class="btn" onclick="togglePanel('left-panel')">🧲 参数</button>
+    <button class="btn" id="mt-right">📖 理论</button>
+  </div>
+
+  <!-- Three.js 模块导入 -->
+  <script type="module">
+  import * as THREE from './lib/three.module.js';
+  import { OrbitControls } from './lib/OrbitControls.js';
+
+  // 全局变量和配置
+  const config = {
+    length: 6, width: 2, height: 2, strength: 5, mode: 'lines'
+  };
+
+  let scene, camera, renderer, controls;
+  let magnetGroup, nMesh, sMesh;
+  let fieldVisuals = new THREE.Group();
+  let clock;
+  let paths = [];
+  let fluxMesh = null;
+  let powderMesh = null;
+  let powderData = [];
+  let powderProgress = 1;
+  let frameCount = 0, lastFpsTime = 0, currentFps = 60;
+
+  // 主题颜色获取
+  function getThemeColors() {
+    const cs = getComputedStyle(document.documentElement);
+    const bg = cs.getPropertyValue('--bg-color').trim() || '#1a1a1a';
+    const accent1 = cs.getPropertyValue('--accent-1').trim() || '#ff6b6b';
+    const accent2 = cs.getPropertyValue('--accent-2').trim() || '#4ecdc4';
+    const accent4 = cs.getPropertyValue('--accent-4').trim() || '#a29bfe';
+    const panelBorder = cs.getPropertyValue('--panel-border').trim() || 'rgba(255,255,255,.1)';
+    return { bg, accent1, accent2, accent4, panelBorder };
+  }
+
+  function init() {
+    const container = document.getElementById('canvas-container');
+    scene = new THREE.Scene();
+    const tc = getThemeColors();
+    scene.background = new THREE.Color(tc.bg);
+
+    camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(15, 10, 15);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 5;
+    controls.maxDistance = 100;
+
+    clock = new THREE.Clock();
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 10);
+    scene.add(dirLight);
+
+    magnetGroup = new THREE.Group();
+    scene.add(magnetGroup);
+    scene.add(fieldVisuals);
+
+    createMagnetMesh();
+    updateField();
+
+    window.addEventListener('resize', onWindowResize);
+    bindUIEvents();
+
+    // 主题切换监听
+    const themeObserver = new MutationObserver(() => { applySceneTheme(); });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+
+  function applySceneTheme() {
+    const tc = getThemeColors();
+    scene.background = new THREE.Color(tc.bg);
+  }
+
+  function createMagnetMesh() {
+    while(magnetGroup.children.length > 0){
+      const child = magnetGroup.children[0];
+      magnetGroup.remove(child);
+      if(child.geometry) child.geometry.dispose();
+      if(child.material) child.material.dispose();
+    }
+
+    const halfL = config.length / 2;
+
+    const nGeom = new THREE.BoxGeometry(halfL, config.height, config.width);
+    const nMat = new THREE.MeshPhongMaterial({ color: 0xd32f2f, shininess: 50 });
+    nMesh = new THREE.Mesh(nGeom, nMat);
+    nMesh.position.x = halfL / 2;
+
+    const sGeom = new THREE.BoxGeometry(halfL, config.height, config.width);
+    const sMat = new THREE.MeshPhongMaterial({ color: 0x1976d2, shininess: 50 });
+    sMesh = new THREE.Mesh(sGeom, sMat);
+    sMesh.position.x = -halfL / 2;
+
+    magnetGroup.add(nMesh);
+    magnetGroup.add(sMesh);
+  }
+
+  function getBField(x, y, z) {
+    const poleOffset = config.length / 2 * 0.9;
+    const rN = new THREE.Vector3(x - poleOffset, y, z);
+    const rS = new THREE.Vector3(x + poleOffset, y, z);
+    const distN = rN.length();
+    const distS = rS.length();
+    const softDistN = Math.pow(distN + 0.1, 3);
+    const softDistS = Math.pow(distS + 0.1, 3);
+    const Bx = (rN.x / softDistN) - (rS.x / softDistS);
+    const By = (rN.y / softDistN) - (rS.y / softDistS);
+    const Bz = (rN.z / softDistN) - (rS.z / softDistS);
+    return new THREE.Vector3(Bx, By, Bz);
+  }
+
+  function generateLines() {
+    const linesGroup = new THREE.Group();
+    const seeds = [];
+    paths = [];
+
+    const pOffset = config.length / 2;
+    const wH = config.width / 2;
+    const hH = config.height / 2;
+
+    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+      for (let r = 0.2; r <= Math.max(wH, hH); r += 0.4) {
+        seeds.push(new THREE.Vector3(pOffset, Math.cos(angle) * r, Math.sin(angle) * r));
+      }
+    }
+    for (let x = 0; x <= pOffset; x += config.length/4) {
+      seeds.push(new THREE.Vector3(x, wH + 0.1, 0));
+      seeds.push(new THREE.Vector3(x, -wH - 0.1, 0));
+      seeds.push(new THREE.Vector3(x, 0, hH + 0.1));
+      seeds.push(new THREE.Vector3(x, 0, -hH - 0.1));
+    }
+
+    const stepSize = 0.2;
+    const maxSteps = 300;
+    const colorRed = new THREE.Color(0xff4444);
+    const colorBlue = new THREE.Color(0x4444ff);
+
+    seeds.forEach(seed => {
+      const points = [];
+      const colors = [];
+      const pathPoints = [];
+      let currentPos = seed.clone();
+
+      for (let i = 0; i < maxSteps; i++) {
+        points.push(currentPos.x, currentPos.y, currentPos.z);
+        pathPoints.push(currentPos.clone());
+
+        const t = Math.max(0, Math.min(1, (currentPos.x + pOffset) / config.length));
+        const vertexColor = colorBlue.clone().lerp(colorRed, t);
+        const B = getBField(currentPos.x, currentPos.y, currentPos.z);
+        const intensity = Math.min(1, B.length() * config.strength * 2);
+        vertexColor.multiplyScalar(0.3 + 0.7 * intensity);
+        colors.push(vertexColor.r, vertexColor.g, vertexColor.b);
+
+        if (B.length() < 0.0001) break;
+        B.normalize();
+        currentPos.addScaledVector(B, stepSize);
+        if (currentPos.distanceTo(new THREE.Vector3(-pOffset, 0, 0)) < 0.5) break;
+        if (currentPos.length() > 30) break;
+      }
+
+      if (points.length > 6) {
+        paths.push(pathPoints);
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        const material = new THREE.LineBasicMaterial({
+          vertexColors: true, transparent: true, opacity: 0.8, linewidth: 1
+        });
+        const line = new THREE.Line(geometry, material);
+        linesGroup.add(line);
+      }
+    });
+
+    if (paths.length > 0) {
+      const fluxGeom = new THREE.SphereGeometry(0.08, 8, 8);
+      const fluxMat = new THREE.MeshBasicMaterial({ color: 0xffdd44, transparent: true, opacity: 0.8 });
+      fluxMesh = new THREE.InstancedMesh(fluxGeom, fluxMat, paths.length);
+      const dummy = new THREE.Object3D();
+      dummy.position.set(999, 999, 999);
+      dummy.updateMatrix();
+      for(let i=0; i<paths.length; i++) {
+        fluxMesh.setMatrixAt(i, dummy.matrix);
+      }
+      linesGroup.add(fluxMesh);
+    }
+
+    fieldVisuals.add(linesGroup);
+    document.getElementById('stats-particles').textContent = paths.length;
+  }
+
+  function generatePowder() {
+    powderData = [];
+    powderProgress = 0;
+    powderMesh = null;
+
+    const particleCount = 10000;
+    const geometry = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 4);
+    geometry.rotateX(Math.PI / 2);
+    const material = new THREE.MeshPhongMaterial({ color: 0x88888a, shininess: 10 });
+    const instancedMesh = new THREE.InstancedMesh(geometry, material, particleCount);
+
+    const dummy = new THREE.Object3D();
+    const zAxis = new THREE.Vector3(0, 0, 1);
+    let validCount = 0;
+    let attempts = 0;
+    const maxAttempts = 100000;
+
+    const halfL = config.length / 2;
+    const halfW = config.width / 2;
+    const halfH = config.height / 2;
+
+    while(validCount < particleCount && attempts < maxAttempts) {
+      attempts++;
+      const x = (Math.random() - 0.5) * 40;
+      const y = (Math.random() - 0.5) * 30;
+      const z = (Math.random() - 0.5) * 30;
+      if (Math.abs(x) < halfL && Math.abs(y) < halfW && Math.abs(z) < halfH) continue;
+      const B = getBField(x, y, z);
+      const mag = B.length();
+      const threshold = (config.strength / 5) * 1.5;
+      const probability = Math.pow(mag, 0.4) * threshold;
+      if (Math.random() < probability) {
+        const endPos = new THREE.Vector3(x, y, z);
+        B.normalize();
+        const endQuat = new THREE.Quaternion().setFromUnitVectors(zAxis, B);
+        const startPos = new THREE.Vector3(x + (Math.random()-0.5)*5, y + 15 + Math.random()*10, z + (Math.random()-0.5)*5);
+        const startEuler = new THREE.Euler(
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2
+        );
+        const startQuat = new THREE.Quaternion().setFromEuler(startEuler);
+        powderData.push({ startPos, endPos, startQuat, endQuat });
+        dummy.position.copy(startPos);
+        dummy.quaternion.copy(startQuat);
+        dummy.updateMatrix();
+        instancedMesh.setMatrixAt(validCount, dummy.matrix);
+        validCount++;
+      }
+    }
+
+    instancedMesh.count = validCount;
+    instancedMesh.instanceMatrix.needsUpdate = true;
+    powderMesh = instancedMesh;
+    fieldVisuals.add(instancedMesh);
+    document.getElementById('stats-particles').textContent = validCount.toLocaleString();
+  }
+
+  function updateField() {
+    while(fieldVisuals.children.length > 0){
+      const child = fieldVisuals.children[0];
+      fieldVisuals.remove(child);
+      if(child.geometry) child.geometry.dispose();
+      if(child.material) child.material.dispose();
+    }
+    if (config.mode === 'lines') {
+      generateLines();
+      document.getElementById('stats-mode').textContent = '磁感线';
+    } else {
+      generatePowder();
+      document.getElementById('stats-mode').textContent = '铁粉分布';
+    }
+  }
+
+  function bindUIEvents() {
+    const mapping = [
+      { id: 'param-length', valId: 'val-length', key: 'length' },
+      { id: 'param-width',  valId: 'val-width',  key: 'width' },
+      { id: 'param-height', valId: 'val-height', key: 'height' },
+      { id: 'param-strength', valId: 'val-strength', key: 'strength' }
+    ];
+
+    mapping.forEach(item => {
+      const el = document.getElementById(item.id);
+      const valEl = document.getElementById(item.valId);
+      el.addEventListener('input', (e) => {
+        const value = parseFloat(e.target.value);
+        config[item.key] = value;
+        valEl.textContent = value.toFixed(1).replace(/\.0$/, '') || value.toFixed(1);
+        createMagnetMesh();
+        updateField();
+      });
+    });
+
+    const radios = document.getElementsByName('mode');
+    radios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        config.mode = e.target.value;
+        updateField();
+      });
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      camera.position.set(15, 10, 15);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    });
+
+    document.getElementById('btn-replay').addEventListener('click', () => {
+      if (config.mode === 'powder') {
+        powderProgress = 0;
+      }
+    });
+
+    document.getElementById('mt-right')?.addEventListener('click', () => togglePanel('right-panel'));
+  }
+
+  function onWindowResize() {
+    const container = document.getElementById('canvas-container');
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+
+    const time = clock.getElapsedTime();
+
+    // FPS 计算
+    frameCount++;
+    if (time - lastFpsTime >= 1.0) {
+      currentFps = Math.round(frameCount / (time - lastFpsTime));
+      document.getElementById('stats-fps').textContent = currentFps;
+      frameCount = 0;
+      lastFpsTime = time;
+    }
+
+    // 悬浮动效
+    if (magnetGroup && fieldVisuals) {
+      const floatY = Math.sin(time * 1.5) * 0.2;
+      magnetGroup.position.y = floatY;
+      fieldVisuals.position.y = floatY;
+    }
+
+    // 磁感线流动粒子
+    if (config.mode === 'lines' && fluxMesh && paths.length > 0) {
+      const dummy = new THREE.Object3D();
+      const flowSpeed = time * 8;
+      for (let i = 0; i < paths.length; i++) {
+        const path = paths[i];
+        const offset = i * 13.7;
+        const floatIndex = (flowSpeed + offset) % path.length;
+        const idx1 = Math.floor(floatIndex);
+        const idx2 = (idx1 + 1) % path.length;
+        const lerpFactor = floatIndex - idx1;
+        const p1 = path[idx1];
+        const p2 = path[idx2];
+        if (p1 && p2) {
+          dummy.position.copy(p1).lerp(p2, lerpFactor);
+          dummy.updateMatrix();
+          fluxMesh.setMatrixAt(i, dummy.matrix);
+        }
+      }
+      fluxMesh.instanceMatrix.needsUpdate = true;
+    }
+
+    // 铁粉散落动画
+    if (config.mode === 'powder' && powderProgress < 1 && powderMesh) {
+      powderProgress += 0.015;
+      if (powderProgress > 1) powderProgress = 1;
+      const easeOut = 1 - Math.pow(1 - powderProgress, 3);
+      const dummy = new THREE.Object3D();
+      for (let i = 0; i < powderData.length; i++) {
+        const pd = powderData[i];
+        dummy.position.copy(pd.startPos).lerp(pd.endPos, easeOut);
+        dummy.quaternion.copy(pd.startQuat).slerp(pd.endQuat, easeOut);
+        dummy.updateMatrix();
+        powderMesh.setMatrixAt(i, dummy.matrix);
+      }
+      powderMesh.instanceMatrix.needsUpdate = true;
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  function togglePanel(id) {
+    const panel = document.getElementById(id);
+    if (panel) panel.classList.toggle('collapsed');
+  }
+
+  // 暴露给全局
+  window.togglePanel = togglePanel;
+
+  init();
+  animate();
+  </script>
+
+  <!-- 共享主题脚本 -->
+  <script src="shared-theme.js"></script>
+  <script>
+    // 初始化共享 UI (需在 DOMContentLoaded 后)
+    window.addEventListener('DOMContentLoaded', function() {
+      if (window.PSUTheme) {
+        PSUTheme.createSwitcher();
+        PSUTheme.createBackButton('index.html');
+      }
+    });
+  </script>
+</body>
+</html>
