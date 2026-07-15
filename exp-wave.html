@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="shared-theme.css">
 <style>
 /* ================================================================
-   THEME VARIABLES - 四种主题适配
+   THEME VARIABLES - 五种主题适配
    ================================================================ */
 [data-theme="glass"]{
   --w-bg:#080812;--w-bg2:#0e0e1c;--w-surface:rgba(255,255,255,0.04);--w-surface-hover:rgba(255,255,255,0.08);
@@ -67,65 +67,69 @@
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{font-size:16px;scroll-behavior:smooth}
-body{font-family:var(--font-main);background:var(--w-bg);color:var(--w-ink);line-height:1.6;overflow-x:hidden;min-height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+body{font-family:var(--font-main);background:var(--w-bg);color:var(--w-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:var(--w-bg)}
 ::-webkit-scrollbar-thumb{background:var(--w-scrollbar-thumb);border-radius:999px}
 [data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
 
-/* TOP BAR */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:var(--w-bg2);border-bottom:1px solid var(--w-rule);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background-color .5s ease,border-color .4s ease}
-.topbar-left{display:flex;align-items:center;gap:14px}
-.topbar-logo{font-weight:700;font-size:1.05rem;letter-spacing:1px;text-decoration:none;color:var(--w-ink)}
-.topbar-title{font-size:0.85rem;color:var(--w-muted);font-weight:400}
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
 
-[data-theme="academic"] .topbar{background:#fff;border-bottom:1px solid #e0e0e0;backdrop-filter:none}
-[data-theme="cartoon"] .topbar{background:rgba(255,248,240,0.95);border-bottom:2px solid rgba(255,180,100,0.2)}
-[data-theme="soviet"] .topbar{background:#fffaf2;border-bottom:2px solid #c41e1e;backdrop-filter:none}
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--w-rule);background:var(--w-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--w-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--w-formula-bg);border:1px solid var(--w-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--w-muted);margin-top:1px}
 
-/* LAYOUT */
-.app{padding-top:56px;padding-bottom:64px;display:flex;height:calc(100vh - 56px - 64px)}
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--w-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--w-accent);text-shadow:var(--w-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--w-accent)}
+
+/* ===== 中间画布区域 ===== */
 .sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
-.side-panel{width:380px;min-width:340px;border-left:1px solid var(--w-rule);background:var(--w-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
-
-[data-theme="academic"] .side-panel{background:#fff;border-left:1px solid #e0e0e0}
-[data-theme="cartoon"] .side-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
-[data-theme="soviet"] .side-panel{background:#fffaf2;border-left:2px solid #c41e1e}
-
-/* CANVAS */
 .canvas-container{flex:1;position:relative;background:var(--w-canvas-bg);overflow:hidden;transition:background-color .5s ease}
 #simCanvas{display:block;width:100%;height:100%}
 .canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
 .overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--w-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--w-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;font-size:0.82rem;color:var(--w-muted);opacity:0.5;text-align:center;font-family:monospace;letter-spacing:1px}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
 
 [data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
 [data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
 [data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
 
-/* BOTTOM BAR */
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 24px;background:var(--w-bg2);border-top:1px solid var(--w-rule);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(0,0,0,0.15);transition:background-color .5s ease,border-color .4s ease}
-.sim-btn{padding:10px 24px;border:1px solid var(--w-rule);background:var(--w-surface);color:var(--w-ink);border-radius:10px;font-family:var(--font-main);font-size:0.85rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease}
-.sim-btn:hover{background:var(--w-surface-hover);border-color:var(--w-accent)}
-.sim-btn.primary{background:var(--w-accent);color:#fff;border-color:var(--w-accent)}
-.sim-btn.primary:hover{filter:brightness(1.15)}
-.sim-btn svg{width:16px;height:16px}
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--w-rule);background:var(--w-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--w-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--w-formula-bg);border:1px solid var(--w-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--w-muted);margin-top:1px}
 
-[data-theme="academic"] .bottom-bar{background:#fff;border-top:1px solid #e0e0e0;backdrop-filter:none;box-shadow:none}
-[data-theme="academic"] .sim-btn{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:4px}
-[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae}
-[data-theme="soviet"] .sim-btn{background:#f4f0ea;border:1px solid #d4c4a8;border-radius:2px}
-[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
-[data-theme="cartoon"] .bottom-bar{background:rgba(255,248,240,0.95);border-top:2px solid rgba(255,180,100,0.2)}
-[data-theme="soviet"] .bottom-bar{background:#fffaf2;border-top:2px solid #c41e1e;backdrop-filter:none;box-shadow:none}
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--w-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--w-accent);text-shadow:var(--w-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--w-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--w-accent)}
 
-/* SIDE PANEL SECTIONS */
-.side-section{padding:20px 22px;border-bottom:1px solid var(--w-rule);transition:border-color .4s ease}
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--w-rule);transition:border-color .4s ease}
 .side-section:last-child{border-bottom:none}
-.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--w-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.section-label::before{content:'';width:3px;height:14px;background:var(--w-accent);border-radius:2px}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--w-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--w-accent);border-radius:2px;transition:background .4s ease}
 
-/* PARAMS */
+/* ===== 参数控件 ===== */
 .param-group{margin-bottom:16px}.param-group:last-child{margin-bottom:0}
 .param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
 .param-label{font-size:0.82rem;font-weight:600;color:var(--w-ink2);transition:color .4s ease}
@@ -149,7 +153,31 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 [data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
 [data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
 
-/* OUTPUT */
+/* ===== 模式按钮 ===== */
+.mode-indicator{display:flex;gap:6px}
+.mode-btn{flex:1;padding:7px 4px;border:1px solid var(--w-param-border);background:var(--w-param-bg);color:var(--w-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--w-accent);color:var(--w-accent);background:var(--w-formula-bg)}
+
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 控制按钮 ===== */
+.sim-btn{padding:8px 20px;border:1px solid var(--w-rule);background:rgba(0,0,0,0.4);color:var(--w-ink);border-radius:10px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--w-accent)}
+.sim-btn.primary{background:var(--w-accent);color:#0a0a1a;border-color:var(--w-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+
+/* ===== 输出卡片 ===== */
 .output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .output-card{background:var(--w-output-bg);border:1px solid var(--w-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
 .output-num{font-family:monospace;font-size:1.15rem;font-weight:700;color:var(--w-accent);line-height:1.2;transition:color .4s ease}
@@ -159,7 +187,7 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 [data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
 [data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
 
-/* CROSS-SECTION */
+/* ===== 横截面 ===== */
 .cross-container{background:var(--w-output-bg);border:1px solid var(--w-output-border);border-radius:12px;overflow:hidden;position:relative;transition:background-color .5s ease,border-color .4s ease}
 .cross-container canvas{display:block;width:100%;height:160px}
 .cross-label{position:absolute;top:8px;left:10px;font-family:monospace;font-size:0.65rem;color:var(--w-muted);letter-spacing:1px;text-transform:uppercase;pointer-events:none}
@@ -167,61 +195,85 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 [data-theme="academic"] .cross-container{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
 [data-theme="soviet"] .cross-container{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
 
-/* FORMULA */
-.formula-block{background:var(--w-formula-bg);border:1px solid var(--w-formula-border);border-radius:12px;padding:16px 18px;margin-bottom:14px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--w-output-bg);border:1px solid var(--w-output-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.76rem;color:var(--w-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--w-ink)}
+.info-card .muted{color:var(--w-muted);font-size:0.72rem}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .info-card h3{color:var(--w-accent)}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card h3{color:var(--w-accent)}
+[data-theme="cartoon"] .info-card h3{color:var(--w-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--w-accent);text-shadow:var(--w-glow)}
+
+/* ===== 公式块 ===== */
+.formula-block{background:var(--w-formula-bg);border:1px solid var(--w-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
 .formula-block:last-child{margin-bottom:0}
-.formula-title{font-size:0.78rem;font-weight:700;color:var(--w-ink);margin-bottom:8px;transition:color .4s ease}
-.formula-expr{font-family:monospace;font-size:0.8rem;color:var(--w-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
-.formula-desc{font-size:0.78rem;color:var(--w-muted);margin-top:8px;line-height:1.6}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--w-ink);margin-bottom:6px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.76rem;color:var(--w-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.76rem;color:var(--w-muted);margin-top:6px;line-height:1.6}
 .formula-desc strong{color:var(--w-ink2)}
-.formula-note{font-size:0.72rem;color:var(--w-accent3);margin-top:6px;font-style:italic}
+.formula-note{font-size:0.7rem;color:var(--w-accent3);margin-top:6px;font-style:italic}
 
 [data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
 [data-theme="academic"] .formula-expr{color:#4a6a8a}
 [data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
 [data-theme="soviet"] .formula-expr{color:#8b4513}
 
-/* MODE INDICATOR */
-.mode-indicator{display:flex;gap:6px;margin-top:10px}
-.mode-btn{flex:1;padding:6px;border:1px solid var(--w-param-border);background:var(--w-param-bg);color:var(--w-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
-.mode-btn.active{border-color:var(--w-accent);color:var(--w-accent);background:var(--w-formula-bg)}
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:18px}
+.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--w-rule)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--w-accent);border:2px solid var(--w-bg2)}
+.tl-year{font-size:0.72rem;font-weight:700;color:var(--w-accent);font-family:monospace;margin-bottom:2px}
+.tl-title{font-size:0.78rem;font-weight:600;color:var(--w-ink);margin-bottom:2px}
+.tl-desc{font-size:0.72rem;color:var(--w-muted);line-height:1.5}
 
-[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
-[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
-[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
-[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+/* ===== 科学家卡片 ===== */
+.bio-box{padding:8px 12px;border-radius:10px;border:1px solid var(--w-output-border);background:var(--w-output-bg);margin-bottom:8px;transition:background-color .5s ease,border-color .4s ease}
+.bio-box:last-child{margin-bottom:0}
+.bio-box .bio-name{font-weight:700;font-size:0.76rem;color:var(--w-ink)}
+.bio-box .bio-desc{font-size:0.7rem;color:var(--w-muted);margin-top:2px;line-height:1.5}
 
-/* RESPONSIVE */
-@media(max-width:900px){.app{flex-direction:column}.side-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--w-rule);max-height:50vh}}
-@media(max-width:600px){.topbar{padding:10px 14px}.topbar-title{display:none}.sim-btn{padding:8px 16px;font-size:0.78rem}}
+[data-theme="academic"] .bio-box{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .bio-box{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--w-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--w-rule)}
+  .sim-panel{min-height:400px}
+}
+@media(max-width:600px){
+  .canvas-controls{flex-wrap:wrap;justify-content:center}
+  .sim-btn{padding:6px 14px;font-size:0.76rem}
+}
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-left">
-    <a class="topbar-logo" href="index.html">砰！粒子！</a>
-    <span class="topbar-title">/ 波的干涉实验</span>
-  </div>
-  <div class="topbar-right">
-    <!-- Theme switcher & back button will be injected by shared-theme.js -->
-  </div>
-</header>
 
 <div class="app">
-  <div class="sim-panel">
-    <div class="canvas-container">
-      <canvas id="simCanvas"></canvas>
-      <div class="canvas-overlay">
-        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
-        <span class="overlay-badge" id="badgeTime">t = 0.00</span>
-        <span class="overlay-badge" id="badgeMode">双缝干涉</span>
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">〰️</div>
+      <div>
+        <h1>波的干涉</h1>
+        <div class="lp-sub">参数设置 · 波源控制</div>
       </div>
-      <div class="canvas-hint" id="canvasHint">点击画布放置或拖动波源</div>
     </div>
-  </div>
 
-  <aside class="side-panel">
-    <!-- Parameters -->
+    <!-- 实验参数 -->
     <div class="side-section">
       <div class="section-label">实验参数</div>
       <div class="param-group">
@@ -245,14 +297,14 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
         <input type="range" id="sliderSpeed" min="5" max="100" value="40" step="1">
       </div>
       <div class="param-presets">
-        <button class="preset-btn" data-preset="classic">&#127760; 经典双缝</button>
-        <button class="preset-btn" data-preset="close">&#128256; 窄缝衍射</button>
-        <button class="preset-btn" data-preset="distant">&#128507; 远场干涉</button>
-        <button class="preset-btn" data-preset="beat">&#127925; 拍频</button>
+        <button class="preset-btn" data-preset="classic">🌐 经典双缝</button>
+        <button class="preset-btn" data-preset="close">🔊 窄缝衍射</button>
+        <button class="preset-btn" data-preset="distant">🏠 远场干涉</button>
+        <button class="preset-btn" data-preset="beat">🎵 拍频</button>
       </div>
     </div>
 
-    <!-- Mode -->
+    <!-- 干涉模式 -->
     <div class="side-section">
       <div class="section-label">干涉模式</div>
       <div class="mode-indicator">
@@ -262,7 +314,56 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
       </div>
     </div>
 
-    <!-- Output -->
+    <!-- 操作指南 -->
+    <div class="side-section">
+      <div class="section-label">操作指南</div>
+      <div class="info-card">
+        <p><strong>📍 添加波源</strong>：点击画布空白处放置新波源（最多8个）</p>
+        <p><strong>✋ 拖动波源</strong>：按住已有波源拖动以调整位置</p>
+        <p><strong>▶ 播放/暂停</strong>：底部按钮控制动画</p>
+        <p><strong>🔄 重置</strong>：恢复初始波源位置与时间</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeTime">t = 0.00</span>
+        <span class="overlay-badge" id="badgeMode">双缝干涉</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">点击画布放置波源 · 拖动波源调整位置</div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+          播放
+        </button>
+        <button class="sim-btn" id="btnPause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+          暂停
+        </button>
+        <button class="sim-btn" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>输出与知识</h2>
+        <div class="rp-sub">实时数据 · 公式讲解 · 历史脉络</div>
+      </div>
+    </div>
+
+    <!-- 实时输出 -->
     <div class="side-section">
       <div class="section-label">实时输出</div>
       <div class="output-grid">
@@ -273,7 +374,7 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
       </div>
     </div>
 
-    <!-- Cross Section -->
+    <!-- 横截面波形 -->
     <div class="side-section">
       <div class="section-label">横截面波形</div>
       <div class="cross-container">
@@ -282,9 +383,10 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
       </div>
     </div>
 
-    <!-- Formulas -->
+    <!-- 知识点讲解 -->
     <div class="side-section">
-      <div class="section-label">公式讲解</div>
+      <div class="section-label">知识点讲解</div>
+
       <div class="formula-block">
         <div class="formula-title">波动方程</div>
         <div class="formula-expr">ψ(r, t) = A / √r · cos(kr - ωt + φ)
@@ -292,60 +394,91 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 其中:
   k = 2π / λ  (波数)
   ω = 2πf     (角频率)
-  r = √((x-x₀)² + (y-y₀)²)  (到波源距离)</div>
+  r = √((x-x₀)² + (y-y₀)²)</div>
         <div class="formula-desc"><strong>A</strong> 为振幅，<strong>λ</strong> 为波长，<strong>f</strong> 为频率。波从点源以圆形波前向外传播，振幅随 1/√r 衰减（二维波的几何衰减）。</div>
       </div>
+
       <div class="formula-block">
         <div class="formula-title">叠加原理与干涉</div>
-        <div class="formula-expr">ψ<sub>total</sub> = ψ₁ + ψ₂ + ... + ψ<sub>n</sub>
-
-双源干涉:
-ψ<sub>total</sub> = A₁/√r₁ cos(kr₁-ωt)
-           + A₂/√r₂ cos(kr₂-ωt)
+        <div class="formula-expr">ψ_total = ψ₁ + ψ₂ + ... + ψₙ
 
 合成振幅:
-A<sub>total</sub> = √(A₁² + A₂² + 2A₁A₂cosΔφ)
+A_total = √(A₁² + A₂² + 2A₁A₂cosΔφ)
 
 其中 Δφ = k(r₁ - r₂) 为相位差</div>
-        <div class="formula-desc">当 Δφ = 2nπ 时，两波<strong>相长干涉</strong>（亮纹）；当 Δφ = (2n+1)π 时，<strong>相消干涉</strong>（暗纹）。这就是明暗交替的干涉条纹的成因。</div>
+        <div class="formula-desc">当 Δφ = 2nπ 时，两波<strong>相长干涉</strong>（亮纹）；当 Δφ = (2n+1)π 时，<strong>相消干涉</strong>（暗纹）。</div>
       </div>
+
       <div class="formula-block">
         <div class="formula-title">条纹间距公式</div>
         <div class="formula-expr">Δy = λD / d
 
-λ = 波长
-D = 屏到波源的距离
+λ = 波长, D = 屏到波源距离
 d = 两波源间距</div>
-        <div class="formula-desc">条纹间距与波长成正比，与波源间距成反比。<strong>红光</strong>（长波长）的条纹比<strong>蓝光</strong>（短波长）更宽，这正是白光干涉呈彩色条纹的原因。</div>
+        <div class="formula-desc">条纹间距与波长成正比，与波源间距成反比。<strong>红光</strong>（长波长）的条纹比<strong>蓝光</strong>（短波长）更宽。</div>
       </div>
+
       <div class="formula-block">
         <div class="formula-title">拍频效应</div>
-        <div class="formula-expr">两个频率相近的波叠加:
-ψ = A cos(ω₁t) + A cos(ω₂t)
-    = 2A cos(Δωt/2) cos(ω<sub>avg</sub>t)
+        <div class="formula-expr">ψ = A cos(ω₁t) + A cos(ω₂t)
+  = 2A cos(Δωt/2) cos(ω_avg t)
 
-拍频: f<sub>beat</sub> = |f₁ - f₂|</div>
-        <div class="formula-desc"><strong>拍频</strong>是两个频率略有不同的波叠加后产生的振幅周期性变化。拍频等于两波频率之差。切换到「拍频效应」模式可实时观察此现象。</div>
-        <div class="formula-note">⚠ 本模拟中波的传播速度 v = f·λ，改变频率会自动调整波长以维持波速恒定（或反之，取决于当前锁定模式）。</div>
+拍频: f_beat = |f₁ - f₂|</div>
+        <div class="formula-desc"><strong>拍频</strong>是两个频率相近的波叠加后产生的振幅周期性变化，等于两波频率之差。</div>
+        <div class="formula-note">⚠ 本模拟中波速 v = f·λ，改变频率会自动调整波长以维持波速恒定。</div>
+      </div>
+    </div>
+
+    <!-- 知识历史 -->
+    <div class="side-section">
+      <div class="section-label">波动光学历史</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-year">1678</div>
+          <div class="tl-title">惠更斯原理</div>
+          <div class="tl-desc">荷兰物理学家惠更斯提出波动说，认为光是以太中的弹性波动，波前上每一点都是新的子波源。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1801</div>
+          <div class="tl-title">杨氏双缝实验</div>
+          <div class="tl-desc">托马斯·杨的双缝干涉实验首次以定量方式证实了光的波动性，否定了牛顿的微粒说主导地位。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1818</div>
+          <div class="tl-title">菲涅尔衍射理论</div>
+          <div class="tl-desc">菲涅尔将惠更斯原理与干涉原理结合，建立了完整的衍射理论，成功解释了光的直线传播与衍射现象。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1865</div>
+          <div class="tl-title">麦克斯韦电磁理论</div>
+          <div class="tl-desc">麦克斯韦证明光是电磁波，将光学与电磁学统一，光速 c = 1/√(μ₀ε₀)。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1905</div>
+          <div class="tl-title">波粒二象性</div>
+          <div class="tl-desc">爱因斯坦提出光量子假说解释光电效应，揭示了光的波粒二象性，为量子力学奠定基础。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 科学家档案 -->
+    <div class="side-section">
+      <div class="section-label">科学家档案</div>
+      <div class="bio-box">
+        <div class="bio-name">克里斯蒂安·惠更斯 (1629–1695)</div>
+        <div class="bio-desc">荷兰物理学家、天文学家。提出光的波动说与惠更斯原理，发明摆钟，发现土星最大卫星泰坦。</div>
+      </div>
+      <div class="bio-box">
+        <div class="bio-name">托马斯·杨 (1773–1829)</div>
+        <div class="bio-desc">英国博学者。1801年完成双缝干涉实验，首次证实光的波动性。还提出了杨氏模量，破解了罗塞塔石碑部分古埃及文字。</div>
+      </div>
+      <div class="bio-box">
+        <div class="bio-name">奥古斯丁·菲涅尔 (1788–1827)</div>
+        <div class="bio-desc">法国物理学家。建立了衍射的完整数学理论——惠更斯-菲涅尔原理，发明菲涅尔透镜，广泛应用于灯塔照明。</div>
       </div>
     </div>
   </aside>
 </div>
-
-<nav class="bottom-bar">
-  <button class="sim-btn primary" id="btnPlay">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
-    开始
-  </button>
-  <button class="sim-btn" id="btnPause">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
-    暂停
-  </button>
-  <button class="sim-btn" id="btnReset">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
-    重置
-  </button>
-</nav>
 
 <script src="shared-theme.js"></script>
 <script>
@@ -402,7 +535,7 @@ var badgeMode = document.getElementById('badgeMode');
 var canvasHint = document.getElementById('canvasHint');
 
 /* ================================================================
-   THEME SYNC - 响应主题变化重绘
+   THEME SYNC
    ================================================================ */
 var themeObs = new MutationObserver(function(){ drawSim(); drawCrossSection(); });
 themeObs.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
