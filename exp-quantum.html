@@ -74,6 +74,10 @@
     .slider-switch:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
     input:checked + .slider-switch:before { transform: translateX(30px); }
     input:checked + .slider-switch.q-switch-bg { background-color: var(--accent-1); }
+    input:checked + .slider-switch.q-switch-bg-wave { background-color: #38bdf8; }
+    input:checked + .slider-switch.q-switch-bg-wave:before { background-color: #fff; }
+    input:checked + .slider-switch.q-switch-bg-particle { background-color: #fbbf24; }
+    input:checked + .slider-switch.q-switch-bg-particle:before { background-color: #fff; }
 
     canvas { display: block; }
     .grid-bg {
@@ -83,6 +87,12 @@
     [data-theme="cartoon"] .grid-bg {
       background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
     }
+
+    /* Mode indicator badges */
+    .mode-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .7rem; padding: 2px 8px; border-radius: 50px; font-weight: 600; }
+    .mode-badge.wave { background: rgba(56,189,248,0.15); color: #38bdf8; }
+    .mode-badge.particle { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .mode-badge.off { background: rgba(128,128,128,0.1); color: #94a3b8; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -101,7 +111,7 @@
     <div class="w-full md:w-2/3 flex flex-col gap-4">
       <div class="q-panel">
         <h2 class="text-xl font-medium q-text mb-2">双缝干涉实验</h2>
-        <p class="q-muted text-sm mb-4">观察粒子（光子/电子）如何穿越双缝。开启"探测器"将导致波函数坍缩，干涉条纹消失。</p>
+        <p class="q-muted text-sm mb-4">观察粒子（光子/电子）如何穿越双缝。可同时开启粒子模式与波动模式，对比两种描述下的干涉结果。</p>
         <div class="relative w-full" style="height: 450px;">
           <div id="canvas-container" class="absolute inset-0 q-canvas-bg grid-bg">
             <canvas id="simCanvas" width="800" height="400" class="w-full h-full"></canvas>
@@ -110,17 +120,27 @@
             <div id="status-indicator" class="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
             <span id="status-text" class="q-text">运行中</span>
           </div>
+          <div class="absolute top-4 left-4 flex gap-2">
+            <span id="badge-wave" class="mode-badge wave">🌊 波动</span>
+            <span id="badge-particle" class="mode-badge particle">⚛ 粒子</span>
+          </div>
         </div>
-        <div class="flex justify-center mt-4 gap-8 text-sm q-muted">
+        <div class="flex justify-center mt-4 gap-8 text-sm q-muted flex-wrap">
           <div class="flex items-center"><div class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div><span>发射源</span></div>
           <div class="flex items-center"><div class="w-3 h-3 rounded-full bg-cyan-400 mr-2"></div><span>双缝</span></div>
           <div class="flex items-center"><div class="w-3 h-3 rounded-full bg-red-400 mr-2"></div><span>屏幕</span></div>
+          <div class="flex items-center"><div class="w-3 h-3 rounded-full mr-2" style="background:#38bdf8"></div><span>波强度</span></div>
+          <div class="flex items-center"><div class="w-3 h-3 rounded-full mr-2" style="background:#fbbf24"></div><span>粒子强度</span></div>
         </div>
       </div>
       <div class="q-panel">
-        <h2 class="text-xl font-medium q-text mb-2">强度分布</h2>
-        <div class="w-full h-40 rounded-lg p-2 q-canvas-bg">
-          <canvas id="intensityCanvas" width="800" height="150" class="w-full h-full"></canvas>
+        <h2 class="text-xl font-medium q-text mb-2">强度分布对比</h2>
+        <div class="w-full h-48 rounded-lg p-2 q-canvas-bg">
+          <canvas id="intensityCanvas" width="800" height="180" class="w-full h-full"></canvas>
+        </div>
+        <div class="flex justify-around mt-3 text-xs q-muted">
+          <span><span style="color:#38bdf8">━</span> 波动理论强度（实时计算）</span>
+          <span><span style="color:#fbbf24">━</span> 粒子累积强度（屏幕记录）</span>
         </div>
       </div>
     </div>
@@ -136,16 +156,43 @@
               <button id="doubleSlitBtn" class="flex-1 py-2 px-4 text-center text-sm transition-colors q-btn-primary">双缝模式</button>
             </div>
           </div>
+
           <div>
             <div class="flex justify-between items-center mb-2">
-              <label class="q-muted text-sm">观察者模式</label>
-              <span id="observerStatus" class="text-xs px-2 py-1 rounded-full q-btn-secondary">关闭 (波动模式)</span>
+              <label class="q-muted text-sm">🌊 波动模式</label>
+              <span id="waveModeStatus" class="text-xs px-2 py-1 rounded-full q-btn-secondary">开启</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="waveModeToggle" checked onchange="toggleWaveMode()">
+              <span class="slider-switch q-switch-bg q-switch-bg-wave"></span>
+            </label>
+            <p class="q-muted text-xs mt-1">显示连续波干涉图样（理论强度曲线）</p>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="q-muted text-sm">⚛ 粒子模式</label>
+              <span id="particleModeStatus" class="text-xs px-2 py-1 rounded-full q-btn-secondary">开启</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="particleModeToggle" checked onchange="toggleParticleMode()">
+              <span class="slider-switch q-switch-bg q-switch-bg-particle"></span>
+            </label>
+            <p class="q-muted text-xs mt-1">发射离散粒子，按干涉概率分布落点</p>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="q-muted text-sm">🔍 探测器（路径检测）</label>
+              <span id="observerStatus" class="text-xs px-2 py-1 rounded-full q-btn-secondary">关闭</span>
             </div>
             <label class="switch">
               <input type="checkbox" id="observerToggle" onchange="toggleObserver()">
               <span class="slider-switch q-switch-bg"></span>
             </label>
+            <p class="q-muted text-xs mt-1">开启后波函数坍缩，干涉条纹消失</p>
           </div>
+
           <div>
             <div class="flex justify-between items-center mb-2">
               <label class="q-muted text-sm">粒子发射速率</label>
@@ -178,7 +225,8 @@
       </div>
       <div class="q-panel">
         <h2 class="text-xl font-medium q-text mb-2">波粒二象性</h2>
-        <p class="q-muted text-sm">量子力学中的波粒二象性表明，微观粒子同时具有波动性和粒子性。双缝干涉实验是展示这一现象的经典实验。</p>
+        <p class="q-muted text-sm">量子力学中的波粒二象性表明，微观粒子同时具有波动性和粒子性。<strong class="q-accent">波动模式</strong>展示连续的干涉图样，<strong class="q-accent">粒子模式</strong>展示离散粒子的概率分布落点。两者同时开启时，可以直观看到粒子累积分布如何趋近于波动理论预言的强度曲线。</p>
+        <p class="q-muted text-sm mt-2">当<strong class="q-accent">探测器</strong>开启时，粒子路径被确定，干涉条纹消失——这就是量子力学中的"观察者效应"。</p>
       </div>
     </div>
   </main>
@@ -200,8 +248,41 @@
     const sourceX = 50, sourceY = height / 2, wallX = 300, screenX = 750;
     let slitGap = 40, slitWidth = 10;
     let particles = [], hits = new Array(height).fill(0);
+    let waveIntensityCache = new Array(height).fill(0);
     let isObserverOn = false, isDoubleSlit = true, isPaused = false;
-    let emissionRate = 3, frameCount = 0, animationId;
+    let isWaveMode = true, isParticleMode = true;
+    let emissionRate = 3, frameCount = 0, waveAnimPhase = 0, animationId;
+    let waveIntensityDirty = true;
+    let maxWaveCache = 0.001, maxHitsCache = 1;
+
+    // ===== Wave intensity calculation (theoretical) =====
+    function computeWaveIntensity() {
+      maxWaveCache = 0.001;
+      for (let y = 0; y < height; y++) {
+        if (isObserverOn) {
+          // Observer on: no interference, just single-slit-like envelope
+          let dy = y - height / 2;
+          let envelope = Math.exp(-0.0001 * dy * dy);
+          waveIntensityCache[y] = envelope * 0.5;
+        } else if (isDoubleSlit) {
+          let angle = (y - height / 2) / (screenX - wallX);
+          let intensity = Math.cos(angle * 60);
+          intensity = intensity * intensity;
+          let envelope = Math.exp(-0.00005 * Math.pow(y - height / 2, 2));
+          waveIntensityCache[y] = intensity * envelope;
+        } else {
+          let angle = (y - height / 2) / (screenX - wallX);
+          let x = angle * 30;
+          if (Math.abs(x) < 0.001) x = 0.001;
+          let intensity = Math.sin(x) / x;
+          intensity = intensity * intensity;
+          let envelope = Math.exp(-0.00005 * Math.pow(y - height / 2, 2));
+          waveIntensityCache[y] = intensity * envelope;
+        }
+        if (waveIntensityCache[y] > maxWaveCache) maxWaveCache = waveIntensityCache[y];
+      }
+      waveIntensityDirty = false;
+    }
 
     class Particle {
       constructor() {
@@ -230,10 +311,12 @@
       }
       performQuantumMagic(isUpper) {
         if (isObserverOn) {
+          // Observer: straight path, no interference
           this.vx = 4; this.vy += (Math.random() - 0.5) * 0.5; this.color = '#ef4444';
         } else {
-          let targetY, accepted = false;
-          while (!accepted) {
+          // Quantum: sample from interference probability distribution
+          let targetY, accepted = false, attempts = 0;
+          while (!accepted && attempts < 100) {
             let testY = Math.random() * height;
             let angle = (testY - height/2) / (screenX - wallX);
             let intensity;
@@ -241,10 +324,12 @@
             else { let x = angle * 30; if (Math.abs(x) < 0.001) x = 0.001; intensity = Math.sin(x) / x; intensity = intensity * intensity; }
             let envelope = Math.exp(-0.00005 * Math.pow(testY - height/2, 2));
             if (Math.random() < intensity * envelope) { targetY = testY; accepted = true; }
+            attempts++;
           }
+          if (!accepted) targetY = height / 2 + (Math.random() - 0.5) * 100;
           let timeToScreen = (screenX - this.x) / this.vx;
           this.vy = (targetY - this.y) / timeToScreen;
-          this.color = '#38bdf8';
+          this.color = '#fbbf24';
         }
       }
       recordHit() { let index = Math.floor(this.y); if (index >= 0 && index < height) hits[index]++; }
@@ -261,6 +346,73 @@
       const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
       ctx.fillStyle = theme === 'cartoon' ? 'rgba(255,255,255,0.2)' : (theme === 'glass' ? 'rgba(15,17,23,0.2)' : (theme === 'soviet' ? 'rgba(240,235,228,0.2)' : 'rgba(2, 6, 23, 0.2)'));
       ctx.fillRect(0, 0, width, height);
+
+      // ===== Draw wave pattern (if wave mode on) =====
+      if (isWaveMode) {
+        // Draw wave ripples between source and wall
+        const rippleSpacing = 40;
+        for (let r = rippleSpacing; r < wallX - sourceX; r += rippleSpacing) {
+          const rippleR = r + (waveAnimPhase % rippleSpacing);
+          ctx.strokeStyle = `rgba(56,189,248,${0.15 * (1 - rippleR / (wallX - sourceX))})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(sourceX, sourceY, rippleR, -Math.PI/2, Math.PI/2);
+          ctx.stroke();
+        }
+
+        // Draw wave pattern between wall and screen
+        if (isDoubleSlit) {
+          const slit1Y = height/2 - slitGap/2;
+          const slit2Y = height/2 + slitGap/2;
+          const maxR = screenX - wallX;
+          for (let r = rippleSpacing; r < maxR; r += rippleSpacing) {
+            const rippleR = r + (waveAnimPhase % rippleSpacing);
+            const alpha = 0.12 * (1 - rippleR / maxR);
+            // From slit 1
+            ctx.strokeStyle = `rgba(56,189,248,${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(wallX, slit1Y, rippleR, -Math.PI/2, Math.PI/2); ctx.stroke();
+            // From slit 2
+            ctx.beginPath(); ctx.arc(wallX, slit2Y, rippleR, -Math.PI/2, Math.PI/2); ctx.stroke();
+          }
+        } else {
+          const slitY = height/2;
+          const maxR = screenX - wallX;
+          for (let r = rippleSpacing; r < maxR; r += rippleSpacing) {
+            const rippleR = r + (waveAnimPhase % rippleSpacing);
+            const alpha = 0.12 * (1 - rippleR / maxR);
+            ctx.strokeStyle = `rgba(56,189,248,${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(wallX, slitY, rippleR, -Math.PI/2, Math.PI/2); ctx.stroke();
+          }
+        }
+
+        // Draw wave intensity on screen (step 2px for performance)
+        if (!isObserverOn) {
+          for (let y = 0; y < height; y += 2) {
+            const intensity = waveIntensityCache[y] * 0.8;
+            if (intensity > 0.01) {
+              ctx.fillStyle = `rgba(56,189,248,${intensity})`;
+              ctx.fillRect(screenX + 2, y, 8, 2);
+            }
+          }
+        } else {
+          // Observer: flat distribution
+          ctx.fillStyle = 'rgba(239,68,68,0.3)';
+          ctx.fillRect(screenX + 2, height/2 - 30, 8, 60);
+        }
+      }
+
+      // ===== Draw particle hits on screen (if particle mode on) =====
+      if (isParticleMode) {
+        const hitColor = isObserverOn ? 'rgba(239,68,68,0.5)' : 'rgba(251,191,36,0.5)';
+        ctx.fillStyle = hitColor;
+        for (let y = 0; y < height; y += 2) {
+          if (hits[y] > 0) ctx.fillRect(screenX + 12, y, hits[y] * 2, 2);
+        }
+      }
+
+      // ===== Draw wall =====
       ctx.fillStyle = theme === 'cartoon' ? '#bbb' : (theme === 'soviet' ? '#8b7d6b' : '#475569');
       if (isDoubleSlit) {
         ctx.fillRect(wallX, 0, 5, height/2 - slitGap/2 - slitWidth/2);
@@ -270,19 +422,29 @@
         ctx.fillRect(wallX, 0, 5, height/2 - slitWidth/2);
         ctx.fillRect(wallX, height/2 + slitWidth/2, 5, height);
       }
+
+      // ===== Draw screen line =====
       ctx.strokeStyle = theme === 'cartoon' ? '#ccc' : (theme === 'soviet' ? '#a89880' : '#94a3b8');
       ctx.beginPath(); ctx.moveTo(screenX, 0); ctx.lineTo(screenX, height); ctx.stroke();
-      ctx.fillStyle = isObserverOn ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.5)';
-      ctx.beginPath();
-      for (let y = 0; y < height; y++) { ctx.fillRect(screenX + 2, y, hits[y] * 2, 1); }
+
+      // ===== Draw source =====
       ctx.beginPath(); ctx.arc(sourceX, sourceY, 8, 0, Math.PI * 2); ctx.fillStyle = '#fbbf24'; ctx.fill();
       ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2; ctx.stroke();
+
+      // ===== Draw slit highlights =====
       ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
       if (isDoubleSlit) {
         ctx.beginPath(); ctx.moveTo(wallX, height/2 - slitGap/2 - slitWidth/2); ctx.lineTo(wallX, height/2 - slitGap/2 + slitWidth/2); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(wallX, height/2 + slitGap/2 - slitWidth/2); ctx.lineTo(wallX, height/2 + slitGap/2 + slitWidth/2); ctx.stroke();
       } else {
         ctx.beginPath(); ctx.moveTo(wallX, height/2 - slitWidth/2); ctx.lineTo(wallX, height/2 + slitWidth/2); ctx.stroke();
+      }
+
+      // Observer indicator
+      if (isObserverOn) {
+        ctx.fillStyle = 'rgba(239,68,68,0.8)';
+        ctx.font = '12px Arial'; ctx.textAlign = 'center';
+        ctx.fillText('🔍 探测器开启', wallX + 60, 20);
       }
     }
 
@@ -291,37 +453,107 @@
       const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
       intensityCtx.fillStyle = theme === 'cartoon' ? '#f5f5f5' : (theme === 'glass' ? '#0f172a' : (theme === 'soviet' ? '#f0ebe4' : '#0f172a'));
       intensityCtx.fillRect(0, 0, graphWidth, graphHeight);
+
+      // Grid
       intensityCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)'; intensityCtx.lineWidth = 1;
       for (let y = 0; y <= graphHeight; y += 30) { intensityCtx.beginPath(); intensityCtx.moveTo(0, y); intensityCtx.lineTo(graphWidth, y); intensityCtx.stroke(); }
       for (let x = 0; x <= graphWidth; x += 50) { intensityCtx.beginPath(); intensityCtx.moveTo(x, 0); intensityCtx.lineTo(x, graphHeight); intensityCtx.stroke(); }
-      let maxHits = Math.max(...hits, 1);
-      intensityCtx.beginPath(); intensityCtx.moveTo(0, graphHeight);
-      for (let y = 0; y < height; y++) { const x = (y / height) * graphWidth; const intensity = (hits[y] / maxHits) * graphHeight; intensityCtx.lineTo(x, graphHeight - intensity); }
-      intensityCtx.lineTo(graphWidth, graphHeight);
-      intensityCtx.fillStyle = isObserverOn ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.3)'; intensityCtx.fill();
-      intensityCtx.strokeStyle = isObserverOn ? '#ef4444' : '#38bdf8'; intensityCtx.lineWidth = 2; intensityCtx.stroke();
+
+      // Center line
       intensityCtx.strokeStyle = 'rgba(148, 163, 184, 0.3)'; intensityCtx.lineWidth = 1;
       intensityCtx.beginPath(); intensityCtx.moveTo(graphWidth / 2, 0); intensityCtx.lineTo(graphWidth / 2, graphHeight); intensityCtx.stroke();
+
+      // ===== Draw wave intensity (theoretical curve) =====
+      if (isWaveMode) {
+        intensityCtx.beginPath();
+        intensityCtx.moveTo(0, graphHeight);
+        for (let y = 0; y < height; y += 2) {
+          const x = (y / height) * graphWidth;
+          const intensity = (waveIntensityCache[y] / maxWaveCache) * graphHeight * 0.85;
+          intensityCtx.lineTo(x, graphHeight - intensity);
+        }
+        intensityCtx.lineTo(graphWidth, graphHeight);
+        intensityCtx.closePath();
+        intensityCtx.fillStyle = isObserverOn ? 'rgba(239,68,68,0.15)' : 'rgba(56,189,248,0.15)';
+        intensityCtx.fill();
+        intensityCtx.strokeStyle = isObserverOn ? '#ef4444' : '#38bdf8';
+        intensityCtx.lineWidth = 2;
+        intensityCtx.stroke();
+      }
+
+      // ===== Draw particle intensity (accumulated hits) =====
+      if (isParticleMode) {
+        if (frameCount % 10 === 0) { maxHitsCache = Math.max(...hits, 1); }
+        intensityCtx.beginPath();
+        intensityCtx.moveTo(0, graphHeight);
+        for (let y = 0; y < height; y += 2) {
+          const x = (y / height) * graphWidth;
+          const intensity = (hits[y] / maxHitsCache) * graphHeight * 0.85;
+          intensityCtx.lineTo(x, graphHeight - intensity);
+        }
+        intensityCtx.lineTo(graphWidth, graphHeight);
+        intensityCtx.closePath();
+        intensityCtx.fillStyle = isObserverOn ? 'rgba(239,68,68,0.1)' : 'rgba(251,191,36,0.1)';
+        intensityCtx.fill();
+        intensityCtx.strokeStyle = isObserverOn ? '#ef4444' : '#fbbf24';
+        intensityCtx.lineWidth = 1.5;
+        intensityCtx.stroke();
+      }
+
+      // Labels
       intensityCtx.fillStyle = '#94a3b8'; intensityCtx.font = '10px Arial'; intensityCtx.textAlign = 'center';
-      intensityCtx.fillText('强度分布', graphWidth / 2, 15);
+      intensityCtx.fillText('强度分布对比', graphWidth / 2, 14);
+
+      // Legend
+      intensityCtx.font = '9px Arial'; intensityCtx.textAlign = 'left';
+      if (isWaveMode) { intensityCtx.fillStyle = isObserverOn ? '#ef4444' : '#38bdf8'; intensityCtx.fillText('━ 波动理论', 8, graphHeight - 8); }
+      if (isParticleMode) { intensityCtx.fillStyle = isObserverOn ? '#ef4444' : '#fbbf24'; intensityCtx.fillText('━ 粒子累积', 90, graphHeight - 8); }
     }
 
     function loop() {
       if (!isPaused) {
-        drawScene(); drawIntensityGraph();
-        for(let i=0; i<emissionRate; i++) particles.push(new Particle());
-        for (let i = particles.length - 1; i >= 0; i--) { let p = particles[i]; p.update(); p.draw(); if (p.dead) particles.splice(i, 1); }
+        waveAnimPhase += 2;
+        if (waveIntensityDirty) computeWaveIntensity();
+        drawScene();
+        drawIntensityGraph();
+
+        if (isParticleMode) {
+          for(let i=0; i<emissionRate; i++) particles.push(new Particle());
+          for (let i = particles.length - 1; i >= 0; i--) {
+            let p = particles[i]; p.update(); p.draw();
+            if (p.dead) particles.splice(i, 1);
+          }
+        } else {
+          particles = [];
+        }
         frameCount++;
       }
       animationId = requestAnimationFrame(loop);
     }
+
     function resetSimulation() { hits = new Array(height).fill(0); }
     function clearAll() { hits = new Array(height).fill(0); particles = []; }
+
+    function toggleWaveMode() {
+      isWaveMode = document.getElementById('waveModeToggle').checked;
+      const status = document.getElementById('waveModeStatus');
+      const badge = document.getElementById('badge-wave');
+      if (isWaveMode) { status.textContent = "开启"; badge.className = "mode-badge wave"; badge.textContent = "🌊 波动"; }
+      else { status.textContent = "关闭"; badge.className = "mode-badge off"; badge.textContent = "🌊 关闭"; }
+    }
+    function toggleParticleMode() {
+      isParticleMode = document.getElementById('particleModeToggle').checked;
+      const status = document.getElementById('particleModeStatus');
+      const badge = document.getElementById('badge-particle');
+      if (isParticleMode) { status.textContent = "开启"; badge.className = "mode-badge particle"; badge.textContent = "⚛ 粒子"; }
+      else { status.textContent = "关闭"; badge.className = "mode-badge off"; badge.textContent = "⚛ 关闭"; particles = []; }
+    }
     function toggleObserver() {
       isObserverOn = document.getElementById('observerToggle').checked;
       const status = document.getElementById('observerStatus');
-      if (isObserverOn) { status.textContent = "开启 (粒子模式)"; }
-      else { status.textContent = "关闭 (波动模式)"; }
+      if (isObserverOn) { status.textContent = "开启 (坍缩)"; }
+      else { status.textContent = "关闭"; }
+      waveIntensityDirty = true;
     }
     function toggleSlitMode() {
       isDoubleSlit = !isDoubleSlit;
@@ -338,6 +570,7 @@
         slitGapContainer.style.display = "none";
       }
       resetSimulation();
+      waveIntensityDirty = true;
     }
     function togglePause() {
       isPaused = !isPaused;
@@ -355,8 +588,8 @@
       }
     }
     function updateEmissionRate(value) { emissionRate = parseInt(value); document.getElementById('emissionRateValue').textContent = `${emissionRate} 粒子/帧`; }
-    function updateSlitWidth(value) { slitWidth = parseInt(value); document.getElementById('slitWidthValue').textContent = `${slitWidth} 像素`; }
-    function updateSlitGap(value) { slitGap = parseInt(value); document.getElementById('slitGapValue').textContent = `${slitGap} 像素`; }
+    function updateSlitWidth(value) { slitWidth = parseInt(value); document.getElementById('slitWidthValue').textContent = `${slitWidth} 像素`; waveIntensityDirty = true; }
+    function updateSlitGap(value) { slitGap = parseInt(value); document.getElementById('slitGapValue').textContent = `${slitGap} 像素`; waveIntensityDirty = true; }
 
     document.getElementById('singleSlitBtn').addEventListener('click', function() { if (isDoubleSlit) toggleSlitMode(); });
     document.getElementById('doubleSlitBtn').addEventListener('click', function() { if (!isDoubleSlit) toggleSlitMode(); });
@@ -374,7 +607,9 @@
       intensityCanvas.style.width = '100%'; intensityCanvas.style.height = '100%';
     }
     window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); loop();
+    computeWaveIntensity();
+    resizeCanvas();
+    loop();
   </script>
 </body>
 </html>
