@@ -543,8 +543,8 @@ input[type="range"]::-moz-range-thumb {
       <input type="range" id="slider-gamma" min="0.05" max="0.40" step="0.01" value="0.13">
     </div>
     <div class="control-group">
-      <div class="control-label"><span>撞击速度 v/v_esc</span><span id="val-velocity">1.05</span></div>
-      <input type="range" id="slider-velocity" min="0.8" max="1.8" step="0.05" value="1.05">
+      <div class="control-label"><span>撞击速度 v/v_esc</span><span id="val-velocity">0.95</span></div>
+      <input type="range" id="slider-velocity" min="0.8" max="1.8" step="0.05" value="0.95">
     </div>
     <div class="control-group">
       <div class="control-label"><span>撞击角度 b = sin&theta;</span><span id="val-b">0.70</span></div>
@@ -738,9 +738,9 @@ const R_EARTH = 1.0;
 const M_EARTH = 1.0;
 const H_SMOOTH = 0.25;
 const H2 = H_SMOOTH * H_SMOOTH;
-const K_EOS = 3.5;
+const K_EOS = 5.0;
 const RHO_0 = 1.5;
-const ALPHA_VISC = 1.8;
+const ALPHA_VISC = 3.0;
 const ROCHE_LIMIT = 2.8;
 const DT = 0.004;
 let STEPS_PER_FRAME = 4;
@@ -852,7 +852,7 @@ function buildGrid() {
 // O(N²) 对称万有引力
 // ==========================================
 function computeGravity() {
-  const soft2 = 0.02;
+  const soft2 = 0.005;
   for (let i = 0; i < N; i++) {
     const i3 = i * 3;
     const xi = pos[i3], yi = pos[i3+1], zi = pos[i3+2];
@@ -983,6 +983,27 @@ function stepPhysics() {
   buildGrid();
   computeDensity();
   computeSPHForces();
+  // 速度上限：防止粒子飞太远，对超出束缚半径的粒子施加阻尼
+  for (let i = 0; i < N; i++) {
+    const i3 = i * 3;
+    const px = pos[i3], py = pos[i3+1], pz = pos[i3+2];
+    const r = Math.sqrt(px*px + py*py + pz*pz);
+    if (r > 8.0) {
+      // 对超出8倍半径的粒子施加速度阻尼（模拟气体阻力）
+      const damping = 0.98;
+      vel[i3] *= damping;
+      vel[i3+1] *= damping;
+      vel[i3+2] *= damping;
+    }
+    // 角速度限制：防止极端速度
+    const v2 = vel[i3]*vel[i3] + vel[i3+1]*vel[i3+1] + vel[i3+2]*vel[i3+2];
+    if (v2 > 9.0) {
+      const scale = 3.0 / Math.sqrt(v2);
+      vel[i3] *= scale;
+      vel[i3+1] *= scale;
+      vel[i3+2] *= scale;
+    }
+  }
   for (let i = 0; i < N * 3; i++) vel[i] += acc[i] * (DT * 0.5);
   for (let i = 0; i < N; i++) temp[i] *= 0.995;
 }
@@ -1036,7 +1057,7 @@ let sim = {
   hasFlashed: false,
   phase: 0,
   gamma: 0.13,
-  vRatio: 1.05,
+  vRatio: 0.95,
   bParam: 0.70,
   targetN: 1200,
   trackCOM: true,
@@ -1345,9 +1366,9 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 
 // 预设场景
 const presets = {
-  graze: { gamma: 0.13, v: 1.05, b: 0.72 },
-  headon: { gamma: 0.15, v: 1.15, b: 0.00 },
-  fast: { gamma: 0.10, v: 1.60, b: 0.85 },
+  graze: { gamma: 0.13, v: 0.95, b: 0.72 },
+  headon: { gamma: 0.15, v: 1.00, b: 0.00 },
+  fast: { gamma: 0.10, v: 1.30, b: 0.85 },
   merge: { gamma: 0.30, v: 0.85, b: 0.30 },
 };
 document.querySelectorAll('.preset-btn').forEach(btn => {
