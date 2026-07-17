@@ -357,6 +357,106 @@ input[type="range"]::-moz-range-thumb {
   background: transparent;
 }
 
+/* Knowledge section */
+.kp-section { margin-top: 12px; }
+.kp-item {
+  margin-bottom: 8px; padding: 8px;
+  border-radius: var(--ti-radius);
+  border: 1px solid var(--ti-panel-border);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+.kp-item:hover { border-color: var(--ti-accent); }
+.kp-item-title {
+  font-size: 11px; font-weight: 600;
+  color: var(--ti-text);
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 5px;
+  transition: color 0.4s ease;
+}
+.kp-item-title .kp-icon { font-size: 13px; }
+.kp-item-body {
+  font-size: 10px; line-height: 1.6;
+  color: var(--ti-text-muted);
+  transition: color 0.4s ease;
+}
+.kp-formula {
+  display: inline-block;
+  margin: 3px 0;
+  padding: 2px 6px;
+  border-radius: var(--ti-radius);
+  border: 1px solid var(--ti-panel-border);
+  background: transparent;
+  font-family: 'Consolas', monospace;
+  font-size: 10px;
+  color: var(--ti-accent);
+  transition: all 0.4s ease;
+}
+
+/* History timeline (mini) */
+.kp-timeline { position: relative; padding-left: 14px; margin-top: 6px; }
+.kp-timeline::before {
+  content: ''; position: absolute; left: 4px; top: 2px; bottom: 2px;
+  width: 1px; background: var(--ti-panel-border);
+  transition: background 0.4s ease;
+}
+.kp-tl-item { position: relative; margin-bottom: 7px; }
+.kp-tl-item::before {
+  content: ''; position: absolute; left: -12px; top: 3px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ti-accent);
+  transition: background 0.4s ease;
+}
+.kp-tl-year {
+  font-size: 9px; font-weight: 700;
+  color: var(--ti-accent);
+  font-family: 'Consolas', monospace;
+  transition: color 0.4s ease;
+}
+.kp-tl-text {
+  font-size: 10px; line-height: 1.5;
+  color: var(--ti-text-muted);
+  transition: color 0.4s ease;
+}
+.kp-tl-text strong { color: var(--ti-text); font-weight: 600; }
+
+/* Collapsible knowledge accordion */
+.kp-accordion-item {
+  margin-bottom: 4px;
+  border-radius: var(--ti-radius);
+  overflow: hidden;
+  border: 1px solid var(--ti-panel-border);
+  transition: border-color 0.3s;
+}
+.kp-accordion-item:hover { border-color: var(--ti-accent); }
+.kp-accordion-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 8px; cursor: pointer;
+  font-size: 11px; font-weight: 600;
+  color: var(--ti-text);
+  background: transparent;
+  transition: color 0.4s ease;
+  user-select: none;
+}
+.kp-accordion-header:hover { color: var(--ti-accent); }
+.kp-accordion-arrow {
+  font-size: 9px; color: var(--ti-text-muted);
+  transition: transform 0.3s, color 0.4s;
+}
+.kp-accordion-item.open .kp-accordion-arrow { transform: rotate(90deg); }
+.kp-accordion-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.kp-accordion-item.open .kp-accordion-body { max-height: 400px; }
+.kp-accordion-content {
+  padding: 4px 8px 8px;
+  font-size: 10px; line-height: 1.6;
+  color: var(--ti-text-muted);
+  transition: color 0.4s ease;
+}
+.kp-accordion-content strong { color: var(--ti-text); font-weight: 600; }
+
 /* ========== Bottom Progress ========== */
 #bottom-progress {
   position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
@@ -510,6 +610,82 @@ input[type="range"]::-moz-range-thumb {
     <div class="stat-row"><span class="stat-label">角动量 L</span><span class="stat-value" id="st-l">0.00</span></div>
     <div class="stat-row"><span class="stat-label">计算耗时/步</span><span class="stat-value" id="st-ms">0.0 ms</span></div>
     <div class="stat-row"><span class="stat-label">引擎帧率</span><span class="stat-value" id="st-fps">60 FPS</span></div>
+
+    <!-- Knowledge Points -->
+    <div class="panel-title" style="margin-top:14px">&#128218; 知识点</div>
+    <div class="kp-accordion-item open" id="kp-1">
+      <div class="kp-accordion-header" onclick="toggleAccordion('kp-1')">
+        <span>&#9883; 大撞击假说</span><span class="kp-accordion-arrow">&#9654;</span>
+      </div>
+      <div class="kp-accordion-body"><div class="kp-accordion-content">
+        约<strong>45亿年前</strong>，火星大小的天体<strong>忒伊亚（Theia）</strong>与原地球发生碰撞。撞击产生的碎屑在轨道上聚集形成月球，同时赋予了地球<strong>23.5&deg;自转倾角</strong>。这一假说由<strong>Hartmann & Davis</strong>（1975）和<strong>Cameron & Ward</strong>（1976）独立提出。
+      </div></div>
+    </div>
+    <div class="kp-accordion-item" id="kp-2">
+      <div class="kp-accordion-header" onclick="toggleAccordion('kp-2')">
+        <span>&#9883; 洛希极限</span><span class="kp-accordion-arrow">&#9654;</span>
+      </div>
+      <div class="kp-accordion-body"><div class="kp-accordion-content">
+        天体进入<strong>洛希极限</strong>（<span class="kp-formula">d &asymp; 2.44 R&#8857; (&rho;&#8857;/&rho;_s)^{1/3}</span>）内时，潮汐力将超过自身引力，导致解体。模拟中的蓝色环即为洛希极限半径，碎片在此范围内被撕碎并形成环。
+      </div></div>
+    </div>
+    <div class="kp-accordion-item" id="kp-3">
+      <div class="kp-accordion-header" onclick="toggleAccordion('kp-3')">
+        <span>&#9883; SPH 流体动力学</span><span class="kp-accordion-arrow">&#9654;</span>
+      </div>
+      <div class="kp-accordion-body"><div class="kp-accordion-content">
+        本模拟采用<strong>光滑粒子流体动力学（SPH）</strong>方法，将行星离散为N个粒子，每个粒子携带质量、速度、温度等信息。通过核函数 W 进行插值计算密度和压力，用<strong>Leapfrog 积分</strong>保证能量守恒。
+      </div></div>
+    </div>
+    <div class="kp-accordion-item" id="kp-4">
+      <div class="kp-accordion-header" onclick="toggleAccordion('kp-4')">
+        <span>&#9883; 洛希瓣与质量转移</span><span class="kp-accordion-arrow">&#9654;</span>
+      </div>
+      <div class="kp-accordion-body"><div class="kp-accordion-content">
+        碰撞后忒伊亚的部分地幔通过<strong>洛希瓣溢流</strong>被抛射到地球轨道。角动量守恒使碎片盘获得足够的<strong>轨道角动量</strong>，最终在洛希极限外吸积形成月球。
+      </div></div>
+    </div>
+    <div class="kp-accordion-item" id="kp-5">
+      <div class="kp-accordion-header" onclick="toggleAccordion('kp-5')">
+        <span>&#9883; 同位素证据</span><span class="kp-accordion-arrow">&#9654;</span>
+      </div>
+      <div class="kp-accordion-body"><div class="kp-accordion-content">
+        阿波罗带回的月岩<strong>氧同位素</strong>组成与地球岩石几乎完全一致，支持月球由地球地幔物质形成。2012年<strong>Herwartz</strong>团队发现月球 50 ppm 的差异，可能来自忒伊亚的少量贡献。
+      </div></div>
+    </div>
+
+    <!-- History Timeline -->
+    <div class="panel-title" style="margin-top:14px">&#128340; 历史脉络</div>
+    <div class="kp-timeline">
+      <div class="kp-tl-item">
+        <div class="kp-tl-year">1873</div>
+        <div class="kp-tl-text"><strong>George Darwin</strong> 提出月球从地球分裂而来的分裂假说，但无法解释地月角动量。</div>
+      </div>
+      <div class="kp-tl-item">
+        <div class="kp-tl-year">1946</div>
+        <div class="kp-tl-text"><strong>Reginald Daly</strong> 首次提出撞击分裂假说，但缺乏定量模型。</div>
+      </div>
+      <div class="kp-tl-item">
+        <div class="kp-tl-year">1975</div>
+        <div class="kp-tl-text"><strong>Hartmann & Davis</strong> 在《Icarus》发表大撞击假说论文，计算了碎片盘吸积月球的可行性。</div>
+      </div>
+      <div class="kp-tl-item">
+        <div class="kp-tl-year">1984</div>
+        <div class="kp-tl-text"><strong>Kona 会议</strong>（夏威夷）上，大撞击假说成为月形成的主流理论。</div>
+      </div>
+      <div class="kp-tl-item">
+        <div class="kp-tl-year">2001</div>
+        <div class="kp-tl-text"><strong>Canup & Asphaug</strong> 完成 SPH 数值模拟，重现了标准大撞击场景（&gamma;=0.13, v=1.05v_esc）。</div>
+      </div>
+      <div class="kp-tl-item">
+        <div class="kp-tl-year">2012</div>
+        <div class="kp-tl-text"><strong>&Ccedil;uk & Stewart</strong> 提出"快速自转地球"模型，解决了地月系统角动量守恒问题。</div>
+      </div>
+      <div class="kp-tl-item">
+        <div class="kp-tl-year">2014</div>
+        <div class="kp-tl-text"><strong>Canup</strong> 提出"合生模型"：忒伊亚与地球质量相近，撞击后直接合并并形成月球。</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -543,6 +719,10 @@ function toggleRightDrawer() {
   var toggle = document.getElementById('right-toggle');
   drawer.classList.toggle('collapsed');
   toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9664;' : '&#9654;';
+}
+
+function toggleAccordion(id) {
+  document.getElementById(id).classList.toggle('open');
 }
 
 function isDarkTheme() {
