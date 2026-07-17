@@ -742,16 +742,65 @@
     tracedIds.clear();
     tracedLinks.clear();
 
-    // 双向追踪: 找出所有与该节点直接相连的节点和连线
-    LINKS.forEach(link => {
-      if (link.source === id){
-        tracedIds.add(link.target);
-        tracedLinks.add(link.source + '->' + link.target);
-      } else if (link.target === id){
-        tracedIds.add(link.source);
-        tracedLinks.add(link.source + '->' + link.target);
-      }
-    });
+    const selNode = nodeMap.get(id);
+
+    // 沿树结构向上追踪 (仅 parent→child 类型链接)
+    function traceUp(nodeId){
+      LINKS.forEach(link => {
+        if (link.target === nodeId && link.type === 'normal'){
+          tracedIds.add(link.source);
+          tracedLinks.add(link.source + '->' + link.target);
+          traceUp(link.source);
+        }
+      });
+    }
+
+    // 沿树结构向下追踪 (仅 parent→child 类型链接)
+    function traceDown(nodeId){
+      LINKS.forEach(link => {
+        if (link.source === nodeId && link.type === 'normal'){
+          tracedIds.add(link.target);
+          tracedLinks.add(link.source + '->' + link.target);
+          traceDown(link.target);
+        }
+      });
+    }
+
+    // 添加实验的科学家交叉链接 (不递归)
+    function addCrossLinks(expId){
+      LINKS.forEach(link => {
+        if (link.type === 'scientist' && (link.source === expId || link.target === expId)){
+          const neighbor = link.source === expId ? link.target : link.source;
+          tracedIds.add(neighbor);
+          tracedLinks.add(link.source + '->' + link.target);
+        }
+      });
+    }
+
+    if (selNode.group === 8){
+      // 科学家: 先找到关联实验, 再从每个实验向上追踪到根
+      const linkedExps = [];
+      LINKS.forEach(link => {
+        if (link.source === id && link.type === 'scientist'){
+          tracedIds.add(link.target);
+          tracedLinks.add(link.source + '->' + link.target);
+          linkedExps.push(link.target);
+          traceUp(link.target);
+        }
+      });
+      // 添加与这些实验关联的其他科学家 (同级, 不递归)
+      linkedExps.forEach(eid => addCrossLinks(eid));
+    } else {
+      // 非科学家: 沿树结构向上和向下追踪
+      traceUp(id);
+      traceDown(id);
+      // 为链路中的每个实验添加关联科学家
+      const expIds = [id, ...tracedIds].filter(i => {
+        const n = nodeMap.get(i);
+        return n && n.group === 7;
+      });
+      expIds.forEach(eid => addCrossLinks(eid));
+    }
 
     updateHighlight();
     showDetail(nodeMap.get(id));
