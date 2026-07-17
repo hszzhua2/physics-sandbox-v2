@@ -317,9 +317,9 @@
   <div class="stats-bar">
     <span class="stat">📚 <span class="n na">5</span> 物理分类</span>
     <span class="stat">🔬 <span class="n na">16</span> 学科</span>
-    <span class="stat">🧪 <span class="n na">32</span> 实验</span>
-    <span class="stat">👨‍🔬 <span class="n na">24</span> 科学家</span>
-    <span class="stat">🔗 <span class="n">85</span> 关联</span>
+    <span class="stat">🧪 <span class="n na">33</span> 实验</span>
+    <span class="stat">👨‍🔬 <span class="n na">26</span> 科学家</span>
+    <span class="stat">🔗 <span class="n">87</span> 关联</span>
   </div>
 
   <!-- 3D 画布 -->
@@ -398,10 +398,10 @@
   // 节点分组定义
   // ==========================================
   const GROUPS = {
-    1: { name:'物理分类', hex:'#4ecdc4', y:120,  radius:200, size:8,   icon:'📚' },
-    6: { name:'学科',     hex:'#74b9ff', y:40,   radius:230, size:6,   icon:'🔬' },
-    7: { name:'实验',     hex:'#2ecc71', y:-40,  radius:260, size:4.5, icon:'🧪' },
-    8: { name:'科学家',   hex:'#fdcb6e', y:-120, radius:290, size:3.5, icon:'👨‍🔬' }
+    1: { name:'物理分类', hex:'#4ecdc4', y:120,  radius:140, size:8,   icon:'📚' },
+    6: { name:'学科',     hex:'#74b9ff', y:40,   radius:170, size:6,   icon:'🔬' },
+    7: { name:'实验',     hex:'#2ecc71', y:-40,  radius:200, size:4.5, icon:'🧪' },
+    8: { name:'科学家',   hex:'#fdcb6e', y:-120, radius:230, size:3.5, icon:'👨‍🔬' }
   };
   const GROUP_LIST = [1,6,7,8];
 
@@ -469,6 +469,7 @@
     { id:"klein-bottle",        name:"克莱因瓶",          group:7, icon:"🧪", color:"#2ecc71", description:"克莱因瓶三维参数化可视化", target:"exp-klein-bottle.html", parent:"mechanics" },
     { id:"theia-impact",        name:"忒伊亚撞击",       group:7, icon:"🧪", color:"#2ecc71", description:"SPH光滑粒子流体动力学模拟地月系统形成", target:"exp-theia-impact.html", parent:"astro" },
     { id:"fractal",             name:"分形几何",          group:7, icon:"🧪", color:"#2ecc71", description:"L-System分形生成与连续折叠插值", target:"exp-fractal.html", parent:"chaos_theory" },
+    { id:"calabi-yau",          name:"卡拉比-丘流形",     group:7, icon:"🧪", color:"#2ecc71", description:"弦理论额外维度紧致化流形可视化", target:"exp-calabi-yau.html", parent:"chaos_theory" },
 
     // ===== 科学家 (group:8) =====
     { id:"sci-newton",      name:"牛顿",       group:8, icon:"🍎", color:"#e17055", description:"经典力学奠基人 · 万有引力定律", experiments:["spring","gravity_exp","matter","solar"] },
@@ -494,7 +495,9 @@
     { id:"sci-copernicus",  name:"哥白尼",     group:8, icon:"☀️", color:"#fdcb6e", description:"日心说创立者 · 现代天文学奠基人", experiments:["solar"] },
     { id:"sci-vonneumann",  name:"冯·诺依曼",  group:8, icon:"🧮", color:"#74b9ff", description:"元胞自动机创始人 · 计算机科学先驱", experiments:["ca3d"] },
     { id:"sci-conway",      name:"Conway",     group:8, icon:"🎮", color:"#55efc4", description:"生命游戏发明者 · 元胞自动机先驱", experiments:["ca3d"] },
-    { id:"sci-sutherland",  name:"Sutherland", group:8, icon:"💻", color:"#a29bfe", description:"计算机图形学之父 · 三维交互先驱", experiments:["pointcloud"] }
+    { id:"sci-sutherland",  name:"Sutherland", group:8, icon:"💻", color:"#a29bfe", description:"计算机图形学之父 · 三维交互先驱", experiments:["pointcloud"] },
+    { id:"sci-calabi",      name:"卡拉比",     group:8, icon:"📐", color:"#a29bfe", description:"微分几何学家 · 卡拉比猜想提出者", experiments:["calabi-yau"] },
+    { id:"sci-yau",         name:"丘成桐",     group:8, icon:"🔷", color:"#a29bfe", description:"菲尔兹奖得主 · 证明卡拉比猜想", experiments:["calabi-yau"] }
   ];
 
   // ==========================================
