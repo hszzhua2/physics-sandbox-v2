@@ -118,10 +118,7 @@ canvas { display: block; }
   transform: translateX(0);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.left-drawer.collapsed {
-  transform: translateX(-100%);
-}
+.left-drawer.collapsed { transform: translateX(-100%); }
 
 .left-drawer-inner {
   width: 100%; height: 100%;
@@ -134,7 +131,6 @@ canvas { display: block; }
   -webkit-backdrop-filter: var(--ti-backdrop);
   transition: all 0.4s ease;
 }
-
 .left-drawer-inner::-webkit-scrollbar { width: 4px; }
 .left-drawer-inner::-webkit-scrollbar-thumb {
   background: var(--ti-panel-border);
@@ -148,10 +144,7 @@ canvas { display: block; }
   transform: translateX(0);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.right-drawer.collapsed {
-  transform: translateX(100%);
-}
+.right-drawer.collapsed { transform: translateX(100%); }
 
 .right-drawer-inner {
   width: 100%; height: 100%;
@@ -164,14 +157,13 @@ canvas { display: block; }
   -webkit-backdrop-filter: var(--ti-backdrop);
   transition: all 0.4s ease;
 }
-
 .right-drawer-inner::-webkit-scrollbar { width: 4px; }
 .right-drawer-inner::-webkit-scrollbar-thumb {
   background: var(--ti-panel-border);
   border-radius: 2px;
 }
 
-/* ========== Drawer Toggle Buttons (position: fixed) ========== */
+/* ========== Drawer Toggle ========== */
 .drawer-toggle {
   position: fixed; top: 50%; transform: translateY(-50%);
   width: 28px; height: 60px;
@@ -183,38 +175,30 @@ canvas { display: block; }
   transition: all 0.3s ease;
   user-select: none;
 }
+.drawer-toggle:hover { color: var(--ti-accent); }
 
-.drawer-toggle:hover {
-  color: var(--ti-accent);
-}
-
-/* Left drawer toggle */
 .left-drawer .drawer-toggle {
   left: 300px;
   border-left: none;
   border-radius: 0 var(--ti-radius) var(--ti-radius) 0;
 }
-
 .left-drawer.collapsed .drawer-toggle {
   left: 0;
   border-left: var(--ti-border-width) solid var(--ti-panel-border);
   border-radius: 0 var(--ti-radius) var(--ti-radius) 0;
 }
-
-/* Right drawer toggle */
 .right-drawer .drawer-toggle {
   right: 250px;
   border-right: none;
   border-radius: var(--ti-radius) 0 0 var(--ti-radius);
 }
-
 .right-drawer.collapsed .drawer-toggle {
   right: 0;
   border-right: var(--ti-border-width) solid var(--ti-panel-border);
   border-radius: var(--ti-radius) 0 0 var(--ti-radius);
 }
 
-/* ========== Panel Content Styles ========== */
+/* ========== Panel Content ========== */
 .panel-title {
   color: var(--ti-accent);
   font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
@@ -225,7 +209,6 @@ canvas { display: block; }
 }
 
 .control-group { margin-bottom: 10px; }
-
 .control-label {
   display: flex; justify-content: space-between; align-items: center;
   color: var(--ti-text-muted); font-size: 11px; margin-bottom: 4px;
@@ -266,7 +249,6 @@ input[type="range"]::-moz-range-thumb {
   color: var(--ti-text-muted); font-size: 11px; margin: 8px 0;
   transition: color 0.4s ease;
 }
-
 .toggle-switch {
   width: 36px; height: 18px;
   border-radius: 9px;
@@ -301,6 +283,37 @@ input[type="range"]::-moz-range-thumb {
 .btn-accent2 {
   background: var(--ti-accent-2); color: #fff;
   border-color: var(--ti-accent-2);
+}
+
+/* Speed preset buttons */
+.speed-row { display: flex; gap: 4px; margin-top: 6px; }
+.btn-speed {
+  flex: 1; padding: 5px 0;
+  border-radius: var(--ti-radius);
+  border: var(--ti-border-width) solid var(--ti-panel-border);
+  background: var(--ti-panel-bg);
+  color: var(--ti-text-muted); font-size: 10px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.btn-speed:hover { color: var(--ti-text); border-color: var(--ti-accent); }
+.btn-speed.active {
+  background: var(--ti-accent); color: #fff;
+  border-color: var(--ti-accent);
+  box-shadow: 0 0 8px var(--ti-accent);
+}
+.btn-turbo {
+  flex: 1; padding: 7px 0;
+  border-radius: var(--ti-radius);
+  border: var(--ti-border-width) solid var(--ti-accent-2);
+  background: var(--ti-panel-bg);
+  color: var(--ti-accent-2); font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+  margin-top: 6px;
+}
+.btn-turbo:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn-turbo.active {
+  background: var(--ti-accent-2); color: #fff;
+  box-shadow: 0 0 12px var(--ti-accent-2);
 }
 
 .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
@@ -399,7 +412,6 @@ input[type="range"]::-moz-range-thumb {
   font-family: var(--font-main, 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif);
 }
 
-/* ========== Responsive ========== */
 @media (max-width: 900px) {
   .left-drawer { width: 260px; }
   .right-drawer { width: 220px; }
@@ -416,7 +428,6 @@ input[type="range"]::-moz-range-thumb {
 <body>
 <div class="exp-bg"></div>
 
-<!-- Back button -->
 <a href="index.html" class="back-btn" id="back-btn">&#8592; 返回首页</a>
 
 <div id="canvas-container"></div>
@@ -429,54 +440,55 @@ input[type="range"]::-moz-range-thumb {
 
     <div class="control-group">
       <div class="control-label"><span>忒伊亚质量比 &gamma;</span><span id="val-gamma">0.13</span></div>
-      <input type="range" id="slider-gamma" min="0.05" max="0.50" step="0.01" value="0.13">
+      <input type="range" id="slider-gamma" min="0.05" max="0.40" step="0.01" value="0.13">
     </div>
     <div class="control-group">
       <div class="control-label"><span>撞击速度 v/v_esc</span><span id="val-velocity">1.05</span></div>
-      <input type="range" id="slider-velocity" min="0.8" max="2.5" step="0.05" value="1.05">
+      <input type="range" id="slider-velocity" min="0.8" max="1.8" step="0.05" value="1.05">
     </div>
     <div class="control-group">
-      <div class="control-label"><span>撞击参数 b = sin&theta;</span><span id="val-b">0.70</span></div>
-      <input type="range" id="slider-b" min="0.0" max="0.99" step="0.01" value="0.70">
+      <div class="control-label"><span>撞击角度 b = sin&theta;</span><span id="val-b">0.70</span></div>
+      <input type="range" id="slider-b" min="0.0" max="0.95" step="0.01" value="0.70">
     </div>
     <div class="control-group">
       <div class="control-label"><span>粒子数 N</span><span id="val-n">1200</span></div>
-      <input type="range" id="slider-n" min="400" max="5000" step="200" value="1200">
+      <input type="range" id="slider-n" min="500" max="3000" step="100" value="1200">
     </div>
     <div class="control-group">
       <div class="control-label"><span>模拟速度</span><span id="val-speed">4&times;</span></div>
-      <input type="range" id="slider-speed" min="1" max="20" step="1" value="4">
+      <input type="range" id="slider-speed" min="1" max="50" step="1" value="4">
+      <div class="speed-row">
+        <button class="btn-speed active" data-speed="4">4&times;</button>
+        <button class="btn-speed" data-speed="10">10&times;</button>
+        <button class="btn-speed" data-speed="20">20&times;</button>
+        <button class="btn-speed" data-speed="40">40&times;</button>
+      </div>
+      <button class="btn-turbo" id="btn-turbo">&#9889; 极速模式</button>
     </div>
 
     <div class="toggle-row">
-      <span>显示粒子尾迹</span>
-      <div class="toggle-switch" id="toggle-trail"></div>
-    </div>
-    <div class="toggle-row">
       <span>相机跟踪质心</span>
-      <div class="toggle-switch" id="toggle-track"></div>
+      <div class="toggle-switch active" id="toggle-track"></div>
     </div>
 
     <div class="btn-row">
-      <div class="btn btn-accent" id="btn-start">&#9654; 开始</div>
-      <div class="btn btn-accent2" id="btn-pause">&#9208; 暂停</div>
-      <div class="btn" id="btn-reset">&#8634; 重置</div>
+      <div class="btn btn-accent" id="btn-start">&#9654; 开始模拟</div>
+      <div class="btn" id="btn-reset">&#8634; 重新生成</div>
     </div>
 
     <div class="panel-title" style="margin-top:12px">预设场景</div>
     <div class="preset-grid">
-      <div class="preset-btn" data-preset="graze">擦边撞击</div>
-      <div class="preset-btn" data-preset="headon">正面撞击</div>
-      <div class="preset-btn" data-preset="fast">高速撞击</div>
-      <div class="preset-btn" data-preset="merge">低速并合</div>
+      <div class="preset-btn" data-preset="graze">形成月球 (擦边)</div>
+      <div class="preset-btn" data-preset="headon">同归于尽 (正面)</div>
+      <div class="preset-btn" data-preset="fast">肇事逃逸 (高速)</div>
+      <div class="preset-btn" data-preset="merge">缓慢融合 (吸积)</div>
     </div>
 
-    <div class="panel-title" style="margin-top:12px">粒子图例</div>
-    <div class="legend-item"><div class="dot" style="background:#e65c2c"></div>原地球 &mdash; 铁核</div>
-    <div class="legend-item"><div class="dot" style="background:#3366dd"></div>原地球 &mdash; 地幔硅酸盐</div>
-    <div class="legend-item"><div class="dot" style="background:#e6c82c"></div>忒伊亚 &mdash; 铁核</div>
-    <div class="legend-item"><div class="dot" style="background:#99cc33"></div>忒伊亚 &mdash; 地幔硅酸盐</div>
-    <div class="legend-item"><div class="dot" style="background:#cc66aa"></div>碎片盘 / 逃逸物质</div>
+    <div class="panel-title" style="margin-top:12px">粒子材质</div>
+    <div class="legend-item"><div class="dot" style="background:#1999b3"></div>原地球 &mdash; 硅酸盐地幔 (青)</div>
+    <div class="legend-item"><div class="dot" style="background:#e6a619"></div>原地球 &mdash; 重金属铁核 (金)</div>
+    <div class="legend-item"><div class="dot" style="background:#cc3333"></div>忒伊亚 &mdash; 硅酸盐地幔 (赤)</div>
+    <div class="legend-item"><div class="dot" style="background:#804dcc"></div>忒伊亚 &mdash; 重金属铁核 (紫)</div>
 
     <div class="panel-title" style="margin-top:12px">能量历史</div>
     <canvas id="energy-canvas" width="230" height="80"></canvas>
@@ -487,31 +499,31 @@ input[type="range"]::-moz-range-thumb {
 <div class="right-drawer" id="right-drawer">
   <div class="drawer-toggle" id="right-toggle" onclick="toggleRightDrawer()" title="展开/收起状态面板">&#9654;</div>
   <div class="right-drawer-inner">
-    <div class="panel-title">&#128202; 实时状态</div>
-    <div class="stat-row"><span class="stat-label">模拟时间</span><span class="stat-value" id="st-time">0.00</span></div>
-    <div class="stat-row"><span class="stat-label">粒子总数</span><span class="stat-value" id="st-n">0</span></div>
-    <div class="stat-row"><span class="stat-label">系统总能量</span><span class="stat-value" id="st-etot">0.00</span></div>
+    <div class="panel-title">&#128202; 实时遥测</div>
+    <div class="stat-row"><span class="stat-label">演化时间</span><span class="stat-value" id="st-time">0.00</span></div>
+    <div class="stat-row"><span class="stat-label">轨道碎片数</span><span class="stat-value" id="st-debris">0</span></div>
+    <div class="stat-row"><span class="stat-label">月球胚胎</span><span class="stat-value" id="st-moon">否</span></div>
+    <div class="stat-row"><span class="stat-label">系统最高温</span><span class="stat-value" id="st-tmax">300 K</span></div>
+    <div class="stat-row"><span class="stat-label">最大密度 &rho;</span><span class="stat-value" id="st-rhomax">0.00</span></div>
     <div class="stat-row"><span class="stat-label">动能 KE</span><span class="stat-value" id="st-ke">0.00</span></div>
     <div class="stat-row"><span class="stat-label">势能 PE</span><span class="stat-value" id="st-pe">0.00</span></div>
     <div class="stat-row"><span class="stat-label">角动量 L</span><span class="stat-value" id="st-l">0.00</span></div>
-    <div class="stat-row"><span class="stat-label">最大密度 &rho;</span><span class="stat-value" id="st-rhomax">0.00</span></div>
-    <div class="stat-row"><span class="stat-label">轨道碎片数</span><span class="stat-value" id="st-debris">0</span></div>
-    <div class="stat-row"><span class="stat-label">温度峰值</span><span class="stat-value" id="st-tmax">0.00</span></div>
-    <div class="stat-row"><span class="stat-label">FPS</span><span class="stat-value" id="st-fps">60</span></div>
+    <div class="stat-row"><span class="stat-label">计算耗时/步</span><span class="stat-value" id="st-ms">0.0 ms</span></div>
+    <div class="stat-row"><span class="stat-label">引擎帧率</span><span class="stat-value" id="st-fps">60 FPS</span></div>
   </div>
 </div>
 
 <!-- Bottom Progress -->
 <div id="bottom-progress">
-  <div class="step active" id="step-0"><div class="step-dot"></div>初始化</div>
+  <div class="step active" id="step-0"><div class="step-dot"></div>引力捕获</div>
   <div class="step-arrow">&#8250;</div>
-  <div class="step" id="step-1"><div class="step-dot"></div>接近</div>
+  <div class="step" id="step-1"><div class="step-dot"></div>大碰撞爆发</div>
   <div class="step-arrow">&#8250;</div>
-  <div class="step" id="step-2"><div class="step-dot"></div>撞击</div>
+  <div class="step" id="step-2"><div class="step-dot"></div>洛希瓣抛射</div>
   <div class="step-arrow">&#8250;</div>
-  <div class="step" id="step-3"><div class="step-dot"></div>碎片盘形成</div>
+  <div class="step" id="step-3"><div class="step-dot"></div>碎屑环吸积</div>
   <div class="step-arrow">&#8250;</div>
-  <div class="step" id="step-4"><div class="step-dot"></div>月球累积</div>
+  <div class="step" id="step-4"><div class="step-dot"></div>新地月系统</div>
 </div>
 
 <div id="hint">拖动鼠标旋转视角 &middot; 滚轮缩放 &middot; 右键平移</div>
@@ -533,112 +545,91 @@ function toggleRightDrawer() {
   toggle.innerHTML = drawer.classList.contains('collapsed') ? '&#9664;' : '&#9654;';
 }
 
-// ==========================================
-// Theme helper: is dark background?
-// ==========================================
 function isDarkTheme() {
   var theme = document.documentElement.getAttribute('data-theme') || 'academic';
   return (theme === 'glass' || theme === 'cyber');
 }
 
 // ==========================================
-// 一、物理常数与全局配置
+// 物理常数
 // ==========================================
-const G = 6.57e-3;
-const H_SMOOTH = 0.32;
-const K_EOS = 0.04;
-const GAMMA_EOS = 1.4;
-const ALPHA_AV = 1.0;
-const BETA_AV = 2.0;
-const ROCHE = 2.9;
-const DT_BASE = 1.0e-3;
-const M_EARTH = 1.0;
+const G_CONST = 1.0;
 const R_EARTH = 1.0;
-const CORE_FRACTION = 0.30;
-
-const TYPE_EARTH_CORE = 0;
-const TYPE_EARTH_MANTLE = 1;
-const TYPE_THEIA_CORE = 2;
-const TYPE_THEIA_MANTLE = 3;
-const TYPE_DEBRIS = 4;
-
-const COLOR_EARTH_CORE = new THREE.Color(0xe65c2c);
-const COLOR_EARTH_MANTLE = new THREE.Color(0x3366dd);
-const COLOR_THEIA_CORE = new THREE.Color(0xe6c82c);
-const COLOR_THEIA_MANTLE = new THREE.Color(0x99cc33);
-const COLOR_DEBRIS = new THREE.Color(0xcc66aa);
+const M_EARTH = 1.0;
+const H_SMOOTH = 0.25;
+const H2 = H_SMOOTH * H_SMOOTH;
+const K_EOS = 3.5;
+const RHO_0 = 1.5;
+const ALPHA_VISC = 1.8;
+const ROCHE_LIMIT = 2.8;
+const DT = 0.004;
+let STEPS_PER_FRAME = 4;
 
 // ==========================================
-// 二、场景初始化
+// 扁平化数据结构 (SoA)
+// ==========================================
+let N = 0;
+let pos, vel, acc, mass, rho, press, matType, temp, colorBuf;
+
+// SPH 空间网格 (1D Hash Grid)
+const GRID_CELL = H_SMOOTH * 2.0;
+const INV_GRID = 1.0 / GRID_CELL;
+const HASH_SIZE = 16384;
+const gridHead = new Int32Array(HASH_SIZE);
+let gridNext = new Int32Array(3000);
+
+// ==========================================
+// Three.js 场景初始化
 // ==========================================
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-
-// Initial scene background will be set by applyTheme()
 scene.background = new THREE.Color(0xe8e8ee);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 200);
-camera.position.set(0, 8, 18);
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 6, 14);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 container.appendChild(renderer.domElement);
 
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.minDistance = 2;
-controls.maxDistance = 80;
-
-// 光照
-const ambientLight = new THREE.AmbientLight(0x223344, 1.0);
-scene.add(ambientLight);
-const pointLight = new THREE.PointLight(0xffeedd, 1.5, 100);
-pointLight.position.set(0, 0, 0);
-scene.add(pointLight);
-
-// Refs for theme-reactive objects
-let starsMesh = null;
-let rocheRingMesh = null;
+controls.enableDamping = true; controls.dampingFactor = 0.05;
+controls.maxDistance = 100; controls.minDistance = 2;
 
 // 星空背景
+let starsMesh = null;
 function createStars() {
   if (starsMesh) { scene.remove(starsMesh); starsMesh.geometry.dispose(); starsMesh.material.dispose(); }
-  const count = 3000;
+  const count = 4000;
   const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(count * 3);
+  const starPos = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    const r = 50 + Math.random() * 100;
+    const r = 50 + Math.random() * 150;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    pos[i*3] = r * Math.sin(phi) * Math.cos(theta);
-    pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
-    pos[i*3+2] = r * Math.cos(phi);
+    starPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+    starPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+    starPos[i*3+2] = r * Math.cos(phi);
   }
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
   const dark = isDarkTheme();
-  const mat = new THREE.PointsMaterial({
-    color: dark ? 0xffffff : 0x666688,
-    size: 0.15,
-    transparent: true,
-    opacity: dark ? 0.8 : 0.3,
-    sizeAttenuation: true
-  });
-  starsMesh = new THREE.Points(geo, mat);
+  starsMesh = new THREE.Points(geo, new THREE.PointsMaterial({
+    color: 0xffffff, size: 0.08, transparent: true,
+    opacity: dark ? 0.6 : 0.3, sizeAttenuation: true
+  }));
   scene.add(starsMesh);
 }
 
 // 洛希参考环
+let rocheRingMesh = null;
 function createRocheRing() {
   if (rocheRingMesh) { scene.remove(rocheRingMesh); rocheRingMesh.geometry.dispose(); rocheRingMesh.material.dispose(); }
-  const geo = new THREE.RingGeometry(ROCHE - 0.05, ROCHE + 0.05, 128);
+  const geo = new THREE.RingGeometry(ROCHE_LIMIT - 0.05, ROCHE_LIMIT + 0.05, 128);
   const dark = isDarkTheme();
   const mat = new THREE.MeshBasicMaterial({
     color: dark ? 0x4488ff : 0x6688bb,
-    transparent: true,
-    opacity: 0.25,
-    side: THREE.DoubleSide
+    transparent: true, opacity: 0.25, side: THREE.DoubleSide
   });
   rocheRingMesh = new THREE.Mesh(geo, mat);
   rocheRingMesh.rotation.x = Math.PI / 2;
@@ -648,625 +639,427 @@ createStars();
 createRocheRing();
 
 // ==========================================
-// 三、空间网格加速
+// 粒子颜色
 // ==========================================
-class SpatialGrid {
-  constructor(cellSize) {
-    this.cellSize = cellSize;
-    this.grid = new Map();
+const materialColors = [
+  new THREE.Color(0.10, 0.60, 0.70), // 地球地幔 (青蓝)
+  new THREE.Color(0.90, 0.65, 0.10), // 地球铁核 (亮金)
+  new THREE.Color(0.80, 0.20, 0.20), // 忒伊亚地幔 (赤红)
+  new THREE.Color(0.50, 0.30, 0.70), // 忒伊亚铁核 (紫钢)
+];
+
+// ==========================================
+// 1D Hash Grid 空间加速
+// ==========================================
+function getHash(x, y, z) {
+  let cx = Math.floor(x * INV_GRID) + 500;
+  let cy = Math.floor(y * INV_GRID) + 500;
+  let cz = Math.floor(z * INV_GRID) + 500;
+  return ((cx * 73856093) ^ (cy * 19349663) ^ (cz * 83492791)) & (HASH_SIZE - 1);
+}
+
+function buildGrid() {
+  gridHead.fill(-1);
+  if (N > gridNext.length) gridNext = new Int32Array(N);
+  for (let i = 0; i < N; i++) {
+    const hash = getHash(pos[i*3], pos[i*3+1], pos[i*3+2]);
+    gridNext[i] = gridHead[hash];
+    gridHead[hash] = i;
   }
-  clear() { this.grid.clear(); }
-  hash(x, y, z) {
-    const cx = Math.floor(x / this.cellSize);
-    const cy = Math.floor(y / this.cellSize);
-    const cz = Math.floor(z / this.cellSize);
-    return `${cx},${cy},${cz}`;
+}
+
+// ==========================================
+// O(N²) 对称万有引力
+// ==========================================
+function computeGravity() {
+  const soft2 = 0.02;
+  for (let i = 0; i < N; i++) {
+    const i3 = i * 3;
+    const xi = pos[i3], yi = pos[i3+1], zi = pos[i3+2];
+    const mi = mass[i];
+    for (let j = i + 1; j < N; j++) {
+      const j3 = j * 3;
+      const dx = pos[j3] - xi;
+      const dy = pos[j3+1] - yi;
+      const dz = pos[j3+2] - zi;
+      const r2 = dx*dx + dy*dy + dz*dz + soft2;
+      const invR = 1.0 / Math.sqrt(r2);
+      const forceScalar = G_CONST * invR * invR * invR;
+      const f_mi = forceScalar * mi;
+      const f_mj = forceScalar * mass[j];
+      acc[i3]   += f_mj * dx;
+      acc[i3+1] += f_mj * dy;
+      acc[i3+2] += f_mj * dz;
+      acc[j3]   -= f_mi * dx;
+      acc[j3+1] -= f_mi * dy;
+      acc[j3+2] -= f_mi * dz;
+    }
   }
-  insertParticle(idx, x, y, z) {
-    const key = this.hash(x, y, z);
-    if (!this.grid.has(key)) this.grid.set(key, []);
-    this.grid.get(key).push(idx);
-  }
-  queryNeighbors(px, py, pz, radius, callback) {
-    const r2 = radius * radius;
-    const cs = this.cellSize;
-    const cx0 = Math.floor((px - radius) / cs);
-    const cx1 = Math.floor((px + radius) / cs);
-    const cy0 = Math.floor((py - radius) / cs);
-    const cy1 = Math.floor((py + radius) / cs);
-    const cz0 = Math.floor((pz - radius) / cs);
-    const cz1 = Math.floor((pz + radius) / cs);
-    for (let cx = cx0; cx <= cx1; cx++) {
-      for (let cy = cy0; cy <= cy1; cy++) {
-        for (let cz = cz0; cz <= cz1; cz++) {
-          const key = `${cx},${cy},${cz}`;
-          const list = this.grid.get(key);
-          if (!list) continue;
-          for (let i = 0; i < list.length; i++) {
-            const idx = list[i];
-            const dx = sim.pos[idx*3] - px;
-            const dy = sim.pos[idx*3+1] - py;
-            const dz = sim.pos[idx*3+2] - pz;
-            const d2 = dx*dx + dy*dy + dz*dz;
-            if (d2 < r2 && d2 > 1e-12) callback(idx, Math.sqrt(d2));
+}
+
+// ==========================================
+// SPH 密度与压力计算
+// ==========================================
+const W_NORM = 315.0 / (64.0 * Math.PI * Math.pow(H_SMOOTH, 9));
+const GRAD_W_NORM = -45.0 / (Math.PI * Math.pow(H_SMOOTH, 6));
+
+function computeDensity() {
+  const h2 = H2;
+  for (let i = 0; i < N; i++) {
+    const i3 = i * 3;
+    const xi = pos[i3], yi = pos[i3+1], zi = pos[i3+2];
+    let density = 0;
+    const cx = Math.floor(xi * INV_GRID) + 500;
+    const cy = Math.floor(yi * INV_GRID) + 500;
+    const cz = Math.floor(zi * INV_GRID) + 500;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          const hash = (((cx+dx)*73856093) ^ ((cy+dy)*19349663) ^ ((cz+dz)*83492791)) & (HASH_SIZE - 1);
+          let j = gridHead[hash];
+          while (j !== -1) {
+            const j3 = j * 3;
+            const diff_x = xi - pos[j3];
+            const diff_y = yi - pos[j3+1];
+            const diff_z = zi - pos[j3+2];
+            const r2 = diff_x*diff_x + diff_y*diff_y + diff_z*diff_z;
+            if (r2 < h2) {
+              const diff = h2 - r2;
+              density += mass[j] * W_NORM * diff * diff * diff;
+            }
+            j = gridNext[j];
           }
         }
       }
     }
+    rho[i] = Math.max(density, RHO_0 * 0.1);
+    press[i] = K_EOS * Math.max(0.0, Math.pow(rho[i] / RHO_0, 7) - 1.0);
   }
 }
 
 // ==========================================
-// 四、SPH 核函数
+// SPH 压力与黏性力
 // ==========================================
-const H2 = H_SMOOTH * H_SMOOTH;
-const H3 = H2 * H_SMOOTH;
-const W_NORM = 8.0 / (Math.PI * H3);
-const DW_NORM = 48.0 / (Math.PI * H3 * H_SMOOTH);
-
-function W_fast(q) {
-  if (q >= 2.0) return 0.0;
-  if (q >= 1.0) {
-    const t = 2.0 - q;
-    return W_NORM * 0.25 * t * t * t;
+function computeSPHForces() {
+  const h2 = H2;
+  for (let i = 0; i < N; i++) {
+    const i3 = i * 3;
+    const xi = pos[i3], yi = pos[i3+1], zi = pos[i3+2];
+    const uxi = vel[i3], uyi = vel[i3+1], uzi = vel[i3+2];
+    let ax = 0, ay = 0, az = 0;
+    const cx = Math.floor(xi * INV_GRID) + 500;
+    const cy = Math.floor(yi * INV_GRID) + 500;
+    const cz = Math.floor(zi * INV_GRID) + 500;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          const hash = (((cx+dx)*73856093) ^ ((cy+dy)*19349663) ^ ((cz+dz)*83492791)) & (HASH_SIZE - 1);
+          let j = gridHead[hash];
+          while (j !== -1) {
+            if (i !== j) {
+              const j3 = j * 3;
+              const vx = xi - pos[j3];
+              const vy = yi - pos[j3+1];
+              const vz = zi - pos[j3+2];
+              const r2 = vx*vx + vy*vy + vz*vz;
+              if (r2 > 0.0001 && r2 < h2) {
+                const r = Math.sqrt(r2);
+                const inv_rho_i = 1.0 / rho[i];
+                const inv_rho_j = 1.0 / rho[j];
+                const p_term = mass[j] * (press[i] * inv_rho_i * inv_rho_i + press[j] * inv_rho_j * inv_rho_j);
+                let visc_term = 0;
+                const dvx = uxi - vel[j3], dvy = uyi - vel[j3+1], dvz = uzi - vel[j3+2];
+                const vdotr = dvx*vx + dvy*vy + dvz*vz;
+                if (vdotr < 0) {
+                  const mu = (H_SMOOTH * vdotr) / (r2 + 0.01 * h2);
+                  visc_term = mass[j] * (-ALPHA_VISC * mu) * (inv_rho_i + inv_rho_j);
+                  temp[i] += Math.abs(visc_term) * 0.01;
+                }
+                const diff = H_SMOOTH - r;
+                const grad_W = GRAD_W_NORM * diff * diff / r;
+                const total_force = (p_term + visc_term) * grad_W;
+                ax += total_force * vx;
+                ay += total_force * vy;
+                az += total_force * vz;
+              }
+            }
+            j = gridNext[j];
+          }
+        }
+      }
+    }
+    acc[i3] -= ax; acc[i3+1] -= ay; acc[i3+2] -= az;
   }
-  const t1 = 1.0 - q;
-  const t2 = 0.5 - q;
-  return W_NORM * (t1*t1*t1 - 4.0*t2*t2*t2);
-}
-function dW_fast(q) {
-  if (q >= 2.0) return 0.0;
-  if (q >= 1.0) {
-    const t = 2.0 - q;
-    return -DW_NORM * 0.25 * t * t;
-  }
-  const t1 = 1.0 - q;
-  const t2 = 0.5 - q;
-  return DW_NORM * (t1*t1 - 4.0*t2*t2);
 }
 
 // ==========================================
-// 五、粒子系统与模拟状态
+// Leapfrog 积分
 // ==========================================
-const sim = {
-  n: 0,
-  pos: null,
-  vel: null,
-  velHalf: null,
-  acc: null,
-  rho: null,
-  p: null,
-  u: null,
-  mass: null,
-  type: null,
-  active: false,
-  paused: true,
+function stepPhysics() {
+  for (let i = 0; i < N * 3; i++) vel[i] += acc[i] * (DT * 0.5);
+  for (let i = 0; i < N * 3; i++) pos[i] += vel[i] * DT;
+  acc.fill(0);
+  computeGravity();
+  buildGrid();
+  computeDensity();
+  computeSPHForces();
+  for (let i = 0; i < N * 3; i++) vel[i] += acc[i] * (DT * 0.5);
+  for (let i = 0; i < N; i++) temp[i] *= 0.995;
+}
+
+// ==========================================
+// 内存分配与天体生成
+// ==========================================
+function allocateArrays(particleCount) {
+  N = particleCount;
+  pos = new Float32Array(N * 3);
+  vel = new Float32Array(N * 3);
+  acc = new Float32Array(N * 3);
+  mass = new Float32Array(N);
+  rho = new Float32Array(N);
+  press = new Float32Array(N);
+  matType = new Int32Array(N);
+  temp = new Float32Array(N);
+  colorBuf = new Float32Array(N * 3);
+}
+
+function buildPlanet(cx, cy, cz, vx, vy, vz, totalMass, radius, isTheia, startIndex, numParticles) {
+  const mPerPart = totalMass / numParticles;
+  const coreRatio = 0.3;
+  const rFac = Math.cbrt(coreRatio);
+  for (let i = 0; i < numParticles; i++) {
+    const idx = startIndex + i;
+    const r = radius * Math.cbrt(Math.random());
+    const theta = Math.random() * 2 * Math.PI;
+    const phi = Math.acos(2 * Math.random() - 1);
+    pos[idx*3]   = cx + r * Math.sin(phi) * Math.cos(theta);
+    pos[idx*3+1] = cy + r * Math.sin(phi) * Math.sin(theta);
+    pos[idx*3+2] = cz + r * Math.cos(phi);
+    vel[idx*3] = vx; vel[idx*3+1] = vy; vel[idx*3+2] = vz;
+    mass[idx] = mPerPart;
+    const isCore = (r / radius) < rFac;
+    if (!isTheia) matType[idx] = isCore ? 1 : 0;
+    else          matType[idx] = isCore ? 3 : 2;
+    temp[idx] = 300;
+  }
+}
+
+// ==========================================
+// 模拟状态
+// ==========================================
+let sim = {
+  running: false,
   time: 0,
-  flashIntensity: 0,
-  energyHistory: [],
-  keHistory: [],
-  frameCount: 0,
-  stage: 0,
-  contacted: false,
-  debrisCount: 0,
+  diskCount: 0,
+  maxTemp: 300,
   maxDensity: 0,
-  maxTemp: 0,
-  totalMass: 0,
-  trailEnabled: false,
-  trackCM: false,
-  speedMult: 4,
+  hasFlashed: false,
+  phase: 0,
   gamma: 0.13,
   vRatio: 1.05,
   bParam: 0.70,
   targetN: 1200,
-  trailPoints: [],
-  trailGeo: null,
-  trailObj: null,
-  points: null,
-  flashLight: null,
-  spatial: new SpatialGrid(2.0 * H_SMOOTH),
+  trackCOM: true,
+  turboMode: false,
+  totalMass: 0,
+  ke: 0, pe: 0, am: 0,
+  energyHistory: [],
+  keHistory: [],
+  lastStats: null,
 };
 
-// 自定义粒子着色器（完整保留）
-const particleVertexShader = `
-  attribute float size;
-  attribute vec3 customColor;
-  varying vec3 vColor;
-  varying float vAlpha;
-  void main() {
-    vColor = customColor;
-    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    float dist = length(mvPosition.xyz);
-    float pointSize = size * (300.0 / (dist + 1.0));
-    gl_PointSize = max(pointSize, 1.5);
-    gl_Position = projectionMatrix * mvPosition;
-    vAlpha = 0.85;
-  }
-`;
-const particleFragmentShader = `
-  varying vec3 vColor;
-  varying float vAlpha;
-  void main() {
-    vec2 coord = gl_PointCoord - vec2(0.5);
-    float dist = length(coord);
-    if (dist > 0.5) discard;
-    float glow = 1.0 - smoothstep(0.0, 0.5, dist);
-    glow = pow(glow, 1.4);
-    vec3 finalColor = vColor + vec3(0.15) * pow(glow, 3.0);
-    float alpha = vAlpha * glow;
-    gl_FragColor = vec4(finalColor, alpha);
-  }
-`;
-
-function initParticleSystem() {
-  if (sim.points) { scene.remove(sim.points); sim.points.geometry.dispose(); sim.points.material.dispose(); }
-  const n = sim.n;
-  const geo = new THREE.BufferGeometry();
-  const positions = new Float32Array(n * 3);
-  const colors = new Float32Array(n * 3);
-  const sizes = new Float32Array(n);
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geo.setAttribute('customColor', new THREE.BufferAttribute(colors, 3));
-  geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-  const dark = isDarkTheme();
-  const mat = new THREE.ShaderMaterial({
-    vertexShader: particleVertexShader,
-    fragmentShader: particleFragmentShader,
-    transparent: true,
-    depthWrite: false,
-    blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending,
-  });
-  sim.points = new THREE.Points(geo, mat);
-  scene.add(sim.points);
-}
-
-function initTrailSystem() {
-  if (sim.trailObj) { scene.remove(sim.trailObj); sim.trailObj.geometry.dispose(); sim.trailObj.material.dispose(); }
-  sim.trailPoints = [];
-  const maxTrail = 3000;
-  const geo = new THREE.BufferGeometry();
-  const positions = new Float32Array(maxTrail * 3);
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geo.setDrawRange(0, 0);
-  const dark = isDarkTheme();
-  const mat = new THREE.PointsMaterial({
-    color: dark ? 0x4488ff : 0x6688bb,
-    size: 0.08, transparent: true, opacity: 0.4, depthWrite: false
-  });
-  sim.trailObj = new THREE.Points(geo, mat);
-  scene.add(sim.trailObj);
-}
-
-function initFlashLight() {
-  if (sim.flashLight) { scene.remove(sim.flashLight); }
-  sim.flashLight = new THREE.PointLight(0xffaa33, 0, 30);
-  sim.flashLight.position.set(0, 0, 0);
-  scene.add(sim.flashLight);
-}
-
-// ==========================================
-// 六、初始轨道与天体生成
-// ==========================================
-function generateBody(nParticles, totalMass, radius, centerX, centerY, centerZ, vx, vy, vz, typeCore, typeMantle) {
-  const coreRadius = radius * CORE_FRACTION;
-  const coreMass = totalMass * 0.325;
-  const mantleMass = totalMass - coreMass;
-  const coreN = Math.floor(nParticles * 0.325);
-  const mantleN = nParticles - coreN;
-  const positions = [];
-  const types = [];
-  const masses = [];
-
-  function sampleSphere(count, r, typ, mPerP) {
-    let placed = 0;
-    while (placed < count) {
-      const x = (Math.random() * 2 - 1) * r;
-      const y = (Math.random() * 2 - 1) * r;
-      const z = (Math.random() * 2 - 1) * r;
-      const d = Math.sqrt(x*x + y*y + z*z);
-      if (d <= r) {
-        positions.push(centerX + x, centerY + y, centerZ + z);
-        types.push(typ);
-        masses.push(mPerP);
-        placed++;
-      }
-    }
-  }
-  sampleSphere(coreN, coreRadius, typeCore, coreMass / coreN);
-  sampleSphere(mantleN, radius, typeMantle, mantleMass / mantleN);
-
-  return { positions, types, masses, n: nParticles };
-}
+let pointsMesh = null;
+let flashLight = null;
 
 function initSimulation() {
-  sim.active = true;
-  sim.paused = true;
-  sim.time = 0;
-  sim.frameCount = 0;
-  sim.stage = 0;
-  sim.contacted = false;
-  sim.flashIntensity = 0;
-  sim.energyHistory = [];
-  sim.keHistory = [];
+  const gamma = sim.gamma;
+  const vRat = sim.vRatio;
+  const bPar = sim.bParam;
+  const totalN = sim.targetN;
 
-  const n = sim.targetN;
-  sim.n = n;
+  allocateArrays(totalN);
 
-  const mTheia = sim.gamma * M_EARTH;
-  const rTheia = R_EARTH * Math.pow(sim.gamma, 1.0/3.0);
+  const mEarth = M_EARTH;
+  const mTheia = gamma * M_EARTH / (1 - gamma);
   const rEarth = R_EARTH;
+  const rTheia = R_EARTH * Math.cbrt(mTheia / mEarth);
+  const vEsc = Math.sqrt(2 * G_CONST * (mEarth + mTheia) / (rEarth + rTheia));
+  const vImpact = vRat * vEsc;
+  const sep = 2.8 * (rEarth + rTheia);
+  const b_offset = bPar * (rEarth + rTheia);
 
-  const separation = 3.5 * (rEarth + rTheia);
+  const rel_x = sep;
+  const rel_y = b_offset;
+  const rel_vx = -vImpact;
 
-  const vEsc = Math.sqrt(2.0 * G * (M_EARTH + mTheia) / separation);
-  const vImpact = sim.vRatio * vEsc;
+  const cm_x = (mTheia * rel_x) / (mEarth + mTheia);
+  const cm_y = (mTheia * rel_y) / (mEarth + mTheia);
+  const cm_vx = (mTheia * rel_vx) / (mEarth + mTheia);
 
-  const earthX = -separation * mTheia / (M_EARTH + mTheia);
-  const theiaX = separation * M_EARTH / (M_EARTH + mTheia);
+  const xE = -cm_x, yE = -cm_y, vEx = -cm_vx;
+  const xT = rel_x - cm_x, yT = rel_y - cm_y, vTx = rel_vx - cm_vx;
 
-  const b = sim.bParam;
-  const theta = Math.asin(Math.min(b, 0.999));
-  const vxTheia = -vImpact * Math.cos(theta);
-  const vyTheia = vImpact * Math.sin(theta);
+  const nEarth = Math.round(totalN * mEarth / (mEarth + mTheia));
+  const nTheia = totalN - nEarth;
 
-  const vxEarth = -vxTheia * mTheia / M_EARTH;
-  const vyEarth = -vyTheia * mTheia / M_EARTH;
+  buildPlanet(xE, yE, 0, vEx, 0, 0, mEarth, rEarth, false, 0, nEarth);
+  buildPlanet(xT, yT, 0, vTx, 0, 0, mTheia, rTheia, true, nEarth, nTheia);
 
-  const earthBody = generateBody(
-    Math.floor(n * M_EARTH / (M_EARTH + mTheia)),
-    M_EARTH, rEarth, earthX, 0, 0, vxEarth, vyEarth, 0,
-    TYPE_EARTH_CORE, TYPE_EARTH_MANTLE
-  );
-  const theiaBody = generateBody(
-    Math.floor(n * mTheia / (M_EARTH + mTheia)),
-    mTheia, rTheia, theiaX, 0, 0, vxTheia, vyTheia, 0,
-    TYPE_THEIA_CORE, TYPE_THEIA_MANTLE
-  );
+  sim.totalMass = mEarth + mTheia;
 
-  const totalN = earthBody.n + theiaBody.n;
-  sim.n = totalN;
+  acc.fill(0);
+  computeGravity(); buildGrid(); computeDensity(); computeSPHForces();
 
-  sim.pos = new Float32Array(totalN * 3);
-  sim.vel = new Float32Array(totalN * 3);
-  sim.velHalf = new Float32Array(totalN * 3);
-  sim.acc = new Float32Array(totalN * 3);
-  sim.rho = new Float32Array(totalN);
-  sim.p = new Float32Array(totalN);
-  sim.u = new Float32Array(totalN);
-  sim.mass = new Float32Array(totalN);
-  sim.type = new Uint8Array(totalN);
+  rebuildThreeMesh();
+  sim.time = 0; sim.phase = 0; sim.diskCount = 0; sim.maxTemp = 300;
+  sim.hasFlashed = false; sim.energyHistory = []; sim.keHistory = [];
+  updatePhaseUI();
 
-  let idx = 0;
-  for (let i = 0; i < earthBody.n; i++) {
-    sim.pos[idx*3] = earthBody.positions[i*3];
-    sim.pos[idx*3+1] = earthBody.positions[i*3+1];
-    sim.pos[idx*3+2] = earthBody.positions[i*3+2];
-    sim.vel[idx*3] = vxEarth; sim.vel[idx*3+1] = vyEarth; sim.vel[idx*3+2] = 0;
-    sim.mass[idx] = earthBody.masses[i];
-    sim.type[idx] = earthBody.types[i];
-    idx++;
-  }
-  for (let i = 0; i < theiaBody.n; i++) {
-    sim.pos[idx*3] = theiaBody.positions[i*3];
-    sim.pos[idx*3+1] = theiaBody.positions[i*3+1];
-    sim.pos[idx*3+2] = theiaBody.positions[i*3+2];
-    sim.vel[idx*3] = vxTheia; sim.vel[idx*3+1] = vyTheia; sim.vel[idx*3+2] = 0;
-    sim.mass[idx] = theiaBody.masses[i];
-    sim.type[idx] = theiaBody.types[i];
-    idx++;
-  }
+  if (flashLight) { scene.remove(flashLight); flashLight = null; }
+}
 
-  sim.totalMass = 0;
-  for (let i = 0; i < totalN; i++) sim.totalMass += sim.mass[i];
-
-  for (let i = 0; i < totalN * 3; i++) sim.velHalf[i] = sim.vel[i];
-
-  initParticleSystem();
-  initTrailSystem();
-  initFlashLight();
-
-  computeDensityPressure();
-  computeAcceleration();
-
-  updateStageDisplay();
-  updateStatsUI();
+function rebuildThreeMesh() {
+  if (pointsMesh) { scene.remove(pointsMesh); pointsMesh.geometry.dispose(); pointsMesh.material.dispose(); }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colorBuf, 3));
+  const dark = isDarkTheme();
+  const mat = new THREE.ShaderMaterial({
+    vertexColors: true,
+    transparent: !dark,
+    depthWrite: true,
+    depthTest: true,
+    blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending,
+    vertexShader: `
+      varying vec3 vColor;
+      void main(){
+        vColor = color;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = (100.0 / -mvPos.z);
+        gl_Position = projectionMatrix * mvPos;
+      }`,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main(){
+        vec2 pt = gl_PointCoord - vec2(0.5);
+        float r2 = dot(pt, pt);
+        if (r2 > 0.25) discard;
+        float z = sqrt(0.25 - r2);
+        vec3 normal = normalize(vec3(pt.x, pt.y, z));
+        vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+        float diff = max(dot(normal, lightDir), 0.0);
+        float ambient = 0.25;
+        vec3 finalColor = vColor * (diff * 0.8 + ambient);
+        gl_FragColor = vec4(finalColor, 1.0);
+      }`
+  });
+  pointsMesh = new THREE.Points(geo, mat);
+  scene.add(pointsMesh);
 }
 
 // ==========================================
-// 七、SPH 计算流程
+// 可视化与统计更新
 // ==========================================
-function computeDensityPressure() {
-  const n = sim.n;
-  sim.spatial.clear();
-  for (let i = 0; i < n; i++) {
-    sim.spatial.insertParticle(i, sim.pos[i*3], sim.pos[i*3+1], sim.pos[i*3+2]);
+function updateVisualsAndStats() {
+  let cx = 0, cy = 0, cz = 0;
+  sim.diskCount = 0; sim.maxTemp = 300; sim.maxDensity = 0;
+
+  for (let i = 0; i < N; i++) {
+    const i3 = i * 3;
+    cx += mass[i] * pos[i3]; cy += mass[i] * pos[i3+1]; cz += mass[i] * pos[i3+2];
+    if (temp[i] > sim.maxTemp) sim.maxTemp = temp[i];
+    if (rho[i] > sim.maxDensity) sim.maxDensity = rho[i];
+
+    const baseC = materialColors[matType[i]];
+    const heat = Math.min(1.0, (temp[i] - 300) / 4500);
+    colorBuf[i3]   = baseC.r * (1.0 - heat) + 1.0 * heat;
+    colorBuf[i3+1] = baseC.g * (1.0 - heat) + 0.35 * heat;
+    colorBuf[i3+2] = baseC.b * (1.0 - heat) + 0.0 * heat;
+  }
+  cx /= sim.totalMass; cy /= sim.totalMass; cz /= sim.totalMass;
+
+  for (let i = 0; i < N; i++) {
+    const dx = pos[i*3] - cx, dy = pos[i*3+1] - cy, dz = pos[i*3+2] - cz;
+    if (Math.sqrt(dx*dx + dy*dy + dz*dz) > ROCHE_LIMIT) sim.diskCount++;
   }
 
-  for (let i = 0; i < n; i++) {
-    let rho = 0;
-    const px = sim.pos[i*3], py = sim.pos[i*3+1], pz = sim.pos[i*3+2];
-    sim.spatial.queryNeighbors(px, py, pz, 2.0 * H_SMOOTH, (j, r) => {
-      const q = r / H_SMOOTH;
-      rho += sim.mass[j] * W_fast(q);
-    });
-    rho += sim.mass[i] * W_fast(0);
-    sim.rho[i] = Math.max(rho, 1e-6);
-    sim.p[i] = K_EOS * Math.pow(sim.rho[i], GAMMA_EOS);
-  }
-}
+  pointsMesh.geometry.attributes.position.needsUpdate = true;
+  pointsMesh.geometry.attributes.color.needsUpdate = true;
 
-function computeAcceleration() {
-  const n = sim.n;
-  for (let i = 0; i < n * 3; i++) sim.acc[i] = 0;
-
-  sim.maxDensity = 0;
-  sim.maxTemp = 0;
-
-  for (let i = 0; i < n; i++) {
-    sim.maxDensity = Math.max(sim.maxDensity, sim.rho[i]);
-    sim.u[i] = sim.p[i] / ((GAMMA_EOS - 1.0) * sim.rho[i]);
-    sim.maxTemp = Math.max(sim.maxTemp, sim.u[i]);
-
-    const px = sim.pos[i*3], py = sim.pos[i*3+1], pz = sim.pos[i*3+2];
-    const vxi = sim.vel[i*3], vyi = sim.vel[i*3+1], vzi = sim.vel[i*3+2];
-
-    sim.spatial.queryNeighbors(px, py, pz, 2.0 * H_SMOOTH, (j, r) => {
-      if (i === j) return;
-      const dx = sim.pos[j*3] - px;
-      const dy = sim.pos[j*3+1] - py;
-      const dz = sim.pos[j*3+2] - pz;
-      const q = r / H_SMOOTH;
-
-      const rhoAvg = (sim.rho[i] + sim.rho[j]) * 0.5;
-      const pTerm = -(sim.p[i] / (sim.rho[i]*sim.rho[i]) + sim.p[j] / (sim.rho[j]*sim.rho[j]));
-      const dw = dW_fast(q) / (H_SMOOTH * r + 1e-8);
-      const fPress = pTerm * dw;
-
-      const dvx = vxi - sim.vel[j*3];
-      const dvy = vyi - sim.vel[j*3+1];
-      const dvz = vzi - sim.vel[j*3+2];
-      const vdotr = dvx*dx + dvy*dy + dvz*dz;
-      let fVisc = 0;
-      if (vdotr < 0) {
-        const mu = H_SMOOTH * vdotr / (r*r + 0.01*H2);
-        const csi = Math.sqrt(GAMMA_EOS * sim.p[i] / sim.rho[i]);
-        const csj = Math.sqrt(GAMMA_EOS * sim.p[j] / sim.rho[j]);
-        const csAvg = (csi + csj) * 0.5;
-        fVisc = (-ALPHA_AV * csAvg * mu + BETA_AV * mu * mu) / rhoAvg;
-        fVisc *= dw;
-      }
-
-      const fx = (fPress + fVisc) * dx * sim.mass[j];
-      const fy = (fPress + fVisc) * dy * sim.mass[j];
-      const fz = (fPress + fVisc) * dz * sim.mass[j];
-
-      sim.acc[i*3] += fx;
-      sim.acc[i*3+1] += fy;
-      sim.acc[i*3+2] += fz;
-
-      sim.acc[j*3] -= fx * sim.mass[i] / sim.mass[j];
-      sim.acc[j*3+1] -= fy * sim.mass[i] / sim.mass[j];
-      sim.acc[j*3+2] -= fz * sim.mass[i] / sim.mass[j];
-    });
-
-    const dist2 = px*px + py*py + pz*pz;
-    const dist = Math.sqrt(dist2 + 0.01);
-    const fGrav = -G * sim.totalMass / (dist2 + 0.1);
-    sim.acc[i*3] += fGrav * px / dist;
-    sim.acc[i*3+1] += fGrav * py / dist;
-    sim.acc[i*3+2] += fGrav * pz / dist;
-  }
-}
-
-// ==========================================
-// 八、Leapfrog 积分器
-// ==========================================
-function leapfrogStep(dt) {
-  const n = sim.n;
-  const subSteps = sim.speedMult;
-  const subDt = dt / subSteps;
-
-  for (let s = 0; s < subSteps; s++) {
-    for (let i = 0; i < n; i++) {
-      sim.velHalf[i*3]   += sim.acc[i*3]   * subDt * 0.5;
-      sim.velHalf[i*3+1] += sim.acc[i*3+1] * subDt * 0.5;
-      sim.velHalf[i*3+2] += sim.acc[i*3+2] * subDt * 0.5;
-    }
-    for (let i = 0; i < n; i++) {
-      sim.pos[i*3]   += sim.velHalf[i*3]   * subDt;
-      sim.pos[i*3+1] += sim.velHalf[i*3+1] * subDt;
-      sim.pos[i*3+2] += sim.velHalf[i*3+2] * subDt;
-    }
-    computeDensityPressure();
-    computeAcceleration();
-    for (let i = 0; i < n; i++) {
-      sim.velHalf[i*3]   += sim.acc[i*3]   * subDt * 0.5;
-      sim.velHalf[i*3+1] += sim.acc[i*3+1] * subDt * 0.5;
-      sim.velHalf[i*3+2] += sim.acc[i*3+2] * subDt * 0.5;
-    }
-    for (let i = 0; i < n; i++) {
-      sim.vel[i*3]   = sim.velHalf[i*3];
-      sim.vel[i*3+1] = sim.velHalf[i*3+1];
-      sim.vel[i*3+2] = sim.velHalf[i*3+2];
-    }
+  if (sim.trackCOM) {
+    const offset = new THREE.Vector3().copy(camera.position).sub(controls.target);
+    controls.target.lerp(new THREE.Vector3(cx, cy, cz), 0.1);
+    camera.position.copy(controls.target).add(offset);
   }
 
-  sim.time += dt;
-  sim.frameCount++;
-}
-
-// ==========================================
-// 九、几何体更新与尾迹
-// ==========================================
-function getTypeColor(type, u) {
-  let base;
-  switch (type) {
-    case TYPE_EARTH_CORE: base = COLOR_EARTH_CORE; break;
-    case TYPE_EARTH_MANTLE: base = COLOR_EARTH_MANTLE; break;
-    case TYPE_THEIA_CORE: base = COLOR_THEIA_CORE; break;
-    case TYPE_THEIA_MANTLE: base = COLOR_THEIA_MANTLE; break;
-    default: base = COLOR_DEBRIS;
-  }
-  const tempFactor = Math.min(u * 2.0, 1.0);
-  const r = Math.min(base.r + tempFactor * (1.0 - base.r), 1.0);
-  const g = Math.min(base.g + tempFactor * (0.95 - base.g), 1.0);
-  const b = Math.min(base.b + tempFactor * (0.8 - base.b), 1.0);
-  return new THREE.Color(r, g, b);
-}
-
-function updateGeometry() {
-  if (!sim.points) return;
-  const geo = sim.points.geometry;
-  const posAttr = geo.attributes.position;
-  const colAttr = geo.attributes.customColor;
-  const sizeAttr = geo.attributes.size;
-  const n = sim.n;
-
-  for (let i = 0; i < n; i++) {
-    posAttr.array[i*3] = sim.pos[i*3];
-    posAttr.array[i*3+1] = sim.pos[i*3+1];
-    posAttr.array[i*3+2] = sim.pos[i*3+2];
-    const c = getTypeColor(sim.type[i], sim.u[i]);
-    colAttr.array[i*3] = c.r;
-    colAttr.array[i*3+1] = c.g;
-    colAttr.array[i*3+2] = c.b;
-    sizeAttr.array[i] = (sim.type[i] <= TYPE_THEIA_MANTLE) ? 0.18 : 0.14;
-  }
-  posAttr.needsUpdate = true;
-  colAttr.needsUpdate = true;
-  sizeAttr.needsUpdate = true;
-}
-
-function updateTrails() {
-  if (!sim.trailEnabled || !sim.trailObj) return;
-  if (sim.frameCount % 10 !== 0) return;
-
-  const sampleRate = Math.max(1, Math.floor(sim.n / 200));
-  for (let i = 0; i < sim.n; i += sampleRate) {
-    sim.trailPoints.push(sim.pos[i*3], sim.pos[i*3+1], sim.pos[i*3+2]);
-  }
-  const maxPts = 3000 * 3;
-  if (sim.trailPoints.length > maxPts) {
-    sim.trailPoints = sim.trailPoints.slice(sim.trailPoints.length - maxPts);
+  // 撞击闪光
+  if (!sim.hasFlashed && sim.maxTemp > 3000 && sim.diskCount > 10) {
+    sim.hasFlashed = true;
+    flashLight = new THREE.PointLight(0xffddaa, 10, 50);
+    flashLight.position.set(cx, cy, cz);
+    scene.add(flashLight);
+    let f = 0;
+    const fade = () => {
+      if (f++ < 40) { flashLight.intensity *= 0.9; requestAnimationFrame(fade); }
+      else { scene.remove(flashLight); flashLight = null; }
+    };
+    fade();
   }
 
-  const geo = sim.trailObj.geometry;
-  const count = Math.min(sim.trailPoints.length / 3, geo.attributes.position.array.length / 3);
-  for (let i = 0; i < count; i++) {
-    geo.attributes.position.array[i*3] = sim.trailPoints[i*3];
-    geo.attributes.position.array[i*3+1] = sim.trailPoints[i*3+1];
-    geo.attributes.position.array[i*3+2] = sim.trailPoints[i*3+2];
-  }
-  geo.setDrawRange(0, count);
-  geo.attributes.position.needsUpdate = true;
-}
-
-function checkContact() {
-  if (sim.contacted) return;
-  const n = sim.n;
-  let cmEarth = new THREE.Vector3(), cmTheia = new THREE.Vector3();
-  let mE = 0, mT = 0;
-  for (let i = 0; i < n; i++) {
-    if (sim.type[i] <= TYPE_EARTH_MANTLE) {
-      cmEarth.x += sim.pos[i*3] * sim.mass[i];
-      cmEarth.y += sim.pos[i*3+1] * sim.mass[i];
-      cmEarth.z += sim.pos[i*3+2] * sim.mass[i];
-      mE += sim.mass[i];
-    } else if (sim.type[i] <= TYPE_THEIA_MANTLE) {
-      cmTheia.x += sim.pos[i*3] * sim.mass[i];
-      cmTheia.y += sim.pos[i*3+1] * sim.mass[i];
-      cmTheia.z += sim.pos[i*3+2] * sim.mass[i];
-      mT += sim.mass[i];
-    }
-  }
-  if (mE > 0) cmEarth.divideScalar(mE);
-  if (mT > 0) cmTheia.divideScalar(mT);
-  const dist = cmEarth.distanceTo(cmTheia);
-  const rEarth = R_EARTH;
-  const rTheia = R_EARTH * Math.pow(sim.gamma, 1.0/3.0);
-  if (dist < (rEarth + rTheia) * 1.1) {
-    sim.contacted = true;
-    sim.flashIntensity = 2.0;
-  }
-}
-
-function updateFlash() {
-  if (sim.flashIntensity > 0 && sim.flashLight) {
-    sim.flashLight.intensity = sim.flashIntensity;
-    sim.flashIntensity -= 2.0 / 30;
-    if (sim.flashIntensity < 0) sim.flashIntensity = 0;
-  }
-}
-
-// ==========================================
-// 十、统计计算
-// ==========================================
-function computeStats() {
-  const n = sim.n;
+  // 能量统计
   let ke = 0, pe = 0, am = 0;
-  let cmX = 0, cmY = 0, cmZ = 0;
-  for (let i = 0; i < n; i++) {
-    const m = sim.mass[i];
-    const vx = sim.vel[i*3], vy = sim.vel[i*3+1], vz = sim.vel[i*3+2];
-    const px = sim.pos[i*3], py = sim.pos[i*3+1], pz = sim.pos[i*3+2];
+  for (let i = 0; i < N; i++) {
+    const m = mass[i];
+    const vx = vel[i*3], vy = vel[i*3+1], vz = vel[i*3+2];
+    const px = pos[i*3], py = pos[i*3+1], pz = pos[i*3+2];
     ke += 0.5 * m * (vx*vx + vy*vy + vz*vz);
-    pe += m * (-G * sim.totalMass / Math.sqrt(px*px + py*py + pz*pz + 0.1));
+    pe += m * (-G_CONST * sim.totalMass / Math.sqrt(px*px + py*py + pz*pz + 0.1));
     am += m * (px*vy - py*vx);
-    cmX += px * m; cmY += py * m; cmZ += pz * m;
   }
-  const totalE = ke + pe;
-  sim.lastStats = { ke, pe, totalE, am, cmX: cmX/sim.totalMass, cmY: cmY/sim.totalMass, cmZ: cmZ/sim.totalMass };
-
-  sim.energyHistory.push(totalE);
+  sim.ke = ke; sim.pe = pe; sim.am = am;
+  sim.energyHistory.push(ke + pe);
   sim.keHistory.push(ke);
-  if (sim.energyHistory.length > 200) {
-    sim.energyHistory.shift();
-    sim.keHistory.shift();
-  }
-
-  let debris = 0;
-  for (let i = 0; i < n; i++) {
-    const px = sim.pos[i*3], py = sim.pos[i*3+1];
-    const r = Math.sqrt(px*px + py*py);
-    if (r > ROCHE) debris++;
-  }
-  sim.debrisCount = debris;
+  if (sim.energyHistory.length > 200) { sim.energyHistory.shift(); sim.keHistory.shift(); }
+  sim.lastStats = { ke, pe, totalE: ke + pe, am, cmX: cx, cmY: cy, cmZ: cz };
 }
 
-function detectStage() {
+// ==========================================
+// 阶段追踪
+// ==========================================
+function updatePhase() {
   const t = sim.time;
-  let stage = 0;
-  if (t < 0.5) stage = 0;
-  else if (!sim.contacted) stage = 1;
-  else if (t < 5.0) stage = 2;
-  else if (sim.debrisCount / sim.n > 0.15) stage = 3;
-  else stage = 4;
-  if (stage !== sim.stage) { sim.stage = stage; updateStageDisplay(); }
+  let p = 0;
+  if (t < 0.2) p = 0;
+  else if (t < 1.0 && sim.maxTemp > 2000) p = 1;
+  else if (t < 3.0 && sim.diskCount > N * 0.05) p = 2;
+  else if (t > 4.0 && sim.diskCount > N * 0.1) p = 3;
+  else if (t > 8.0) p = 4;
+  if (p !== sim.phase) { sim.phase = p; updatePhaseUI(); }
 }
 
-function updateStageDisplay() {
-  for (let i = 0; i < 5; i++) {
-    const el = document.getElementById('step-' + i);
+function updatePhaseUI() {
+  for (let k = 0; k < 5; k++) {
+    const el = document.getElementById('step-' + k);
     el.classList.remove('active', 'done');
-    if (i < sim.stage) el.classList.add('done');
-    else if (i === sim.stage) el.classList.add('active');
+    if (k < sim.phase) el.classList.add('done');
+    else if (k === sim.phase) el.classList.add('active');
   }
 }
 
 // ==========================================
-// 十一、UI 更新
+// UI 更新
 // ==========================================
 function updateStatsUI() {
-  if (!sim.lastStats) return;
   document.getElementById('st-time').textContent = sim.time.toFixed(2);
-  document.getElementById('st-n').textContent = sim.n;
-  document.getElementById('st-etot').textContent = sim.lastStats.totalE.toFixed(2);
-  document.getElementById('st-ke').textContent = sim.lastStats.ke.toFixed(2);
-  document.getElementById('st-pe').textContent = sim.lastStats.pe.toFixed(2);
-  document.getElementById('st-l').textContent = sim.lastStats.am.toFixed(2);
+  document.getElementById('st-debris').textContent = sim.diskCount;
+  document.getElementById('st-tmax').textContent = Math.round(sim.maxTemp) + ' K';
   document.getElementById('st-rhomax').textContent = sim.maxDensity.toFixed(2);
-  document.getElementById('st-debris').textContent = sim.debrisCount;
-  document.getElementById('st-tmax').textContent = sim.maxTemp.toFixed(2);
+  document.getElementById('st-moon').textContent = (sim.phase >= 3) ? '形成中' : '否';
+  if (sim.lastStats) {
+    document.getElementById('st-ke').textContent = sim.lastStats.ke.toFixed(2);
+    document.getElementById('st-pe').textContent = sim.lastStats.pe.toFixed(2);
+    document.getElementById('st-l').textContent = sim.lastStats.am.toFixed(2);
+  }
 }
 
 const energyCtx = document.getElementById('energy-canvas').getContext('2d');
@@ -1275,7 +1068,6 @@ function drawEnergyChart() {
   const w = 230, h = 80;
   ctx.clearRect(0, 0, w, h);
   if (sim.energyHistory.length < 2) return;
-
   const hist = sim.energyHistory;
   const keHist = sim.keHistory;
   let minE = hist[0], maxE = hist[0];
@@ -1284,12 +1076,9 @@ function drawEnergyChart() {
     maxE = Math.max(maxE, hist[i], keHist[i]);
   }
   const range = maxE - minE || 1;
-
-  // Read accent colors from CSS variables
   const style = getComputedStyle(document.documentElement);
   const accent = style.getPropertyValue('--ti-accent').trim() || '#6b8cae';
   const accent2 = style.getPropertyValue('--ti-accent-2').trim() || '#8a7ca8';
-
   ctx.strokeStyle = accent;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -1299,7 +1088,6 @@ function drawEnergyChart() {
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
-
   ctx.strokeStyle = accent2;
   ctx.beginPath();
   for (let i = 0; i < keHist.length; i++) {
@@ -1311,52 +1099,76 @@ function drawEnergyChart() {
 }
 
 // ==========================================
-// 十二、UI 事件绑定
+// UI 事件绑定
 // ==========================================
-function bindSlider(id, valId, simKey, suffix) {
+function bindSlider(id, valId, simKey, isInt) {
   const slider = document.getElementById(id);
   const valSpan = document.getElementById(valId);
   slider.addEventListener('input', () => {
-    const v = parseFloat(slider.value);
+    const v = isInt ? parseInt(slider.value) : parseFloat(slider.value);
     sim[simKey] = v;
-    valSpan.textContent = v + (suffix || '');
+    valSpan.textContent = isInt ? v : v.toFixed(2);
   });
 }
 bindSlider('slider-gamma', 'val-gamma', 'gamma');
 bindSlider('slider-velocity', 'val-velocity', 'vRatio');
 bindSlider('slider-b', 'val-b', 'bParam');
-bindSlider('slider-n', 'val-n', 'targetN');
-document.getElementById('slider-speed').addEventListener('input', () => {
-  sim.speedMult = parseInt(document.getElementById('slider-speed').value);
-  document.getElementById('val-speed').textContent = sim.speedMult + '\u00d7';
+bindSlider('slider-n', 'val-n', 'targetN', true);
+
+// 速度按钮
+const speedBtns = document.querySelectorAll('.btn-speed');
+function syncSpeedUI(val) {
+  STEPS_PER_FRAME = val;
+  document.getElementById('slider-speed').value = val;
+  document.getElementById('val-speed').textContent = val + '\u00d7';
+  speedBtns.forEach(b => {
+    if (parseInt(b.dataset.speed) === val) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+}
+document.getElementById('slider-speed').addEventListener('input', (e) => {
+  syncSpeedUI(parseInt(e.target.value));
+});
+speedBtns.forEach(b => {
+  b.addEventListener('click', () => syncSpeedUI(parseInt(b.dataset.speed)));
 });
 
-document.getElementById('toggle-trail').addEventListener('click', function() {
-  sim.trailEnabled = !sim.trailEnabled;
-  this.classList.toggle('active');
-  if (sim.trailEnabled) initTrailSystem();
+// 极速模式
+const btnTurbo = document.getElementById('btn-turbo');
+btnTurbo.addEventListener('click', () => {
+  sim.turboMode = !sim.turboMode;
+  btnTurbo.classList.toggle('active');
+  btnTurbo.textContent = sim.turboMode ? '\u26A1 极速计算中...' : '\u26A1 极速模式';
 });
+
+// 相机跟踪
 document.getElementById('toggle-track').addEventListener('click', function() {
-  sim.trackCM = !sim.trackCM;
+  sim.trackCOM = !sim.trackCOM;
   this.classList.toggle('active');
 });
 
-document.getElementById('btn-start').addEventListener('click', () => {
-  if (sim.n === 0 || !sim.active) initSimulation();
-  sim.paused = false;
+// 开始/暂停/重置
+const btnStart = document.getElementById('btn-start');
+btnStart.addEventListener('click', () => {
+  sim.running = !sim.running;
+  if (sim.running && N === 0) initSimulation();
+  btnStart.textContent = sim.running ? '\u23F8 暂停模拟' : '\u25B6 继续模拟';
+  btnStart.className = sim.running ? 'btn btn-accent2' : 'btn btn-accent';
 });
-document.getElementById('btn-pause').addEventListener('click', () => {
-  sim.paused = !sim.paused;
-});
+
 document.getElementById('btn-reset').addEventListener('click', () => {
+  sim.running = false;
+  btnStart.textContent = '\u25B6 开始模拟';
+  btnStart.className = 'btn btn-accent';
   initSimulation();
 });
 
+// 预设场景
 const presets = {
-  graze: { gamma: 0.13, v: 1.05, b: 0.85 },
-  headon: { gamma: 0.20, v: 1.20, b: 0.10 },
-  fast: { gamma: 0.10, v: 2.00, b: 0.60 },
-  merge: { gamma: 0.25, v: 0.90, b: 0.40 },
+  graze: { gamma: 0.13, v: 1.05, b: 0.72 },
+  headon: { gamma: 0.15, v: 1.15, b: 0.00 },
+  fast: { gamma: 0.10, v: 1.60, b: 0.85 },
+  merge: { gamma: 0.30, v: 0.85, b: 0.30 },
 };
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1364,118 +1176,88 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
     if (!p) return;
     sim.gamma = p.gamma; sim.vRatio = p.v; sim.bParam = p.b;
     document.getElementById('slider-gamma').value = p.gamma;
-    document.getElementById('val-gamma').textContent = p.gamma;
+    document.getElementById('val-gamma').textContent = p.gamma.toFixed(2);
     document.getElementById('slider-velocity').value = p.v;
-    document.getElementById('val-velocity').textContent = p.v;
+    document.getElementById('val-velocity').textContent = p.v.toFixed(2);
     document.getElementById('slider-b').value = p.b;
-    document.getElementById('val-b').textContent = p.b;
+    document.getElementById('val-b').textContent = p.b.toFixed(2);
+    sim.running = false;
+    btnStart.textContent = '\u25B6 开始模拟';
+    btnStart.className = 'btn btn-accent';
     initSimulation();
   });
 });
 
-// 窗口自适应
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// 底部提示3秒淡出
 setTimeout(() => document.getElementById('hint').classList.add('fade'), 3000);
 
 // ==========================================
-// 十三、主题适配（Three.js 场景）
+// 主题适配
 // ==========================================
 function applyThemeToScene() {
   const style = getComputedStyle(document.documentElement);
   const sceneBg = style.getPropertyValue('--ti-scene-bg').trim();
-  if (sceneBg) {
-    scene.background = new THREE.Color(sceneBg);
-  }
-
-  const dark = isDarkTheme();
-
-  // 更新星空粒子
+  if (sceneBg) scene.background = new THREE.Color(sceneBg);
   createStars();
-
-  // 更新洛希环颜色
-  if (rocheRingMesh) {
-    rocheRingMesh.material.color.set(dark ? 0x4488ff : 0x6688bb);
-  }
-
-  // 更新灯光强度
-  ambientLight.intensity = dark ? 0.5 : 1.0;
-  pointLight.intensity = dark ? 2.0 : 1.5;
-
-  // 重新创建粒子系统以切换 blending
-  if (sim.points && sim.active) {
-    initParticleSystem();
-  }
-  if (sim.trailObj && sim.trailEnabled) {
-    initTrailSystem();
-  }
+  createRocheRing();
+  if (pointsMesh && N > 0) rebuildThreeMesh();
 }
 
-// MutationObserver 监听主题切换
-const themeObserver = new MutationObserver(() => {
-  applyThemeToScene();
-});
+const themeObserver = new MutationObserver(() => { applyThemeToScene(); });
 themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
 // ==========================================
-// 十四、主循环
+// 主循环
 // ==========================================
 let lastFpsTime = performance.now();
 let fpsFrames = 0;
-let fps = 60;
+let frames = 0;
 
 function animate() {
   requestAnimationFrame(animate);
+  controls.update();
 
-  if (sim.active && !sim.paused && sim.n > 0) {
-    leapfrogStep(DT_BASE);
-    updateGeometry();
-    updateTrails();
-    checkContact();
-    updateFlash();
-
-    if (sim.frameCount % 20 === 0) {
-      computeStats();
-      detectStage();
-      updateStatsUI();
-      drawEnergyChart();
+  if (sim.running && N > 0) {
+    const t0 = performance.now();
+    let steps = sim.turboMode ? STEPS_PER_FRAME * 5 : STEPS_PER_FRAME;
+    for (let s = 0; s < steps; s++) {
+      stepPhysics();
+      sim.time += DT;
     }
+    const t1 = performance.now();
 
-    if (sim.trackCM && sim.lastStats) {
-      const target = new THREE.Vector3(sim.lastStats.cmX, sim.lastStats.cmY, sim.lastStats.cmZ);
-      const offset = camera.position.clone().sub(controls.target);
-      controls.target.lerp(target, 0.05);
-      camera.position.copy(controls.target).add(offset);
+    updateVisualsAndStats();
+
+    if (frames % 15 === 0) {
+      updateStatsUI();
+      updatePhase();
+      drawEnergyChart();
+      document.getElementById('st-ms').textContent = ((t1 - t0) / steps).toFixed(1) + ' ms';
     }
   }
 
-  controls.update();
-  renderer.render(scene, camera);
+  if (!sim.turboMode || frames % 3 === 0) {
+    renderer.render(scene, camera);
+  }
 
+  frames++;
   fpsFrames++;
   const now = performance.now();
   if (now - lastFpsTime > 1000) {
-    fps = fpsFrames;
+    document.getElementById('st-fps').textContent = Math.round(fpsFrames * 1000 / (now - lastFpsTime)) + ' FPS';
     fpsFrames = 0;
     lastFpsTime = now;
-    document.getElementById('st-fps').textContent = fps;
   }
 }
 
-// 初始状态
+// 启动
 initSimulation();
-updateStageDisplay();
-
-// 初始主题应用（延迟确保 shared-theme.js 已执行）
-setTimeout(() => {
-  applyThemeToScene();
-}, 100);
-
+setTimeout(() => { applyThemeToScene(); }, 100);
 animate();
 </script>
 
