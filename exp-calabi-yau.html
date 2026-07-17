@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>卡拉比-丘流形 - 物理沙盒宇宙</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI','Microsoft YaHei',system-ui,sans-serif; }
+        canvas { display: block; }
+        #cy-canvas-container { position: fixed; inset: 0; z-index: 0; }
+
+        #loading {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            color: rgba(255,255,255,0.9); font-size: 1.1rem; font-weight: 300;
+            letter-spacing: 2px; z-index: 1000; pointer-events: none; transition: opacity .5s;
+            text-shadow: 0 0 10px rgba(116,185,255,.5);
+        }
+
+        /* ===== 左侧参数面板 ===== */
+        #cy-ui {
+            position: absolute; top: 70px; left: 20px; width: 300px;
+            z-index: 10; max-height: calc(100vh - 100px);
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: var(--theme-transition, background-color .5s, border-color .4s);
+        }
+        #cy-ui .lp-header { padding: 12px 16px; border-bottom: 1px solid var(--panel-border,rgba(116,185,255,.15)); display: flex; align-items: center; gap: 8px; }
+        #cy-ui .lp-header .ic { width: 32px; height: 32px; border-radius: var(--radius,8px); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        #cy-ui .lp-header h1 { margin: 0; font-size: .92rem; font-weight: 700; }
+        #cy-ui .lp-header .sub { font-size: .68rem; color: var(--text-muted,#64748b); margin-top: 1px; }
+        #cy-ui .lp-body { flex: 1; overflow-y: auto; padding: 14px 16px; }
+        #cy-ui .lp-body::-webkit-scrollbar { width: 4px; }
+        #cy-ui .lp-body::-webkit-scrollbar-thumb { background: var(--panel-border,rgba(116,185,255,.3)); border-radius: 2px; }
+
+        .section-label { font-family: monospace; font-size: .65rem; font-weight: 400; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-1,#74b9ff); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .section-label::before { content: ''; width: 3px; height: 12px; background: var(--accent-1,#74b9ff); border-radius: 2px; flex-shrink: 0; }
+
+        .cy-slider-group { margin-bottom: 12px; }
+        .cy-slider-group label { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; margin-bottom: 4px; font-weight: 500; color: var(--text-color,#e0e6ed); }
+        .cy-val { color: var(--accent-1,#74b9ff); font-family: monospace; font-size: .78rem; font-weight: 700; }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--panel-border,rgba(255,255,255,.15)); cursor: pointer; transition: background .4s; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: var(--accent-1,#74b9ff); cursor: pointer; box-shadow: 0 0 8px rgba(116,185,255,.6); transition: transform .1s; }
+        input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+        input[type=range]::-moz-range-thumb { height: 14px; width: 14px; border-radius: 50%; border: none; background: var(--accent-1,#74b9ff); cursor: pointer; }
+
+        .toggle-container { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; font-weight: 500; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--panel-border,rgba(255,255,255,.08)); color: var(--text-color,#e0e6ed); }
+        .toggle-switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider-tg { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--panel-border,rgba(255,255,255,.1)); transition: .3s; border-radius: 20px; }
+        .slider-tg:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: var(--text-muted,#8b9bb4); transition: .3s; border-radius: 50%; }
+        input:checked + .slider-tg { background-color: var(--accent-1,#0984e3); }
+        input:checked + .slider-tg:before { transform: translateX(18px); background-color: #fff; }
+
+        .mode-btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+        .mode-btn { padding: 7px 4px; border: 1px solid var(--panel-border,rgba(255,255,255,.15)); background: transparent; color: var(--text-color,#e0e6ed); border-radius: var(--radius,8px); cursor: pointer; font-size: .72rem; font-family: inherit; text-align: center; transition: all .15s; }
+        .mode-btn:hover { background: rgba(128,128,128,.1); }
+        .mode-btn.active { background: var(--accent-1,#74b9ff); color: #fff; border-color: var(--accent-1,#74b9ff); font-weight: 600; }
+
+        /* ===== 右侧知识面板 ===== */
+        #knowledge-panel { position: absolute; top: 70px; right: 20px; width: 330px; max-height: calc(100vh - 100px); z-index: 10; display: flex; flex-direction: column; overflow: hidden; transition: var(--theme-transition,background-color .5s,border-color .4s); }
+        #knowledge-panel .kp-header { padding: 12px 16px; border-bottom: 1px solid var(--panel-border,rgba(116,185,255,.15)); display: flex; align-items: center; gap: 8px; }
+        #knowledge-panel .kp-header .ic { width: 32px; height: 32px; border-radius: var(--radius,8px); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+        #knowledge-panel .kp-header h2 { margin: 0; font-size: .92rem; font-weight: 700; }
+        #knowledge-panel .kp-header .sub { font-size: .68rem; color: var(--text-muted,#64748b); margin-top: 1px; }
+        #knowledge-panel .kp-body { flex: 1; overflow-y: auto; padding: 14px 16px; font-size: .8rem; line-height: 1.7; }
+        #knowledge-panel .kp-body::-webkit-scrollbar { width: 4px; }
+        #knowledge-panel .kp-body::-webkit-scrollbar-thumb { background: var(--panel-border,rgba(116,185,255,.3)); border-radius: 2px; }
+
+        .k-section { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--panel-border,rgba(255,255,255,.06)); }
+        .k-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .k-section h3 { font-size: .82rem; margin: 0 0 5px 0; font-weight: 700; color: var(--accent-1,#74b9ff); }
+        .k-section p { margin: 0 0 6px 0; color: var(--text-muted,#b2becd); font-size: .76rem; line-height: 1.65; text-align: justify; }
+        .formula { background: rgba(128,128,128,.06); padding: 8px 10px; border-radius: var(--radius,8px); text-align: center; margin: 8px 0; border: 1px solid var(--panel-border,rgba(255,255,255,.06)); color: var(--text-color,#fff); font-size: .82rem; overflow-x: auto; }
+        .history-tag { display: inline-block; background: rgba(162,155,254,.12); color: var(--accent-2,#a29bfe); padding: 2px 8px; border-radius: 10px; font-size: .68rem; margin-bottom: 6px; font-weight: 500; border: 1px solid rgba(162,155,254,.25); }
+
+        /* ===== 底部形态指示器 ===== */
+        #morph-indicator { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        #morph-dots { display: flex; gap: 10px; }
+        .morph-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--panel-border,rgba(255,255,255,.2)); transition: all .4s cubic-bezier(.25,1,.5,1); cursor: pointer; }
+        .morph-dot.active { background: var(--accent-1,#74b9ff); transform: scale(1.6); box-shadow: 0 0 8px rgba(116,185,255,.6); }
+        #morph-label { font-size: .72rem; color: var(--text-muted,#64748b); font-family: monospace; letter-spacing: 1px; text-align: center; max-width: 500px; transition: opacity .4s; }
+
+        /* ===== 顶部状态栏 ===== */
+        .stats-top { position: fixed; top: 54px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; align-items: center; gap: 12px; padding: 4px 16px; font-size: .72rem; font-family: monospace; border-radius: 50px; }
+        .stats-top .sep { width:1px; height:12px; background: var(--panel-border,rgba(255,255,255,.1)); }
+        .stats-top .val { font-weight: 700; }
+
+        /* ===== 主题特化 ===== */
+        [data-theme="cartoon"] .k-section h3 { color: var(--accent-1); }
+        [data-theme="cartoon"] #cy-ui .lp-header .ic { background: rgba(255,107,107,.12); }
+        [data-theme="cartoon"] #cy-ui .lp-header h1 { color: var(--accent-1); }
+        [data-theme="cartoon"] #knowledge-panel .kp-header .ic { background: rgba(78,205,196,.12); }
+        [data-theme="cartoon"] #knowledge-panel .kp-header h2 { color: var(--accent-2); }
+        [data-theme="glass"] .k-section h3 { color: #74b9ff; }
+        [data-theme="glass"] #cy-ui .lp-header .ic { background: rgba(116,185,255,.12); }
+        [data-theme="glass"] #cy-ui .lp-header h1 { color: #ff6b6b; }
+        [data-theme="glass"] #knowledge-panel .kp-header .ic { background: rgba(116,185,255,.12); }
+        [data-theme="glass"] #knowledge-panel .kp-header h2 { color: #74b9ff; }
+        [data-theme="cyber"] .k-section h3 { color: #00f3ff; text-shadow: 0 0 6px rgba(0,243,255,.3); }
+        [data-theme="cyber"] #cy-ui .lp-header .ic { background: rgba(189,0,255,.15); }
+        [data-theme="cyber"] #cy-ui .lp-header h1 { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,.4); }
+        [data-theme="cyber"] #knowledge-panel .kp-header .ic { background: rgba(189,0,255,.15); }
+        [data-theme="cyber"] #knowledge-panel .kp-header h2 { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,.3); }
+        [data-theme="academic"] .k-section h3 { color: var(--accent-1); }
+        [data-theme="academic"] #cy-ui .lp-header .ic { background: rgba(107,140,174,.12); }
+        [data-theme="academic"] #cy-ui .lp-header h1 { color: #1a1a2e; }
+        [data-theme="academic"] #knowledge-panel .kp-header .ic { background: rgba(107,140,174,.12); }
+        [data-theme="academic"] #knowledge-panel .kp-header h2 { color: var(--accent-1); }
+        [data-theme="soviet"] .k-section h3 { color: var(--accent-1); }
+        [data-theme="soviet"] #cy-ui .lp-header .ic { background: rgba(196,30,30,.1); }
+        [data-theme="soviet"] #cy-ui .lp-header h1 { color: var(--accent-1); }
+        [data-theme="soviet"] #knowledge-panel .kp-header .ic { background: rgba(196,30,30,.1); }
+        [data-theme="soviet"] #knowledge-panel .kp-header h2 { color: var(--accent-1); }
+
+        @media (max-width: 900px) { #knowledge-panel { display: none; } #cy-ui { width: calc(100vw - 40px); max-width: 340px; } }
+        @media (max-width: 600px) { #cy-ui { top: auto; bottom: 80px; left: 15px; right: 15px; width: auto; max-width: none; } .stats-top { font-size: .65rem; gap: 8px; padding: 3px 12px; } }
+    </style>
+</head>
+<body>
+    <div id="loading">初始化卡拉比-丘流形着色器...</div>
+    <div id="cy-canvas-container"></div>
+
+    <!-- 顶部状态栏 -->
+    <div class="stats-top glass-panel">
+        <span>形态: <strong class="val" id="stats-morph" style="color:var(--accent-1)">SU(5) 经典</strong></span>
+        <span class="sep"></span>
+        <span>自转: <strong class="val" id="stats-speed" style="color:var(--accent-2)">1.0x</strong></span>
+        <span class="sep"></span>
+        <span>FPS: <strong class="val" id="stats-fps" style="color:var(--accent-4)">60</strong></span>
+    </div>
+
+    <!-- 左侧参数面板 -->
+    <aside id="cy-ui" class="glass-panel">
+        <div class="lp-header">
+            <div class="ic">🌀</div>
+            <div>
+                <h1>卡拉比-丘流形</h1>
+                <div class="sub">弦理论额外维度 · 拓扑形变</div>
+            </div>
+        </div>
+        <div class="lp-body">
+            <div class="section-label">环境参数</div>
+            <div class="cy-slider-group">
+                <label><span>自转速度</span><span id="val-speed" class="cy-val">1.0x</span></label>
+                <input type="range" id="param-speed" min="0" max="3" step="0.1" value="1.0">
+            </div>
+            <div class="cy-slider-group">
+                <label><span>网格形变强度</span><span id="val-deform" class="cy-val">100%</span></label>
+                <input type="range" id="param-deform" min="0" max="200" step="10" value="100">
+            </div>
+            <div class="cy-slider-group">
+                <label><span>色彩饱和度</span><span id="val-saturation" class="cy-val">40%</span></label>
+                <input type="range" id="param-saturation" min="0" max="100" step="5" value="40">
+            </div>
+
+            <div class="section-label" style="margin-top: 16px;">拓扑形态</div>
+            <div class="mode-btn-group">
+                <button class="mode-btn active" data-morph="0">SU(5) 经典</button>
+                <button class="mode-btn" data-morph="1">SU(3) 锐利</button>
+                <button class="mode-btn" data-morph="2">量子高频</button>
+                <button class="mode-btn" data-morph="3">异相扭曲</button>
+            </div>
+
+            <div class="toggle-container">
+                <span>线框模式</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="param-wireframe">
+                    <span class="slider-tg"></span>
+                </label>
+            </div>
+            <div class="toggle-container" style="border-top: none; margin-top: 4px; padding-top: 0;">
+                <span>自动循环</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="param-autocycle">
+                    <span class="slider-tg"></span>
+                </label>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 右侧知识面板 -->
+    <aside id="knowledge-panel" class="glass-panel">
+        <div class="kp-header">
+            <div class="ic">📐</div>
+            <div>
+                <h2>弦理论物理与拓扑</h2>
+                <div class="sub">公式讲解 · 历史脉络 · 科学家档案</div>
+            </div>
+        </div>
+        <div class="kp-body">
+            <div class="k-section">
+                <h3>1. 卡拉比猜想</h3>
+                <div class="history-tag">1957年 · 尤金尼奥·卡拉比</div>
+                <p>卡拉比提出猜想：存在一类紧致的复流形，其里奇曲率处处为零但并非平凡平坦。这类流形后来被丘成桐证明存在，成为了弦理论中额外维度的候选空间。</p>
+                <div class="formula">R_μν = 0  (里奇平坦)</div>
+            </div>
+            <div class="k-section">
+                <h3>2. 丘成桐定理</h3>
+                <div class="history-tag">1977年 · 丘成桐</div>
+                <p>丘成桐证明了卡拉比猜想，确立了卡拉比-丘流形的数学存在性。这一工作为他赢得了1982年的菲尔兹奖，也奠定了弦理论几何基础。</p>
+                <div class="formula">M(CY₃) : h^(1,1) + h^(2,1) = 欧拉数 χ / 2</div>
+            </div>
+            <div class="k-section">
+                <h3>3. 弦理论的紧致化</h3>
+                <div class="history-tag">1985年 · Green-Schwarz-Witten</div>
+                <p>超弦理论要求十维时空，其中六维额外维度以卡拉比-丘流形的形式紧致化卷曲在普朗克尺度。不同的拓扑结构决定了我们四维宇宙中的粒子谱和耦合常数。</div>
+                <div class="formula">M₁₀ = M₄ × CY₃</div>
+                <p>卡拉比-丘流形的欧拉数 χ 与代数族代数直接相关，决定了标准模型中的代数数（代数代数 = |χ|/2）。</p>
+            </div>
+            <div class="k-section">
+                <h3>4. 当前拓扑形态</h3>
+                <p id="edu-state-title" style="color: var(--accent-1,#74b9ff); font-weight: 600; font-size: .8rem;">SU(5) 经典流形投影</p>
+                <p id="edu-state-desc">人类视界中隐化在三维空间下的柔和呼吸感与标准折叠。n=5, k=2 参数组合产生经典的多维卷曲投影。</p>
+            </div>
+            <div class="k-section">
+                <h3>5. 镜像对称性</h3>
+                <div class="history-tag">1989年 · Dixon-Harvey-Vafa</div>
+                <p>两个看似不同的卡拉比-丘流形可以产生相同的物理，这被称为镜像对称。它们交换了 h^(1,1) 和 h^(2,1)，是代数几何中最深刻的对偶性之一。</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 底部形态指示器 -->
+    <div id="morph-indicator">
+        <div id="morph-dots">
+            <div class="morph-dot active" data-morph="0"></div>
+            <div class="morph-dot" data-morph="1"></div>
+            <div class="morph-dot" data-morph="2"></div>
+            <div class="morph-dot" data-morph="3"></div>
+        </div>
+        <div id="morph-label">滚轮或点击切换形态 · SU(5) 经典投影</div>
+    </div>
+
+    <script src="shared-theme.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        PSUTheme.createSwitcher();
+        PSUTheme.createBackButton('index.html');
+
+        const container = document.getElementById('cy-canvas-container');
+        const html = document.documentElement;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 7.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.enablePan = false;
+
+        // 主题背景色同步
+        function updateBgColor() {
+            const bg = getComputedStyle(html).getPropertyValue('--bg-color').trim() || '#0a0e1a';
+            scene.background = new THREE.Color(bg);
+        }
+        updateBgColor();
+        new MutationObserver(updateBgColor).observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // 构建多形态几何体
+        function buildMorphingGeometry(slices, stacks) {
+            const geometry = new THREE.BufferGeometry();
+            const uvs = [];
+            const indices = [];
+            for (let i = 0; i <= stacks; i++) {
+                const v = i / stacks;
+                for (let j = 0; j <= slices; j++) { uvs.push(j / slices, v); }
+            }
+            for (let i = 0; i < stacks; i++) {
+                for (let j = 0; j < slices; j++) {
+                    const a = i * (slices + 1) + j;
+                    const b = i * (slices + 1) + j + 1;
+                    const c = (i + 1) * (slices + 1) + j;
+                    const d = (i + 1) * (slices + 1) + j + 1;
+                    indices.push(a, b, d, a, d, c);
+                }
+            }
+            geometry.setIndex(indices);
+            geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+            const p = new THREE.Vector3(), p1 = new THREE.Vector3(), p2 = new THREE.Vector3();
+            const eps = 0.001;
+
+            const evaluate = (u, v, type, target) => {
+                const alpha = u * Math.PI / 2;
+                const theta = v * Math.PI * 2;
+                let n, k, z_scale;
+                if (type === 0) { n = 5; k = 2; z_scale = 0.8; }
+                else if (type === 1) { n = 3; k = 1; z_scale = 1.3; }
+                else if (type === 2) { n = 8; k = 3; z_scale = 0.5; }
+                else { n = 4; k = 2; z_scale = 0.9; }
+                const z1_r = Math.cos(alpha) * Math.cos(k * theta);
+                const z1_i = Math.cos(alpha) * Math.sin(k * theta);
+                const z2_r = Math.sin(alpha) * Math.cos(n * theta);
+                const z2_i = Math.sin(alpha) * Math.sin(n * theta);
+                let x = z1_r + z2_r * 0.5;
+                let y = z1_i + z2_i * 0.5;
+                let z = Math.sin(alpha) * Math.cos((n - k) * theta) * z_scale;
+                if (type === 3) {
+                    x = z1_r - z2_r * 0.6;
+                    y = z1_i + z2_i * 0.6;
+                    z = Math.sin(alpha) * Math.sin(n * theta) * z_scale;
+                }
+                target.set(x, y, z).multiplyScalar(2.2);
+            };
+
+            for (let t = 0; t < 4; t++) {
+                const positions = [], normals = [];
+                for (let i = 0; i <= stacks; i++) {
+                    const v = i / stacks;
+                    for (let j = 0; j <= slices; j++) {
+                        const u = j / slices;
+                        evaluate(u, v, t, p);
+                        positions.push(p.x, p.y, p.z);
+                        evaluate(u + eps, v, t, p1);
+                        evaluate(u, v + eps, t, p2);
+                        p1.sub(p); p2.sub(p);
+                        p1.cross(p2).normalize();
+                        normals.push(p1.x, p1.y, p1.z);
+                    }
+                }
+                geometry.setAttribute(`pos${t}`, new THREE.Float32BufferAttribute(positions, 3));
+                geometry.setAttribute(`norm${t}`, new THREE.Float32BufferAttribute(normals, 3));
+            }
+            geometry.setAttribute('position', geometry.attributes.pos0.clone());
+            geometry.setAttribute('normal', geometry.attributes.norm0.clone());
+            return geometry;
+        }
+
+        const geometry = buildMorphingGeometry(100, 100);
+
+        const material = new THREE.ShaderMaterial({
+            side: THREE.DoubleSide,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.NormalBlending,
+            wireframe: false,
+            uniforms: {
+                uTime: { value: 0.0 },
+                uMouse: { value: new THREE.Vector2(0, 0) },
+                uScroll: { value: 0.0 },
+                uDeformBase: { value: 1.0 },
+                uSaturation: { value: 0.4 }
+            },
+            vertexShader: `
+                uniform float uTime; uniform vec2 uMouse; uniform float uScroll; uniform float uDeformBase;
+                attribute vec3 pos0; attribute vec3 norm0;
+                attribute vec3 pos1; attribute vec3 norm1;
+                attribute vec3 pos2; attribute vec3 norm2;
+                attribute vec3 pos3; attribute vec3 norm3;
+                varying vec2 vUv; varying vec3 vNormal; varying vec3 vPosition; varying vec3 vViewPosition; varying float vMorphProcess;
+                void main() {
+                    vUv = uv; vMorphProcess = uScroll;
+                    float w0 = max(1.0 - abs(uScroll - 0.0), 0.0);
+                    float w1 = max(1.0 - abs(uScroll - 1.0), 0.0);
+                    float w2 = max(1.0 - abs(uScroll - 2.0), 0.0);
+                    float w3 = max(1.0 - abs(uScroll - 3.0), 0.0);
+                    vec3 mixedPos = pos0 * w0 + pos1 * w1 + pos2 * w2 + pos3 * w3;
+                    vec3 mixedNorm = norm0 * w0 + norm1 * w1 + norm2 * w2 + norm3 * w3;
+                    mixedNorm = normalize(mixedNorm);
+                    vNormal = normalize(normalMatrix * mixedNorm);
+                    vPosition = mixedPos;
+                    vec3 pos = mixedPos;
+                    float deform = sin(pos.x * 3.0 + uTime) * cos(pos.y * 3.0 + uTime) * 0.05 * uDeformBase;
+                    float mouseInfluence = (uMouse.x * uMouse.y) * 0.5 + 0.5;
+                    pos += mixedNorm * deform * (1.0 + mouseInfluence);
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    vViewPosition = -mvPosition.xyz;
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                uniform float uTime; uniform vec2 uMouse; uniform float uSaturation;
+                varying vec2 vUv; varying vec3 vNormal; varying vec3 vPosition; varying vec3 vViewPosition; varying float vMorphProcess;
+                void main() {
+                    float t = uTime * 0.3;
+                    float w0 = max(1.0 - abs(vMorphProcess - 0.0), 0.0);
+                    float w1 = max(1.0 - abs(vMorphProcess - 1.0), 0.0);
+                    float w2 = max(1.0 - abs(vMorphProcess - 2.0), 0.0);
+                    float w3 = max(1.0 - abs(vMorphProcess - 3.0), 0.0);
+                    vec3 c0_1 = vec3(0.0,0.8,0.8); vec3 c0_2 = vec3(0.1,0.8,0.2); vec3 c0_3 = vec3(0.6,0.1,0.8); vec3 c0_4 = vec3(0.9,0.5,0.0);
+                    vec3 c1_1 = vec3(1.0,0.2,0.4); vec3 c1_2 = vec3(1.0,0.8,0.0); vec3 c1_3 = vec3(0.1,0.3,1.0); vec3 c1_4 = vec3(0.7,0.0,0.9);
+                    vec3 c2_1 = vec3(0.0,0.4,0.8); vec3 c2_2 = vec3(0.2,0.8,1.0); vec3 c2_3 = vec3(0.8,0.9,1.0); vec3 c2_4 = vec3(0.5,0.6,0.8);
+                    vec3 c3_1 = vec3(0.9,0.7,0.2); vec3 c3_2 = vec3(0.8,0.2,0.3); vec3 c3_3 = vec3(0.3,0.1,0.5); vec3 c3_4 = vec3(1.0,0.4,0.0);
+                    vec3 col1 = c0_1*w0 + c1_1*w1 + c2_1*w2 + c3_1*w3;
+                    vec3 col2 = c0_2*w0 + c1_2*w1 + c2_2*w2 + c3_2*w3;
+                    vec3 col3 = c0_3*w0 + c1_3*w1 + c2_3*w2 + c3_3*w3;
+                    vec3 col4 = c0_4*w0 + c1_4*w1 + c2_4*w2 + c3_4*w3;
+                    float mix1 = sin(vPosition.x*2.0+t)*0.5+0.5;
+                    float mix2 = cos(vPosition.y*2.0-t)*0.5+0.5;
+                    float mix3 = sin(vPosition.z*2.0+t)*0.5+0.5;
+                    vec3 color = mix(col1, col2, mix1);
+                    color = mix(color, col3, mix2);
+                    color = mix(color, col4, mix3);
+                    color += vec3(uMouse.x*0.2, uMouse.y*0.2, 0.0);
+                    vec3 normal = normalize(vNormal);
+                    vec3 viewDir = normalize(vViewPosition);
+                    float fresnel = 1.0 - max(dot(viewDir, normal), 0.0);
+                    fresnel = smoothstep(0.4, 1.0, fresnel);
+                    float edgeIntensity = pow(fresnel, 2.0);
+                    float alpha = edgeIntensity * 0.8 + 0.1;
+                    vec3 finalColor = color * (edgeIntensity + 0.3);
+                    float luminance = dot(finalColor, vec3(0.299, 0.587, 0.114));
+                    vec3 grayColor = vec3(luminance);
+                    finalColor = mix(grayColor, finalColor, uSaturation);
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // 交互
+        const mouse = new THREE.Vector2(0, 0);
+        let targetScroll = 0, currentScroll = 0, scrollTimeout = null;
+        let rotationSpeed = 1.0, autoCycle = false;
+
+        function updateMouse(cx, cy) {
+            mouse.x = (cx / window.innerWidth) * 2 - 1;
+            mouse.y = -(cy / window.innerHeight) * 2 + 1;
+        }
+        window.addEventListener('mousemove', e => updateMouse(e.clientX, e.clientY));
+
+        window.addEventListener('wheel', e => {
+            if (scrollTimeout) return;
+            if (e.deltaY > 0) targetScroll = Math.min(targetScroll + 1, 3);
+            else targetScroll = Math.max(targetScroll - 1, 0);
+            scrollTimeout = setTimeout(() => { scrollTimeout = null; }, 400);
+        }, { passive: true });
+
+        // 触摸
+        let touchStartY = 0;
+        window.addEventListener('touchstart', e => { if (e.touches.length) touchStartY = e.touches[0].clientY; }, { passive: true });
+        window.addEventListener('touchmove', e => { if (e.touches.length) updateMouse(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+        window.addEventListener('touchend', e => {
+            if (e.changedTouches.length) {
+                const dy = touchStartY - e.changedTouches[0].clientY;
+                if (Math.abs(dy) > 50) { if (dy > 0) targetScroll = Math.min(targetScroll + 1, 3); else targetScroll = Math.max(targetScroll - 1, 0); }
+            }
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // UI
+        const morphNames = ['SU(5) 经典', 'SU(3) 锐利', '量子高频', '异相扭曲'];
+        const eduTitles = ['SU(5) 经典流形投影', 'SU(3) 简易拓扑结构', '量子微观高频纠缠态', '异相变体引力场扭曲'];
+        const eduDescs = [
+            '人类视界中隐化在三维空间下的柔和呼吸感与标准折叠。n=5, k=2 参数组合产生经典的多维卷曲投影。',
+            '降低卷曲系数，展现出更为锐利且对称的光谱几何切割。n=3, k=1 产生更棱角分明的拓扑结构。',
+            '维度深度纠缠，模拟微小尺度下多维空间的剧烈涨落。n=8, k=3 产生高频复杂的纠缠形态。',
+            '引入非标准负向扭曲相位，呈现破碎而又不断重组的异向空间。n=4, k=2 但采用负向扭曲。'
+        ];
+        const morphLabels = [
+            'SU(5) 经典投影 · n=5, k=2',
+            'SU(3) 锐利拓扑 · n=3, k=1',
+            '量子高频纠缠 · n=8, k=3',
+            '异相扭曲变体 · n=4, k=2 (负向)'
+        ];
+
+        function setMorph(idx) {
+            targetScroll = idx;
+            updateUIState(idx);
+        }
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const m = parseInt(btn.dataset.morph);
+                setMorph(m);
+            });
+        });
+        document.querySelectorAll('.morph-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const m = parseInt(dot.dataset.morph);
+                setMorph(m);
+            });
+        });
+
+        let activeIndex = -1;
+        function updateUIState(scrollVal) {
+            const idx = Math.round(scrollVal);
+            if (idx !== activeIndex && idx >= 0 && idx <= 3) {
+                activeIndex = idx;
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.morph) === idx));
+                document.querySelectorAll('.morph-dot').forEach(d => d.classList.toggle('active', parseInt(d.dataset.morph) === idx));
+                document.getElementById('stats-morph').textContent = morphNames[idx];
+                document.getElementById('edu-state-title').textContent = eduTitles[idx];
+                document.getElementById('edu-state-desc').textContent = eduDescs[idx];
+                const label = document.getElementById('morph-label');
+                label.style.opacity = '0';
+                setTimeout(() => { label.textContent = morphLabels[idx]; label.style.opacity = '1'; }, 200);
+            }
+        }
+
+        // 滑块事件
+        document.getElementById('param-speed').addEventListener('input', e => {
+            rotationSpeed = parseFloat(e.target.value);
+            document.getElementById('val-speed').textContent = rotationSpeed.toFixed(1) + 'x';
+            document.getElementById('stats-speed').textContent = rotationSpeed.toFixed(1) + 'x';
+        });
+        document.getElementById('param-deform').addEventListener('input', e => {
+            const v = parseFloat(e.target.value);
+            material.uniforms.uDeformBase.value = v / 100;
+            document.getElementById('val-deform').textContent = v + '%';
+        });
+        document.getElementById('param-saturation').addEventListener('input', e => {
+            const v = parseFloat(e.target.value);
+            material.uniforms.uSaturation.value = v / 100;
+            document.getElementById('val-saturation').textContent = v + '%';
+        });
+        document.getElementById('param-wireframe').addEventListener('change', e => { material.wireframe = e.target.checked; });
+        document.getElementById('param-autocycle').addEventListener('change', e => { autoCycle = e.target.checked; });
+
+        // 动画循环
+        const clock = new THREE.Clock();
+        let frameCount = 0, lastFpsTime = performance.now(), autoCycleTimer = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            const elapsedTime = clock.getElapsedTime();
+
+            if (autoCycle) {
+                autoCycleTimer += dt;
+                if (autoCycleTimer > 4) {
+                    autoCycleTimer = 0;
+                    targetScroll = (Math.round(targetScroll) + 1) % 4;
+                }
+            }
+
+            currentScroll += (targetScroll - currentScroll) * 0.05;
+            material.uniforms.uScroll.value = currentScroll;
+            updateUIState(currentScroll);
+
+            material.uniforms.uTime.value = elapsedTime;
+            material.uniforms.uMouse.value.lerp(mouse, 0.05);
+
+            mesh.rotation.y += 0.002 * rotationSpeed;
+            mesh.rotation.z += 0.001 * rotationSpeed;
+
+            controls.update();
+            renderer.render(scene, camera);
+
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFpsTime >= 1000) {
+                document.getElementById('stats-fps').textContent = frameCount;
+                frameCount = 0; lastFpsTime = now;
+            }
+        }
+
+        updateUIState(0);
+        setTimeout(() => { document.getElementById('loading').style.opacity = '0'; }, 500);
+        animate();
+    </script>
+</body>
+</html>
