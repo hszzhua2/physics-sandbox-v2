@@ -126,7 +126,7 @@
     // Taxonomy
     const taxLink = document.createElement('a');
     taxLink.href = 'taxonomy.html';
-    taxLink.textContent = '知识分类';
+    taxLink.textContent = '知识追踪';
     if (currentPage === 'taxonomy.html') taxLink.classList.add('active');
     nav.appendChild(taxLink);
 
