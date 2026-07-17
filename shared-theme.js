@@ -152,7 +152,15 @@
       { text: 'ChinaXiv', href: 'http://chinaxiv.org/home.htm', target: '_blank' },
       { text: 'Sci-Hub', href: 'https://sci-hub.sg/', target: '_blank' },
       { text: 'bioRxiv', href: 'https://www.biorxiv.org/', target: '_blank' },
-      { text: 'medRxiv', href: 'https://www.medrxiv.org/', target: '_blank' }
+      { text: 'medRxiv', href: 'https://www.medrxiv.org/', target: '_blank' },
+      { text: '中科院物理所论文', href: 'https://www.iop.cas.cn/kycg/bslw/', target: '_blank' },
+      { text: '物理学报', href: 'https://wulixb.iphy.ac.cn/', target: '_blank' },
+      { text: '中国科技论文在线', href: 'https://www.paper.edu.cn/', target: '_blank' },
+      { text: 'NSTL国家科技图书文献中心', href: 'https://www.nstl.gov.cn/', target: '_blank' },
+      { text: '中国物理学会', href: 'http://www.cps-net.org.cn/', target: '_blank' },
+      { text: '中科院高能物理所', href: 'http://www.ihep.cas.cn/', target: '_blank' },
+      { text: '中科院理论物理所', href: 'http://www.itp.cas.cn/', target: '_blank' },
+      { text: '中国知网', href: 'https://www.cnki.net/', target: '_blank' }
     ];
     libItems.forEach(item => {
       const a = document.createElement('a');
