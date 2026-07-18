@@ -104,16 +104,43 @@ body, html {
   display: flex; z-index: 5;
 }
 
+/* Resizer bars */
+.pb-resizer {
+  width: 5px; flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--pb-panel-border);
+  position: relative;
+  z-index: 15;
+  transition: background 0.2s;
+}
+.pb-resizer:hover, .pb-resizer.dragging {
+  background: var(--pb-accent);
+}
+.pb-resizer::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px; height: 24px;
+  background: var(--pb-text-muted);
+  opacity: 0.3;
+  border-radius: 1px;
+  transition: opacity 0.2s;
+}
+.pb-resizer:hover::after, .pb-resizer.dragging::after {
+  opacity: 0.8;
+}
+
 /* Left: file tree */
 .pb-sidebar {
-  width: 280px; flex-shrink: 0;
+  flex-basis: 280px; flex-shrink: 0; min-width: 180px; max-width: 500px;
   background: var(--pb-panel-bg);
   border-right: 1px solid var(--pb-panel-border);
   backdrop-filter: var(--pb-backdrop);
   -webkit-backdrop-filter: var(--pb-backdrop);
   box-shadow: var(--pb-shadow);
   overflow-y: auto;
-  transition: all 0.4s;
+  transition: box-shadow 0.4s, background 0.4s, border-color 0.4s;
   z-index: 10;
 }
 .pb-sidebar::-webkit-scrollbar { width: 4px; }
@@ -374,14 +401,14 @@ body, html {
 
 /* Right: graph */
 .pb-graph-panel {
-  width: 360px; flex-shrink: 0;
+  flex-basis: 360px; flex-shrink: 0; min-width: 240px; max-width: 600px;
   background: var(--pb-panel-bg);
   border-left: 1px solid var(--pb-panel-border);
   backdrop-filter: var(--pb-backdrop);
   -webkit-backdrop-filter: var(--pb-backdrop);
   box-shadow: var(--pb-shadow);
   display: flex; flex-direction: column;
-  transition: all 0.4s;
+  transition: box-shadow 0.4s, background 0.4s, border-color 0.4s;
   z-index: 10;
 }
 
@@ -437,19 +464,20 @@ body, html {
 }
 
 @media (max-width: 1200px) {
-  .pb-graph-panel { width: 300px; }
-  .pb-sidebar { width: 240px; }
+  .pb-graph-panel { flex-basis: 300px; }
+  .pb-sidebar { flex-basis: 240px; }
 }
 
 @media (max-width: 900px) {
-  .pb-sidebar { width: 200px; }
-  .pb-graph-panel { width: 260px; }
+  .pb-sidebar { flex-basis: 200px; }
+  .pb-graph-panel { flex-basis: 260px; }
   .pb-content { padding: 16px 20px; }
 }
 
 @media (max-width: 700px) {
   .pb-graph-panel { display: none; }
-  .pb-sidebar { width: 180px; }
+  .pb-resizer-right { display: none; }
+  .pb-sidebar { flex-basis: 180px; }
 }
 </style>
 </head>
@@ -466,6 +494,9 @@ body, html {
     <div id="pb-tree"></div>
   </div>
 
+  <!-- Left Resizer -->
+  <div class="pb-resizer" id="pb-resizer-left"></div>
+
   <!-- Center: Content -->
   <div class="pb-content" id="pb-content">
     <div class="pb-welcome" id="pb-welcome">
@@ -475,6 +506,9 @@ body, html {
     </div>
     <div class="pb-article" id="pb-article" style="display:none;"></div>
   </div>
+
+  <!-- Right Resizer -->
+  <div class="pb-resizer pb-resizer-right" id="pb-resizer-right"></div>
 
   <!-- Right: Knowledge Graph -->
   <div class="pb-graph-panel" id="pb-graph-panel">
@@ -942,7 +976,95 @@ document.querySelectorAll('.pb-graph-btn').forEach(btn => {
   });
 });
 
+// ===== Resizable panels =====
+function initResizer(resizerEl, leftEl, rightEl, opts) {
+  let isDragging = false;
+  let startX = 0;
+  let startBasis = 0;
+
+  resizerEl.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    startBasis = leftEl.getBoundingClientRect().width;
+    resizerEl.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const delta = e.clientX - startX;
+    let newBasis = startBasis + delta * (opts.direction === 'right' ? 1 : -1);
+    // Clamp to min/max
+    const min = opts.minWidth || 180;
+    const max = opts.maxWidth || 500;
+    newBasis = Math.max(min, Math.min(max, newBasis));
+    leftEl.style.flexBasis = newBasis + 'px';
+    // Resize graph SVG if applicable
+    if (rightEl && rightEl.id === 'pb-graph-panel') {
+      const svgEl = document.getElementById('graph-svg');
+      if (svgEl && simulation) {
+        const w = svgEl.clientWidth || 360;
+        const h = svgEl.clientHeight || 500;
+        d3.select('#graph-svg').attr('viewBox', `0 0 ${w} ${h}`);
+        simulation.force('center', d3.forceCenter(w / 2, h / 2));
+        simulation.alpha(0.3).restart();
+      }
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isDragging) {
+      isDragging = false;
+      resizerEl.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  });
+
+  // Touch support
+  resizerEl.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startBasis = leftEl.getBoundingClientRect().width;
+    resizerEl.classList.add('dragging');
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const delta = e.touches[0].clientX - startX;
+    let newBasis = startBasis + delta * (opts.direction === 'right' ? 1 : -1);
+    const min = opts.minWidth || 180;
+    const max = opts.maxWidth || 500;
+    newBasis = Math.max(min, Math.min(max, newBasis));
+    leftEl.style.flexBasis = newBasis + 'px';
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (isDragging) {
+      isDragging = false;
+      resizerEl.classList.remove('dragging');
+    }
+  });
+}
+
 // ===== Init =====
+// Initialize resizers
+initResizer(
+  document.getElementById('pb-resizer-left'),
+  document.getElementById('pb-sidebar'),
+  null,
+  { direction: 'right', minWidth: 180, maxWidth: 500 }
+);
+initResizer(
+  document.getElementById('pb-resizer-right'),
+  document.getElementById('pb-graph-panel'),
+  document.getElementById('pb-graph-panel'),
+  { direction: 'left', minWidth: 240, maxWidth: 600 }
+);
+
 loadManifest().then(() => {
   // Check URL hash for deep link
   if (location.hash.length > 1) {
