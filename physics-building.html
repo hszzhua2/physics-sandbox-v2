@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>物理大厦 — 知识图谱</title>
+<link rel="stylesheet" href="shared-theme.css">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pb-bg: #f8f9fa;
+  --pb-panel-bg: #ffffff;
+  --pb-panel-border: #e0e0e0;
+  --pb-text: #1a1a2e;
+  --pb-text-muted: #7a7a8a;
+  --pb-accent: #6b8cae;
+  --pb-accent-2: #8a7ca8;
+  --pb-hover: rgba(107,140,174,0.08);
+  --pb-active: rgba(107,140,174,0.15);
+  --pb-radius: 8px;
+  --pb-backdrop: none;
+  --pb-shadow: none;
+}
+
+[data-theme="glass"] {
+  --pb-bg: #0f1117;
+  --pb-panel-bg: rgba(255,255,255,0.06);
+  --pb-panel-border: rgba(255,255,255,0.12);
+  --pb-text: #e0e6ed;
+  --pb-text-muted: #8b92a8;
+  --pb-accent: #74b9ff;
+  --pb-accent-2: #a29bfe;
+  --pb-hover: rgba(116,185,255,0.08);
+  --pb-active: rgba(116,185,255,0.15);
+  --pb-radius: 20px;
+  --pb-backdrop: blur(20px);
+  --pb-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+[data-theme="cyber"] {
+  --pb-bg: #0a0014;
+  --pb-panel-bg: rgba(20,0,40,0.6);
+  --pb-panel-border: rgba(189,0,255,0.4);
+  --pb-text: #f0e6ff;
+  --pb-text-muted: #a080c0;
+  --pb-accent: #bd00ff;
+  --pb-accent-2: #00f3ff;
+  --pb-hover: rgba(189,0,255,0.08);
+  --pb-active: rgba(189,0,255,0.15);
+  --pb-radius: 8px;
+  --pb-backdrop: blur(12px);
+  --pb-shadow: 0 0 20px rgba(189,0,255,0.15);
+}
+
+[data-theme="cartoon"] {
+  --pb-bg: #fef6e4;
+  --pb-panel-bg: rgba(255,255,255,0.9);
+  --pb-panel-border: rgba(255,180,100,0.4);
+  --pb-text: #2d3436;
+  --pb-text-muted: #636e72;
+  --pb-accent: #ff6b6b;
+  --pb-accent-2: #4ecdc4;
+  --pb-hover: rgba(255,107,107,0.08);
+  --pb-active: rgba(255,107,107,0.15);
+  --pb-radius: 24px;
+  --pb-backdrop: blur(16px);
+  --pb-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+[data-theme="soviet"] {
+  --pb-bg: #f0ebe4;
+  --pb-panel-bg: #fffaf2;
+  --pb-panel-border: #c41e1e;
+  --pb-text: #1a1a1a;
+  --pb-text-muted: #6a5a4a;
+  --pb-accent: #c41e1e;
+  --pb-accent-2: #8b4513;
+  --pb-hover: rgba(196,30,30,0.06);
+  --pb-active: rgba(196,30,30,0.12);
+  --pb-radius: 2px;
+  --pb-backdrop: none;
+  --pb-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+body, html {
+  width: 100vw; height: 100vh; overflow: hidden;
+  font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+  background: var(--pb-bg);
+  color: var(--pb-text);
+  transition: background-color 0.6s, color 0.4s;
+}
+
+.pb-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background: var(--pb-bg);
+  transition: background-color 0.6s;
+}
+
+/* Layout: 3 columns */
+.pb-layout {
+  position: fixed; top: 56px; left: 0; right: 0; bottom: 0;
+  display: flex; z-index: 5;
+}
+
+/* Left: file tree */
+.pb-sidebar {
+  width: 280px; flex-shrink: 0;
+  background: var(--pb-panel-bg);
+  border-right: 1px solid var(--pb-panel-border);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  overflow-y: auto;
+  transition: all 0.4s;
+  z-index: 10;
+}
+.pb-sidebar::-webkit-scrollbar { width: 4px; }
+.pb-sidebar::-webkit-scrollbar-thumb { background: var(--pb-panel-border); border-radius: 2px; }
+
+.pb-sidebar-header {
+  padding: 14px 16px 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  color: var(--pb-accent);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--pb-panel-border);
+  transition: color 0.4s, border-color 0.4s;
+}
+
+.pb-search {
+  margin: 10px 12px;
+  padding: 7px 12px;
+  width: calc(100% - 24px);
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: var(--pb-panel-bg);
+  color: var(--pb-text);
+  font-size: 12px;
+  outline: none;
+  transition: all 0.3s;
+}
+.pb-search:focus { border-color: var(--pb-accent); }
+.pb-search::placeholder { color: var(--pb-text-muted); }
+
+.pb-cat-group { margin-bottom: 2px; }
+.pb-cat-header {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  color: var(--pb-text);
+  display: flex; align-items: center; gap: 6px;
+  user-select: none;
+  transition: background 0.2s, color 0.4s;
+}
+.pb-cat-header:hover { background: var(--pb-hover); }
+.pb-cat-arrow { font-size: 8px; color: var(--pb-text-muted); transition: transform 0.3s; }
+.pb-cat-group.open .pb-cat-arrow { transform: rotate(90deg); }
+.pb-cat-count {
+  margin-left: auto;
+  font-size: 10px; font-weight: 400;
+  color: var(--pb-text-muted);
+  background: var(--pb-hover);
+  padding: 1px 6px; border-radius: 8px;
+  transition: all 0.4s;
+}
+
+.pb-cat-files {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s;
+}
+.pb-cat-group.open .pb-cat-files { max-height: 2000px; }
+
+.pb-file-item {
+  padding: 5px 16px 5px 32px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--pb-text-muted);
+  border-left: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pb-file-item:hover {
+  color: var(--pb-text);
+  background: var(--pb-hover);
+  border-left-color: var(--pb-accent);
+}
+.pb-file-item.active {
+  color: var(--pb-accent);
+  background: var(--pb-active);
+  border-left-color: var(--pb-accent);
+  font-weight: 600;
+}
+
+/* Center: content */
+.pb-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 40px;
+  transition: all 0.4s;
+}
+.pb-content::-webkit-scrollbar { width: 6px; }
+.pb-content::-webkit-scrollbar-thumb { background: var(--pb-panel-border); border-radius: 3px; }
+
+.pb-welcome {
+  max-width: 700px; margin: 40px auto;
+  text-align: center;
+}
+.pb-welcome h1 {
+  font-size: 28px; color: var(--pb-text);
+  margin-bottom: 8px;
+  transition: color 0.4s;
+}
+.pb-welcome p {
+  color: var(--pb-text-muted);
+  font-size: 14px; line-height: 1.8;
+  transition: color 0.4s;
+}
+.pb-welcome-stats {
+  display: flex; justify-content: center; gap: 30px;
+  margin-top: 30px;
+}
+.pb-stat-box {
+  text-align: center;
+}
+.pb-stat-num {
+  font-size: 32px; font-weight: 700;
+  color: var(--pb-accent);
+  transition: color 0.4s;
+}
+.pb-stat-label {
+  font-size: 11px; color: var(--pb-text-muted);
+  margin-top: 4px;
+  transition: color 0.4s;
+}
+
+/* Markdown content styling */
+.pb-article { max-width: 780px; margin: 0 auto; }
+.pb-article h1 {
+  font-size: 24px; color: var(--pb-text);
+  margin: 20px 0 12px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--pb-panel-border);
+  transition: color 0.4s, border-color 0.4s;
+}
+.pb-article h2 {
+  font-size: 19px; color: var(--pb-text);
+  margin: 24px 0 10px;
+  transition: color 0.4s;
+}
+.pb-article h3 {
+  font-size: 15px; color: var(--pb-text);
+  margin: 18px 0 8px;
+  transition: color 0.4s;
+}
+.pb-article p {
+  font-size: 14px; line-height: 1.8;
+  color: var(--pb-text);
+  margin: 8px 0;
+  transition: color 0.4s;
+}
+.pb-article ul, .pb-article ol {
+  margin: 8px 0 8px 24px;
+  font-size: 14px; line-height: 1.8;
+  color: var(--pb-text);
+  transition: color 0.4s;
+}
+.pb-article li { margin: 3px 0; }
+.pb-article blockquote {
+  border-left: 3px solid var(--pb-accent);
+  margin: 10px 0; padding: 8px 16px;
+  background: var(--pb-hover);
+  border-radius: 0 var(--pb-radius) var(--pb-radius) 0;
+  color: var(--pb-text-muted);
+  font-size: 13px;
+  transition: all 0.4s;
+}
+.pb-article code {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--pb-hover);
+  color: var(--pb-accent);
+  transition: all 0.4s;
+}
+.pb-article pre {
+  background: var(--pb-hover);
+  padding: 12px 16px;
+  border-radius: var(--pb-radius);
+  overflow-x: auto;
+  margin: 10px 0;
+  border: 1px solid var(--pb-panel-border);
+  transition: all 0.4s;
+}
+.pb-article pre code {
+  background: none; padding: 0;
+  color: var(--pb-text);
+}
+.pb-article table {
+  width: 100%; border-collapse: collapse;
+  margin: 12px 0; font-size: 13px;
+}
+.pb-article th, .pb-article td {
+  border: 1px solid var(--pb-panel-border);
+  padding: 8px 12px; text-align: left;
+  transition: border-color 0.4s;
+}
+.pb-article th {
+  background: var(--pb-hover);
+  font-weight: 600;
+  color: var(--pb-text);
+  transition: all 0.4s;
+}
+.pb-article td { color: var(--pb-text-muted); transition: color 0.4s; }
+.pb-article a {
+  color: var(--pb-accent);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--pb-accent);
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.pb-article a:hover { opacity: 0.7; }
+.pb-article strong { color: var(--pb-text); font-weight: 600; transition: color 0.4s; }
+.pb-article hr {
+  border: none;
+  border-top: 1px solid var(--pb-panel-border);
+  margin: 20px 0;
+  transition: border-color 0.4s;
+}
+
+/* Frontmatter badge */
+.pb-frontmatter {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 16px;
+}
+.pb-fm-badge {
+  font-size: 10px; padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--pb-panel-border);
+  color: var(--pb-text-muted);
+  background: var(--pb-hover);
+  transition: all 0.4s;
+}
+.pb-fm-badge strong { color: var(--pb-accent); }
+
+/* Backlinks */
+.pb-backlinks {
+  margin-top: 30px; padding-top: 16px;
+  border-top: 1px solid var(--pb-panel-border);
+  transition: border-color 0.4s;
+}
+.pb-backlinks-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--pb-accent);
+  margin-bottom: 8px;
+  transition: color 0.4s;
+}
+.pb-backlink-item {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: var(--pb-radius);
+  cursor: pointer;
+  color: var(--pb-text-muted);
+  border: 1px solid var(--pb-panel-border);
+  margin-bottom: 4px;
+  transition: all 0.3s;
+  display: block;
+}
+.pb-backlink-item:hover {
+  color: var(--pb-text);
+  border-color: var(--pb-accent);
+  background: var(--pb-hover);
+}
+
+/* Right: graph */
+.pb-graph-panel {
+  width: 360px; flex-shrink: 0;
+  background: var(--pb-panel-bg);
+  border-left: 1px solid var(--pb-panel-border);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  display: flex; flex-direction: column;
+  transition: all 0.4s;
+  z-index: 10;
+}
+
+.pb-graph-header {
+  padding: 14px 16px 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  color: var(--pb-accent);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--pb-panel-border);
+  display: flex; align-items: center; justify-content: space-between;
+  transition: color 0.4s, border-color 0.4s;
+}
+
+.pb-graph-controls {
+  display: flex; gap: 6px; padding: 8px 12px;
+  border-bottom: 1px solid var(--pb-panel-border);
+  transition: border-color 0.4s;
+}
+.pb-graph-btn {
+  padding: 4px 8px;
+  font-size: 10px;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: transparent;
+  color: var(--pb-text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.pb-graph-btn:hover { color: var(--pb-text); border-color: var(--pb-accent); }
+.pb-graph-btn.active {
+  background: var(--pb-accent); color: #fff;
+  border-color: var(--pb-accent);
+}
+
+#graph-svg {
+  flex: 1; width: 100%;
+  cursor: grab;
+}
+#graph-svg:active { cursor: grabbing; }
+
+.pb-graph-info {
+  padding: 8px 12px;
+  border-top: 1px solid var(--pb-panel-border);
+  font-size: 11px;
+  color: var(--pb-text-muted);
+  transition: all 0.4s;
+}
+.pb-graph-info strong { color: var(--pb-accent); }
+
+/* Drawer toggles for mobile */
+.pb-toggle {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .pb-graph-panel { width: 300px; }
+  .pb-sidebar { width: 240px; }
+}
+
+@media (max-width: 900px) {
+  .pb-sidebar { width: 200px; }
+  .pb-graph-panel { width: 260px; }
+  .pb-content { padding: 16px 20px; }
+}
+
+@media (max-width: 700px) {
+  .pb-graph-panel { display: none; }
+  .pb-sidebar { width: 180px; }
+}
+</style>
+</head>
+<body>
+<div class="pb-bg"></div>
+
+<a href="index.html" class="back-btn" id="back-btn" style="position:fixed;top:20px;right:20px;z-index:1000;padding:10px 20px;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.3s;font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;">&#8592; 返回首页</a>
+
+<div class="pb-layout">
+  <!-- Left: File Tree -->
+  <div class="pb-sidebar" id="pb-sidebar">
+    <div class="pb-sidebar-header">&#128218; 知识目录</div>
+    <input type="text" class="pb-search" id="pb-search" placeholder="搜索知识点...">
+    <div id="pb-tree"></div>
+  </div>
+
+  <!-- Center: Content -->
+  <div class="pb-content" id="pb-content">
+    <div class="pb-welcome" id="pb-welcome">
+      <h1>&#127969; 物理大厦</h1>
+      <p>从经典力学到量子场论，从中学基础到前沿宇宙学。<br>点击左侧目录或右侧知识图谱中的节点，开始探索物理学完备知识框架。</p>
+      <div class="pb-welcome-stats" id="pb-stats"></div>
+    </div>
+    <div class="pb-article" id="pb-article" style="display:none;"></div>
+  </div>
+
+  <!-- Right: Knowledge Graph -->
+  <div class="pb-graph-panel" id="pb-graph-panel">
+    <div class="pb-graph-header">
+      <span>&#128279; 知识图谱</span>
+    </div>
+    <div class="pb-graph-controls">
+      <button class="pb-graph-btn active" data-mode="all">全部</button>
+      <button class="pb-graph-btn" data-mode="branch">同分支</button>
+      <button class="pb-graph-btn" data-mode="links">关联</button>
+    </div>
+    <svg id="graph-svg"></svg>
+    <div class="pb-graph-info" id="pb-graph-info">点击节点查看详情 · 拖拽节点重排</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+<script>
+let MANIFEST = null;
+let currentNode = null;
+let linkMap = {};
+let backlinks = {};
+
+// Category colors
+const CAT_COLORS = {
+  '00-初高中物理基础': '#4caf50',
+  '01-经典力学': '#2196f3',
+  '02-热力学与统计物理': '#ff9800',
+  '03-电磁学与电动力学': '#9c27b0',
+  '04-光学': '#00bcd4',
+  '05-量子力学': '#e91e63',
+  '06-相对论': '#3f51b5',
+  '07-凝聚态与固体物理': '#795548',
+  '08-核与粒子物理': '#f44336',
+  '09-天体物理与宇宙学': '#607d8b',
+  '10-非线性动力学与复杂系统': '#ff5722',
+  '11-数学与拓扑': '#8bc34a',
+  '_索引与模板': '#9e9e9e'
+};
+
+// ===== Load manifest =====
+async function loadManifest() {
+  const res = await fetch('physics-vault/manifest.json');
+  MANIFEST = await res.json();
+  linkMap = MANIFEST.linkMap;
+  
+  // Build backlinks map
+  backlinks = {};
+  MANIFEST.edges.forEach(e => {
+    if (!backlinks[e.target]) backlinks[e.target] = [];
+    backlinks[e.target].push(e.source);
+  });
+  
+  renderTree();
+  renderStats();
+  initGraph();
+}
+
+// ===== Render file tree =====
+function renderTree() {
+  const tree = document.getElementById('pb-tree');
+  tree.innerHTML = '';
+  
+  MANIFEST.categories.forEach(cat => {
+    const group = document.createElement('div');
+    group.className = 'pb-cat-group';
+    if (cat.name === '05-量子力学' || cat.name === '01-经典力学') group.classList.add('open');
+    
+    const header = document.createElement('div');
+    header.className = 'pb-cat-header';
+    header.innerHTML = `<span class="pb-cat-arrow">&#9654;</span> ${cat.name} <span class="pb-cat-count">${cat.fileCount}</span>`;
+    header.onclick = () => group.classList.toggle('open');
+    group.appendChild(header);
+    
+    const filesDiv = document.createElement('div');
+    filesDiv.className = 'pb-cat-files';
+    cat.files.forEach(fid => {
+      const node = MANIFEST.nodes.find(n => n.id === fid);
+      if (!node) return;
+      const item = document.createElement('div');
+      item.className = 'pb-file-item';
+      item.dataset.path = node.path;
+      // Show Chinese name (before _)
+      const displayName = node.name.includes('_') ? node.name.split('_')[0] : node.name;
+      item.textContent = displayName;
+      item.title = node.name;
+      item.onclick = () => loadArticle(node.path);
+      filesDiv.appendChild(item);
+    });
+    group.appendChild(filesDiv);
+    tree.appendChild(group);
+  });
+}
+
+// ===== Render stats =====
+function renderStats() {
+  const stats = document.getElementById('pb-stats');
+  stats.innerHTML = `
+    <div class="pb-stat-box">
+      <div class="pb-stat-num">${MANIFEST.totalFiles}</div>
+      <div class="pb-stat-label">知识节点</div>
+    </div>
+    <div class="pb-stat-box">
+      <div class="pb-stat-num">${MANIFEST.totalEdges}</div>
+      <div class="pb-stat-label">双向链接</div>
+    </div>
+    <div class="pb-stat-box">
+      <div class="pb-stat-num">${MANIFEST.categories.length}</div>
+      <div class="pb-stat-label">学科分支</div>
+    </div>
+  `;
+}
+
+// ===== Load and render article =====
+async function loadArticle(path) {
+  try {
+    const res = await fetch('physics-vault/' + path);
+    if (!res.ok) throw new Error('Not found');
+    let content = await res.text();
+    
+    // Hide welcome, show article
+    document.getElementById('pb-welcome').style.display = 'none';
+    const article = document.getElementById('pb-article');
+    article.style.display = 'block';
+    
+    // Parse frontmatter
+    let frontmatter = {};
+    let body = content;
+    const fmMatch = content.match(/^---\n(.*?)\n---/s);
+    if (fmMatch) {
+      body = content.slice(fmMatch[0].length).trim();
+      const fmText = fmMatch[1];
+      for (const line of fmText.split('\n')) {
+        const idx = line.indexOf(':');
+        if (idx > 0) {
+          let key = line.slice(0, idx).trim();
+          let val = line.slice(idx + 1).trim().replace(/^"|"$/g, '').replace(/^\[\[|\]\]$/g, '');
+          if (key !== 'tags') frontmatter[key] = val;
+        }
+      }
+    }
+    
+    // Render markdown with custom wiki-link handling
+    // Step 1: Protect wiki links by replacing with placeholders
+    const linkPlaceholders = [];
+    body = body.replace(/\[\[([^\]]+)\]\]/g, (match, linkText) => {
+      const displayText = linkText.split('|')[1] || linkText.split('_')[0] || linkText;
+      const target = linkText.split('|')[0].trim();
+      const idx = linkPlaceholders.length;
+      linkPlaceholders.push({ target, displayText });
+      return `\u0000LINK${idx}\u0000`;
+    });
+    
+    // Step 2: Render markdown
+    let html = marked.parse(body);
+    
+    // Step 3: Restore wiki links
+    linkPlaceholders.forEach((link, idx) => {
+      const targetPath = resolveLink(link.target);
+      const cls = targetPath ? 'pb-wiki-link' : 'pb-wiki-link pb-wiki-broken';
+      const href = targetPath ? `data-path="${targetPath}"` : '';
+      html = html.replace(`\u0000LINK${idx}\u0000`, `<a class="${cls}" ${href}>${link.displayText}</a>`);
+    });
+    
+    // Step 4: Render LaTeX
+    // Display math $$...$$ first (must come before inline)
+    html = html.replace(/\$\$([\s\S]+?)\$\$/g, (match, tex) => {
+      try { return katex.renderToString(tex.trim(), { displayMode: true, throwOnError: false }); }
+      catch { return match; }
+    });
+    // Inline math $...$ (avoid matching currency like $5)
+    html = html.replace(/\$([^\$\n]+?)\$/g, (match, tex) => {
+      if (/^\d+$/.test(tex.trim())) return match; // skip pure numbers
+      try { return katex.renderToString(tex.trim(), { throwOnError: false }); }
+      catch { return match; }
+    });
+    
+    // Build frontmatter badges
+    let fmHtml = '';
+    if (Object.keys(frontmatter).length > 0) {
+      const exclude = ['id', 'date_created', 'date_updated', 'status'];
+      const badges = Object.entries(frontmatter)
+        .filter(([k]) => !exclude.includes(k))
+        .map(([k, v]) => `<span class="pb-fm-badge"><strong>${k}</strong>: ${v}</span>`);
+      if (badges.length) fmHtml = `<div class="pb-backlinks">${badges.join('')}</div>`;
+    }
+    
+    // Build backlinks
+    const bl = backlinks[path] || [];
+    let blHtml = '';
+    if (bl.length > 0) {
+      blHtml = '<div class="pb-backlinks"><div class="pb-backlinks-title">&#128279; 反向链接 (' + bl.length + ')</div>';
+      bl.forEach(srcPath => {
+        const srcNode = MANIFEST.nodes.find(n => n.path === srcPath);
+        if (srcNode) {
+          const name = srcNode.name.includes('_') ? srcNode.name.split('_')[0] : srcNode.name;
+          blHtml += `<div class="pb-backlink-item" data-path="${srcPath}">${name} <span style="opacity:0.5;font-size:10px">${srcNode.category}</span></div>`;
+        }
+      });
+      blHtml += '</div>';
+    }
+    
+    article.innerHTML = fmHtml + html + blHtml;
+    
+    // Bind wiki-link clicks
+    article.querySelectorAll('.pb-wiki-link[data-path]').forEach(el => {
+      el.onclick = (e) => { e.preventDefault(); loadArticle(el.dataset.path); };
+    });
+    // Bind backlink clicks
+    article.querySelectorAll('.pb-backlink-item[data-path]').forEach(el => {
+      el.onclick = () => loadArticle(el.dataset.path);
+    });
+    
+    // Update active state in tree
+    document.querySelectorAll('.pb-file-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.path === path);
+    });
+    
+    currentNode = MANIFEST.nodes.find(n => n.path === path);
+    updateGraphHighlight();
+    
+    // Scroll content to top
+    document.getElementById('pb-content').scrollTop = 0;
+    
+    // Update URL hash
+    history.replaceState(null, '', '#' + path);
+  } catch (e) {
+    console.error('Failed to load article:', e);
+  }
+}
+
+// Resolve wiki link to file path
+function resolveLink(linkText) {
+  linkText = linkText.trim();
+  // Exact match
+  if (linkMap[linkText]) return linkMap[linkText];
+  // Try with _English suffix variations
+  for (const [key, path] of Object.entries(linkMap)) {
+    if (key === linkText || key.startsWith(linkText + '_') || linkText.startsWith(key + '_')) {
+      return path;
+    }
+  }
+  // Partial match
+  for (const [key, path] of Object.entries(linkMap)) {
+    if (key.includes(linkText) || linkText.includes(key)) {
+      return path;
+    }
+  }
+  return null;
+}
+
+// ===== Search =====
+document.getElementById('pb-search').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.pb-file-item').forEach(el => {
+    if (!query) {
+      el.style.display = '';
+      return;
+    }
+    const name = el.title.toLowerCase();
+    if (name.includes(query)) {
+      el.style.display = '';
+      // Open parent group
+      el.closest('.pb-cat-group').classList.add('open');
+    } else {
+      el.style.display = 'none';
+    }
+  });
+});
+
+// ===== Knowledge Graph (D3 force-directed) =====
+let svg, g, simulation, linkSel, nodeSel, labelSel;
+let graphMode = 'all';
+
+function initGraph() {
+  const svgEl = document.getElementById('graph-svg');
+  const width = svgEl.clientWidth || 360;
+  const height = svgEl.clientHeight || 500;
+  
+  svg = d3.select('#graph-svg')
+    .attr('viewBox', `0 0 ${width} ${height}`);
+  
+  svg.selectAll('*').remove();
+  
+  // Defs for arrow markers
+  const defs = svg.append('defs');
+  
+  g = svg.append('g');
+  
+  // Zoom
+  const zoom = d3.zoom()
+    .scaleExtent([0.3, 4])
+    .on('zoom', (event) => {
+      g.attr('transform', event.transform);
+    });
+  svg.call(zoom);
+  
+  buildGraphData();
+  
+  // Resize handler
+  window.addEventListener('resize', () => {
+    const w = svgEl.clientWidth || 360;
+    const h = svgEl.clientHeight || 500;
+    svg.attr('viewBox', `0 0 ${w} ${h}`);
+    if (simulation) {
+      simulation.force('center', d3.forceCenter(w / 2, h / 2));
+      simulation.alpha(0.3).restart();
+    }
+  });
+}
+
+function buildGraphData() {
+  if (!MANIFEST) return;
+  
+  const svgEl = document.getElementById('graph-svg');
+  const width = svgEl.clientWidth || 360;
+  const height = svgEl.clientHeight || 500;
+  
+  // Build nodes
+  const nodes = MANIFEST.nodes.map(n => ({
+    id: n.path,
+    name: n.name.includes('_') ? n.name.split('_')[0] : n.name,
+    fullName: n.name,
+    category: n.category,
+    color: CAT_COLORS[n.category] || '#999',
+    type: n.type,
+    linkCount: n.linkCount
+  }));
+  
+  // Build links
+  const links = MANIFEST.edges.map(e => ({
+    source: e.source,
+    target: e.target
+  }));
+  
+  // Simulation
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(40).strength(0.3))
+    .force('charge', d3.forceManyBody().strength(-30))
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collision', d3.forceCollide().radius(5))
+    .alpha(1)
+    .alphaDecay(0.02);
+  
+  // Links
+  linkSel = g.append('g')
+    .selectAll('line')
+    .data(links)
+    .join('line')
+    .attr('stroke', 'var(--pb-panel-border)')
+    .attr('stroke-opacity', 0.3)
+    .attr('stroke-width', 0.5);
+  
+  // Nodes
+  nodeSel = g.append('g')
+    .selectAll('circle')
+    .data(nodes)
+    .join('circle')
+    .attr('r', d => Math.max(3, Math.min(7, 3 + d.linkCount * 0.15)))
+    .attr('fill', d => d.color)
+    .attr('stroke', 'var(--pb-bg)')
+    .attr('stroke-width', 1)
+    .attr('cursor', 'pointer')
+    .on('click', (event, d) => {
+      event.stopPropagation();
+      loadArticle(d.id);
+    })
+    .on('mouseover', function(event, d) {
+      d3.select(this).attr('r', Math.max(5, Math.min(9, 5 + d.linkCount * 0.15)));
+      document.getElementById('pb-graph-info').innerHTML = `<strong>${d.name}</strong> · ${d.category} · ${d.linkCount}链接`;
+    })
+    .on('mouseout', function(event, d) {
+      if (!d.id || d.id !== (currentNode ? currentNode.path : '')) {
+        d3.select(this).attr('r', Math.max(3, Math.min(7, 3 + d.linkCount * 0.15)));
+      }
+    });
+  
+  // Labels (only for important nodes)
+  labelSel = g.append('g')
+    .selectAll('text')
+    .data(nodes.filter(n => n.linkCount > 8))
+    .join('text')
+    .text(d => d.name)
+    .attr('font-size', 8)
+    .attr('fill', 'var(--pb-text-muted)')
+    .attr('text-anchor', 'middle')
+    .attr('dy', -8)
+    .attr('pointer-events', 'none')
+    .attr('opacity', 0.6);
+  
+  // Tick
+  simulation.on('tick', () => {
+    linkSel
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y);
+    
+    nodeSel
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y);
+    
+    labelSel
+      .attr('x', d => d.x)
+      .attr('y', d => d.y);
+  });
+  
+  // Drag
+  nodeSel.call(d3.drag()
+    .on('start', (event, d) => {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x; d.fy = d.y;
+    })
+    .on('drag', (event, d) => {
+      d.fx = event.x; d.fy = event.y;
+    })
+    .on('end', (event, d) => {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null; d.fy = null;
+    })
+  );
+}
+
+function updateGraphHighlight() {
+  if (!nodeSel || !currentNode) return;
+  
+  const currentPath = currentNode.path;
+  // Find linked nodes
+  const linkedPaths = new Set([currentPath]);
+  MANIFEST.edges.forEach(e => {
+    if (e.source === currentPath) linkedPaths.add(e.target);
+    if (e.target === currentPath) linkedPaths.add(e.source);
+  });
+  
+  nodeSel
+    .attr('opacity', d => linkedPaths.has(d.id) ? 1 : 0.15)
+    .attr('stroke', d => d.id === currentPath ? 'var(--pb-accent)' : 'var(--pb-bg)')
+    .attr('stroke-width', d => d.id === currentPath ? 3 : 1)
+    .attr('r', d => d.id === currentPath ? 8 : Math.max(3, Math.min(7, 3 + d.linkCount * 0.15)));
+  
+  linkSel
+    .attr('stroke-opacity', d => {
+      const s = typeof d.source === 'object' ? d.source.id : d.source;
+      const t = typeof d.target === 'object' ? d.target.id : d.target;
+      return (s === currentPath || t === currentPath) ? 0.8 : 0.08;
+    })
+    .attr('stroke', d => {
+      const s = typeof d.source === 'object' ? d.source.id : d.source;
+      const t = typeof d.target === 'object' ? d.target.id : d.target;
+      return (s === currentPath || t === currentPath) ? 'var(--pb-accent)' : 'var(--pb-panel-border)';
+    });
+}
+
+// Graph mode buttons
+document.querySelectorAll('.pb-graph-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pb-graph-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    graphMode = btn.dataset.mode;
+    // Could filter graph by mode - for now just visual
+  });
+});
+
+// ===== Init =====
+loadManifest().then(() => {
+  // Check URL hash for deep link
+  if (location.hash.length > 1) {
+    const path = location.hash.slice(1);
+    if (linkMap[Object.keys(linkMap).find(k => linkMap[k] === path)] || MANIFEST.nodes.find(n => n.path === path)) {
+      loadArticle(path);
+    }
+  }
+});
+
+// Keyboard shortcut: Escape to go back to welcome
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('pb-welcome').style.display = '';
+    document.getElementById('pb-article').style.display = 'none';
+    document.querySelectorAll('.pb-file-item').forEach(el => el.classList.remove('active'));
+    history.replaceState(null, '', location.pathname);
+  }
+});
+</script>
+
+<script src="shared-theme.js"></script>
+</body>
+</html>

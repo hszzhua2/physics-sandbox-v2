@@ -1,0 +1,5334 @@
+{
+  "categories": [
+    {
+      "name": "00-初高中物理基础",
+      "fileCount": 50,
+      "files": [
+        "交变电流_Alternating Current",
+        "光的反射定律_Law of Reflection",
+        "光的折射与斯涅尔定律_Refraction and Snell's Law",
+        "光的直线传播_Rectilinear Propagation of Light",
+        "光的色散_Dispersion of Light",
+        "光的衍射_Diffraction of Light",
+        "全反射_Total Internal Reflection",
+        "共点力平衡_Equilibrium of Concurrent Forces",
+        "分子动理论_Kinetic Theory of Matter",
+        "力的合成与分解_Composition and Decomposition of Forces",
+        "功和机械能_Work and Mechanical Energy",
+        "动能定理_Kinetic Energy Theorem",
+        "动量与冲量_Momentum and Impulse",
+        "动量守恒定律_Conservation of Momentum",
+        "匀变速直线运动_Uniformly Accelerated Linear Motion",
+        "匀速圆周运动_Uniform Circular Motion",
+        "压强_Pressure",
+        "原子光谱_Atomic Spectra",
+        "原子核的组成_Composition of Nucleus",
+        "原子结构模型_Atomic Structure Models",
+        "变压器_Transformer",
+        "声音的产生与传播_Sound Production and Propagation",
+        "安培力_Ampère's Force",
+        "平抛运动_Projectile Motion",
+        "弹力_Elastic Force",
+        "摩擦力_Friction Force",
+        "放射性衰变_Radioactive Decay",
+        "机械波_Mechanical Waves",
+        "机械能守恒定律_Conservation of Mechanical Energy",
+        "杠杆原理_Lever Principle",
+        "核裂变与核聚变_Nuclear Fission and Fusion",
+        "欧姆定律_Ohm's Law",
+        "比热容_Specific Heat Capacity",
+        "波粒二象性_Wave-Particle Duality",
+        "浮力与阿基米德原理_Buoyancy and Archimedes' Principle",
+        "滑轮与滑轮组_Pulley Systems",
+        "热传递_Heat Transfer",
+        "物态变化_Phase Change",
+        "玻尔模型_Bohr Model",
+        "理想气体状态方程_Ideal Gas Equation",
+        "电功与电功率_Electric Work and Power",
+        "电流与电路_Current and Circuits",
+        "电流的磁效应_Magnetic Effect of Current",
+        "电磁感应现象_Electromagnetic Induction",
+        "简谐运动_Simple Harmonic Motion",
+        "自由落体运动_Free Fall Motion",
+        "质量与密度_Mass and Density",
+        "透镜成像_Lens Imaging",
+        "重力_Gravity",
+        "闭合电路欧姆定律_Ohm's Law for Complete Circuit"
+      ]
+    },
+    {
+      "name": "01-经典力学",
+      "fileCount": 18,
+      "files": [
+        "伯努利原理_Bernoulli Principle",
+        "克拉尼图形_Chladni Patterns",
+        "刚体沙盒_Rigid Body Sandbox",
+        "利萨茹曲线_Lissajous Curve",
+        "哈密顿力学_Hamiltonian Mechanics",
+        "开普勒定律_Kepler's Laws",
+        "弹簧振子_Spring Oscillator",
+        "悬臂梁分析_Cantilever Beam Analysis",
+        "拉格朗日力学_Lagrangian Mechanics",
+        "最小作用量原理_Principle of Least Action",
+        "欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation",
+        "欧拉动力学方程_Euler's Equations of Motion",
+        "泰勒-库埃特流_Taylor-Couette Flow",
+        "牛顿万有引力定律_Newton's Law of Universal Gravitation",
+        "牛顿运动定律_Newton's Laws of Motion",
+        "纳维-斯托克斯方程_Navier-Stokes Equations",
+        "胡克定律_Hooke's Law",
+        "齿轮与自行车_Gears and Bicycle"
+      ]
+    },
+    {
+      "name": "02-热力学与统计物理",
+      "fileCount": 12,
+      "files": [
+        "伊辛模型_Ising Model",
+        "布朗运动_Brownian Motion",
+        "帕隆多悖论_Parrondo Paradox",
+        "朗之万方程_Langevin Equation",
+        "涨落耗散定理_Fluctuation-Dissipation Theorem",
+        "热力学四大定律_Four Laws of Thermodynamics",
+        "玻色-爱因斯坦统计_Bose-Einstein Statistics",
+        "系综理论_Ensemble Theory",
+        "费米-狄拉克统计_Fermi-Dirac Statistics",
+        "配分函数_Partition Function",
+        "高尔顿钉板_Galton Board",
+        "麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution"
+      ]
+    },
+    {
+      "name": "03-电磁学与电动力学",
+      "fileCount": 7,
+      "files": [
+        "RLC谐振_RLC Resonance",
+        "库仑定律_Coulomb's Law",
+        "洛伦兹力_Lorentz Force",
+        "点电荷群_Point Charges",
+        "特斯拉线圈_Tesla Coil",
+        "电磁感应定律_Electromagnetic Induction Law",
+        "麦克斯韦方程组_Maxwell's Equations"
+      ]
+    },
+    {
+      "name": "04-光学",
+      "fileCount": 4,
+      "files": [
+        "偏振_Polarization",
+        "惠更斯-菲涅耳原理_Huygens-Fresnel Principle",
+        "波的干涉_Wave Interference",
+        "费马原理_Fermat's Principle"
+      ]
+    },
+    {
+      "name": "05-量子力学",
+      "fileCount": 14,
+      "files": [
+        "一维势阱_1D Potential Well",
+        "不确定性原理_Uncertainty Principle",
+        "光电效应_Photoelectric Effect",
+        "双缝干涉_Double-Slit Interference",
+        "康普顿散射_Compton Scattering",
+        "微扰理论_Perturbation Theory",
+        "态叠加原理_Superposition Principle",
+        "斯特恩-盖拉赫实验_Stern-Gerlach Experiment",
+        "泡利不相容原理_Pauli Exclusion Principle",
+        "玻恩概率解释_Born Rule",
+        "自旋_Spin",
+        "薛定谔方程_Schrödinger Equation",
+        "量子隧穿效应_Quantum Tunneling",
+        "黑体辐射_Black Body Radiation"
+      ]
+    },
+    {
+      "name": "06-相对论",
+      "fileCount": 9,
+      "files": [
+        "史瓦西度规_Schwarzschild Metric",
+        "广义相对论_General Relativity",
+        "引力波探测_Gravitational Wave Detection",
+        "洛伦兹变换_Lorentz Transformation",
+        "爱因斯坦场方程_Einstein Field Equations",
+        "狭义相对论_Special Relativity",
+        "等效原理_Equivalence Principle",
+        "迈克尔逊-莫雷实验_Michelson-Morley Experiment",
+        "闵可夫斯基时空_Minkowski Spacetime"
+      ]
+    },
+    {
+      "name": "07-凝聚态与固体物理",
+      "fileCount": 5,
+      "files": [
+        "BCS理论_BCS Theory",
+        "布洛赫定理_Bloch's Theorem",
+        "能带理论_Band Theory",
+        "超流_Superfluidity",
+        "铁磁相变_Ferromagnetic Phase Transition"
+      ]
+    },
+    {
+      "name": "08-核与粒子物理",
+      "fileCount": 7,
+      "files": [
+        "夸克模型_Quark Model",
+        "希格斯机制_Higgs Mechanism",
+        "弱相互作用_Weak Interaction",
+        "强相互作用_Strong Interaction",
+        "托卡马克_Tokamak",
+        "标准模型_Standard Model",
+        "磁约束聚变_Magnetic Confinement Fusion"
+      ]
+    },
+    {
+      "name": "09-天体物理与宇宙学",
+      "fileCount": 11,
+      "files": [
+        "中子星_Neutron Star",
+        "大爆炸理论_Big Bang Theory",
+        "太阳系沙盒_Solar System Sandbox",
+        "宇宙学微扰理论_Cosmological Perturbation Theory",
+        "宇宙微波背景辐射_Cosmic Microwave Background",
+        "恒星结构方程_Stellar Structure Equations",
+        "星系的诞生_Galaxy Formation",
+        "暗物质_Dark Matter",
+        "赫罗图_Hertzsprung-Russell Diagram",
+        "黑洞吸积盘_Black Hole Accretion Disk",
+        "黑洞吸积盘喷流_Black Hole Jet"
+      ]
+    },
+    {
+      "name": "10-非线性动力学与复杂系统",
+      "fileCount": 10,
+      "files": [
+        "三体问题_Three-Body Problem",
+        "分形维数_Fractal Dimension",
+        "复杂性理论_Complexity Theory",
+        "李雅普诺夫指数_Lyapunov Exponent",
+        "洛伦兹吸引子_Lorenz Attractor",
+        "混沌双摆_Chaotic Double Pendulum",
+        "磁流体力学_Magnetohydrodynamics",
+        "社会力模型_Social Force Model",
+        "耗散结构_Dissipative Structure",
+        "胞元自动机_Cellular Automata"
+      ]
+    },
+    {
+      "name": "11-数学与拓扑",
+      "fileCount": 7,
+      "files": [
+        "克莱因瓶_Klein Bottle",
+        "张量分析_Tensor Analysis",
+        "微分几何_Differential Geometry",
+        "拓扑学_Topology",
+        "欧拉示性数_Euler Characteristic",
+        "流形_Manifold",
+        "群论_Group Theory"
+      ]
+    },
+    {
+      "name": "_索引与模板",
+      "fileCount": 1,
+      "files": [
+        "物理学知识库总索引_Physics Knowledge Base Index"
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "交变电流_Alternating Current",
+      "name": "交变电流_Alternating Current",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/交变电流_Alternating Current.md",
+      "type": "theory",
+      "branch": "电磁学",
+      "linkCount": 6
+    },
+    {
+      "id": "光的反射定律_Law of Reflection",
+      "name": "光的反射定律_Law of Reflection",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/光的反射定律_Law of Reflection.md",
+      "type": "theory",
+      "branch": "光学",
+      "linkCount": 9
+    },
+    {
+      "id": "光的折射与斯涅尔定律_Refraction and Snell's Law",
+      "name": "光的折射与斯涅尔定律_Refraction and Snell's Law",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md",
+      "type": "theory",
+      "branch": "光学",
+      "linkCount": 11
+    },
+    {
+      "id": "光的直线传播_Rectilinear Propagation of Light",
+      "name": "光的直线传播_Rectilinear Propagation of Light",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/光的直线传播_Rectilinear Propagation of Light.md",
+      "type": "theory",
+      "branch": "光学",
+      "linkCount": 15
+    },
+    {
+      "id": "光的色散_Dispersion of Light",
+      "name": "光的色散_Dispersion of Light",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/光的色散_Dispersion of Light.md",
+      "type": "theory",
+      "branch": "光学",
+      "linkCount": 12
+    },
+    {
+      "id": "光的衍射_Diffraction of Light",
+      "name": "光的衍射_Diffraction of Light",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/光的衍射_Diffraction of Light.md",
+      "type": "theory",
+      "branch": "光学/波动光学",
+      "linkCount": 13
+    },
+    {
+      "id": "全反射_Total Internal Reflection",
+      "name": "全反射_Total Internal Reflection",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/全反射_Total Internal Reflection.md",
+      "type": "theory",
+      "branch": "光学",
+      "linkCount": 5
+    },
+    {
+      "id": "共点力平衡_Equilibrium of Concurrent Forces",
+      "name": "共点力平衡_Equilibrium of Concurrent Forces",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 12
+    },
+    {
+      "id": "分子动理论_Kinetic Theory of Matter",
+      "name": "分子动理论_Kinetic Theory of Matter",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "type": "theory",
+      "branch": "热学",
+      "linkCount": 27
+    },
+    {
+      "id": "力的合成与分解_Composition and Decomposition of Forces",
+      "name": "力的合成与分解_Composition and Decomposition of Forces",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/力的合成与分解_Composition and Decomposition of Forces.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 8
+    },
+    {
+      "id": "功和机械能_Work and Mechanical Energy",
+      "name": "功和机械能_Work and Mechanical Energy",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 19
+    },
+    {
+      "id": "动能定理_Kinetic Energy Theorem",
+      "name": "动能定理_Kinetic Energy Theorem",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 14
+    },
+    {
+      "id": "动量与冲量_Momentum and Impulse",
+      "name": "动量与冲量_Momentum and Impulse",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 15
+    },
+    {
+      "id": "动量守恒定律_Conservation of Momentum",
+      "name": "动量守恒定律_Conservation of Momentum",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 15
+    },
+    {
+      "id": "匀变速直线运动_Uniformly Accelerated Linear Motion",
+      "name": "匀变速直线运动_Uniformly Accelerated Linear Motion",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md",
+      "type": "theory",
+      "branch": "运动学",
+      "linkCount": 6
+    },
+    {
+      "id": "匀速圆周运动_Uniform Circular Motion",
+      "name": "匀速圆周运动_Uniform Circular Motion",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md",
+      "type": "theory",
+      "branch": "运动学",
+      "linkCount": 8
+    },
+    {
+      "id": "压强_Pressure",
+      "name": "压强_Pressure",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/压强_Pressure.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 10
+    },
+    {
+      "id": "原子光谱_Atomic Spectra",
+      "name": "原子光谱_Atomic Spectra",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/原子光谱_Atomic Spectra.md",
+      "type": "experiment",
+      "branch": "原子物理/光学",
+      "linkCount": 14
+    },
+    {
+      "id": "原子核的组成_Composition of Nucleus",
+      "name": "原子核的组成_Composition of Nucleus",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+      "type": "theory",
+      "branch": "核物理",
+      "linkCount": 15
+    },
+    {
+      "id": "原子结构模型_Atomic Structure Models",
+      "name": "原子结构模型_Atomic Structure Models",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+      "type": "theory",
+      "branch": "原子物理",
+      "linkCount": 17
+    },
+    {
+      "id": "变压器_Transformer",
+      "name": "变压器_Transformer",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/变压器_Transformer.md",
+      "type": "theory",
+      "branch": "电磁学",
+      "linkCount": 9
+    },
+    {
+      "id": "声音的产生与传播_Sound Production and Propagation",
+      "name": "声音的产生与传播_Sound Production and Propagation",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/声音的产生与传播_Sound Production and Propagation.md",
+      "type": "theory",
+      "branch": "声学",
+      "linkCount": 9
+    },
+    {
+      "id": "安培力_Ampère's Force",
+      "name": "安培力_Ampère's Force",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/安培力_Ampère's Force.md",
+      "type": "theory",
+      "branch": "电磁学",
+      "linkCount": 10
+    },
+    {
+      "id": "平抛运动_Projectile Motion",
+      "name": "平抛运动_Projectile Motion",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/平抛运动_Projectile Motion.md",
+      "type": "theory",
+      "branch": "运动学",
+      "linkCount": 8
+    },
+    {
+      "id": "弹力_Elastic Force",
+      "name": "弹力_Elastic Force",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/弹力_Elastic Force.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 11
+    },
+    {
+      "id": "摩擦力_Friction Force",
+      "name": "摩擦力_Friction Force",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/摩擦力_Friction Force.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 12
+    },
+    {
+      "id": "放射性衰变_Radioactive Decay",
+      "name": "放射性衰变_Radioactive Decay",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/放射性衰变_Radioactive Decay.md",
+      "type": "theory",
+      "branch": "核物理",
+      "linkCount": 16
+    },
+    {
+      "id": "机械波_Mechanical Waves",
+      "name": "机械波_Mechanical Waves",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/机械波_Mechanical Waves.md",
+      "type": "theory",
+      "branch": "振动与波",
+      "linkCount": 25
+    },
+    {
+      "id": "机械能守恒定律_Conservation of Mechanical Energy",
+      "name": "机械能守恒定律_Conservation of Mechanical Energy",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 19
+    },
+    {
+      "id": "杠杆原理_Lever Principle",
+      "name": "杠杆原理_Lever Principle",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/杠杆原理_Lever Principle.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 11
+    },
+    {
+      "id": "核裂变与核聚变_Nuclear Fission and Fusion",
+      "name": "核裂变与核聚变_Nuclear Fission and Fusion",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md",
+      "type": "theory",
+      "branch": "核物理",
+      "linkCount": 16
+    },
+    {
+      "id": "欧姆定律_Ohm's Law",
+      "name": "欧姆定律_Ohm's Law",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/欧姆定律_Ohm's Law.md",
+      "type": "theory",
+      "branch": "电学",
+      "linkCount": 18
+    },
+    {
+      "id": "比热容_Specific Heat Capacity",
+      "name": "比热容_Specific Heat Capacity",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+      "type": "theory",
+      "branch": "热学",
+      "linkCount": 17
+    },
+    {
+      "id": "波粒二象性_Wave-Particle Duality",
+      "name": "波粒二象性_Wave-Particle Duality",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+      "type": "theory",
+      "branch": "现代物理/量子力学",
+      "linkCount": 24
+    },
+    {
+      "id": "浮力与阿基米德原理_Buoyancy and Archimedes' Principle",
+      "name": "浮力与阿基米德原理_Buoyancy and Archimedes' Principle",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 8
+    },
+    {
+      "id": "滑轮与滑轮组_Pulley Systems",
+      "name": "滑轮与滑轮组_Pulley Systems",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 7
+    },
+    {
+      "id": "热传递_Heat Transfer",
+      "name": "热传递_Heat Transfer",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/热传递_Heat Transfer.md",
+      "type": "theory",
+      "branch": "热学",
+      "linkCount": 9
+    },
+    {
+      "id": "物态变化_Phase Change",
+      "name": "物态变化_Phase Change",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/物态变化_Phase Change.md",
+      "type": "theory",
+      "branch": "热学",
+      "linkCount": 12
+    },
+    {
+      "id": "玻尔模型_Bohr Model",
+      "name": "玻尔模型_Bohr Model",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+      "type": "theory",
+      "branch": "原子物理",
+      "linkCount": 13
+    },
+    {
+      "id": "理想气体状态方程_Ideal Gas Equation",
+      "name": "理想气体状态方程_Ideal Gas Equation",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md",
+      "type": "theory",
+      "branch": "热学",
+      "linkCount": 19
+    },
+    {
+      "id": "电功与电功率_Electric Work and Power",
+      "name": "电功与电功率_Electric Work and Power",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+      "type": "theory",
+      "branch": "电学",
+      "linkCount": 10
+    },
+    {
+      "id": "电流与电路_Current and Circuits",
+      "name": "电流与电路_Current and Circuits",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "type": "theory",
+      "branch": "电学",
+      "linkCount": 22
+    },
+    {
+      "id": "电流的磁效应_Magnetic Effect of Current",
+      "name": "电流的磁效应_Magnetic Effect of Current",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md",
+      "type": "theory",
+      "branch": "电磁学",
+      "linkCount": 15
+    },
+    {
+      "id": "电磁感应现象_Electromagnetic Induction",
+      "name": "电磁感应现象_Electromagnetic Induction",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md",
+      "type": "theory",
+      "branch": "电磁学",
+      "linkCount": 9
+    },
+    {
+      "id": "简谐运动_Simple Harmonic Motion",
+      "name": "简谐运动_Simple Harmonic Motion",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md",
+      "type": "theory",
+      "branch": "振动与波",
+      "linkCount": 15
+    },
+    {
+      "id": "自由落体运动_Free Fall Motion",
+      "name": "自由落体运动_Free Fall Motion",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+      "type": "theory",
+      "branch": "运动学",
+      "linkCount": 9
+    },
+    {
+      "id": "质量与密度_Mass and Density",
+      "name": "质量与密度_Mass and Density",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/质量与密度_Mass and Density.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 8
+    },
+    {
+      "id": "透镜成像_Lens Imaging",
+      "name": "透镜成像_Lens Imaging",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/透镜成像_Lens Imaging.md",
+      "type": "theory",
+      "branch": "光学",
+      "linkCount": 5
+    },
+    {
+      "id": "重力_Gravity",
+      "name": "重力_Gravity",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/重力_Gravity.md",
+      "type": "theory",
+      "branch": "力学",
+      "linkCount": 10
+    },
+    {
+      "id": "闭合电路欧姆定律_Ohm's Law for Complete Circuit",
+      "name": "闭合电路欧姆定律_Ohm's Law for Complete Circuit",
+      "category": "00-初高中物理基础",
+      "path": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md",
+      "type": "theory",
+      "branch": "电学",
+      "linkCount": 7
+    },
+    {
+      "id": "伯努利原理_Bernoulli Principle",
+      "name": "伯努利原理_Bernoulli Principle",
+      "category": "01-经典力学",
+      "path": "01-经典力学/伯努利原理_Bernoulli Principle.md",
+      "type": "theory",
+      "branch": "经典力学",
+      "linkCount": 10
+    },
+    {
+      "id": "克拉尼图形_Chladni Patterns",
+      "name": "克拉尼图形_Chladni Patterns",
+      "category": "01-经典力学",
+      "path": "01-经典力学/克拉尼图形_Chladni Patterns.md",
+      "type": "experiment",
+      "branch": "经典力学",
+      "linkCount": 8
+    },
+    {
+      "id": "刚体沙盒_Rigid Body Sandbox",
+      "name": "刚体沙盒_Rigid Body Sandbox",
+      "category": "01-经典力学",
+      "path": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+      "type": "experiment",
+      "branch": "经典力学",
+      "linkCount": 8
+    },
+    {
+      "id": "利萨茹曲线_Lissajous Curve",
+      "name": "利萨茹曲线_Lissajous Curve",
+      "category": "01-经典力学",
+      "path": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+      "type": "theory",
+      "branch": "经典力学",
+      "linkCount": 11
+    },
+    {
+      "id": "哈密顿力学_Hamiltonian Mechanics",
+      "name": "哈密顿力学_Hamiltonian Mechanics",
+      "category": "01-经典力学",
+      "path": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md",
+      "type": "theory",
+      "branch": "经典力学/分析力学",
+      "linkCount": 15
+    },
+    {
+      "id": "开普勒定律_Kepler's Laws",
+      "name": "开普勒定律_Kepler's Laws",
+      "category": "01-经典力学",
+      "path": "01-经典力学/开普勒定律_Kepler's Laws.md",
+      "type": "theory",
+      "branch": "经典力学/天体力学",
+      "linkCount": 17
+    },
+    {
+      "id": "弹簧振子_Spring Oscillator",
+      "name": "弹簧振子_Spring Oscillator",
+      "category": "01-经典力学",
+      "path": "01-经典力学/弹簧振子_Spring Oscillator.md",
+      "type": "experiment",
+      "branch": "经典力学",
+      "linkCount": 8
+    },
+    {
+      "id": "悬臂梁分析_Cantilever Beam Analysis",
+      "name": "悬臂梁分析_Cantilever Beam Analysis",
+      "category": "01-经典力学",
+      "path": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md",
+      "type": "experiment",
+      "branch": "经典力学",
+      "linkCount": 7
+    },
+    {
+      "id": "拉格朗日力学_Lagrangian Mechanics",
+      "name": "拉格朗日力学_Lagrangian Mechanics",
+      "category": "01-经典力学",
+      "path": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+      "type": "theory",
+      "branch": "经典力学/分析力学",
+      "linkCount": 15
+    },
+    {
+      "id": "最小作用量原理_Principle of Least Action",
+      "name": "最小作用量原理_Principle of Least Action",
+      "category": "01-经典力学",
+      "path": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "type": "theory",
+      "branch": "经典力学/分析力学",
+      "linkCount": 20
+    },
+    {
+      "id": "欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation",
+      "name": "欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation",
+      "category": "01-经典力学",
+      "path": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md",
+      "type": "theory",
+      "branch": "经典力学/材料力学",
+      "linkCount": 12
+    },
+    {
+      "id": "欧拉动力学方程_Euler's Equations of Motion",
+      "name": "欧拉动力学方程_Euler's Equations of Motion",
+      "category": "01-经典力学",
+      "path": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md",
+      "type": "theory",
+      "branch": "经典力学/刚体动力学",
+      "linkCount": 13
+    },
+    {
+      "id": "泰勒-库埃特流_Taylor-Couette Flow",
+      "name": "泰勒-库埃特流_Taylor-Couette Flow",
+      "category": "01-经典力学",
+      "path": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md",
+      "type": "experiment",
+      "branch": "经典力学",
+      "linkCount": 5
+    },
+    {
+      "id": "牛顿万有引力定律_Newton's Law of Universal Gravitation",
+      "name": "牛顿万有引力定律_Newton's Law of Universal Gravitation",
+      "category": "01-经典力学",
+      "path": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "type": "theory",
+      "branch": "经典力学/天体力学",
+      "linkCount": 16
+    },
+    {
+      "id": "牛顿运动定律_Newton's Laws of Motion",
+      "name": "牛顿运动定律_Newton's Laws of Motion",
+      "category": "01-经典力学",
+      "path": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md",
+      "type": "theory",
+      "branch": "经典力学",
+      "linkCount": 13
+    },
+    {
+      "id": "纳维-斯托克斯方程_Navier-Stokes Equations",
+      "name": "纳维-斯托克斯方程_Navier-Stokes Equations",
+      "category": "01-经典力学",
+      "path": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md",
+      "type": "theory",
+      "branch": "经典力学/流体力学",
+      "linkCount": 12
+    },
+    {
+      "id": "胡克定律_Hooke's Law",
+      "name": "胡克定律_Hooke's Law",
+      "category": "01-经典力学",
+      "path": "01-经典力学/胡克定律_Hooke's Law.md",
+      "type": "theory",
+      "branch": "经典力学/弹性力学",
+      "linkCount": 14
+    },
+    {
+      "id": "齿轮与自行车_Gears and Bicycle",
+      "name": "齿轮与自行车_Gears and Bicycle",
+      "category": "01-经典力学",
+      "path": "01-经典力学/齿轮与自行车_Gears and Bicycle.md",
+      "type": "experiment",
+      "branch": "经典力学",
+      "linkCount": 7
+    },
+    {
+      "id": "伊辛模型_Ising Model",
+      "name": "伊辛模型_Ising Model",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/伊辛模型_Ising Model.md",
+      "type": "theory",
+      "branch": "热力学与统计物理",
+      "linkCount": 13
+    },
+    {
+      "id": "布朗运动_Brownian Motion",
+      "name": "布朗运动_Brownian Motion",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+      "type": "experiment",
+      "branch": "热力学与统计物理",
+      "linkCount": 14
+    },
+    {
+      "id": "帕隆多悖论_Parrondo Paradox",
+      "name": "帕隆多悖论_Parrondo Paradox",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md",
+      "type": "theory",
+      "branch": "热力学与统计物理",
+      "linkCount": 8
+    },
+    {
+      "id": "朗之万方程_Langevin Equation",
+      "name": "朗之万方程_Langevin Equation",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+      "type": "theory",
+      "branch": "统计物理/随机过程",
+      "linkCount": 48
+    },
+    {
+      "id": "涨落耗散定理_Fluctuation-Dissipation Theorem",
+      "name": "涨落耗散定理_Fluctuation-Dissipation Theorem",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+      "type": "theory",
+      "branch": "统计物理/非平衡态",
+      "linkCount": 34
+    },
+    {
+      "id": "热力学四大定律_Four Laws of Thermodynamics",
+      "name": "热力学四大定律_Four Laws of Thermodynamics",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+      "type": "theory",
+      "branch": "热力学",
+      "linkCount": 22
+    },
+    {
+      "id": "玻色-爱因斯坦统计_Bose-Einstein Statistics",
+      "name": "玻色-爱因斯坦统计_Bose-Einstein Statistics",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "type": "theory",
+      "branch": "量子统计物理",
+      "linkCount": 41
+    },
+    {
+      "id": "系综理论_Ensemble Theory",
+      "name": "系综理论_Ensemble Theory",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "type": "theory",
+      "branch": "统计物理",
+      "linkCount": 31
+    },
+    {
+      "id": "费米-狄拉克统计_Fermi-Dirac Statistics",
+      "name": "费米-狄拉克统计_Fermi-Dirac Statistics",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+      "type": "theory",
+      "branch": "量子统计物理",
+      "linkCount": 26
+    },
+    {
+      "id": "配分函数_Partition Function",
+      "name": "配分函数_Partition Function",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "type": "theory",
+      "branch": "统计物理",
+      "linkCount": 58
+    },
+    {
+      "id": "高尔顿钉板_Galton Board",
+      "name": "高尔顿钉板_Galton Board",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/高尔顿钉板_Galton Board.md",
+      "type": "experiment",
+      "branch": "热力学与统计物理",
+      "linkCount": 7
+    },
+    {
+      "id": "麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution",
+      "name": "麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution",
+      "category": "02-热力学与统计物理",
+      "path": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "type": "theory",
+      "branch": "统计物理",
+      "linkCount": 24
+    },
+    {
+      "id": "RLC谐振_RLC Resonance",
+      "name": "RLC谐振_RLC Resonance",
+      "category": "03-电磁学与电动力学",
+      "path": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md",
+      "type": "theory",
+      "branch": "电磁学/电路理论",
+      "linkCount": 33
+    },
+    {
+      "id": "库仑定律_Coulomb's Law",
+      "name": "库仑定律_Coulomb's Law",
+      "category": "03-电磁学与电动力学",
+      "path": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "type": "theory",
+      "branch": "静电学",
+      "linkCount": 48
+    },
+    {
+      "id": "洛伦兹力_Lorentz Force",
+      "name": "洛伦兹力_Lorentz Force",
+      "category": "03-电磁学与电动力学",
+      "path": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+      "type": "theory",
+      "branch": "电动力学",
+      "linkCount": 46
+    },
+    {
+      "id": "点电荷群_Point Charges",
+      "name": "点电荷群_Point Charges",
+      "category": "03-电磁学与电动力学",
+      "path": "03-电磁学与电动力学/点电荷群_Point Charges.md",
+      "type": "experiment",
+      "branch": "电磁学与电动力学",
+      "linkCount": 6
+    },
+    {
+      "id": "特斯拉线圈_Tesla Coil",
+      "name": "特斯拉线圈_Tesla Coil",
+      "category": "03-电磁学与电动力学",
+      "path": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md",
+      "type": "experiment",
+      "branch": "电磁学与电动力学",
+      "linkCount": 3
+    },
+    {
+      "id": "电磁感应定律_Electromagnetic Induction Law",
+      "name": "电磁感应定律_Electromagnetic Induction Law",
+      "category": "03-电磁学与电动力学",
+      "path": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "type": "theory",
+      "branch": "电动力学",
+      "linkCount": 51
+    },
+    {
+      "id": "麦克斯韦方程组_Maxwell's Equations",
+      "name": "麦克斯韦方程组_Maxwell's Equations",
+      "category": "03-电磁学与电动力学",
+      "path": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "type": "theory",
+      "branch": "电动力学",
+      "linkCount": 43
+    },
+    {
+      "id": "偏振_Polarization",
+      "name": "偏振_Polarization",
+      "category": "04-光学",
+      "path": "04-光学/偏振_Polarization.md",
+      "type": "theory",
+      "branch": "光学/波动光学",
+      "linkCount": 22
+    },
+    {
+      "id": "惠更斯-菲涅耳原理_Huygens-Fresnel Principle",
+      "name": "惠更斯-菲涅耳原理_Huygens-Fresnel Principle",
+      "category": "04-光学",
+      "path": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md",
+      "type": "theory",
+      "branch": "光学/波动光学",
+      "linkCount": 16
+    },
+    {
+      "id": "波的干涉_Wave Interference",
+      "name": "波的干涉_Wave Interference",
+      "category": "04-光学",
+      "path": "04-光学/波的干涉_Wave Interference.md",
+      "type": "experiment",
+      "branch": "光学",
+      "linkCount": 3
+    },
+    {
+      "id": "费马原理_Fermat's Principle",
+      "name": "费马原理_Fermat's Principle",
+      "category": "04-光学",
+      "path": "04-光学/费马原理_Fermat's Principle.md",
+      "type": "theory",
+      "branch": "光学/几何光学",
+      "linkCount": 17
+    },
+    {
+      "id": "一维势阱_1D Potential Well",
+      "name": "一维势阱_1D Potential Well",
+      "category": "05-量子力学",
+      "path": "05-量子力学/一维势阱_1D Potential Well.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 5
+    },
+    {
+      "id": "不确定性原理_Uncertainty Principle",
+      "name": "不确定性原理_Uncertainty Principle",
+      "category": "05-量子力学",
+      "path": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 60
+    },
+    {
+      "id": "光电效应_Photoelectric Effect",
+      "name": "光电效应_Photoelectric Effect",
+      "category": "05-量子力学",
+      "path": "05-量子力学/光电效应_Photoelectric Effect.md",
+      "type": "experiment",
+      "branch": "量子力学",
+      "linkCount": 44
+    },
+    {
+      "id": "双缝干涉_Double-Slit Interference",
+      "name": "双缝干涉_Double-Slit Interference",
+      "category": "05-量子力学",
+      "path": "05-量子力学/双缝干涉_Double-Slit Interference.md",
+      "type": "experiment",
+      "branch": "量子力学",
+      "linkCount": 9
+    },
+    {
+      "id": "康普顿散射_Compton Scattering",
+      "name": "康普顿散射_Compton Scattering",
+      "category": "05-量子力学",
+      "path": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "type": "experiment",
+      "branch": "量子力学/粒子物理",
+      "linkCount": 54
+    },
+    {
+      "id": "微扰理论_Perturbation Theory",
+      "name": "微扰理论_Perturbation Theory",
+      "category": "05-量子力学",
+      "path": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "type": "theory",
+      "branch": "量子力学/近似方法",
+      "linkCount": 58
+    },
+    {
+      "id": "态叠加原理_Superposition Principle",
+      "name": "态叠加原理_Superposition Principle",
+      "category": "05-量子力学",
+      "path": "05-量子力学/态叠加原理_Superposition Principle.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 58
+    },
+    {
+      "id": "斯特恩-盖拉赫实验_Stern-Gerlach Experiment",
+      "name": "斯特恩-盖拉赫实验_Stern-Gerlach Experiment",
+      "category": "05-量子力学",
+      "path": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "type": "experiment",
+      "branch": "量子力学",
+      "linkCount": 37
+    },
+    {
+      "id": "泡利不相容原理_Pauli Exclusion Principle",
+      "name": "泡利不相容原理_Pauli Exclusion Principle",
+      "category": "05-量子力学",
+      "path": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 63
+    },
+    {
+      "id": "玻恩概率解释_Born Rule",
+      "name": "玻恩概率解释_Born Rule",
+      "category": "05-量子力学",
+      "path": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 55
+    },
+    {
+      "id": "自旋_Spin",
+      "name": "自旋_Spin",
+      "category": "05-量子力学",
+      "path": "05-量子力学/自旋_Spin.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 69
+    },
+    {
+      "id": "薛定谔方程_Schrödinger Equation",
+      "name": "薛定谔方程_Schrödinger Equation",
+      "category": "05-量子力学",
+      "path": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 72
+    },
+    {
+      "id": "量子隧穿效应_Quantum Tunneling",
+      "name": "量子隧穿效应_Quantum Tunneling",
+      "category": "05-量子力学",
+      "path": "05-量子力学/量子隧穿效应_Quantum Tunneling.md",
+      "type": "theory",
+      "branch": "量子力学",
+      "linkCount": 63
+    },
+    {
+      "id": "黑体辐射_Black Body Radiation",
+      "name": "黑体辐射_Black Body Radiation",
+      "category": "05-量子力学",
+      "path": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "type": "experiment",
+      "branch": "热力学与统计物理/量子力学",
+      "linkCount": 49
+    },
+    {
+      "id": "史瓦西度规_Schwarzschild Metric",
+      "name": "史瓦西度规_Schwarzschild Metric",
+      "category": "06-相对论",
+      "path": "06-相对论/史瓦西度规_Schwarzschild Metric.md",
+      "type": "theory",
+      "branch": "广义相对论",
+      "linkCount": 12
+    },
+    {
+      "id": "广义相对论_General Relativity",
+      "name": "广义相对论_General Relativity",
+      "category": "06-相对论",
+      "path": "06-相对论/广义相对论_General Relativity.md",
+      "type": "theory",
+      "branch": "广义相对论",
+      "linkCount": 19
+    },
+    {
+      "id": "引力波探测_Gravitational Wave Detection",
+      "name": "引力波探测_Gravitational Wave Detection",
+      "category": "06-相对论",
+      "path": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "type": "experiment",
+      "branch": "相对论",
+      "linkCount": 13
+    },
+    {
+      "id": "洛伦兹变换_Lorentz Transformation",
+      "name": "洛伦兹变换_Lorentz Transformation",
+      "category": "06-相对论",
+      "path": "06-相对论/洛伦兹变换_Lorentz Transformation.md",
+      "type": "theory",
+      "branch": "狭义相对论",
+      "linkCount": 12
+    },
+    {
+      "id": "爱因斯坦场方程_Einstein Field Equations",
+      "name": "爱因斯坦场方程_Einstein Field Equations",
+      "category": "06-相对论",
+      "path": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+      "type": "theory",
+      "branch": "广义相对论",
+      "linkCount": 13
+    },
+    {
+      "id": "狭义相对论_Special Relativity",
+      "name": "狭义相对论_Special Relativity",
+      "category": "06-相对论",
+      "path": "06-相对论/狭义相对论_Special Relativity.md",
+      "type": "theory",
+      "branch": "狭义相对论",
+      "linkCount": 15
+    },
+    {
+      "id": "等效原理_Equivalence Principle",
+      "name": "等效原理_Equivalence Principle",
+      "category": "06-相对论",
+      "path": "06-相对论/等效原理_Equivalence Principle.md",
+      "type": "theory",
+      "branch": "广义相对论",
+      "linkCount": 11
+    },
+    {
+      "id": "迈克尔逊-莫雷实验_Michelson-Morley Experiment",
+      "name": "迈克尔逊-莫雷实验_Michelson-Morley Experiment",
+      "category": "06-相对论",
+      "path": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md",
+      "type": "experiment",
+      "branch": "相对论/光学",
+      "linkCount": 9
+    },
+    {
+      "id": "闵可夫斯基时空_Minkowski Spacetime",
+      "name": "闵可夫斯基时空_Minkowski Spacetime",
+      "category": "06-相对论",
+      "path": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+      "type": "theory",
+      "branch": "相对论",
+      "linkCount": 9
+    },
+    {
+      "id": "BCS理论_BCS Theory",
+      "name": "BCS理论_BCS Theory",
+      "category": "07-凝聚态与固体物理",
+      "path": "07-凝聚态与固体物理/BCS理论_BCS Theory.md",
+      "type": "theory",
+      "branch": "凝聚态物理/超导",
+      "linkCount": 20
+    },
+    {
+      "id": "布洛赫定理_Bloch's Theorem",
+      "name": "布洛赫定理_Bloch's Theorem",
+      "category": "07-凝聚态与固体物理",
+      "path": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md",
+      "type": "theory",
+      "branch": "凝聚态物理",
+      "linkCount": 11
+    },
+    {
+      "id": "能带理论_Band Theory",
+      "name": "能带理论_Band Theory",
+      "category": "07-凝聚态与固体物理",
+      "path": "07-凝聚态与固体物理/能带理论_Band Theory.md",
+      "type": "theory",
+      "branch": "凝聚态物理",
+      "linkCount": 16
+    },
+    {
+      "id": "超流_Superfluidity",
+      "name": "超流_Superfluidity",
+      "category": "07-凝聚态与固体物理",
+      "path": "07-凝聚态与固体物理/超流_Superfluidity.md",
+      "type": "theory",
+      "branch": "凝聚态物理/超流",
+      "linkCount": 15
+    },
+    {
+      "id": "铁磁相变_Ferromagnetic Phase Transition",
+      "name": "铁磁相变_Ferromagnetic Phase Transition",
+      "category": "07-凝聚态与固体物理",
+      "path": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+      "type": "theory",
+      "branch": "凝聚态物理/磁性物理",
+      "linkCount": 16
+    },
+    {
+      "id": "夸克模型_Quark Model",
+      "name": "夸克模型_Quark Model",
+      "category": "08-核与粒子物理",
+      "path": "08-核与粒子物理/夸克模型_Quark Model.md",
+      "type": "theory",
+      "branch": "粒子物理",
+      "linkCount": 20
+    },
+    {
+      "id": "希格斯机制_Higgs Mechanism",
+      "name": "希格斯机制_Higgs Mechanism",
+      "category": "08-核与粒子物理",
+      "path": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md",
+      "type": "theory",
+      "branch": "粒子物理",
+      "linkCount": 17
+    },
+    {
+      "id": "弱相互作用_Weak Interaction",
+      "name": "弱相互作用_Weak Interaction",
+      "category": "08-核与粒子物理",
+      "path": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+      "type": "theory",
+      "branch": "粒子物理",
+      "linkCount": 33
+    },
+    {
+      "id": "强相互作用_Strong Interaction",
+      "name": "强相互作用_Strong Interaction",
+      "category": "08-核与粒子物理",
+      "path": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "type": "theory",
+      "branch": "粒子物理/量子色动力学",
+      "linkCount": 21
+    },
+    {
+      "id": "托卡马克_Tokamak",
+      "name": "托卡马克_Tokamak",
+      "category": "08-核与粒子物理",
+      "path": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "type": "experiment",
+      "branch": "核与粒子物理",
+      "linkCount": 12
+    },
+    {
+      "id": "标准模型_Standard Model",
+      "name": "标准模型_Standard Model",
+      "category": "08-核与粒子物理",
+      "path": "08-核与粒子物理/标准模型_Standard Model.md",
+      "type": "theory",
+      "branch": "粒子物理",
+      "linkCount": 17
+    },
+    {
+      "id": "磁约束聚变_Magnetic Confinement Fusion",
+      "name": "磁约束聚变_Magnetic Confinement Fusion",
+      "category": "08-核与粒子物理",
+      "path": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+      "type": "theory",
+      "branch": "等离子体物理",
+      "linkCount": 12
+    },
+    {
+      "id": "中子星_Neutron Star",
+      "name": "中子星_Neutron Star",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+      "type": "theory",
+      "branch": "天体物理/致密星体",
+      "linkCount": 17
+    },
+    {
+      "id": "大爆炸理论_Big Bang Theory",
+      "name": "大爆炸理论_Big Bang Theory",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "type": "theory",
+      "branch": "宇宙学",
+      "linkCount": 25
+    },
+    {
+      "id": "太阳系沙盒_Solar System Sandbox",
+      "name": "太阳系沙盒_Solar System Sandbox",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "type": "experiment",
+      "branch": "天体物理与宇宙学",
+      "linkCount": 11
+    },
+    {
+      "id": "宇宙学微扰理论_Cosmological Perturbation Theory",
+      "name": "宇宙学微扰理论_Cosmological Perturbation Theory",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+      "type": "theory",
+      "branch": "宇宙学",
+      "linkCount": 14
+    },
+    {
+      "id": "宇宙微波背景辐射_Cosmic Microwave Background",
+      "name": "宇宙微波背景辐射_Cosmic Microwave Background",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md",
+      "type": "experiment",
+      "branch": "宇宙学",
+      "linkCount": 13
+    },
+    {
+      "id": "恒星结构方程_Stellar Structure Equations",
+      "name": "恒星结构方程_Stellar Structure Equations",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+      "type": "theory",
+      "branch": "天体物理/恒星物理",
+      "linkCount": 17
+    },
+    {
+      "id": "星系的诞生_Galaxy Formation",
+      "name": "星系的诞生_Galaxy Formation",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "type": "experiment",
+      "branch": "天体物理与宇宙学",
+      "linkCount": 12
+    },
+    {
+      "id": "暗物质_Dark Matter",
+      "name": "暗物质_Dark Matter",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/暗物质_Dark Matter.md",
+      "type": "theory",
+      "branch": "宇宙学/粒子物理",
+      "linkCount": 9
+    },
+    {
+      "id": "赫罗图_Hertzsprung-Russell Diagram",
+      "name": "赫罗图_Hertzsprung-Russell Diagram",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/赫罗图_Hertzsprung-Russell Diagram.md",
+      "type": "experiment",
+      "branch": "天体物理",
+      "linkCount": 6
+    },
+    {
+      "id": "黑洞吸积盘_Black Hole Accretion Disk",
+      "name": "黑洞吸积盘_Black Hole Accretion Disk",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "type": "experiment",
+      "branch": "天体物理与宇宙学",
+      "linkCount": 19
+    },
+    {
+      "id": "黑洞吸积盘喷流_Black Hole Jet",
+      "name": "黑洞吸积盘喷流_Black Hole Jet",
+      "category": "09-天体物理与宇宙学",
+      "path": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "type": "experiment",
+      "branch": "天体物理与宇宙学",
+      "linkCount": 15
+    },
+    {
+      "id": "三体问题_Three-Body Problem",
+      "name": "三体问题_Three-Body Problem",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+      "type": "theory",
+      "branch": "非线性动力学与复杂系统",
+      "linkCount": 11
+    },
+    {
+      "id": "分形维数_Fractal Dimension",
+      "name": "分形维数_Fractal Dimension",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md",
+      "type": "theory",
+      "branch": "非线性动力学/分形几何",
+      "linkCount": 22
+    },
+    {
+      "id": "复杂性理论_Complexity Theory",
+      "name": "复杂性理论_Complexity Theory",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/复杂性理论_Complexity Theory.md",
+      "type": "theory",
+      "branch": "复杂系统",
+      "linkCount": 27
+    },
+    {
+      "id": "李雅普诺夫指数_Lyapunov Exponent",
+      "name": "李雅普诺夫指数_Lyapunov Exponent",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md",
+      "type": "theory",
+      "branch": "非线性动力学/混沌理论",
+      "linkCount": 17
+    },
+    {
+      "id": "洛伦兹吸引子_Lorenz Attractor",
+      "name": "洛伦兹吸引子_Lorenz Attractor",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md",
+      "type": "theory",
+      "branch": "非线性动力学与复杂系统",
+      "linkCount": 12
+    },
+    {
+      "id": "混沌双摆_Chaotic Double Pendulum",
+      "name": "混沌双摆_Chaotic Double Pendulum",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md",
+      "type": "experiment",
+      "branch": "非线性动力学与复杂系统",
+      "linkCount": 10
+    },
+    {
+      "id": "磁流体力学_Magnetohydrodynamics",
+      "name": "磁流体力学_Magnetohydrodynamics",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+      "type": "theory",
+      "branch": "等离子体物理/磁流体力学",
+      "linkCount": 20
+    },
+    {
+      "id": "社会力模型_Social Force Model",
+      "name": "社会力模型_Social Force Model",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+      "type": "theory",
+      "branch": "非线性动力学与复杂系统",
+      "linkCount": 16
+    },
+    {
+      "id": "耗散结构_Dissipative Structure",
+      "name": "耗散结构_Dissipative Structure",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/耗散结构_Dissipative Structure.md",
+      "type": "theory",
+      "branch": "非线性动力学/非平衡热力学",
+      "linkCount": 18
+    },
+    {
+      "id": "胞元自动机_Cellular Automata",
+      "name": "胞元自动机_Cellular Automata",
+      "category": "10-非线性动力学与复杂系统",
+      "path": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "type": "experiment",
+      "branch": "非线性动力学与复杂系统",
+      "linkCount": 20
+    },
+    {
+      "id": "克莱因瓶_Klein Bottle",
+      "name": "克莱因瓶_Klein Bottle",
+      "category": "11-数学与拓扑",
+      "path": "11-数学与拓扑/克莱因瓶_Klein Bottle.md",
+      "type": "theory",
+      "branch": "数学与拓扑",
+      "linkCount": 12
+    },
+    {
+      "id": "张量分析_Tensor Analysis",
+      "name": "张量分析_Tensor Analysis",
+      "category": "11-数学与拓扑",
+      "path": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "type": "theory",
+      "branch": "数学/张量分析",
+      "linkCount": 21
+    },
+    {
+      "id": "微分几何_Differential Geometry",
+      "name": "微分几何_Differential Geometry",
+      "category": "11-数学与拓扑",
+      "path": "11-数学与拓扑/微分几何_Differential Geometry.md",
+      "type": "theory",
+      "branch": "数学/微分几何",
+      "linkCount": 23
+    },
+    {
+      "id": "拓扑学_Topology",
+      "name": "拓扑学_Topology",
+      "category": "11-数学与拓扑",
+      "path": "11-数学与拓扑/拓扑学_Topology.md",
+      "type": "theory",
+      "branch": "数学/拓扑学",
+      "linkCount": 33
+    },
+    {
+      "id": "欧拉示性数_Euler Characteristic",
+      "name": "欧拉示性数_Euler Characteristic",
+      "category": "11-数学与拓扑",
+      "path": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md",
+      "type": "theory",
+      "branch": "数学/拓扑学",
+      "linkCount": 24
+    },
+    {
+      "id": "流形_Manifold",
+      "name": "流形_Manifold",
+      "category": "11-数学与拓扑",
+      "path": "11-数学与拓扑/流形_Manifold.md",
+      "type": "theory",
+      "branch": "数学/微分几何",
+      "linkCount": 33
+    },
+    {
+      "id": "群论_Group Theory",
+      "name": "群论_Group Theory",
+      "category": "11-数学与拓扑",
+      "path": "11-数学与拓扑/群论_Group Theory.md",
+      "type": "theory",
+      "branch": "数学/群论",
+      "linkCount": 25
+    },
+    {
+      "id": "物理学知识库总索引_Physics Knowledge Base Index",
+      "name": "物理学知识库总索引_Physics Knowledge Base Index",
+      "category": "_索引与模板",
+      "path": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "type": "index",
+      "branch": "all",
+      "linkCount": 233
+    }
+  ],
+  "edges": [
+    {
+      "source": "00-初高中物理基础/交变电流_Alternating Current.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "00-初高中物理基础/交变电流_Alternating Current.md",
+      "target": "00-初高中物理基础/变压器_Transformer.md"
+    },
+    {
+      "source": "00-初高中物理基础/交变电流_Alternating Current.md",
+      "target": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的反射定律_Law of Reflection.md",
+      "target": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的反射定律_Law of Reflection.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md",
+      "target": "00-初高中物理基础/光的反射定律_Law of Reflection.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md",
+      "target": "04-光学/费马原理_Fermat's Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的直线传播_Rectilinear Propagation of Light.md",
+      "target": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的直线传播_Rectilinear Propagation of Light.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的直线传播_Rectilinear Propagation of Light.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的色散_Dispersion of Light.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的色散_Dispersion of Light.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的衍射_Diffraction of Light.md",
+      "target": "05-量子力学/光电效应_Photoelectric Effect.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的衍射_Diffraction of Light.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/光的衍射_Diffraction of Light.md",
+      "target": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md"
+    },
+    {
+      "source": "00-初高中物理基础/全反射_Total Internal Reflection.md",
+      "target": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md",
+      "target": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "target": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md"
+    },
+    {
+      "source": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "00-初高中物理基础/力的合成与分解_Composition and Decomposition of Forces.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md",
+      "target": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md"
+    },
+    {
+      "source": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md",
+      "target": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md"
+    },
+    {
+      "source": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md",
+      "target": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md"
+    },
+    {
+      "source": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+      "target": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md"
+    },
+    {
+      "source": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+      "target": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md",
+      "target": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/压强_Pressure.md",
+      "target": "01-经典力学/伯努利原理_Bernoulli Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/压强_Pressure.md",
+      "target": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md"
+    },
+    {
+      "source": "00-初高中物理基础/压强_Pressure.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "00-初高中物理基础/压强_Pressure.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子光谱_Atomic Spectra.md",
+      "target": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子光谱_Atomic Spectra.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子光谱_Atomic Spectra.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子光谱_Atomic Spectra.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+      "target": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+      "target": "08-核与粒子物理/强相互作用_Strong Interaction.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+      "target": "00-初高中物理基础/放射性衰变_Radioactive Decay.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+      "target": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+      "target": "00-初高中物理基础/原子光谱_Atomic Spectra.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+      "target": "03-电磁学与电动力学/点电荷群_Point Charges.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "00-初高中物理基础/变压器_Transformer.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "00-初高中物理基础/变压器_Transformer.md",
+      "target": "00-初高中物理基础/交变电流_Alternating Current.md"
+    },
+    {
+      "source": "00-初高中物理基础/变压器_Transformer.md",
+      "target": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md"
+    },
+    {
+      "source": "00-初高中物理基础/声音的产生与传播_Sound Production and Propagation.md",
+      "target": "00-初高中物理基础/机械波_Mechanical Waves.md"
+    },
+    {
+      "source": "00-初高中物理基础/声音的产生与传播_Sound Production and Propagation.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "00-初高中物理基础/安培力_Ampère's Force.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "00-初高中物理基础/安培力_Ampère's Force.md",
+      "target": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md"
+    },
+    {
+      "source": "00-初高中物理基础/安培力_Ampère's Force.md",
+      "target": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md"
+    },
+    {
+      "source": "00-初高中物理基础/安培力_Ampère's Force.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "00-初高中物理基础/安培力_Ampère's Force.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/平抛运动_Projectile Motion.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/平抛运动_Projectile Motion.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "00-初高中物理基础/平抛运动_Projectile Motion.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/弹力_Elastic Force.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/弹力_Elastic Force.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "00-初高中物理基础/弹力_Elastic Force.md",
+      "target": "00-初高中物理基础/机械波_Mechanical Waves.md"
+    },
+    {
+      "source": "00-初高中物理基础/弹力_Elastic Force.md",
+      "target": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/摩擦力_Friction Force.md",
+      "target": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/放射性衰变_Radioactive Decay.md",
+      "target": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md"
+    },
+    {
+      "source": "00-初高中物理基础/放射性衰变_Radioactive Decay.md",
+      "target": "08-核与粒子物理/弱相互作用_Weak Interaction.md"
+    },
+    {
+      "source": "00-初高中物理基础/放射性衰变_Radioactive Decay.md",
+      "target": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械波_Mechanical Waves.md",
+      "target": "01-经典力学/克拉尼图形_Chladni Patterns.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械波_Mechanical Waves.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械波_Mechanical Waves.md",
+      "target": "04-光学/波的干涉_Wave Interference.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械波_Mechanical Waves.md",
+      "target": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械波_Mechanical Waves.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+      "target": "00-初高中物理基础/摩擦力_Friction Force.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+      "target": "01-经典力学/最小作用量原理_Principle of Least Action.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+      "target": "00-初高中物理基础/重力_Gravity.md"
+    },
+    {
+      "source": "00-初高中物理基础/杠杆原理_Lever Principle.md",
+      "target": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md"
+    },
+    {
+      "source": "00-初高中物理基础/杠杆原理_Lever Principle.md",
+      "target": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/杠杆原理_Lever Principle.md",
+      "target": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md"
+    },
+    {
+      "source": "00-初高中物理基础/杠杆原理_Lever Principle.md",
+      "target": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md",
+      "target": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md"
+    },
+    {
+      "source": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md",
+      "target": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md"
+    },
+    {
+      "source": "00-初高中物理基础/欧姆定律_Ohm's Law.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "00-初高中物理基础/欧姆定律_Ohm's Law.md",
+      "target": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md"
+    },
+    {
+      "source": "00-初高中物理基础/欧姆定律_Ohm's Law.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+      "target": "00-初高中物理基础/物态变化_Phase Change.md"
+    },
+    {
+      "source": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+      "target": "00-初高中物理基础/质量与密度_Mass and Density.md"
+    },
+    {
+      "source": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+      "target": "05-量子力学/不确定性原理_Uncertainty Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+      "target": "05-量子力学/光电效应_Photoelectric Effect.md"
+    },
+    {
+      "source": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+      "target": "00-初高中物理基础/光的衍射_Diffraction of Light.md"
+    },
+    {
+      "source": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+      "target": "05-量子力学/康普顿散射_Compton Scattering.md"
+    },
+    {
+      "source": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md",
+      "target": "01-经典力学/伯努利原理_Bernoulli Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md",
+      "target": "00-初高中物理基础/压强_Pressure.md"
+    },
+    {
+      "source": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md",
+      "target": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md"
+    },
+    {
+      "source": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md",
+      "target": "00-初高中物理基础/杠杆原理_Lever Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md",
+      "target": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md",
+      "target": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/热传递_Heat Transfer.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "00-初高中物理基础/热传递_Heat Transfer.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "00-初高中物理基础/物态变化_Phase Change.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "00-初高中物理基础/物态变化_Phase Change.md",
+      "target": "00-初高中物理基础/质量与密度_Mass and Density.md"
+    },
+    {
+      "source": "00-初高中物理基础/物态变化_Phase Change.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+      "target": "00-初高中物理基础/原子光谱_Atomic Spectra.md"
+    },
+    {
+      "source": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+      "target": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md"
+    },
+    {
+      "source": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+      "target": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md"
+    },
+    {
+      "source": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+      "target": "00-初高中物理基础/欧姆定律_Ohm's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+      "target": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md"
+    },
+    {
+      "source": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "target": "00-初高中物理基础/欧姆定律_Ohm's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "target": "00-初高中物理基础/电功与电功率_Electric Work and Power.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "target": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "target": "03-电磁学与电动力学/点电荷群_Point Charges.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "target": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md",
+      "target": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md",
+      "target": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md"
+    },
+    {
+      "source": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md",
+      "target": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md"
+    },
+    {
+      "source": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md",
+      "target": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md",
+      "target": "01-经典力学/利萨茹曲线_Lissajous Curve.md"
+    },
+    {
+      "source": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md",
+      "target": "01-经典力学/胡克定律_Hooke's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+      "target": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md"
+    },
+    {
+      "source": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+      "target": "06-相对论/等效原理_Equivalence Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+      "target": "00-初高中物理基础/重力_Gravity.md"
+    },
+    {
+      "source": "00-初高中物理基础/质量与密度_Mass and Density.md",
+      "target": "00-初高中物理基础/压强_Pressure.md"
+    },
+    {
+      "source": "00-初高中物理基础/质量与密度_Mass and Density.md",
+      "target": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md"
+    },
+    {
+      "source": "00-初高中物理基础/透镜成像_Lens Imaging.md",
+      "target": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md"
+    },
+    {
+      "source": "00-初高中物理基础/重力_Gravity.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "00-初高中物理基础/重力_Gravity.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md",
+      "target": "00-初高中物理基础/欧姆定律_Ohm's Law.md"
+    },
+    {
+      "source": "01-经典力学/伯努利原理_Bernoulli Principle.md",
+      "target": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md"
+    },
+    {
+      "source": "01-经典力学/伯努利原理_Bernoulli Principle.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "01-经典力学/克拉尼图形_Chladni Patterns.md",
+      "target": "01-经典力学/利萨茹曲线_Lissajous Curve.md"
+    },
+    {
+      "source": "01-经典力学/克拉尼图形_Chladni Patterns.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "01-经典力学/克拉尼图形_Chladni Patterns.md",
+      "target": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md"
+    },
+    {
+      "source": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+      "target": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md"
+    },
+    {
+      "source": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+      "target": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md"
+    },
+    {
+      "source": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+      "target": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md"
+    },
+    {
+      "source": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+      "target": "01-经典力学/齿轮与自行车_Gears and Bicycle.md"
+    },
+    {
+      "source": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+      "target": "01-经典力学/克拉尼图形_Chladni Patterns.md"
+    },
+    {
+      "source": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+      "target": "05-量子力学/态叠加原理_Superposition Principle.md"
+    },
+    {
+      "source": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+      "target": "01-经典力学/胡克定律_Hooke's Law.md"
+    },
+    {
+      "source": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md",
+      "target": "01-经典力学/最小作用量原理_Principle of Least Action.md"
+    },
+    {
+      "source": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md",
+      "target": "04-光学/费马原理_Fermat's Principle.md"
+    },
+    {
+      "source": "01-经典力学/开普勒定律_Kepler's Laws.md",
+      "target": "06-相对论/史瓦西度规_Schwarzschild Metric.md"
+    },
+    {
+      "source": "01-经典力学/开普勒定律_Kepler's Laws.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "01-经典力学/开普勒定律_Kepler's Laws.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "01-经典力学/弹簧振子_Spring Oscillator.md",
+      "target": "01-经典力学/克拉尼图形_Chladni Patterns.md"
+    },
+    {
+      "source": "01-经典力学/弹簧振子_Spring Oscillator.md",
+      "target": "01-经典力学/利萨茹曲线_Lissajous Curve.md"
+    },
+    {
+      "source": "01-经典力学/弹簧振子_Spring Oscillator.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "01-经典力学/弹簧振子_Spring Oscillator.md",
+      "target": "01-经典力学/胡克定律_Hooke's Law.md"
+    },
+    {
+      "source": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md",
+      "target": "01-经典力学/克拉尼图形_Chladni Patterns.md"
+    },
+    {
+      "source": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md",
+      "target": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md"
+    },
+    {
+      "source": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+      "target": "01-经典力学/最小作用量原理_Principle of Least Action.md"
+    },
+    {
+      "source": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "04-光学/费马原理_Fermat's Principle.md"
+    },
+    {
+      "source": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md",
+      "target": "01-经典力学/胡克定律_Hooke's Law.md"
+    },
+    {
+      "source": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md",
+      "target": "01-经典力学/伯努利原理_Bernoulli Principle.md"
+    },
+    {
+      "source": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "target": "01-经典力学/开普勒定律_Kepler's Laws.md"
+    },
+    {
+      "source": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+      "target": "06-相对论/等效原理_Equivalence Principle.md"
+    },
+    {
+      "source": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "01-经典力学/胡克定律_Hooke's Law.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "01-经典力学/胡克定律_Hooke's Law.md",
+      "target": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md"
+    },
+    {
+      "source": "01-经典力学/齿轮与自行车_Gears and Bicycle.md",
+      "target": "01-经典力学/伯努利原理_Bernoulli Principle.md"
+    },
+    {
+      "source": "01-经典力学/齿轮与自行车_Gears and Bicycle.md",
+      "target": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md"
+    },
+    {
+      "source": "01-经典力学/齿轮与自行车_Gears and Bicycle.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "01-经典力学/齿轮与自行车_Gears and Bicycle.md",
+      "target": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md"
+    },
+    {
+      "source": "02-热力学与统计物理/伊辛模型_Ising Model.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "02-热力学与统计物理/伊辛模型_Ising Model.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "02-热力学与统计物理/伊辛模型_Ising Model.md",
+      "target": "02-热力学与统计物理/高尔顿钉板_Galton Board.md"
+    },
+    {
+      "source": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+      "target": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md"
+    },
+    {
+      "source": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+      "target": "02-热力学与统计物理/朗之万方程_Langevin Equation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+      "target": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md"
+    },
+    {
+      "source": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+      "target": "02-热力学与统计物理/高尔顿钉板_Galton Board.md"
+    },
+    {
+      "source": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md",
+      "target": "02-热力学与统计物理/高尔顿钉板_Galton Board.md"
+    },
+    {
+      "source": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+      "target": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md"
+    },
+    {
+      "source": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+      "target": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md"
+    },
+    {
+      "source": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+      "target": "02-热力学与统计物理/朗之万方程_Langevin Equation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+      "target": "05-量子力学/光电效应_Photoelectric Effect.md"
+    },
+    {
+      "source": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+      "target": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md"
+    },
+    {
+      "source": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/配分函数_Partition Function.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/高尔顿钉板_Galton Board.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "02-热力学与统计物理/高尔顿钉板_Galton Board.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "target": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md"
+    },
+    {
+      "source": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+      "target": "02-热力学与统计物理/高尔顿钉板_Galton Board.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md",
+      "target": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md",
+      "target": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "05-量子力学/态叠加原理_Superposition Principle.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "00-初高中物理基础/安培力_Ampère's Force.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "03-电磁学与电动力学/点电荷群_Point Charges.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/点电荷群_Point Charges.md",
+      "target": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/点电荷群_Point Charges.md",
+      "target": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/点电荷群_Point Charges.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md",
+      "target": "03-电磁学与电动力学/点电荷群_Point Charges.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "00-初高中物理基础/变压器_Transformer.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "11-数学与拓扑/拓扑学_Topology.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "target": "06-相对论/洛伦兹变换_Lorentz Transformation.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "target": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md"
+    },
+    {
+      "source": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "04-光学/偏振_Polarization.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "04-光学/波的干涉_Wave Interference.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "04-光学/波的干涉_Wave Interference.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "04-光学/费马原理_Fermat's Principle.md",
+      "target": "00-初高中物理基础/全反射_Total Internal Reflection.md"
+    },
+    {
+      "source": "04-光学/费马原理_Fermat's Principle.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "04-光学/费马原理_Fermat's Principle.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "04-光学/费马原理_Fermat's Principle.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "04-光学/费马原理_Fermat's Principle.md",
+      "target": "01-经典力学/最小作用量原理_Principle of Least Action.md"
+    },
+    {
+      "source": "05-量子力学/一维势阱_1D Potential Well.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "05-量子力学/一维势阱_1D Potential Well.md",
+      "target": "05-量子力学/不确定性原理_Uncertainty Principle.md"
+    },
+    {
+      "source": "05-量子力学/一维势阱_1D Potential Well.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+      "target": "05-量子力学/一维势阱_1D Potential Well.md"
+    },
+    {
+      "source": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+      "target": "05-量子力学/玻恩概率解释_Born Rule.md"
+    },
+    {
+      "source": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "05-量子力学/光电效应_Photoelectric Effect.md",
+      "target": "05-量子力学/康普顿散射_Compton Scattering.md"
+    },
+    {
+      "source": "05-量子力学/光电效应_Photoelectric Effect.md",
+      "target": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md"
+    },
+    {
+      "source": "05-量子力学/光电效应_Photoelectric Effect.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "05-量子力学/光电效应_Photoelectric Effect.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "05-量子力学/光电效应_Photoelectric Effect.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "05-量子力学/光电效应_Photoelectric Effect.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "05-量子力学/双缝干涉_Double-Slit Interference.md",
+      "target": "05-量子力学/态叠加原理_Superposition Principle.md"
+    },
+    {
+      "source": "05-量子力学/双缝干涉_Double-Slit Interference.md",
+      "target": "04-光学/波的干涉_Wave Interference.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "05-量子力学/光电效应_Photoelectric Effect.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "11-数学与拓扑/克莱因瓶_Klein Bottle.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "05-量子力学/康普顿散射_Compton Scattering.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "target": "07-凝聚态与固体物理/BCS理论_BCS Theory.md"
+    },
+    {
+      "source": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "target": "05-量子力学/一维势阱_1D Potential Well.md"
+    },
+    {
+      "source": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "target": "00-初高中物理基础/放射性衰变_Radioactive Decay.md"
+    },
+    {
+      "source": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "05-量子力学/微扰理论_Perturbation Theory.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "05-量子力学/态叠加原理_Superposition Principle.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "05-量子力学/态叠加原理_Superposition Principle.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "05-量子力学/态叠加原理_Superposition Principle.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "target": "05-量子力学/不确定性原理_Uncertainty Principle.md"
+    },
+    {
+      "source": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "target": "05-量子力学/态叠加原理_Superposition Principle.md"
+    },
+    {
+      "source": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "target": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md"
+    },
+    {
+      "source": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "target": "05-量子力学/玻恩概率解释_Born Rule.md"
+    },
+    {
+      "source": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "target": "07-凝聚态与固体物理/BCS理论_BCS Theory.md"
+    },
+    {
+      "source": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "target": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md"
+    },
+    {
+      "source": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "target": "05-量子力学/不确定性原理_Uncertainty Principle.md"
+    },
+    {
+      "source": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "target": "05-量子力学/态叠加原理_Superposition Principle.md"
+    },
+    {
+      "source": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "target": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md"
+    },
+    {
+      "source": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "05-量子力学/玻恩概率解释_Born Rule.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md"
+    },
+    {
+      "source": "05-量子力学/自旋_Spin.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/一维势阱_1D Potential Well.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/不确定性原理_Uncertainty Principle.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "01-经典力学/最小作用量原理_Principle of Least Action.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/态叠加原理_Superposition Principle.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/玻恩概率解释_Born Rule.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+      "target": "05-量子力学/量子隧穿效应_Quantum Tunneling.md"
+    },
+    {
+      "source": "05-量子力学/量子隧穿效应_Quantum Tunneling.md",
+      "target": "05-量子力学/一维势阱_1D Potential Well.md"
+    },
+    {
+      "source": "05-量子力学/量子隧穿效应_Quantum Tunneling.md",
+      "target": "05-量子力学/不确定性原理_Uncertainty Principle.md"
+    },
+    {
+      "source": "05-量子力学/量子隧穿效应_Quantum Tunneling.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "05-量子力学/量子隧穿效应_Quantum Tunneling.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "target": "05-量子力学/光电效应_Photoelectric Effect.md"
+    },
+    {
+      "source": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "target": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md"
+    },
+    {
+      "source": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "05-量子力学/黑体辐射_Black Body Radiation.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "06-相对论/史瓦西度规_Schwarzschild Metric.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "06-相对论/史瓦西度规_Schwarzschild Metric.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "06-相对论/史瓦西度规_Schwarzschild Metric.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "06-相对论/史瓦西度规_Schwarzschild Metric.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "06-相对论/史瓦西度规_Schwarzschild Metric.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "11-数学与拓扑/张量分析_Tensor Analysis.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "06-相对论/等效原理_Equivalence Principle.md"
+    },
+    {
+      "source": "06-相对论/广义相对论_General Relativity.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "04-光学/波的干涉_Wave Interference.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "06-相对论/洛伦兹变换_Lorentz Transformation.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "06-相对论/洛伦兹变换_Lorentz Transformation.md",
+      "target": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md"
+    },
+    {
+      "source": "06-相对论/洛伦兹变换_Lorentz Transformation.md",
+      "target": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md"
+    },
+    {
+      "source": "06-相对论/洛伦兹变换_Lorentz Transformation.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+      "target": "06-相对论/史瓦西度规_Schwarzschild Metric.md"
+    },
+    {
+      "source": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "06-相对论/狭义相对论_Special Relativity.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "06-相对论/狭义相对论_Special Relativity.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "06-相对论/狭义相对论_Special Relativity.md",
+      "target": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md"
+    },
+    {
+      "source": "06-相对论/狭义相对论_Special Relativity.md",
+      "target": "06-相对论/洛伦兹变换_Lorentz Transformation.md"
+    },
+    {
+      "source": "06-相对论/狭义相对论_Special Relativity.md",
+      "target": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md"
+    },
+    {
+      "source": "06-相对论/狭义相对论_Special Relativity.md",
+      "target": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md"
+    },
+    {
+      "source": "06-相对论/狭义相对论_Special Relativity.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "06-相对论/等效原理_Equivalence Principle.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "06-相对论/等效原理_Equivalence Principle.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "06-相对论/等效原理_Equivalence Principle.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "06-相对论/等效原理_Equivalence Principle.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md",
+      "target": "06-相对论/洛伦兹变换_Lorentz Transformation.md"
+    },
+    {
+      "source": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+      "target": "06-相对论/洛伦兹变换_Lorentz Transformation.md"
+    },
+    {
+      "source": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/BCS理论_BCS Theory.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/BCS理论_BCS Theory.md",
+      "target": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/BCS理论_BCS Theory.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/BCS理论_BCS Theory.md",
+      "target": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md",
+      "target": "11-数学与拓扑/群论_Group Theory.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md",
+      "target": "07-凝聚态与固体物理/能带理论_Band Theory.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/能带理论_Band Theory.md",
+      "target": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/能带理论_Band Theory.md",
+      "target": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/能带理论_Band Theory.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/超流_Superfluidity.md",
+      "target": "07-凝聚态与固体物理/BCS理论_BCS Theory.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/超流_Superfluidity.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/超流_Superfluidity.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+      "target": "07-凝聚态与固体物理/BCS理论_BCS Theory.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+      "target": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+      "target": "07-凝聚态与固体物理/超流_Superfluidity.md"
+    },
+    {
+      "source": "08-核与粒子物理/夸克模型_Quark Model.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "08-核与粒子物理/夸克模型_Quark Model.md",
+      "target": "08-核与粒子物理/强相互作用_Strong Interaction.md"
+    },
+    {
+      "source": "08-核与粒子物理/夸克模型_Quark Model.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "08-核与粒子物理/夸克模型_Quark Model.md",
+      "target": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md"
+    },
+    {
+      "source": "08-核与粒子物理/夸克模型_Quark Model.md",
+      "target": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md"
+    },
+    {
+      "source": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md",
+      "target": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md"
+    },
+    {
+      "source": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+      "target": "08-核与粒子物理/夸克模型_Quark Model.md"
+    },
+    {
+      "source": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+      "target": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md"
+    },
+    {
+      "source": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "08-核与粒子物理/夸克模型_Quark Model.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md"
+    },
+    {
+      "source": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+      "target": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md"
+    },
+    {
+      "source": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "target": "04-光学/波的干涉_Wave Interference.md"
+    },
+    {
+      "source": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "target": "03-电磁学与电动力学/点电荷群_Point Charges.md"
+    },
+    {
+      "source": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "target": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md"
+    },
+    {
+      "source": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "target": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md"
+    },
+    {
+      "source": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "target": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md"
+    },
+    {
+      "source": "08-核与粒子物理/托卡马克_Tokamak.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "08-核与粒子物理/标准模型_Standard Model.md",
+      "target": "08-核与粒子物理/夸克模型_Quark Model.md"
+    },
+    {
+      "source": "08-核与粒子物理/标准模型_Standard Model.md",
+      "target": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md"
+    },
+    {
+      "source": "08-核与粒子物理/标准模型_Standard Model.md",
+      "target": "08-核与粒子物理/强相互作用_Strong Interaction.md"
+    },
+    {
+      "source": "08-核与粒子物理/标准模型_Standard Model.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+      "target": "08-核与粒子物理/强相互作用_Strong Interaction.md"
+    },
+    {
+      "source": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+      "target": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md"
+    },
+    {
+      "source": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+      "target": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+      "target": "08-核与粒子物理/强相互作用_Strong Interaction.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+      "target": "07-凝聚态与固体物理/超流_Superfluidity.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "08-核与粒子物理/弱相互作用_Weak Interaction.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "target": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "target": "01-经典力学/开普勒定律_Kepler's Laws.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+      "target": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+      "target": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+      "target": "08-核与粒子物理/弱相互作用_Weak Interaction.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+      "target": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+      "target": "09-天体物理与宇宙学/赫罗图_Hertzsprung-Russell Diagram.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "target": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "target": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/暗物质_Dark Matter.md",
+      "target": "08-核与粒子物理/强相互作用_Strong Interaction.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/暗物质_Dark Matter.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/暗物质_Dark Matter.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/暗物质_Dark Matter.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/赫罗图_Hertzsprung-Russell Diagram.md",
+      "target": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "target": "06-相对论/史瓦西度规_Schwarzschild Metric.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "target": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "target": "04-光学/波的干涉_Wave Interference.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "target": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md"
+    },
+    {
+      "source": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+      "target": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md",
+      "target": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/复杂性理论_Complexity Theory.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md",
+      "target": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md",
+      "target": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md",
+      "target": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md",
+      "target": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md",
+      "target": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+      "target": "01-经典力学/利萨茹曲线_Lissajous Curve.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+      "target": "02-热力学与统计物理/朗之万方程_Langevin Equation.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+      "target": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+      "target": "02-热力学与统计物理/高尔顿钉板_Galton Board.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/耗散结构_Dissipative Structure.md",
+      "target": "10-非线性动力学与复杂系统/复杂性理论_Complexity Theory.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "target": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "target": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md"
+    },
+    {
+      "source": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "11-数学与拓扑/克莱因瓶_Klein Bottle.md",
+      "target": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md"
+    },
+    {
+      "source": "11-数学与拓扑/克莱因瓶_Klein Bottle.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "11-数学与拓扑/克莱因瓶_Klein Bottle.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "11-数学与拓扑/微分几何_Differential Geometry.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "11-数学与拓扑/拓扑学_Topology.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "11-数学与拓扑/流形_Manifold.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "11-数学与拓扑/微分几何_Differential Geometry.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "11-数学与拓扑/微分几何_Differential Geometry.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "11-数学与拓扑/微分几何_Differential Geometry.md",
+      "target": "11-数学与拓扑/张量分析_Tensor Analysis.md"
+    },
+    {
+      "source": "11-数学与拓扑/微分几何_Differential Geometry.md",
+      "target": "11-数学与拓扑/拓扑学_Topology.md"
+    },
+    {
+      "source": "11-数学与拓扑/微分几何_Differential Geometry.md",
+      "target": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md"
+    },
+    {
+      "source": "11-数学与拓扑/微分几何_Differential Geometry.md",
+      "target": "11-数学与拓扑/流形_Manifold.md"
+    },
+    {
+      "source": "11-数学与拓扑/拓扑学_Topology.md",
+      "target": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md"
+    },
+    {
+      "source": "11-数学与拓扑/拓扑学_Topology.md",
+      "target": "07-凝聚态与固体物理/超流_Superfluidity.md"
+    },
+    {
+      "source": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md",
+      "target": "11-数学与拓扑/微分几何_Differential Geometry.md"
+    },
+    {
+      "source": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md",
+      "target": "11-数学与拓扑/拓扑学_Topology.md"
+    },
+    {
+      "source": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md",
+      "target": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "11-数学与拓扑/张量分析_Tensor Analysis.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "11-数学与拓扑/微分几何_Differential Geometry.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "11-数学与拓扑/拓扑学_Topology.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md"
+    },
+    {
+      "source": "11-数学与拓扑/流形_Manifold.md",
+      "target": "11-数学与拓扑/群论_Group Theory.md"
+    },
+    {
+      "source": "11-数学与拓扑/群论_Group Theory.md",
+      "target": "08-核与粒子物理/弱相互作用_Weak Interaction.md"
+    },
+    {
+      "source": "11-数学与拓扑/群论_Group Theory.md",
+      "target": "11-数学与拓扑/拓扑学_Topology.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/交变电流_Alternating Current.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "07-凝聚态与固体物理/BCS理论_BCS Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/一维势阱_1D Potential Well.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/不确定性原理_Uncertainty Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/中子星_Neutron Star.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/伊辛模型_Ising Model.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/伯努利原理_Bernoulli Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "04-光学/偏振_Polarization.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/光电效应_Photoelectric Effect.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/光的反射定律_Law of Reflection.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/光的直线传播_Rectilinear Propagation of Light.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/光的色散_Dispersion of Light.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/光的衍射_Diffraction of Light.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/克拉尼图形_Chladni Patterns.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "11-数学与拓扑/克莱因瓶_Klein Bottle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/全反射_Total Internal Reflection.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/利萨茹曲线_Lissajous Curve.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/力的合成与分解_Composition and Decomposition of Forces.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/压强_Pressure.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/原子光谱_Atomic Spectra.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/双缝干涉_Double-Slit Interference.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/变压器_Transformer.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/史瓦西度规_Schwarzschild Metric.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/声音的产生与传播_Sound Production and Propagation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/复杂性理论_Complexity Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "08-核与粒子物理/夸克模型_Quark Model.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/安培力_Ampère's Force.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/布朗运动_Brownian Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/平抛运动_Projectile Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/广义相对论_General Relativity.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/康普顿散射_Compton Scattering.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/开普勒定律_Kepler's Laws.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/引力波探测_Gravitational Wave Detection.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "11-数学与拓扑/张量分析_Tensor Analysis.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "08-核与粒子物理/弱相互作用_Weak Interaction.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/弹力_Elastic Force.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/弹簧振子_Spring Oscillator.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "08-核与粒子物理/强相互作用_Strong Interaction.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "11-数学与拓扑/微分几何_Differential Geometry.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/微扰理论_Perturbation Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/态叠加原理_Superposition Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "08-核与粒子物理/托卡马克_Tokamak.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "11-数学与拓扑/拓扑学_Topology.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/摩擦力_Friction Force.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/放射性衰变_Radioactive Decay.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/暗物质_Dark Matter.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/最小作用量原理_Principle of Least Action.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/朗之万方程_Langevin Equation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/机械波_Mechanical Waves.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/杠杆原理_Lever Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "08-核与粒子物理/标准模型_Standard Model.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/欧姆定律_Ohm's Law.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/比热容_Specific Heat Capacity.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "04-光学/波的干涉_Wave Interference.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/洛伦兹变换_Lorentz Transformation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "11-数学与拓扑/流形_Manifold.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "03-电磁学与电动力学/点电荷群_Point Charges.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/热传递_Heat Transfer.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/物态变化_Phase Change.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/狭义相对论_Special Relativity.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/玻尔模型_Bohr Model.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/玻恩概率解释_Born Rule.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/电功与电功率_Electric Work and Power.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/电流与电路_Current and Circuits.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/等效原理_Equivalence Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/系综理论_Ensemble Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "11-数学与拓扑/群论_Group Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/耗散结构_Dissipative Structure.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/胡克定律_Hooke's Law.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "07-凝聚态与固体物理/能带理论_Band Theory.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/自旋_Spin.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/自由落体运动_Free Fall Motion.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/薛定谔方程_Schrödinger Equation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/质量与密度_Mass and Density.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "04-光学/费马原理_Fermat's Principle.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/赫罗图_Hertzsprung-Russell Diagram.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "07-凝聚态与固体物理/超流_Superfluidity.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/透镜成像_Lens Imaging.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/配分函数_Partition Function.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/重力_Gravity.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/量子隧穿效应_Quantum Tunneling.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/高尔顿钉板_Galton Board.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "05-量子力学/黑体辐射_Black Body Radiation.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md"
+    },
+    {
+      "source": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+      "target": "01-经典力学/齿轮与自行车_Gears and Bicycle.md"
+    }
+  ],
+  "totalFiles": 155,
+  "totalEdges": 846,
+  "linkMap": {
+    "交变电流_Alternating Current": "00-初高中物理基础/交变电流_Alternating Current.md",
+    "交变电流": "00-初高中物理基础/交变电流_Alternating Current.md",
+    "光的反射定律_Law of Reflection": "00-初高中物理基础/光的反射定律_Law of Reflection.md",
+    "光的反射定律": "00-初高中物理基础/光的反射定律_Law of Reflection.md",
+    "光的折射与斯涅尔定律_Refraction and Snell's Law": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md",
+    "光的折射与斯涅尔定律": "00-初高中物理基础/光的折射与斯涅尔定律_Refraction and Snell's Law.md",
+    "光的直线传播_Rectilinear Propagation of Light": "00-初高中物理基础/光的直线传播_Rectilinear Propagation of Light.md",
+    "光的直线传播": "00-初高中物理基础/光的直线传播_Rectilinear Propagation of Light.md",
+    "光的色散_Dispersion of Light": "00-初高中物理基础/光的色散_Dispersion of Light.md",
+    "光的色散": "00-初高中物理基础/光的色散_Dispersion of Light.md",
+    "光的衍射_Diffraction of Light": "00-初高中物理基础/光的衍射_Diffraction of Light.md",
+    "光的衍射": "00-初高中物理基础/光的衍射_Diffraction of Light.md",
+    "全反射_Total Internal Reflection": "00-初高中物理基础/全反射_Total Internal Reflection.md",
+    "全反射": "00-初高中物理基础/全反射_Total Internal Reflection.md",
+    "共点力平衡_Equilibrium of Concurrent Forces": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md",
+    "共点力平衡": "00-初高中物理基础/共点力平衡_Equilibrium of Concurrent Forces.md",
+    "分子动理论_Kinetic Theory of Matter": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+    "分子动理论": "00-初高中物理基础/分子动理论_Kinetic Theory of Matter.md",
+    "力的合成与分解_Composition and Decomposition of Forces": "00-初高中物理基础/力的合成与分解_Composition and Decomposition of Forces.md",
+    "力的合成与分解": "00-初高中物理基础/力的合成与分解_Composition and Decomposition of Forces.md",
+    "功和机械能_Work and Mechanical Energy": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md",
+    "功和机械能": "00-初高中物理基础/功和机械能_Work and Mechanical Energy.md",
+    "动能定理_Kinetic Energy Theorem": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+    "动能定理": "00-初高中物理基础/动能定理_Kinetic Energy Theorem.md",
+    "动量与冲量_Momentum and Impulse": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+    "动量与冲量": "00-初高中物理基础/动量与冲量_Momentum and Impulse.md",
+    "动量守恒定律_Conservation of Momentum": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md",
+    "动量守恒定律": "00-初高中物理基础/动量守恒定律_Conservation of Momentum.md",
+    "匀变速直线运动_Uniformly Accelerated Linear Motion": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md",
+    "匀变速直线运动": "00-初高中物理基础/匀变速直线运动_Uniformly Accelerated Linear Motion.md",
+    "匀速圆周运动_Uniform Circular Motion": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md",
+    "匀速圆周运动": "00-初高中物理基础/匀速圆周运动_Uniform Circular Motion.md",
+    "压强_Pressure": "00-初高中物理基础/压强_Pressure.md",
+    "压强": "00-初高中物理基础/压强_Pressure.md",
+    "原子光谱_Atomic Spectra": "00-初高中物理基础/原子光谱_Atomic Spectra.md",
+    "原子光谱": "00-初高中物理基础/原子光谱_Atomic Spectra.md",
+    "原子核的组成_Composition of Nucleus": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+    "原子核的组成": "00-初高中物理基础/原子核的组成_Composition of Nucleus.md",
+    "原子结构模型_Atomic Structure Models": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+    "原子结构模型": "00-初高中物理基础/原子结构模型_Atomic Structure Models.md",
+    "变压器_Transformer": "00-初高中物理基础/变压器_Transformer.md",
+    "变压器": "00-初高中物理基础/变压器_Transformer.md",
+    "声音的产生与传播_Sound Production and Propagation": "00-初高中物理基础/声音的产生与传播_Sound Production and Propagation.md",
+    "声音的产生与传播": "00-初高中物理基础/声音的产生与传播_Sound Production and Propagation.md",
+    "安培力_Ampère's Force": "00-初高中物理基础/安培力_Ampère's Force.md",
+    "安培力": "00-初高中物理基础/安培力_Ampère's Force.md",
+    "平抛运动_Projectile Motion": "00-初高中物理基础/平抛运动_Projectile Motion.md",
+    "平抛运动": "00-初高中物理基础/平抛运动_Projectile Motion.md",
+    "弹力_Elastic Force": "00-初高中物理基础/弹力_Elastic Force.md",
+    "弹力": "00-初高中物理基础/弹力_Elastic Force.md",
+    "摩擦力_Friction Force": "00-初高中物理基础/摩擦力_Friction Force.md",
+    "摩擦力": "00-初高中物理基础/摩擦力_Friction Force.md",
+    "放射性衰变_Radioactive Decay": "00-初高中物理基础/放射性衰变_Radioactive Decay.md",
+    "放射性衰变": "00-初高中物理基础/放射性衰变_Radioactive Decay.md",
+    "机械波_Mechanical Waves": "00-初高中物理基础/机械波_Mechanical Waves.md",
+    "机械波": "00-初高中物理基础/机械波_Mechanical Waves.md",
+    "机械能守恒定律_Conservation of Mechanical Energy": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+    "机械能守恒定律": "00-初高中物理基础/机械能守恒定律_Conservation of Mechanical Energy.md",
+    "杠杆原理_Lever Principle": "00-初高中物理基础/杠杆原理_Lever Principle.md",
+    "杠杆原理": "00-初高中物理基础/杠杆原理_Lever Principle.md",
+    "核裂变与核聚变_Nuclear Fission and Fusion": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md",
+    "核裂变与核聚变": "00-初高中物理基础/核裂变与核聚变_Nuclear Fission and Fusion.md",
+    "欧姆定律_Ohm's Law": "00-初高中物理基础/欧姆定律_Ohm's Law.md",
+    "欧姆定律": "00-初高中物理基础/欧姆定律_Ohm's Law.md",
+    "比热容_Specific Heat Capacity": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+    "比热容": "00-初高中物理基础/比热容_Specific Heat Capacity.md",
+    "波粒二象性_Wave-Particle Duality": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+    "波粒二象性": "00-初高中物理基础/波粒二象性_Wave-Particle Duality.md",
+    "浮力与阿基米德原理_Buoyancy and Archimedes' Principle": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md",
+    "浮力与阿基米德原理": "00-初高中物理基础/浮力与阿基米德原理_Buoyancy and Archimedes' Principle.md",
+    "滑轮与滑轮组_Pulley Systems": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md",
+    "滑轮与滑轮组": "00-初高中物理基础/滑轮与滑轮组_Pulley Systems.md",
+    "热传递_Heat Transfer": "00-初高中物理基础/热传递_Heat Transfer.md",
+    "热传递": "00-初高中物理基础/热传递_Heat Transfer.md",
+    "物态变化_Phase Change": "00-初高中物理基础/物态变化_Phase Change.md",
+    "物态变化": "00-初高中物理基础/物态变化_Phase Change.md",
+    "玻尔模型_Bohr Model": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+    "玻尔模型": "00-初高中物理基础/玻尔模型_Bohr Model.md",
+    "理想气体状态方程_Ideal Gas Equation": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md",
+    "理想气体状态方程": "00-初高中物理基础/理想气体状态方程_Ideal Gas Equation.md",
+    "电功与电功率_Electric Work and Power": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+    "电功与电功率": "00-初高中物理基础/电功与电功率_Electric Work and Power.md",
+    "电流与电路_Current and Circuits": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+    "电流与电路": "00-初高中物理基础/电流与电路_Current and Circuits.md",
+    "电流的磁效应_Magnetic Effect of Current": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md",
+    "电流的磁效应": "00-初高中物理基础/电流的磁效应_Magnetic Effect of Current.md",
+    "电磁感应现象_Electromagnetic Induction": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md",
+    "电磁感应现象": "00-初高中物理基础/电磁感应现象_Electromagnetic Induction.md",
+    "简谐运动_Simple Harmonic Motion": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md",
+    "简谐运动": "00-初高中物理基础/简谐运动_Simple Harmonic Motion.md",
+    "自由落体运动_Free Fall Motion": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+    "自由落体运动": "00-初高中物理基础/自由落体运动_Free Fall Motion.md",
+    "质量与密度_Mass and Density": "00-初高中物理基础/质量与密度_Mass and Density.md",
+    "质量与密度": "00-初高中物理基础/质量与密度_Mass and Density.md",
+    "透镜成像_Lens Imaging": "00-初高中物理基础/透镜成像_Lens Imaging.md",
+    "透镜成像": "00-初高中物理基础/透镜成像_Lens Imaging.md",
+    "重力_Gravity": "00-初高中物理基础/重力_Gravity.md",
+    "重力": "00-初高中物理基础/重力_Gravity.md",
+    "闭合电路欧姆定律_Ohm's Law for Complete Circuit": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md",
+    "闭合电路欧姆定律": "00-初高中物理基础/闭合电路欧姆定律_Ohm's Law for Complete Circuit.md",
+    "伯努利原理_Bernoulli Principle": "01-经典力学/伯努利原理_Bernoulli Principle.md",
+    "伯努利原理": "01-经典力学/伯努利原理_Bernoulli Principle.md",
+    "克拉尼图形_Chladni Patterns": "01-经典力学/克拉尼图形_Chladni Patterns.md",
+    "克拉尼图形": "01-经典力学/克拉尼图形_Chladni Patterns.md",
+    "刚体沙盒_Rigid Body Sandbox": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+    "刚体沙盒": "01-经典力学/刚体沙盒_Rigid Body Sandbox.md",
+    "利萨茹曲线_Lissajous Curve": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+    "利萨茹曲线": "01-经典力学/利萨茹曲线_Lissajous Curve.md",
+    "哈密顿力学_Hamiltonian Mechanics": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md",
+    "哈密顿力学": "01-经典力学/哈密顿力学_Hamiltonian Mechanics.md",
+    "开普勒定律_Kepler's Laws": "01-经典力学/开普勒定律_Kepler's Laws.md",
+    "开普勒定律": "01-经典力学/开普勒定律_Kepler's Laws.md",
+    "弹簧振子_Spring Oscillator": "01-经典力学/弹簧振子_Spring Oscillator.md",
+    "弹簧振子": "01-经典力学/弹簧振子_Spring Oscillator.md",
+    "悬臂梁分析_Cantilever Beam Analysis": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md",
+    "悬臂梁分析": "01-经典力学/悬臂梁分析_Cantilever Beam Analysis.md",
+    "拉格朗日力学_Lagrangian Mechanics": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+    "拉格朗日力学": "01-经典力学/拉格朗日力学_Lagrangian Mechanics.md",
+    "最小作用量原理_Principle of Least Action": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+    "最小作用量原理": "01-经典力学/最小作用量原理_Principle of Least Action.md",
+    "欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md",
+    "欧拉-伯努利梁方程": "01-经典力学/欧拉-伯努利梁方程_Euler-Bernoulli Beam Equation.md",
+    "欧拉动力学方程_Euler's Equations of Motion": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md",
+    "欧拉动力学方程": "01-经典力学/欧拉动力学方程_Euler's Equations of Motion.md",
+    "泰勒-库埃特流_Taylor-Couette Flow": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md",
+    "泰勒-库埃特流": "01-经典力学/泰勒-库埃特流_Taylor-Couette Flow.md",
+    "牛顿万有引力定律_Newton's Law of Universal Gravitation": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+    "牛顿万有引力定律": "01-经典力学/牛顿万有引力定律_Newton's Law of Universal Gravitation.md",
+    "牛顿运动定律_Newton's Laws of Motion": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md",
+    "牛顿运动定律": "01-经典力学/牛顿运动定律_Newton's Laws of Motion.md",
+    "纳维-斯托克斯方程_Navier-Stokes Equations": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md",
+    "纳维-斯托克斯方程": "01-经典力学/纳维-斯托克斯方程_Navier-Stokes Equations.md",
+    "胡克定律_Hooke's Law": "01-经典力学/胡克定律_Hooke's Law.md",
+    "胡克定律": "01-经典力学/胡克定律_Hooke's Law.md",
+    "齿轮与自行车_Gears and Bicycle": "01-经典力学/齿轮与自行车_Gears and Bicycle.md",
+    "齿轮与自行车": "01-经典力学/齿轮与自行车_Gears and Bicycle.md",
+    "伊辛模型_Ising Model": "02-热力学与统计物理/伊辛模型_Ising Model.md",
+    "伊辛模型": "02-热力学与统计物理/伊辛模型_Ising Model.md",
+    "布朗运动_Brownian Motion": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+    "布朗运动": "02-热力学与统计物理/布朗运动_Brownian Motion.md",
+    "帕隆多悖论_Parrondo Paradox": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md",
+    "帕隆多悖论": "02-热力学与统计物理/帕隆多悖论_Parrondo Paradox.md",
+    "朗之万方程_Langevin Equation": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+    "朗之万方程": "02-热力学与统计物理/朗之万方程_Langevin Equation.md",
+    "涨落耗散定理_Fluctuation-Dissipation Theorem": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+    "涨落耗散定理": "02-热力学与统计物理/涨落耗散定理_Fluctuation-Dissipation Theorem.md",
+    "热力学四大定律_Four Laws of Thermodynamics": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+    "热力学四大定律": "02-热力学与统计物理/热力学四大定律_Four Laws of Thermodynamics.md",
+    "玻色-爱因斯坦统计_Bose-Einstein Statistics": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+    "玻色-爱因斯坦统计": "02-热力学与统计物理/玻色-爱因斯坦统计_Bose-Einstein Statistics.md",
+    "系综理论_Ensemble Theory": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+    "系综理论": "02-热力学与统计物理/系综理论_Ensemble Theory.md",
+    "费米-狄拉克统计_Fermi-Dirac Statistics": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+    "费米-狄拉克统计": "02-热力学与统计物理/费米-狄拉克统计_Fermi-Dirac Statistics.md",
+    "配分函数_Partition Function": "02-热力学与统计物理/配分函数_Partition Function.md",
+    "配分函数": "02-热力学与统计物理/配分函数_Partition Function.md",
+    "高尔顿钉板_Galton Board": "02-热力学与统计物理/高尔顿钉板_Galton Board.md",
+    "高尔顿钉板": "02-热力学与统计物理/高尔顿钉板_Galton Board.md",
+    "麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+    "麦克斯韦-玻尔兹曼分布": "02-热力学与统计物理/麦克斯韦-玻尔兹曼分布_Maxwell-Boltzmann Distribution.md",
+    "RLC谐振_RLC Resonance": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md",
+    "RLC谐振": "03-电磁学与电动力学/RLC谐振_RLC Resonance.md",
+    "库仑定律_Coulomb's Law": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+    "库仑定律": "03-电磁学与电动力学/库仑定律_Coulomb's Law.md",
+    "洛伦兹力_Lorentz Force": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+    "洛伦兹力": "03-电磁学与电动力学/洛伦兹力_Lorentz Force.md",
+    "点电荷群_Point Charges": "03-电磁学与电动力学/点电荷群_Point Charges.md",
+    "点电荷群": "03-电磁学与电动力学/点电荷群_Point Charges.md",
+    "特斯拉线圈_Tesla Coil": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md",
+    "特斯拉线圈": "03-电磁学与电动力学/特斯拉线圈_Tesla Coil.md",
+    "电磁感应定律_Electromagnetic Induction Law": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+    "电磁感应定律": "03-电磁学与电动力学/电磁感应定律_Electromagnetic Induction Law.md",
+    "麦克斯韦方程组_Maxwell's Equations": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+    "麦克斯韦方程组": "03-电磁学与电动力学/麦克斯韦方程组_Maxwell's Equations.md",
+    "偏振_Polarization": "04-光学/偏振_Polarization.md",
+    "偏振": "04-光学/偏振_Polarization.md",
+    "惠更斯-菲涅耳原理_Huygens-Fresnel Principle": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md",
+    "惠更斯-菲涅耳原理": "04-光学/惠更斯-菲涅耳原理_Huygens-Fresnel Principle.md",
+    "波的干涉_Wave Interference": "04-光学/波的干涉_Wave Interference.md",
+    "波的干涉": "04-光学/波的干涉_Wave Interference.md",
+    "费马原理_Fermat's Principle": "04-光学/费马原理_Fermat's Principle.md",
+    "费马原理": "04-光学/费马原理_Fermat's Principle.md",
+    "一维势阱_1D Potential Well": "05-量子力学/一维势阱_1D Potential Well.md",
+    "一维势阱": "05-量子力学/一维势阱_1D Potential Well.md",
+    "不确定性原理_Uncertainty Principle": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+    "不确定性原理": "05-量子力学/不确定性原理_Uncertainty Principle.md",
+    "光电效应_Photoelectric Effect": "05-量子力学/光电效应_Photoelectric Effect.md",
+    "光电效应": "05-量子力学/光电效应_Photoelectric Effect.md",
+    "双缝干涉_Double-Slit Interference": "05-量子力学/双缝干涉_Double-Slit Interference.md",
+    "双缝干涉": "05-量子力学/双缝干涉_Double-Slit Interference.md",
+    "康普顿散射_Compton Scattering": "05-量子力学/康普顿散射_Compton Scattering.md",
+    "康普顿散射": "05-量子力学/康普顿散射_Compton Scattering.md",
+    "微扰理论_Perturbation Theory": "05-量子力学/微扰理论_Perturbation Theory.md",
+    "微扰理论": "05-量子力学/微扰理论_Perturbation Theory.md",
+    "态叠加原理_Superposition Principle": "05-量子力学/态叠加原理_Superposition Principle.md",
+    "态叠加原理": "05-量子力学/态叠加原理_Superposition Principle.md",
+    "斯特恩-盖拉赫实验_Stern-Gerlach Experiment": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+    "斯特恩-盖拉赫实验": "05-量子力学/斯特恩-盖拉赫实验_Stern-Gerlach Experiment.md",
+    "泡利不相容原理_Pauli Exclusion Principle": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+    "泡利不相容原理": "05-量子力学/泡利不相容原理_Pauli Exclusion Principle.md",
+    "玻恩概率解释_Born Rule": "05-量子力学/玻恩概率解释_Born Rule.md",
+    "玻恩概率解释": "05-量子力学/玻恩概率解释_Born Rule.md",
+    "自旋_Spin": "05-量子力学/自旋_Spin.md",
+    "自旋": "05-量子力学/自旋_Spin.md",
+    "薛定谔方程_Schrödinger Equation": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+    "薛定谔方程": "05-量子力学/薛定谔方程_Schrödinger Equation.md",
+    "量子隧穿效应_Quantum Tunneling": "05-量子力学/量子隧穿效应_Quantum Tunneling.md",
+    "量子隧穿效应": "05-量子力学/量子隧穿效应_Quantum Tunneling.md",
+    "黑体辐射_Black Body Radiation": "05-量子力学/黑体辐射_Black Body Radiation.md",
+    "黑体辐射": "05-量子力学/黑体辐射_Black Body Radiation.md",
+    "史瓦西度规_Schwarzschild Metric": "06-相对论/史瓦西度规_Schwarzschild Metric.md",
+    "史瓦西度规": "06-相对论/史瓦西度规_Schwarzschild Metric.md",
+    "广义相对论_General Relativity": "06-相对论/广义相对论_General Relativity.md",
+    "广义相对论": "06-相对论/广义相对论_General Relativity.md",
+    "引力波探测_Gravitational Wave Detection": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+    "引力波探测": "06-相对论/引力波探测_Gravitational Wave Detection.md",
+    "洛伦兹变换_Lorentz Transformation": "06-相对论/洛伦兹变换_Lorentz Transformation.md",
+    "洛伦兹变换": "06-相对论/洛伦兹变换_Lorentz Transformation.md",
+    "爱因斯坦场方程_Einstein Field Equations": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+    "爱因斯坦场方程": "06-相对论/爱因斯坦场方程_Einstein Field Equations.md",
+    "狭义相对论_Special Relativity": "06-相对论/狭义相对论_Special Relativity.md",
+    "狭义相对论": "06-相对论/狭义相对论_Special Relativity.md",
+    "等效原理_Equivalence Principle": "06-相对论/等效原理_Equivalence Principle.md",
+    "等效原理": "06-相对论/等效原理_Equivalence Principle.md",
+    "迈克尔逊-莫雷实验_Michelson-Morley Experiment": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md",
+    "迈克尔逊-莫雷实验": "06-相对论/迈克尔逊-莫雷实验_Michelson-Morley Experiment.md",
+    "闵可夫斯基时空_Minkowski Spacetime": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+    "闵可夫斯基时空": "06-相对论/闵可夫斯基时空_Minkowski Spacetime.md",
+    "BCS理论_BCS Theory": "07-凝聚态与固体物理/BCS理论_BCS Theory.md",
+    "BCS理论": "07-凝聚态与固体物理/BCS理论_BCS Theory.md",
+    "布洛赫定理_Bloch's Theorem": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md",
+    "布洛赫定理": "07-凝聚态与固体物理/布洛赫定理_Bloch's Theorem.md",
+    "能带理论_Band Theory": "07-凝聚态与固体物理/能带理论_Band Theory.md",
+    "能带理论": "07-凝聚态与固体物理/能带理论_Band Theory.md",
+    "超流_Superfluidity": "07-凝聚态与固体物理/超流_Superfluidity.md",
+    "超流": "07-凝聚态与固体物理/超流_Superfluidity.md",
+    "铁磁相变_Ferromagnetic Phase Transition": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+    "铁磁相变": "07-凝聚态与固体物理/铁磁相变_Ferromagnetic Phase Transition.md",
+    "夸克模型_Quark Model": "08-核与粒子物理/夸克模型_Quark Model.md",
+    "夸克模型": "08-核与粒子物理/夸克模型_Quark Model.md",
+    "希格斯机制_Higgs Mechanism": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md",
+    "希格斯机制": "08-核与粒子物理/希格斯机制_Higgs Mechanism.md",
+    "弱相互作用_Weak Interaction": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+    "弱相互作用": "08-核与粒子物理/弱相互作用_Weak Interaction.md",
+    "强相互作用_Strong Interaction": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+    "强相互作用": "08-核与粒子物理/强相互作用_Strong Interaction.md",
+    "托卡马克_Tokamak": "08-核与粒子物理/托卡马克_Tokamak.md",
+    "托卡马克": "08-核与粒子物理/托卡马克_Tokamak.md",
+    "标准模型_Standard Model": "08-核与粒子物理/标准模型_Standard Model.md",
+    "标准模型": "08-核与粒子物理/标准模型_Standard Model.md",
+    "磁约束聚变_Magnetic Confinement Fusion": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+    "磁约束聚变": "08-核与粒子物理/磁约束聚变_Magnetic Confinement Fusion.md",
+    "中子星_Neutron Star": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+    "中子星": "09-天体物理与宇宙学/中子星_Neutron Star.md",
+    "大爆炸理论_Big Bang Theory": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+    "大爆炸理论": "09-天体物理与宇宙学/大爆炸理论_Big Bang Theory.md",
+    "太阳系沙盒_Solar System Sandbox": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+    "太阳系沙盒": "09-天体物理与宇宙学/太阳系沙盒_Solar System Sandbox.md",
+    "宇宙学微扰理论_Cosmological Perturbation Theory": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+    "宇宙学微扰理论": "09-天体物理与宇宙学/宇宙学微扰理论_Cosmological Perturbation Theory.md",
+    "宇宙微波背景辐射_Cosmic Microwave Background": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md",
+    "宇宙微波背景辐射": "09-天体物理与宇宙学/宇宙微波背景辐射_Cosmic Microwave Background.md",
+    "恒星结构方程_Stellar Structure Equations": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+    "恒星结构方程": "09-天体物理与宇宙学/恒星结构方程_Stellar Structure Equations.md",
+    "星系的诞生_Galaxy Formation": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+    "星系的诞生": "09-天体物理与宇宙学/星系的诞生_Galaxy Formation.md",
+    "暗物质_Dark Matter": "09-天体物理与宇宙学/暗物质_Dark Matter.md",
+    "暗物质": "09-天体物理与宇宙学/暗物质_Dark Matter.md",
+    "赫罗图_Hertzsprung-Russell Diagram": "09-天体物理与宇宙学/赫罗图_Hertzsprung-Russell Diagram.md",
+    "赫罗图": "09-天体物理与宇宙学/赫罗图_Hertzsprung-Russell Diagram.md",
+    "黑洞吸积盘_Black Hole Accretion Disk": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+    "黑洞吸积盘": "09-天体物理与宇宙学/黑洞吸积盘_Black Hole Accretion Disk.md",
+    "黑洞吸积盘喷流_Black Hole Jet": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+    "黑洞吸积盘喷流": "09-天体物理与宇宙学/黑洞吸积盘喷流_Black Hole Jet.md",
+    "三体问题_Three-Body Problem": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+    "三体问题": "10-非线性动力学与复杂系统/三体问题_Three-Body Problem.md",
+    "分形维数_Fractal Dimension": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md",
+    "分形维数": "10-非线性动力学与复杂系统/分形维数_Fractal Dimension.md",
+    "复杂性理论_Complexity Theory": "10-非线性动力学与复杂系统/复杂性理论_Complexity Theory.md",
+    "复杂性理论": "10-非线性动力学与复杂系统/复杂性理论_Complexity Theory.md",
+    "李雅普诺夫指数_Lyapunov Exponent": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md",
+    "李雅普诺夫指数": "10-非线性动力学与复杂系统/李雅普诺夫指数_Lyapunov Exponent.md",
+    "洛伦兹吸引子_Lorenz Attractor": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md",
+    "洛伦兹吸引子": "10-非线性动力学与复杂系统/洛伦兹吸引子_Lorenz Attractor.md",
+    "混沌双摆_Chaotic Double Pendulum": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md",
+    "混沌双摆": "10-非线性动力学与复杂系统/混沌双摆_Chaotic Double Pendulum.md",
+    "磁流体力学_Magnetohydrodynamics": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+    "磁流体力学": "10-非线性动力学与复杂系统/磁流体力学_Magnetohydrodynamics.md",
+    "社会力模型_Social Force Model": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+    "社会力模型": "10-非线性动力学与复杂系统/社会力模型_Social Force Model.md",
+    "耗散结构_Dissipative Structure": "10-非线性动力学与复杂系统/耗散结构_Dissipative Structure.md",
+    "耗散结构": "10-非线性动力学与复杂系统/耗散结构_Dissipative Structure.md",
+    "胞元自动机_Cellular Automata": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+    "胞元自动机": "10-非线性动力学与复杂系统/胞元自动机_Cellular Automata.md",
+    "克莱因瓶_Klein Bottle": "11-数学与拓扑/克莱因瓶_Klein Bottle.md",
+    "克莱因瓶": "11-数学与拓扑/克莱因瓶_Klein Bottle.md",
+    "张量分析_Tensor Analysis": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+    "张量分析": "11-数学与拓扑/张量分析_Tensor Analysis.md",
+    "微分几何_Differential Geometry": "11-数学与拓扑/微分几何_Differential Geometry.md",
+    "微分几何": "11-数学与拓扑/微分几何_Differential Geometry.md",
+    "拓扑学_Topology": "11-数学与拓扑/拓扑学_Topology.md",
+    "拓扑学": "11-数学与拓扑/拓扑学_Topology.md",
+    "欧拉示性数_Euler Characteristic": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md",
+    "欧拉示性数": "11-数学与拓扑/欧拉示性数_Euler Characteristic.md",
+    "流形_Manifold": "11-数学与拓扑/流形_Manifold.md",
+    "流形": "11-数学与拓扑/流形_Manifold.md",
+    "群论_Group Theory": "11-数学与拓扑/群论_Group Theory.md",
+    "群论": "11-数学与拓扑/群论_Group Theory.md",
+    "物理学知识库总索引_Physics Knowledge Base Index": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md",
+    "物理学知识库总索引": "_索引与模板/物理学知识库总索引_Physics Knowledge Base Index.md"
+  }
+}

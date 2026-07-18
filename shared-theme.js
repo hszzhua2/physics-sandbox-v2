@@ -137,6 +137,13 @@
     if (currentPage === 'teacher-prep.html') teachLink.classList.add('active');
     nav.appendChild(teachLink);
 
+    // Physics Building link
+    const pbLink = document.createElement('a');
+    pbLink.href = 'physics-building.html';
+    pbLink.textContent = '物理大厦';
+    if (currentPage === 'physics-building.html') pbLink.classList.add('active');
+    nav.appendChild(pbLink);
+
     // Library dropdown
     const libDropdown = document.createElement('div');
     libDropdown.className = 'nav-dropdown';
