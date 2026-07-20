@@ -8,6 +8,8 @@ tags: [experiment, physics, history]
 
 # 牛顿摆实验_Newton's Cradle Experiment
 
+> [🌐 打开交互实验](../exp-newton-cradle.html)
+
 ## 1. 实验目的
 通过一排等质量钢球的碰撞演示动量守恒和近似动能守恒，直观展示弹性碰撞中动量与能量的传递规律。
 
