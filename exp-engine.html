@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>交互式多缸内燃机 · 热力学循环</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #canvas-container { position: fixed; inset: 0; z-index: 0; }
+    canvas { display: block; }
+
+    #app-title {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+      z-index: 12; pointer-events: none; text-align: center;
+      background: var(--panel-bg); border: 1px solid var(--panel-border);
+      border-radius: var(--radius); padding: 8px 24px;
+      backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop);
+      box-shadow: var(--shadow); transition: all 0.4s ease;
+    }
+    #app-title .main {
+      font-size: 1rem; font-weight: 700; color: var(--accent-1);
+      letter-spacing: 2px; transition: color 0.4s;
+    }
+    #app-title .subtitle {
+      display: block; font-size: 0.68rem; font-weight: 400;
+      color: var(--text-muted); letter-spacing: 1px; margin-top: 2px;
+      transition: color 0.4s;
+    }
+
+    #left-panel {
+      position: fixed; top: 140px; left: 16px; bottom: 20px;
+      width: 260px; z-index: 10;
+      display: flex; flex-direction: column;
+    }
+    #left-panel .panel-header {
+      padding: 12px 16px; font-size: 0.9rem; font-weight: 700;
+      color: var(--accent-1); border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      transition: color 0.4s, border-color 0.4s;
+    }
+    #left-panel .panel-body {
+      padding: 14px 16px; overflow-y: auto; flex: 1;
+    }
+    #left-panel .panel-body::-webkit-scrollbar { width: 4px; }
+    #left-panel .panel-body::-webkit-scrollbar-thumb {
+      background: var(--panel-border); border-radius: 2px;
+    }
+
+    .section { margin-bottom: 16px; }
+    .section:last-child { margin-bottom: 0; }
+    .section-label {
+      font-size: 0.72rem; color: var(--text-muted);
+      margin-bottom: 8px; text-transform: uppercase;
+      letter-spacing: 1px; font-weight: 600;
+      transition: color 0.4s;
+    }
+
+    .param-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; font-size: 0.82rem;
+      color: var(--text-muted); transition: color 0.4s;
+    }
+    .param-row .val {
+      color: var(--accent-1); font-weight: 600;
+      font-variant-numeric: tabular-nums; min-width: 40px; text-align: right;
+      transition: color 0.4s;
+    }
+    .param-row input[type="range"] {
+      flex: 1; margin: 0 8px; -webkit-appearance: none; height: 4px;
+      border-radius: 2px; background: var(--panel-border); outline: none;
+      transition: background 0.4s;
+    }
+    .param-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--accent-1);
+      cursor: pointer; border: 2px solid var(--text-color);
+      transition: all 0.3s;
+    }
+
+    button {
+      background: var(--panel-bg); color: var(--text-color);
+      border: 1px solid var(--panel-border); padding: 7px 14px;
+      border-radius: var(--radius); cursor: pointer; transition: all 0.25s;
+      font-size: 0.82rem; font-family: inherit;
+    }
+    button:hover { border-color: var(--accent-1); color: var(--accent-1); }
+    button.active {
+      background: var(--accent-1) !important; color: #fff !important;
+      border-color: var(--accent-1) !important; font-weight: 600;
+    }
+    .mode-switch { display: flex; gap: 6px; }
+    .mode-switch button { flex: 1; padding: 6px; }
+    .action-btn { width: 100%; padding: 8px; font-size: 0.82rem; }
+
+    #right-panel {
+      position: fixed; top: 140px; right: 16px; bottom: 20px;
+      width: 360px; z-index: 10;
+      display: flex; flex-direction: column;
+    }
+    #right-panel .panel-header {
+      padding: 12px 16px; font-size: 0.9rem; font-weight: 700;
+      color: var(--accent-3); border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      transition: color 0.4s, border-color 0.4s;
+    }
+    .knowledge-content {
+      padding: 14px 16px; overflow-y: auto; flex: 1;
+    }
+    .knowledge-content::-webkit-scrollbar { width: 4px; }
+    .knowledge-content::-webkit-scrollbar-thumb {
+      background: var(--panel-border); border-radius: 2px;
+    }
+
+    .stroke-list { list-style: none; padding: 0; margin: 0 0 12px 0; }
+    .stroke-item {
+      padding: 10px 12px; margin-bottom: 8px;
+      border: 1px solid var(--panel-border); border-radius: var(--radius);
+      transition: all 0.3s; opacity: 0.5;
+    }
+    .stroke-item.active-stroke {
+      border-color: var(--accent-3); opacity: 1;
+      background: rgba(128,128,128,0.05);
+    }
+    .stroke-item h4 {
+      margin: 0 0 4px 0; font-size: 0.86rem; font-weight: 700;
+      color: var(--text-color); transition: color 0.4s;
+    }
+    .stroke-item.active-stroke h4 { color: var(--accent-3); }
+    .stroke-item p {
+      margin: 0; font-size: 0.76rem; color: var(--text-muted);
+      line-height: 1.5; transition: color 0.4s;
+    }
+    .stroke-item .formula {
+      display: inline-block; margin-top: 4px; padding: 1px 6px;
+      border-radius: var(--radius); font-size: 0.74rem;
+      background: rgba(128,128,128,0.08); color: var(--accent-1);
+      transition: all 0.4s;
+    }
+
+    .chart-title {
+      font-size: 0.82rem; font-weight: 600; color: var(--text-muted);
+      margin: 12px 0 6px; transition: color 0.4s;
+    }
+    #chart-container {
+      width: 100%; height: 220px; flex-shrink: 0;
+      border: 1px solid var(--panel-border); border-radius: var(--radius);
+      transition: border-color 0.4s;
+    }
+
+    .info-label {
+      font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px;
+      transition: color 0.4s;
+    }
+
+    .telemetry {
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid var(--panel-border);
+      font-size: 0.76rem; color: var(--text-muted); line-height: 1.9;
+      transition: border-color 0.4s, color 0.4s;
+    }
+    .telemetry .row { display: flex; justify-content: space-between; }
+    .telemetry .val {
+      color: var(--accent-1); font-weight: 600;
+      font-variant-numeric: tabular-nums; transition: color 0.4s;
+    }
+
+    @media (max-width: 1100px) {
+      #left-panel { width: 220px; }
+      #right-panel { width: 320px; }
+    }
+    @media (max-width: 800px) {
+      #left-panel, #right-panel { display: none; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<div class="exp-bg"></div>
+
+<a href="index.html" class="back-btn">&#8592; 返回首页</a>
+
+<div id="app-title">
+  <span class="main">交互式多缸内燃机</span>
+  <span class="subtitle">奥托循环 · 热力学状态分析与P-V图</span>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- Left Panel: Controls -->
+<div id="left-panel" class="glass-panel">
+  <div class="panel-header">&#9881; 结构与控制</div>
+  <div class="panel-body">
+    <div class="section">
+      <div class="section-label">运行模式</div>
+      <div class="mode-switch">
+        <button id="btn-auto" class="active">自动运行</button>
+        <button id="btn-manual">手动拖动</button>
+      </div>
+    </div>
+
+    <div class="section" id="group-rpm">
+      <div class="section-label">引擎转速</div>
+      <div class="param-row">
+        <span>RPM</span>
+        <input type="range" id="range-rpm" min="10" max="600" value="60">
+        <span class="val" id="val-rpm">60</span>
+      </div>
+    </div>
+
+    <div class="section" id="group-angle" style="display:none;">
+      <div class="section-label">曲轴角度</div>
+      <div class="param-row">
+        <span>度</span>
+        <input type="range" id="range-angle" min="0" max="720" value="0">
+        <span class="val" id="val-angle">0</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">气缸配置</div>
+      <div class="param-row">
+        <span>气缸数量</span>
+        <input type="range" id="range-cylinders" min="1" max="8" step="1" value="4">
+        <span class="val" id="val-cylinders">4</span>
+      </div>
+      <div class="param-row">
+        <span>气缸间距</span>
+        <input type="range" id="range-spacing" min="3.0" max="10.0" step="0.5" value="5.0">
+        <span class="val" id="val-spacing">5.0</span>
+      </div>
+      <div class="param-row">
+        <span>外壳透明度</span>
+        <input type="range" id="range-opacity" min="0" max="1" step="0.1" value="0.3">
+        <span class="val" id="val-opacity">0.3</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Right Panel: Knowledge & Chart -->
+<div id="right-panel" class="glass-panel">
+  <div class="panel-header">&#128214; 热力学状态循环 (1号气缸)</div>
+  <div class="knowledge-content">
+    <div class="info-label">监测基准：Cylinder #1，采用理想奥托循环模型</div>
+    <ul class="stroke-list">
+      <li class="stroke-item active-stroke" id="stroke-intake">
+        <h4>1. 吸气冲程 (0-180)</h4>
+        <p>等压过程。工作介质进入气缸，压强约等于大气压。</p>
+        <span class="formula">P = P_atm</span>
+      </li>
+      <li class="stroke-item" id="stroke-compression">
+        <h4>2. 压缩冲程 (180-360)</h4>
+        <p>绝热压缩。活塞上行，容积减小，压强非线性上升。</p>
+        <span class="formula">PV^ = C</span>
+      </li>
+      <li class="stroke-item" id="stroke-power">
+        <h4>3. 做功冲程 (360-540)</h4>
+        <p>点火瞬间等容加热，峰值压强突跃。随后气体绝热膨胀对外做功。</p>
+        <span class="formula">Q_in = CvT</span>
+      </li>
+      <li class="stroke-item" id="stroke-exhaust">
+        <h4>4. 排气冲程 (540-720)</h4>
+        <p>下止点等容放热降压，随后活塞上行等压排气。</p>
+        <span class="formula">P P_atm</span>
+      </li>
+    </ul>
+
+    <div class="chart-title">P-V 与 角度 曲线</div>
+    <div id="chart-container"></div>
+
+    <div class="telemetry">
+      <div class="row"><span>当前冲程</span><span class="val" id="tm-stroke">吸气</span></div>
+      <div class="row"><span>曲轴角度</span><span class="val" id="tm-angle">0</span></div>
+      <div class="row"><span>瞬时压强</span><span class="val" id="tm-pressure">0.10 MPa</span></div>
+      <div class="row"><span>瞬时容积</span><span class="val" id="tm-volume">0.00</span></div>
+      <div class="row"><span>峰值压强</span><span class="val" id="tm-peak">0.10 MPa</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === 物理与几何常数 ===
+const CRANK_RADIUS = 2.0;
+const CON_ROD_LENGTH = 6.0;
+const CYLINDER_HEIGHT = CON_ROD_LENGTH + 4;
+const ROTATION_DIR = 1;
+
+const COMPRESSION_RATIO = 8;
+const GAMMA = 1.4;
+const P_ATM = 0.1;
+const CROSS_AREA = Math.PI * Math.pow(1.9, 2);
+const Y_TDC = CRANK_RADIUS + CON_ROD_LENGTH;
+const Y_BDC = -CRANK_RADIUS + CON_ROD_LENGTH;
+const V_DISPLACEMENT = CROSS_AREA * (Y_TDC - Y_BDC);
+const V_CLEARANCE = V_DISPLACEMENT / (COMPRESSION_RATIO - 1);
+
+let globalAngle = 0;
+let isAutoPlay = true;
+let currentRPM = 60;
+let numCylinders = 4;
+let cylSpacing = 5.0;
+let peakPressure = P_ATM;
+
+let cylinderData = [];
+
+const container = document.getElementById('canvas-container');
+const strokeEls = {
+  0: document.getElementById('stroke-intake'),
+  1: document.getElementById('stroke-compression'),
+  2: document.getElementById('stroke-power'),
+  3: document.getElementById('stroke-exhaust')
+};
+const strokeNames = ['吸气', '压缩', '做功', '排气'];
+
+// === ECharts ===
+const chartDom = document.getElementById('chart-container');
+const myChart = echarts.init(chartDom);
+let chartDataTheta = [], chartDataV = [], chartDataP = [];
+
+function generateCycleData() {
+  chartDataTheta = []; chartDataV = []; chartDataP = [];
+  let p_max_compression = 0;
+  for (let angle = 0; angle <= 720; angle++) {
+    const rad = angle * (Math.PI / 180);
+    const crankX = -CRANK_RADIUS * Math.sin(rad);
+    const crankY = CRANK_RADIUS * Math.cos(rad);
+    const rootTerm = CON_ROD_LENGTH * CON_ROD_LENGTH - crankX * crankX;
+    const pistonY = crankY + Math.sqrt(rootTerm);
+    const V = V_CLEARANCE + CROSS_AREA * (Y_TDC - pistonY);
+    let P = P_ATM;
+    if (angle >= 0 && angle < 180) { P = P_ATM; }
+    else if (angle >= 180 && angle < 360) {
+      const V_max = V_CLEARANCE + V_DISPLACEMENT;
+      P = P_ATM * Math.pow(V_max / V, GAMMA);
+      p_max_compression = P;
+    } else if (angle === 360) { P = p_max_compression * 3.5; }
+    else if (angle > 360 && angle <= 540) {
+      const p_peak = p_max_compression * 3.5;
+      P = p_peak * Math.pow(V_CLEARANCE / V, GAMMA);
+    } else { P = P_ATM; }
+    chartDataTheta.push(angle);
+    chartDataV.push(parseFloat(V.toFixed(2)));
+    chartDataP.push(parseFloat(P.toFixed(2)));
+  }
+  peakPressure = p_max_compression * 3.5;
+}
+generateCycleData();
+
+const strokeColors = ['rgba(0,188,212,0.6)', 'rgba(255,193,7,0.6)', 'rgba(255,77,79,0.6)', 'rgba(128,128,128,0.6)'];
+
+const chartOption = {
+  backgroundColor: 'transparent',
+  tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+  grid: { top: 20, bottom: 25, left: 45, right: 45 },
+  xAxis: {
+    type: 'category', data: chartDataTheta,
+    axisLabel: { color: '#888', fontSize: 9, formatter: v => v % 180 === 0 ? v + '' : '' },
+    axisLine: { lineStyle: { color: '#555' } },
+    splitLine: { show: true, lineStyle: { color: '#333', type: 'dashed' }, interval: 179 }
+  },
+  yAxis: [
+    { type: 'value', name: 'P(MPa)', nameTextStyle: { color: '#ff4d4f', fontSize: 9 }, position: 'left',
+      axisLabel: { color: '#ff4d4f', fontSize: 9 }, splitLine: { show: false } },
+    { type: 'value', name: 'V', nameTextStyle: { color: '#1890ff', fontSize: 9 }, position: 'right',
+      axisLabel: { show: false }, splitLine: { show: false } }
+  ],
+  series: [
+    { name: '压强(P)', type: 'line', yAxisIndex: 0, data: chartDataP,
+      itemStyle: { color: '#ff4d4f' }, lineStyle: { width: 1.5 }, showSymbol: false },
+    { name: '容积(V)', type: 'line', yAxisIndex: 1, data: chartDataV,
+      itemStyle: { color: '#1890ff' }, lineStyle: { width: 1.5 }, showSymbol: false },
+    { name: '当前状态', type: 'scatter', yAxisIndex: 0, data: [[0, chartDataP[0]]],
+      itemStyle: { color: '#fff', borderColor: '#ff4d4f', borderWidth: 2 }, symbolSize: 8, zlevel: 2 },
+    { name: '当前容积', type: 'scatter', yAxisIndex: 1, data: [[0, chartDataV[0]]],
+      itemStyle: { color: '#fff', borderColor: '#1890ff', borderWidth: 2 }, symbolSize: 8, zlevel: 2 }
+  ]
+};
+myChart.setOption(chartOption);
+
+// === Three.js ===
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 200);
+camera.position.set(25, 15, 30);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.domElement.style.position = 'absolute';
+renderer.domElement.style.zIndex = '1';
+container.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.target.set(0, 5, 0);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(15, 30, 20);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 2048;
+dirLight.shadow.mapSize.height = 2048;
+scene.add(dirLight);
+
+const gridHelper = new THREE.GridHelper(50, 50, 0x444444, 0x222222);
+gridHelper.position.y = -3;
+scene.add(gridHelper);
+
+const matMetal = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.2 });
+const matCrank = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7, roughness: 0.3 });
+const matPiston = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.9, roughness: 0.1 });
+const matSpark = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 });
+const matCylinder = new THREE.MeshPhysicalMaterial({
+  color: 0x2288ff, transparent: true, opacity: 0.3, roughness: 0.1,
+  transmission: 0.9, thickness: 0.5, side: THREE.DoubleSide
+});
+
+const crankWebGeom = new THREE.BoxGeometry(1, CRANK_RADIUS + 1, 0.5);
+crankWebGeom.translate(0, CRANK_RADIUS / 2, 0);
+const crankPinGeom = new THREE.CylinderGeometry(0.4, 0.4, 2, 32);
+crankPinGeom.rotateX(Math.PI / 2);
+crankPinGeom.translate(0, CRANK_RADIUS, 0);
+const rodGeom = new THREE.CylinderGeometry(0.3, 0.4, CON_ROD_LENGTH, 16);
+rodGeom.translate(0, CON_ROD_LENGTH / 2, 0);
+const pistonGeom = new THREE.CylinderGeometry(1.9, 1.9, 2.5, 32);
+pistonGeom.translate(0, 1.25, 0);
+const cylinderExtGeom = new THREE.CylinderGeometry(2, 2, CYLINDER_HEIGHT, 32, 1, true);
+const sparkPlugGeom = new THREE.CylinderGeometry(0.4, 0.4, 1.5, 16);
+
+let engineGroup = new THREE.Group();
+scene.add(engineGroup);
+let crankshaftGroup, dynamicPartsGroup;
+
+function rebuildEngine() {
+  scene.remove(engineGroup);
+  engineGroup = new THREE.Group();
+  scene.add(engineGroup);
+  crankshaftGroup = new THREE.Group();
+  dynamicPartsGroup = new THREE.Group();
+  engineGroup.add(crankshaftGroup);
+  engineGroup.add(dynamicPartsGroup);
+  cylinderData = [];
+
+  const totalLength = (numCylinders - 1) * cylSpacing + 4;
+  const mainJournalGeom = new THREE.CylinderGeometry(0.5, 0.5, totalLength, 32);
+  mainJournalGeom.rotateX(Math.PI / 2);
+  const mainJournal = new THREE.Mesh(mainJournalGeom, matCrank);
+  mainJournal.castShadow = true;
+  crankshaftGroup.add(mainJournal);
+
+  const phaseIncrement = (4 * Math.PI) / numCylinders;
+  for (let i = 0; i < numCylinders; i++) {
+    const zOffset = (i - (numCylinders - 1) / 2) * cylSpacing;
+    const mechanicalPhase = (i * phaseIncrement) % (2 * Math.PI);
+    const thermodynamicPhase = i * phaseIncrement;
+
+    const localCrankSlice = new THREE.Group();
+    localCrankSlice.position.z = zOffset;
+    localCrankSlice.rotation.z = mechanicalPhase;
+    const webFront = new THREE.Mesh(crankWebGeom, matCrank);
+    webFront.position.z = 1;
+    const webBack = new THREE.Mesh(crankWebGeom, matCrank);
+    webBack.position.z = -1;
+    const pin = new THREE.Mesh(crankPinGeom, matMetal);
+    localCrankSlice.add(webFront, webBack, pin);
+    crankshaftGroup.add(localCrankSlice);
+
+    const rodMesh = new THREE.Mesh(rodGeom, matMetal);
+    const pistonMesh = new THREE.Mesh(pistonGeom, matPiston);
+    const cylinderBaseY = CRANK_RADIUS + CON_ROD_LENGTH;
+    const cylinderMesh = new THREE.Mesh(cylinderExtGeom, matCylinder);
+    cylinderMesh.position.set(0, cylinderBaseY, zOffset);
+    const sparkPlugMesh = new THREE.Mesh(sparkPlugGeom, matSpark);
+    sparkPlugMesh.position.set(0, cylinderBaseY + CYLINDER_HEIGHT / 2, zOffset);
+    dynamicPartsGroup.add(rodMesh, pistonMesh, cylinderMesh, sparkPlugMesh);
+
+    cylinderData.push({ mechanicalPhase, thermoPhase: thermodynamicPhase, zOffset, rod: rodMesh, piston: pistonMesh, sparkPlug: sparkPlugMesh });
+  }
+}
+rebuildEngine();
+
+function updatePhysics(theta) {
+  crankshaftGroup.rotation.z = ROTATION_DIR * theta;
+  for (let i = 0; i < numCylinders; i++) {
+    const cyl = cylinderData[i];
+    const absoluteAlpha = (ROTATION_DIR * theta) + cyl.mechanicalPhase;
+    const crankX = -CRANK_RADIUS * Math.sin(absoluteAlpha);
+    const crankY = CRANK_RADIUS * Math.cos(absoluteAlpha);
+    const rootTerm = CON_ROD_LENGTH * CON_ROD_LENGTH - crankX * crankX;
+    const pistonY = crankY + Math.sqrt(rootTerm);
+    cyl.piston.position.set(0, pistonY, cyl.zOffset);
+    cyl.rod.position.set(crankX, crankY, cyl.zOffset);
+    cyl.rod.rotation.z = Math.atan2(0 - crankX, pistonY - crankY) * -1;
+  }
+}
+
+let lastChartUpdateDeg = -1;
+function updateUIState(theta) {
+  const cyl0 = cylinderData[0];
+  let integratedAngle = (ROTATION_DIR * theta + cyl0.thermoPhase) % (4 * Math.PI);
+  if (integratedAngle < 0) integratedAngle += 4 * Math.PI;
+  const strokeIndex = Math.floor(integratedAngle / Math.PI);
+  for (let i = 0; i < 4; i++) {
+    strokeEls[i].classList.toggle('active-stroke', i === strokeIndex);
+  }
+  const deg = Math.round(integratedAngle * (180 / Math.PI));
+  if (!isAutoPlay && document.activeElement !== document.getElementById('range-angle')) {
+    document.getElementById('val-angle').textContent = deg;
+  }
+  if (deg !== lastChartUpdateDeg && chartDataP[deg] !== undefined) {
+    myChart.setOption({
+      series: [
+        {}, {},
+        { name: '当前状态', data: [[deg, chartDataP[deg]]] },
+        { name: '当前容积', data: [[deg, chartDataV[deg]]] }
+      ]
+    });
+    lastChartUpdateDeg = deg;
+    // Update telemetry
+    document.getElementById('tm-stroke').textContent = strokeNames[strokeIndex] || '-';
+    document.getElementById('tm-angle').textContent = deg + '';
+    document.getElementById('tm-pressure').textContent = chartDataP[deg].toFixed(2) + ' MPa';
+    document.getElementById('tm-volume').textContent = chartDataV[deg].toFixed(2);
+    document.getElementById('tm-peak').textContent = peakPressure.toFixed(2) + ' MPa';
+  }
+}
+
+// === UI Events ===
+window.addEventListener('resize', () => {
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  myChart.resize();
+});
+
+document.getElementById('range-opacity').addEventListener('input', (e) => {
+  matCylinder.opacity = parseFloat(e.target.value);
+  document.getElementById('val-opacity').textContent = matCylinder.opacity.toFixed(1);
+  matCylinder.transparent = matCylinder.opacity < 1.0;
+});
+document.getElementById('range-cylinders').addEventListener('change', (e) => {
+  numCylinders = parseInt(e.target.value);
+  document.getElementById('val-cylinders').textContent = numCylinders;
+  rebuildEngine();
+});
+document.getElementById('range-spacing').addEventListener('change', (e) => {
+  cylSpacing = parseFloat(e.target.value);
+  document.getElementById('val-spacing').textContent = cylSpacing.toFixed(1);
+  rebuildEngine();
+});
+document.getElementById('range-rpm').addEventListener('input', (e) => {
+  currentRPM = parseInt(e.target.value);
+  document.getElementById('val-rpm').textContent = currentRPM;
+});
+document.getElementById('range-angle').addEventListener('input', (e) => {
+  const deg = parseFloat(e.target.value);
+  document.getElementById('val-angle').textContent = Math.round(deg);
+  globalAngle = ROTATION_DIR * deg * (Math.PI / 180);
+});
+document.getElementById('btn-auto').addEventListener('click', (e) => {
+  isAutoPlay = true; e.target.classList.add('active');
+  document.getElementById('btn-manual').classList.remove('active');
+  document.getElementById('group-rpm').style.display = 'block';
+  document.getElementById('group-angle').style.display = 'none';
+});
+document.getElementById('btn-manual').addEventListener('click', (e) => {
+  isAutoPlay = false; e.target.classList.add('active');
+  document.getElementById('btn-auto').classList.remove('active');
+  document.getElementById('group-rpm').style.display = 'none';
+  document.getElementById('group-angle').style.display = 'block';
+  const deg = (Math.abs(globalAngle) % (4 * Math.PI)) * (180 / Math.PI);
+  document.getElementById('range-angle').value = deg;
+  document.getElementById('val-angle').textContent = Math.round(deg);
+});
+
+// === Main Loop ===
+let lastTime = performance.now();
+function animate(time) {
+  requestAnimationFrame(animate);
+  const deltaTime = (time - lastTime) / 1000;
+  lastTime = time;
+  if (isAutoPlay) {
+    const angularVelocity = (currentRPM / 60) * Math.PI * 2;
+    globalAngle += angularVelocity * deltaTime;
+    if (globalAngle > 1000 * Math.PI) globalAngle = globalAngle % (4 * Math.PI);
+  }
+  updatePhysics(globalAngle);
+  updateUIState(globalAngle);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate(performance.now());
+</script>
+<script src="shared-theme.js"></script>
+</body>
+</html>
