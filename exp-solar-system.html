@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>太阳系沙盘 — Solar System | 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <style>
+    :root {
+      --sol-bg: #0a0a14; --sol-bg2: #111122; --sol-panel: rgba(15,15,30,0.92);
+      --sol-border: rgba(255,255,255,0.08); --sol-text: #e0e0f0; --sol-text2: #8899bb;
+      --sol-accent: #f0c060; --sol-accent2: #60a0ff; --sol-accent3: #ff6b6b;
+      --sol-bar-bg: rgba(255,255,255,0.05);
+    }
+    [data-theme="academic"] {
+      --sol-bg: #f5f5f7; --sol-bg2: #ffffff; --sol-panel: #ffffff; --sol-border: #e0e0e0;
+      --sol-text: #1a1a2e; --sol-text2: #666; --sol-accent: #b8860b; --sol-accent2: #6b8cae; --sol-accent3: #c0392b;
+      --sol-bar-bg: rgba(0,0,0,0.04);
+    }
+    [data-theme="cartoon"] {
+      --sol-bg: #fff8f0; --sol-bg2: #fff5e6; --sol-panel: rgba(255,248,240,0.95);
+      --sol-border: rgba(0,0,0,0.08); --sol-text: #2d3436; --sol-text2: #636e72;
+      --sol-accent: #fdcb6e; --sol-accent2: #74b9ff; --sol-accent3: #ff7675;
+      --sol-bar-bg: rgba(0,0,0,0.04);
+    }
+    [data-theme="cyber"] {
+      --sol-bg: #040410; --sol-bg2: #08081a; --sol-panel: rgba(8,8,26,0.92);
+      --sol-border: rgba(0,243,255,0.12); --sol-text: #e0f7fa; --sol-text2: #a080c0;
+      --sol-accent: #ffd700; --sol-accent2: #00f3ff; --sol-accent3: #ff00ea;
+      --sol-bar-bg: rgba(0,243,255,0.05);
+    }
+    [data-theme="soviet"] {
+      --sol-bg: #f0ebe4; --sol-bg2: #fffaf2; --sol-panel: #fffaf2; --sol-border: #d4c4a8;
+      --sol-text: #1a1a1a; --sol-text2: #6a5a4a; --sol-accent: #c41e1e; --sol-accent2: #5b7a8a; --sol-accent3: #e8a020;
+      --sol-bar-bg: rgba(0,0,0,0.04);
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: var(--font-main,'Segoe UI','Microsoft YaHei',system-ui,sans-serif);
+      background: var(--sol-bg); color: var(--sol-text); min-height:100vh; overflow:hidden;
+    }
+    .top-bar {
+      position:fixed;top:0;left:0;right:0;z-index:1001;display:flex;align-items:center;
+      justify-content:space-between;padding:10px 20px;background:var(--sol-bg2);
+      border-bottom:1px solid var(--sol-border);
+    }
+    .top-bar .sub { font-size:0.9rem;font-weight:700;color:var(--sol-accent); }
+    .top-bar .desc { font-size:0.7rem;color:var(--sol-text2);margin-left:8px; }
+    .back-btn {
+      padding:6px 14px;border-radius:8px;border:1px solid var(--sol-border);
+      background:var(--sol-bar-bg);color:var(--sol-text2);text-decoration:none;
+      font-size:0.8rem;cursor:pointer;transition:all 0.2s;
+    }
+    .back-btn:hover { color:var(--sol-accent);border-color:var(--sol-accent); }
+
+    .app { display:flex;height:100vh;padding-top:48px; }
+    .scene-wrap { flex:1;position:relative;min-width:0; }
+    .scene-wrap canvas { display:block;width:100%;height:100%; }
+    .scene-hint {
+      position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+      font-size:0.65rem;color:var(--sol-text2);pointer-events:none;opacity:0.5;
+      font-family:monospace;
+    }
+    .scene-controls {
+      position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:5;
+    }
+    .ctrl-btn {
+      padding:5px 10px;background:var(--sol-panel);border:1px solid var(--sol-border);
+      border-radius:6px;font-size:0.7rem;color:var(--sol-text2);cursor:pointer;
+      font-family:inherit;transition:all 0.2s;
+    }
+    .ctrl-btn:hover { color:var(--sol-accent);border-color:var(--sol-accent); }
+    .ctrl-btn.active { color:var(--sol-accent);border-color:var(--sol-accent);background:var(--sol-bar-bg); }
+    .speed-indicator {
+      position:absolute;top:12px;right:12px;z-index:5;padding:4px 10px;
+      background:var(--sol-panel);border:1px solid var(--sol-border);border-radius:6px;
+      font-family:monospace;font-size:0.65rem;color:var(--sol-text2);
+    }
+
+    .left-panel, .right-panel {
+      width:340px;min-width:280px;background:var(--sol-panel);
+      display:flex;flex-direction:column;overflow-y:auto;padding:14px;gap:10px;
+      transition:width 0.3s ease, padding 0.3s ease, min-width 0.3s ease;
+      position:relative;
+    }
+    .left-panel { border-right:1px solid var(--sol-border); }
+    .right-panel { border-left:1px solid var(--sol-border); }
+    .left-panel.collapsed, .right-panel.collapsed {
+      width:36px;min-width:36px;padding:14px 4px;overflow:hidden;
+    }
+    .left-panel.collapsed .panel-inner, .right-panel.collapsed .panel-inner {
+      opacity:0;pointer-events:none;
+    }
+    .panel-inner { transition:opacity 0.2s ease; }
+    .collapse-btn {
+      position:absolute;top:50%;transform:translateY(-50%);
+      width:18px;height:50px;background:var(--sol-panel);border:1px solid var(--sol-border);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;
+      font-size:10px;color:var(--sol-text2);transition:all 0.2s;
+    }
+    .collapse-btn:hover { color:var(--sol-accent);border-color:var(--sol-accent); }
+    .left-panel .collapse-btn { right:-9px;border-radius:0 4px 4px 0;border-left:none; }
+    .right-panel .collapse-btn { left:-9px;border-radius:4px 0 0 4px;border-right:none; }
+
+    .left-panel h3, .right-panel h3 {
+      font-size:0.72rem;font-weight:600;color:var(--sol-text2);text-transform:uppercase;
+      letter-spacing:1px;border-bottom:1px solid var(--sol-border);padding-bottom:6px;
+    }
+    .card-img {
+      width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:10px;
+      background:var(--sol-bar-bg);
+    }
+    .card-img[src=""] { display:none; }
+
+    .planet-card {
+      background:var(--sol-bar-bg);border:1px solid var(--sol-border);border-radius:10px;
+      padding:14px 16px;
+    }
+    .planet-card .planet-name {
+      font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:8px;
+    }
+    .planet-card .planet-name .dot {
+      width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;
+    }
+    .planet-card .planet-type {
+      font-size:0.65rem;color:var(--sol-text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;
+    }
+    .planet-card .story {
+      font-size:0.74rem;color:var(--sol-text);line-height:1.6;margin-top:8px;
+    }
+    .planet-card .story .highlight { color:var(--sol-accent);font-weight:600; }
+    .planet-stats {
+      display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;
+    }
+    .planet-stat {
+      font-size:0.65rem;color:var(--sol-text2);
+      display:flex;justify-content:space-between;
+    }
+    .planet-stat .val { color:var(--sol-text);font-family:monospace;font-weight:600; }
+
+    .probe-card {
+      background:var(--sol-bar-bg);border:1px solid var(--sol-border);border-radius:10px;
+      padding:12px 14px;
+    }
+    .probe-card .probe-name {
+      font-size:0.85rem;font-weight:700;display:flex;align-items:center;gap:6px;
+    }
+    .probe-card .probe-name .status {
+      width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0;
+    }
+    .probe-card .probe-info {
+      font-size:0.7rem;color:var(--sol-text2);margin-top:4px;line-height:1.5;
+    }
+    .probe-card .probe-instruments {
+      font-size:0.65rem;color:var(--sol-text);margin-top:6px;line-height:1.5;
+      padding:6px 8px;background:var(--sol-bar-bg);border-radius:6px;
+    }
+
+    .planet-list {
+      display:flex;flex-wrap:wrap;gap:4px;
+    }
+    .planet-chip {
+      padding:3px 8px;border:1px solid var(--sol-border);border-radius:6px;
+      font-size:0.65rem;cursor:pointer;color:var(--sol-text2);transition:all 0.2s;
+      background:var(--sol-bar-bg);font-family:inherit;
+    }
+    .planet-chip:hover { border-color:var(--sol-accent);color:var(--sol-accent); }
+    .planet-chip.active { border-color:var(--sol-accent);color:var(--sol-accent);background:rgba(240,192,96,0.1); }
+
+    .probe-list { display:flex;flex-direction:column;gap:4px; }
+    .probe-chip {
+      padding:4px 8px;border:1px solid var(--sol-border);border-radius:6px;
+      font-size:0.65rem;cursor:pointer;color:var(--sol-text2);transition:all 0.2s;
+      background:var(--sol-bar-bg);font-family:inherit;text-align:left;
+      display:flex;align-items:center;gap:6px;
+    }
+    .probe-chip:hover { border-color:var(--sol-accent2);color:var(--sol-accent2); }
+    .probe-chip.active { border-color:var(--sol-accent2);color:var(--sol-accent2);background:rgba(96,160,255,0.1); }
+    .probe-chip .p-dot { width:6px;height:6px;border-radius:50%;background:var(--sol-accent2);flex-shrink:0; }
+
+    .empty-state {
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:40px 20px;text-align:center;color:var(--sol-text2);gap:8px;
+    }
+    .empty-state .icon { font-size:2rem;opacity:0.3; }
+    .empty-state .msg { font-size:0.75rem;line-height:1.5; }
+
+    @media (max-width:900px) {
+      .app { flex-direction:column; }
+      .left-panel, .right-panel { width:100%;border:none;border-top:1px solid var(--sol-border);max-height:35vh; }
+      .left-panel.collapsed, .right-panel.collapsed { width:100%;min-width:auto;height:36px; }
+    }
+  </style>
+</head>
+<body>
+  <script src="shared-theme.js"></script>
+
+  <div class="top-bar">
+    <div>
+      <span class="sub">太阳系沙盘</span>
+      <span class="desc">行星 · 发现故事 · 深空探测器</span>
+    </div>
+    <a class="back-btn" href="index.html">&#8592; 返回首页</a>
+  </div>
+
+  <div class="app">
+    <div class="left-panel" id="leftPanel">
+      <div class="panel-inner">
+        <!-- Sun -->
+        <h3>太阳</h3>
+        <div class="planet-list" id="sunList"></div>
+
+        <!-- Planet List -->
+        <h3>八大行星</h3>
+        <div class="planet-list" id="planetList"></div>
+
+        <!-- Dwarf Planet List -->
+        <h3>矮行星</h3>
+        <div class="planet-list" id="dwarfList"></div>
+
+        <!-- Moon List -->
+        <h3>主要卫星</h3>
+        <div class="planet-list" id="moonList"></div>
+
+        <!-- Detail -->
+        <div id="planetDetail">
+          <div class="empty-state">
+            <div class="icon">&#9790;</div>
+            <div class="msg">点击3D场景中的天体<br>或选择上方标签查看详情</div>
+          </div>
+        </div>
+      </div>
+      <button class="collapse-btn" id="collapseLeft">&#9664;</button>
+    </div>
+
+    <div class="scene-wrap" id="sceneWrap">
+      <div class="scene-controls">
+        <button class="ctrl-btn" data-speed="0">&#10074;&#10074; 暂停</button>
+        <button class="ctrl-btn" data-speed="0.5">0.5x</button>
+        <button class="ctrl-btn active" data-speed="1">1x</button>
+        <button class="ctrl-btn" data-speed="2">2x</button>
+        <button class="ctrl-btn" data-speed="5">5x</button>
+      </div>
+      <div class="speed-indicator" id="speedLabel">1x</div>
+      <div class="scene-hint">[左键] 旋转 | [右键] 平移 | [滚轮] 缩放 | [点击天体] 查看详情</div>
+    </div>
+
+    <div class="right-panel" id="rightPanel">
+      <div class="panel-inner">
+        <!-- Historians -->
+        <h3>历史人物 &#128214;</h3>
+        <div class="planet-list" id="historianList"></div>
+
+        <!-- Probes -->
+        <h3>深空探测器 &#128640;</h3>
+        <div class="probe-list" id="probeList"></div>
+        <div id="probeDetail"></div>
+      </div>
+      <button class="collapse-btn" id="collapseRight">&#9654;</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ========== Sun Data ==========
+    const SUN_DATA = {
+      key:'sun', name:'太阳', en:'Sun', type:'恒星', color:'#ffcc33',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg/600px-The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg',
+      dist:0, orbit:0, rot:25.38, temp:'约5,500°C（表面）/ 1,500万°C（核心）',
+      diameter:'139.2万 km', gravity:'274 m/s² (28g)',
+      story:'太阳是太阳系的中心恒星，占整个太阳系质量的99.86%。约46亿年前由分子云坍缩形成。核心温度高达1,500万°C，通过氢核聚变产生能量，每秒消耗约400万吨氢转化为氦。能量以辐射和对流方式传递到表面，最终以光子和中微子辐射到太空。约50亿年后，太阳将耗尽核心氢燃料，膨胀为红巨星，半径可能吞噬地球轨道。太阳每11年左右经历一次磁场活动周期，表现为太阳黑子数量的周期性变化。太阳风是从太阳上层大气持续流出的带电粒子流，影响整个太阳系的空间天气。'
+    };
+
+    // ========== Data ==========
+    const PLANET_DATA = [
+      { key:'mercury', name:'水星', en:'Mercury', type:'类地行星', color:'#b0a899', size:0.38,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Mercury_in_true_color.jpg/600px-Mercury_in_true_color.jpg',
+        dist:5.8, orbit:0.24, rot:58.6, temp:'167°C (昼430°C/夜-180°C)', moons:0,
+        gravity:'0.38 g', diameter:'4,878 km', incl:7.0,
+        story:'水星是离太阳最近的行星，早在公元前3000年就被苏美尔人观测记录。因其快速绕太阳运行，古罗马人以信使之神墨丘利(Mercurius)命名。由于紧贴太阳，水星极难观测——哥白尼临终前遗憾一辈子未见过水星。1974年水手10号首次飞掠，2011年信使号进入轨道，揭示其表面布满陨石坑，酷似月球。',
+        discoverer:'苏美尔人（约公元前3000年）', year:'古代' },
+      { key:'venus', name:'金星', en:'Venus', type:'类地行星', color:'#e8cda0', size:0.95,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Venus-real_color.jpg/600px-Venus-real_color.jpg',
+        dist:10.8, orbit:0.615, rot:243, temp:'462°C', moons:0,
+        gravity:'0.90 g', diameter:'12,104 km', incl:3.4,
+        story:'金星是夜空中最亮的行星，中国古代称"启明"或"长庚"。古罗马人以爱与美之神维纳斯命名。金星是太阳系最热的行星，浓厚的二氧化碳大气层产生了极端的温室效应。1962年水手2号成为首个飞掠金星的探测器。苏联的"金星"系列探测器在20世纪70-80年代成功着陆，传回了金星表面灼热荒芜的图像——这是人类首次看到另一个行星表面的景象。',
+        discoverer:'古代文明', year:'古代' },
+      { key:'earth', name:'地球', en:'Earth', type:'类地行星', color:'#4da6ff', size:1.0,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/600px-The_Earth_seen_from_Apollo_17.jpg',
+        dist:15, orbit:1, rot:1, temp:'15°C', moons:1,
+        gravity:'1.00 g', diameter:'12,756 km', incl:0.0,
+        story:'我们的家园，目前已知唯一孕育生命的天体。约45.4亿年前形成。从哥白尼1543年提出日心说确认地球是绕太阳运行的行星之一，到阿波罗计划首次将人类送上月球，再到国际空间站常年驻留宇航员——地球始终是人类探索宇宙的起点和归宿。',
+        discoverer:'—', year:'—' },
+      { key:'mars', name:'火星', en:'Mars', type:'类地行星', color:'#e07050', size:0.53,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/600px-OSIRIS_Mars_true_color.jpg',
+        dist:22.8, orbit:1.88, rot:1.03, temp:'-65°C', moons:2,
+        gravity:'0.38 g', diameter:'6,779 km', incl:1.85,
+        story:'火星因锈红色而被称为"红色星球"，古罗马人以战神马尔斯(Mars)命名。中国古代称"荧惑"。17世纪开普勒计算了火星椭圆轨道，打破了"完美圆周"的教条。1877年斯基亚帕雷利观测到火星表面"运河"，引发火星生命猜想。1965年水手4号首次飞掠火星。目前已有多个探测器在火星表面工作，包括毅力号、好奇号、祝融号等。',
+        discoverer:'古代文明', year:'古代' },
+      { key:'jupiter', name:'木星', en:'Jupiter', type:'气态巨行星', color:'#c4a882', size:4.0,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/600px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
+        dist:77.8, orbit:11.86, rot:0.41, temp:'-110°C', moons:95,
+        gravity:'2.53 g', diameter:'139,820 km', incl:1.31,
+        story:'太阳系最大的行星，以罗马主神朱庇特命名。1610年伽利略用自制的30倍望远镜发现木星的四颗大卫星——这是人类首次观测到地球之外的天体卫星，直接动摇了"所有天体围绕地球转动"的地心说。木星大红斑是一场持续了至少350年的超级风暴，体积比地球还大。2016年朱诺号探测器抵达木星，正持续揭示这颗巨行星的内部秘密。',
+        discoverer:'古代文明 · 伽利略（1610年发现卫星）', year:'古代' },
+      { key:'saturn', name:'土星', en:'Saturn', type:'气态巨行星', color:'#e8d5a3', size:3.5,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Saturn_during_Equinox.jpg/600px-Saturn_during_Equinox.jpg',
+        dist:143, orbit:29.46, rot:0.44, temp:'-140°C', moons:146,
+        gravity:'1.07 g', diameter:'116,460 km', incl:2.49,
+        story:'土星以其壮丽的环系统闻名。1610年伽利略首次用望远镜看到土星环，但因分辨率不足，误以为是土星的"耳朵"或两颗卫星。1655年惠更斯用更强大的望远镜正确识别出土星环。1675年卡西尼发现环中的缝隙（卡西尼缝）。1997年发射的卡西尼-惠更斯号探测器环绕土星13年，于2017年壮丽地坠入土星大气层，完成了史诗般的使命。',
+        discoverer:'古代文明 · 惠更斯（1655年确认环结构）', year:'古代' },
+      { key:'uranus', name:'天王星', en:'Uranus', type:'冰巨行星', color:'#88ccdd', size:2.2,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Uranus2.jpg/600px-Uranus2.jpg',
+        dist:287, orbit:84.01, rot:0.72, temp:'-195°C', moons:27,
+        gravity:'0.89 g', diameter:'50,724 km', incl:0.77,
+        story:'1781年3月13日，英国天文学家威廉·赫歇尔在自家花园用自制望远镜巡天时，发现了一颗"彗星"——后来确认这是一颗新行星！这是人类历史上第一次用望远镜发现新行星，将太阳系的已知边界扩大了一倍。赫歇尔原想以国王乔治三世命名，但最终以希腊天空之神乌拉诺斯(Uranus)命名。天王星自转轴倾斜约98°，几乎是"躺着"公转。',
+        discoverer:'威廉·赫歇尔（1781年）', year:'1781' },
+      { key:'neptune', name:'海王星', en:'Neptune', type:'冰巨行星', color:'#4466ff', size:2.1,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg/600px-Neptune_-_Voyager_2_%2829347980845%29_flatten_crop.jpg',
+        dist:450, orbit:164.8, rot:0.67, temp:'-200°C', moons:16,
+        gravity:'1.14 g', diameter:'49,244 km', incl:1.77,
+        story:'海王星被称为"笔尖上发现的行星"。天文学家发现天王星轨道偏离牛顿引力理论预测，推测存在一颗未知行星的引力扰动。法国数学家勒维耶和英国天文学家亚当斯分别独立通过数学计算预言了这颗行星的位置。1846年9月23日，德国天文学家伽勒在柏林天文台按照勒维耶的预测位置，仅用1小时就找到了海王星——这是牛顿万有引力定律的辉煌胜利。海王星风速高达2100km/h，是太阳系风速最快的行星。',
+        discoverer:'勒维耶/亚当斯（数学预测）· 伽勒（观测确认，1846年）', year:'1846' },
+      // --- Dwarf Planets ---
+      { key:'pluto', name:'冥王星', en:'Pluto', type:'矮行星', color:'#d88a6c', size:1.15,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Pluto_in_True_Color_-_High-Res.jpg/600px-Pluto_in_True_Color_-_High-Res.jpg',
+        dist:592, orbit:248, rot:6.39, temp:'-225°C', moons:5,
+        gravity:'0.06 g', diameter:'2,377 km', incl:17.16,
+        story:'1905年，珀西瓦尔·洛厄尔(Percival Lowell)根据天王星和海王星轨道偏差推测存在"X行星"。1930年2月18日，洛厄尔天文台的克莱德·汤博(Clyde Tombaugh)通过对比星空照片最终发现了冥王星。命名来自英国11岁女孩维尼蒂亚·伯尼的建议，取自罗马冥界之神。曾是太阳系第9大行星，2006年被IAU降级为矮行星。2015年新视野号飞越探测，发现表面有山脉、平原和陨石坑。',
+        discoverer:'克莱德·汤博（1930年）', year:'1930' },
+      { key:'ceres', name:'谷神星', en:'Ceres', type:'矮行星', color:'#aaaaaa', size:0.48,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29.jpg/600px-Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29.jpg',
+        dist:41.5, orbit:4.6, rot:0.38, temp:'-105°C', moons:0,
+        gravity:'0.03 g', diameter:'950 km', incl:10.59,
+        story:'1801年1月1日，意大利天文学家朱塞佩·皮亚齐(Giuseppe Piazzi)在西西里岛巴勒莫天文台观测金牛座时发现。当时它一度失踪，24岁的高斯用新创立的方法计算出轨道，1801年底被重新找到。它是第一颗被发现的小行星，也是小行星带中唯一的矮行星。2015年黎明号探测器入轨，成为首个访问矮行星的航天器。',
+        discoverer:'朱塞佩·皮亚齐（1801年）', year:'1801' },
+      { key:'eris', name:'阋神星', en:'Eris', type:'矮行星', color:'#888888', size:1.1,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Eris_and_dysnomia2.jpg/600px-Eris_and_dysnomia2.jpg',
+        dist:1020, orbit:557, rot:25.9, temp:'-243°C', moons:1,
+        gravity:'~0.8 g', diameter:'2,326 km', incl:44.04,
+        story:'2005年1月5日，迈克·布朗(Mike Brown)团队在分析2003年10月21日帕洛玛天文台拍摄的照片时发现。由于阋神星移动极慢，计算机自动搜索软件最初漏掉了它。发现后引发了行星定义大讨论，直接导致冥王星被降级为矮行星。阋神星是质量最大的矮行星，比冥王星重约27%。',
+        discoverer:'迈克·布朗团队（2005年）', year:'2005' },
+      { key:'makemake', name:'鸟神星', en:'Makemake', type:'矮行星', color:'#c87040', size:0.75,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Artist%E2%80%99s_impression_of_the_dwarf_planet_Makemake.jpg/600px-Artist%E2%80%99s_impression_of_the_dwarf_planet_Makemake.jpg',
+        dist:687, orbit:310, rot:7.77, temp:'-243°C', moons:1,
+        gravity:'~0.4 g', diameter:'~1,500 km', incl:28.96,
+        story:'2005年3月31日（复活节后不久），迈克·布朗团队发现，团队内部曾用"复活兔"作为代号。由于鸟神星轨道倾角高达 29°，且发现时位于后发座远离黄道，因此长期未被发现。1930年汤博搜寻行星时虽曾拍到它，但因靠近银河密集星区而未能识别。',
+        discoverer:'迈克·布朗团队（2005年）', year:'2005' },
+      { key:'haumea', name:'妊神星', en:'Haumea', type:'矮行星', color:'#f8f8f8', size:0.9,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Haumea_and_its_rings.jpg/600px-Haumea_and_its_rings.jpg',
+        dist:648, orbit:285, rot:3.55, temp:'~-240°C', moons:2,
+        gravity:'~2.6-3.3 g/cm³', diameter:'1,960 × 1,518 × 996 km', incl:28.19,
+        story:'发现存在争议：2004年12月，迈克·布朗团队根据凯克天文台2004年5月6日拍摄的图像发现。西班牙奥尔蒂斯团队也声称在2003年3月的图像中发现。IAU于2008年9月17日定义为矮行星，以夏威夷生育女神Haumea命名，因其两颗卫星被视为从母体"分离"而出。妊神星是太阳系自转最快的大型天体，形状被拉成橄榄球状。',
+        discoverer:'迈克·布朗团队 / 奥尔蒂斯团队（2004年）', year:'2008' },
+    ];
+
+    // --- Major Moons ---
+    const MOON_DATA = [
+      { key:'moon', name:'月球', en:'Moon', parent:'地球', parentKey:'earth', color:'#cccccc', size:0.9,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/600px-FullMoon2010.jpg',
+        dist_planet: 0.38, orbit: 27.3,
+        story:'自古以来已知，是地球唯一的天然卫星。人类对月球的观测贯穿整个文明史，但直到1609年伽利略首次用望远镜观测，才揭示了其环形山等地貌。它是人类唯一登陆过的地外天体（1969年阿波罗11号）。',
+        discoverer:'自古以来已知', size_display:'约 3,474 km', rotation:'潮汐锁定（同步自转）', gravity: '1/6 g', temp_mean: '-53°C' },
+      { key:'io', name:'木卫一', en:'Io', parent:'木星', parentKey:'jupiter', color:'#ff8844', size:1.0,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Io_highest_resolution_true_color.jpg/600px-Io_highest_resolution_true_color.jpg',
+        dist_planet: 0.42, orbit: 1.77,
+        story:'1610年1月7日，伽利略·伽利莱用自制望远镜发现木星旁有3个光点，次日确认是4颗卫星，木卫一即为其中之一。木卫一是太阳系火山活动最活跃的天体，表面有超过 400 座活火山；火山喷发由木星强大潮汐力加热驱动。',
+        discoverer:'伽利略（1610年）', size_display:'约 3,642 km', rotation:'潮汐锁定（与木卫二、木卫三1:2:4共振）', gravity: '0.18 g', temp_mean: '-143°C' },
+      { key:'europa', name:'木卫二', en:'Europa', parent:'木星', parentKey:'jupiter', color:'#4488dd', size:0.85,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Europa-moon-with-margins.jpg/600px-Europa-moon-with-margins.jpg',
+        dist_planet: 0.67, orbit: 3.55,
+        story:'1610年1月8日，伽利略确认了四颗木星卫星，木卫二是其中最小的一颗。因与木卫一距离太近，伽利略最初误认为与木卫一是一个天体。表面是太阳系最光滑的天体，由冰壳覆盖；冰壳厚约15-25km，下方是全球咸水海洋（深达60-150km），含水量约是地球海洋的两倍。',
+        discoverer:'伽利略（1610年）', size_display:'约 3,120 km', rotation:'潮汐锁定（同步自转）', gravity: '0.13 g', temp_mean: '-160°C' },
+      { key:'ganymede', name:'木卫三', en:'Ganymede', parent:'木星', parentKey:'jupiter', color:'#bbaacc', size:1.3,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Ganymede_-_Perijove_34_Composite.png/600px-Ganymede_-_Perijove_34_Composite.png',
+        dist_planet: 1.07, orbit: 7.16,
+        story:'1610年1月7日，伽利略发现。中国战国时期天文学家甘德（公元前364年）据记载已用肉眼观测到木卫三，并描述其颜色"呈黄色"，与现代观测一致。太阳系最大的卫星，直径大于水星。太阳系唯一拥有自身磁场的卫星；内部结构分化：铁金属核 + 岩石地幔 + 冰壳，冰壳下有地下海洋（深约100km）。',
+        discoverer:'伽利略（1610年）', size_display:'约 5,262 km', rotation:'潮汐锁定', gravity: '1.43 m/s²', temp_mean: '-163°C' },
+      { key:'callisto', name:'木卫四', en:'Callisto', parent:'木星', parentKey:'jupiter', color:'#9999bb', size:1.2,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Callisto_-_July_8_1979_%2838426080651%29.jpg/600px-Callisto_-_July_8_1979_%2838426080651%29.jpg',
+        dist_planet: 1.88, orbit: 16.7,
+        story:'1610年1月，伽利略发现。命名来自希腊神话中宙斯的情人卡利斯托。太阳系陨石坑最密集的天体，表面几乎没有地质活动，年龄约40亿年；不参与其他伽利略卫星的轨道共振，因此无显著潮汐加热；内部可能存在地下咸水海洋（在地表以下约250km）。',
+        discoverer:'伽利略（1610年）', size_display:'约 4,820 km', rotation:'潮汐锁定', gravity: '0.126 g', temp_mean: '-139°C' },
+      { key:'titan', name:'土卫六', en:'Titan', parent:'土星', parentKey:'saturn', color:'#b8aa88', size:1.28,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Titan_in_true_color_by_Cassini.jpg/600px-Titan_in_true_color_by_Cassini.jpg',
+        dist_planet: 1.22, orbit: 15.95,
+        story:'1655年3月25日，荷兰天文学家克里斯蒂安·惠更斯用自制望远镜发现。太阳系第二大卫星，也是太阳系唯一拥有浓厚大气层的卫星（氮气占98.4%，甲烷占1.4%），表面大气压约为地球的1.5倍。拥有完整的甲烷循环：甲烷雨、河流、湖泊、海洋。最大湖泊"克拉肯湖"面积约4万平方公里。',
+        discoverer:'克里斯蒂安·惠更斯（1655年）', size_display:'约 5,150 km', rotation:'潮汐锁定', gravity: '0.14 g', temp_mean: '-179°C' },
+      { key:'enceladus', name:'土卫二', en:'Enceladus', parent:'土星', parentKey:'saturn', color:'#f8f8ff', size:0.25,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/PIA18351-SaturnMoon-Enceladus-Animation-20150430.jpg/600px-PIA18351-SaturnMoon-Enceladus-Animation-20150430.jpg',
+        dist_planet: 0.238, orbit: 1.37,
+        story:'1789年8月28日，威廉·赫歇尔(William Herschel)用大型反射望远镜发现。太阳系反照率最高的天体（接近100%）；南极有著名的"虎纹"裂缝，从中喷出巨大的冰火山羽流（高达500km），羽流含 91% 水汽。冰壳下存在全球液态水海洋；2023年在海洋中发现高浓度磷元素，集齐了生命所需六大基本元素，被认为是太阳系最有可能找到生命的天体之一。',
+        discoverer:'威廉·赫歇尔（1789年）', size_display:'约 505 km', rotation:'潮汐锁定', gravity: '~0.1 g', temp_mean: '-201°C' },
+      { key:'triton', name:'海卫一', en:'Triton', parent:'海王星', parentKey:'neptune', color:'#bbaadd', size:0.68,
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Triton_moon_mosaic_Voyager_2_%28large%29.jpg/600px-Triton_moon_mosaic_Voyager_2_%28large%29.jpg',
+        dist_planet: 0.355, orbit: -5.88,
+        story:'1846年10月10日，海王星被发现仅17天后，英国天文学家威廉·拉塞尔(William Lassell)在海王星旁发现了这颗卫星。拉塞尔本职是酿酒商，用自制61厘米反射望远镜发现了海卫一。海卫一是太阳系唯一逆行的大卫星（绕海王星方向与海王星自转方向相反），很可能是被海王星引力捕获的柯伊伯带天体。',
+        discoverer:'威廉·拉塞尔（1846年）', size_display:'约 2,707 km', rotation:'逆行轨道 · 潮汐锁定', gravity: '0.08 g', temp_mean: '-235°C' },
+    ];
+
+    // --- Historians ---
+    const HISTORIAN_DATA = [
+      { key:'sumerian', name:'苏美尔人', en:'Sumerians', period:'约公元前3000年', country:'美索不达米亚', role:'古代文明',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Sumerian_astrolabe.jpg/440px-Sumerian_astrolabe.jpg',
+        bio:'最早的天文观测者，通过肉眼观测记录了水星等天体运动。', discoveries:['水星观测'] },
+      { key:'galileo', name:'伽利略·伽利莱', en:'Galileo Galilei', period:'1564-1642', country:'意大利', role:'物理学家、天文学家、数学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Galileo.arp.300pix.jpg/440px-Galileo.arp.300pix.jpg',
+        bio:'近代科学之父。通过自制望远镜首次观测到木星四颗卫星、金星相位、土星环和月球陨石坑，为日心说提供了直接观测证据。因支持日心说被宗教裁判所审判。', discoveries:['木星四颗卫星(1610)','金星相位','土星环','月球陨石坑'] },
+      { key:'huygens', name:'克里斯蒂安·惠更斯', en:'Christiaan Huygens', period:'1629-1695', country:'荷兰', role:'物理学家、天文学家、数学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Christiaan_Huygens.jpg/440px-Christiaan_Huygens.jpg',
+        bio:'正确识别出土星环的结构，发现了土卫六。提出了光的波动说，发现了土星光环的真正本质。', discoveries:['土星环结构(1655)','土卫六(1655)'] },
+      { key:'cassini', name:'乔凡尼·多梅尼科·卡西尼', en:'Giovanni Domenico Cassini', period:'1625-1712', country:'意大利', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Giovanni_Cassini.jpg/440px-Giovanni_Cassini.jpg',
+        bio:'发现了卡西尼缝（土星环的主要缝隙），精确测量了火星和木星的距离。巴黎天文台的创始人。', discoveries:['卡西尼缝(1675)','精确测量行星距离'] },
+      { key:'herschel', name:'威廉·赫歇尔', en:'William Herschel', period:'1738-1822', country:'英国', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/William_Herschel01.jpg/440px-William_Herschel01.jpg',
+        bio:'发现天王星，以及土卫一和土卫二。制作了当时最大的反射望远镜，进行了系统的星空巡天。', discoveries:['天王星(1781)','土卫二(1789)','土卫一'] },
+      { key:'leverrier', name:'于尔班·勒维耶', en:'Urbain Le Verrier', period:'1811-1877', country:'法国', role:'数学家、天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Urbain_Le_Verrier.jpg/440px-Urbain_Le_Verrier.jpg',
+        bio:'通过数学计算预测了海王星的位置，仅凭纸笔和数学就定位了一颗新行星，被誉为"笔尖上发现的行星"。', discoveries:['海王星数学预测(1846)'] },
+      { key:'adams', name:'约翰·柯西·亚当斯', en:'John Couch Adams', period:'1819-1892', country:'英国', role:'数学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/John_Couch_Adams.jpg/440px-John_Couch_Adams.jpg',
+        bio:'独立通过数学计算预言了海王星的位置，与勒维耶的预测几乎完全相同。', discoveries:['海王星数学预测(1846)'] },
+      { key:'galle', name:'约翰·伽勒', en:'Johann Galle', period:'1812-1910', country:'德国', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Johann_Gottfried_Galle.jpg/440px-Johann_Gottfried_Galle.jpg',
+        bio:'根据勒维耶的预测位置，在柏林天文台仅用1小时就观测到海王星，完成了牛顿万有引力定律的辉煌验证。', discoveries:['海王星观测确认(1846)'] },
+      { key:'tombaugh', name:'克莱德·汤博', en:'Clyde Tombaugh', period:'1906-1997', country:'美国', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Clyde_Tombaugh.jpg/440px-Clyde_Tombaugh.jpg',
+        bio:'洛厄尔天文台的年轻助理，通过对比星空照片，在1930年发现了冥王星。这是第一颗由美国人发现的行星。', discoveries:['冥王星(1930)'] },
+      { key:'piazzi', name:'朱塞佩·皮亚齐', en:'Giuseppe Piazzi', period:'1746-1826', country:'意大利', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Giuseppe_Piazzi.jpg/440px-Giuseppe_Piazzi.jpg',
+        bio:'在西西里岛巴勒莫天文台发现谷神星。当时它一度失踪，24岁的高斯用新创立的轨道计算方法帮助重新定位。', discoveries:['谷神星(1801)'] },
+      { key:'brown', name:'迈克·布朗', en:'Mike Brown', period:'1965-', country:'美国', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Michael_Brown_1.jpg/440px-Michael_Brown_1.jpg',
+        bio:'加州理工学院教授，发现阋神星、鸟神星、妊神星等多颗外海王星天体。其发现直接导致2006年IAU重新定义行星，冥王星被降级。', discoveries:['阋神星(2005)','鸟神星(2005)','妊神星(2004)'] },
+      { key:'ortiz', name:'奥尔蒂斯团队', en:'José Luis Ortiz et al.', period:'2000s', country:'西班牙', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Granada_Observatory.jpg/440px-Granada_Observatory.jpg',
+        bio:'西班牙格拉纳达大学团队，也声称在2003年图像中发现了妊神星，与迈克·布朗团队存在发现权争议。', discoveries:['妊神星争议发现'] },
+      { key:'lassell', name:'威廉·拉塞尔', en:'William Lassell', period:'1799-1880', country:'英国', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/William_Lassell.jpg/440px-William_Lassell.jpg',
+        bio:'酿酒商出身的天文爱好者，自制61厘米反射望远镜，在海王星发现仅17天后就发现了海卫一。', discoveries:['海卫一(1846)'] },
+      { key:'gande', name:'甘德', en:'Gan De', period:'约公元前370-310', country:'中国', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Ancient_Chinese_Star_Map.jpg/440px-Ancient_Chinese_Star_Map.jpg',
+        bio:'中国战国时期天文学家，据《开元占经》记载，甘德已用肉眼观测到木卫三，并描述其颜色"呈黄色"，与现代观测一致。这是人类首次用肉眼观测到木星卫星。', discoveries:['木卫三（肉眼观测，公元前364年）'] },
+      { key:'lowell', name:'珀西瓦尔·洛厄尔', en:'Percival Lowell', period:'1855-1916', country:'美国', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Percival_Lowell_1.jpg/440px-Percival_Lowell_1.jpg',
+        bio:'根据天王星和海王星轨道偏差推测存在"X行星"，建立了洛厄尔天文台。虽然未亲自发现冥王星，但其预言推动了搜寻工作。', discoveries:['"X行星"假说','洛厄尔天文台'] },
+      { key:'schiaparelli', name:'乔凡尼·斯基亚帕雷利', en:'Giovanni Schiaparelli', period:'1835-1910', country:'意大利', role:'天文学家',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Giovanni_Schiaparelli.jpg/440px-Giovanni_Schiaparelli.jpg',
+        bio:'观测到火星表面"运河"（canali），引发火星生命猜想。虽然后来被证实是视觉错觉，但极大地推动了火星探索。', discoveries:['火星"运河"观测(1877)'] },
+      { key:'ancient', name:'古代文明', en:'Ancient Civilizations', period:'古代', country:'全球', role:'文明',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Ancient_astronomy.jpg/440px-Ancient_astronomy.jpg',
+        bio:'古代文明通过肉眼观测记录金星、火星、木星和土星的运动。中国古代称金星为"启明"/"长庚"，火星为"荧惑"。', discoveries:['金星、火星、木星、土星观测'] },
+    ];
+
+    // Name -> key mapping for discoverer tagging
+    const HISTORIAN_MAP = (() => {
+      const map = {};
+      HISTORIAN_DATA.forEach(h => {
+        map[h.name] = h.key;
+        // Also map common short names
+        if (h.key === 'galileo') { map['伽利略'] = h.key; }
+        if (h.key === 'huygens') { map['惠更斯'] = h.key; }
+        if (h.key === 'cassini') { map['卡西尼'] = h.key; }
+        if (h.key === 'herschel') { map['威廉·赫歇尔'] = h.key; map['赫歇尔'] = h.key; }
+        if (h.key === 'leverrier') { map['于尔班·勒维耶'] = h.key; map['勒维耶'] = h.key; }
+        if (h.key === 'adams') { map['约翰·柯西·亚当斯'] = h.key; map['亚当斯'] = h.key; }
+        if (h.key === 'galle') { map['约翰·伽勒'] = h.key; map['伽勒'] = h.key; }
+        if (h.key === 'tombaugh') { map['克莱德·汤博'] = h.key; map['汤博'] = h.key; }
+        if (h.key === 'piazzi') { map['朱塞佩·皮亚齐'] = h.key; map['皮亚齐'] = h.key; }
+        if (h.key === 'brown') { map['迈克·布朗团队'] = h.key; map['迈克·布朗'] = h.key; map['布朗'] = h.key; }
+        if (h.key === 'ortiz') { map['奥尔蒂斯团队'] = h.key; }
+        if (h.key === 'lassell') { map['威廉·拉塞尔'] = h.key; map['拉塞尔'] = h.key; }
+        if (h.key === 'gande') { map['甘德'] = h.key; }
+        if (h.key === 'lowell') { map['珀西瓦尔·洛厄尔'] = h.key; map['洛厄尔'] = h.key; }
+        if (h.key === 'schiaparelli') { map['乔凡尼·斯基亚帕雷利'] = h.key; map['斯基亚帕雷利'] = h.key; }
+        if (h.key === 'sumerian') { map['苏美尔人'] = h.key; }
+        if (h.key === 'ancient') { map['古代文明'] = h.key; }
+      });
+      return map;
+    })();
+
+    function tagDiscoverer(text) {
+      if (!text || text === '—' || text === '自古以来已知') return text;
+      const entries = Object.entries(HISTORIAN_MAP).sort((a, b) => b[0].length - a[0].length);
+      let result = text;
+      entries.forEach(([name, key]) => {
+        const tag = `<span class="historian-tag" data-hkey="${key}" style="cursor:pointer;color:var(--sol-accent);border-bottom:1px dotted var(--sol-accent);">${name}</span>`;
+        result = result.split(name).join(tag);
+      });
+      return result;
+    }
+
+    const PROBE_DATA = [
+      { key:'voyager1', name:'旅行者1号', en:'Voyager 1', agency:'NASA', launch:'1977-09-05',
+        location:'星际空间（日球层外）', distance:'约 245 亿 km', status:'运行中（仅剩2台仪器）',
+        instruments:'宇宙射线探测仪、等离子体波探测器、磁力计、低能带电粒子探测器',
+        goal:'飞越木星和土星（已完成）；探测星际空间。携带金唱片，记录人类文明信息。',
+        pos: { x: 120, y: 40, z: 6 } },
+      { key:'voyager2', name:'旅行者2号', en:'Voyager 2', agency:'NASA', launch:'1977-08-20',
+        location:'星际空间（日球层外）', distance:'约 204 亿 km', status:'运行中',
+        instruments:'宇宙射线探测仪、等离子体波探测器、磁力计、低能带电粒子探测器',
+        goal:'唯一飞越天王星和海王星的探测器；探测星际空间。',
+        pos: { x: -80, y: -70, z: -15 } },
+      { key:'newhorizons', name:'新视野号', en:'New Horizons', agency:'NASA', launch:'2006-01-19',
+        location:'柯伊伯带', distance:'约 85 亿 km', status:'运行中',
+        instruments:'远程侦察成像仪(LORRI)、紫外/红外成像光谱仪(Alice/Ralph)、太阳风分析仪(SWAP)、高能粒子谱仪(PEPSSI)、尘埃计数器(SDC)',
+        goal:'2015年飞掠冥王星；2019年飞掠柯伊伯带天体"天涯海角"(Arrokoth)；预计2038年到达日球层边缘。',
+        pos: { x: 60, y: 30, z: 40 } },
+      { key:'parker', name:'帕克太阳探测器', en:'Parker Solar Probe', agency:'NASA', launch:'2018-08-12',
+        location:'绕太阳运行（近日点约610万km）', distance:'距太阳 ~610 万 km', status:'运行中',
+        instruments:'FIELDS（电磁场）、IS☉IS（太阳综合科学调查）、WISPR（广角成像仪）、SWEAP（太阳风探测）',
+        goal:'穿越太阳日冕采样；解开日冕百万度高温之谜；找到太阳风源头。史上最快人造物体(~192km/s)。',
+        pos: { x: 0.8, y: 0.5, z: 0.3 } },
+      { key:'juno', name:'朱诺号', en:'Juno', agency:'NASA', launch:'2011-08-05',
+        location:'木星极地轨道', distance:'距木星 ~5,000 km（近木点）', status:'运行中',
+        instruments:'微波辐射计(MWR)、极光红外成像仪(JIRAM)、磁力计(MAG)、高能粒子探测器(JEDI)、JunoCam',
+        goal:'研究木星内部结构、大气组成、磁场和极光；探测木星卫星。',
+        pos: { x: 77, y: 4, z: 2 } },
+      { key:'psyche', name:'灵神星探测器', en:'Psyche', agency:'NASA', launch:'2023-10-13',
+        location:'飞往小行星带（途中）', distance:'距地球 ~3 亿 km', status:'飞行中',
+        instruments:'多光谱成像仪、伽马射线与中子光谱仪、磁力计、X波段无线电科学实验',
+        goal:'探测富金属型小行星灵神星(16 Psyche)，研究行星核的形成。预计2029年抵达。',
+        pos: { x: 30, y: 15, z: 8 } },
+      { key:'bepi', name:'贝皮科伦坡', en:'BepiColombo', agency:'ESA/JAXA', launch:'2018-10-20',
+        location:'飞往水星（途中，已多次飞掠水星）', distance:'距地球 ~1.5 亿 km', status:'飞行中',
+        instruments:'ESA水星行星轨道器(MPO) 11台仪器；JAXA水星磁层轨道器(MMO) 5台仪器',
+        goal:'全面研究水星的组成、地质、磁场、磁层及内部结构。预计2026年底抵达水星轨道。',
+        pos: { x: 5, y: 2, z: 1 } },
+      { key:'juice', name:'JUICE', en:'Jupiter Icy Moons Explorer', agency:'ESA', launch:'2023-04-14',
+        location:'飞往木星（途中，地球-月球-金星借力）', distance:'距地球 ~2 亿 km', status:'飞行中',
+        instruments:'相机、成像光谱仪、雷达探测仪、激光高度计、磁力计、粒子探测器等10台仪器',
+        goal:'研究木星三大冰卫星（木卫三、木卫二、木卫四）的海洋与宜居性；最终进入木卫三轨道。预计2031年抵达。',
+        pos: { x: 25, y: 10, z: 5 } },
+      { key:'solarorbiter', name:'太阳轨道器', en:'Solar Orbiter', agency:'ESA/NASA', launch:'2020-02-10',
+        location:'绕太阳运行（近日点~0.28 AU）', distance:'距太阳 ~4200 万 km', status:'运行中',
+        instruments:'极紫外成像仪(EUI)、日冕环境光谱仪(SPICE)、磁力计(MAG)、太阳风分析仪(SWA)、高能粒子探测器(EPD)等10台',
+        goal:'首次拍摄太阳两极图像；研究太阳风起源和日冕加热机制。',
+        pos: { x: 8, y: 6, z: -2 } },
+      { key:'osiris', name:'OSIRIS-APEX', en:'OSIRIS-APEX (原OSIRIS-REx)', agency:'NASA', launch:'2016-09-08',
+        location:'飞往小行星阿波菲斯（途中）', distance:'距地球 ~2 亿 km', status:'飞行中',
+        instruments:'相机套件(OCAMS)、激光高度计(OLA)、热发射光谱仪(OTES)、X射线成像光谱仪(REXIS)',
+        goal:'2023年已成功将贝努样本送回地球。探测器更名为OSIRIS-APEX，继续飞往小行星阿波菲斯(Apophis)，预计2029年抵达。',
+        pos: { x: 20, y: -10, z: 12 } }
+    ];
+
+    // ========== Theme Colors ==========
+    function getThemeColors() {
+      const s = getComputedStyle(document.documentElement);
+      const accent = s.getPropertyValue('--sol-accent').trim() || '#f0c060';
+      const accent2 = s.getPropertyValue('--sol-accent2').trim() || '#60a0ff';
+      const bg = s.getPropertyValue('--sol-bg').trim() || '#0a0a14';
+      const text2 = s.getPropertyValue('--sol-text2').trim() || '#8899bb';
+      return { accent, accent2, bg, text2 };
+    }
+
+    // ========== Solar System ==========
+    class SolarSystem {
+      constructor() {
+        this.speed = 1;
+        this.paused = false;
+        this.selectedPlanet = null;
+        this.selectedMoon = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
+        this.selectedProbe = null;
+        this.planetMeshes = {};
+        this.dwarfMeshes = {};
+        this.moonMeshes = {};
+        this.probeMeshes = {};
+        this.orbitLines = {};
+        this.orbitGroups = {};
+
+        // Camera follow state
+        this.cameraTarget = new THREE.Vector3(0, 0, 0);
+        this.cameraDestPos = null;
+        this.cameraAnimating = false;
+        this.orbitAngle = 0;
+        this.orbitRadius = 80;
+        this.orbitHeight = 35;
+        this.autoOrbit = false;
+
+        this.setupScene();
+        this.createSun();
+        this.createPlanets();
+        this.createDwarfPlanets();
+        this.createMoons();
+        this.createProbes();
+        this.createStarfield();
+        this.bindEvents();
+        this.buildSidePanel();
+        this.animate();
+      }
+
+      setupScene() {
+        const wrap = document.getElementById('sceneWrap');
+        const w = wrap.clientWidth, h = wrap.clientHeight;
+
+        this.scene = new THREE.Scene();
+        const colors = getThemeColors();
+        this.scene.background = new THREE.Color(colors.bg);
+
+        this.camera = new THREE.PerspectiveCamera(50, w/h, 0.5, 2000);
+        this.camera.position.set(40, 35, 60);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(w, h);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        wrap.appendChild(this.renderer.domElement);
+
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.08;
+        this.controls.target.set(0, 0, 0);
+        this.controls.minDistance = 3;
+        this.controls.maxDistance = 300;
+
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+
+        const ambient = new THREE.AmbientLight(0x333344, 0.6);
+        this.scene.add(ambient);
+        const sunLight = new THREE.PointLight(0xfff8e0, 200, 500, 0.5);
+        sunLight.position.set(0, 0, 0);
+        this.scene.add(sunLight);
+
+        window.addEventListener('resize', () => {
+          const rw = wrap.clientWidth, rh = wrap.clientHeight;
+          this.camera.aspect = rw/rh;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(rw, rh);
+        });
+      }
+
+      createSun() {
+        const geo = new THREE.SphereGeometry(2.5, 64, 64);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffcc33 });
+        this.sun = new THREE.Mesh(geo, mat);
+        this.sun.userData = { type:'sun' };
+        this.scene.add(this.sun);
+
+        // Glow
+        const glowGeo = new THREE.SphereGeometry(3.2, 64, 64);
+        const glowMat = new THREE.ShaderMaterial({
+          uniforms: { time: { value: 0 } },
+          vertexShader: `
+            varying vec3 vNormal; varying vec3 vPosition;
+            void main() { vNormal = normalize(normalMatrix * normal); vPosition = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+          `,
+          fragmentShader: `
+            varying vec3 vNormal; varying vec3 vPosition;
+            void main() {
+              float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 1.8);
+              gl_FragColor = vec4(1.0, 0.75, 0.15, 1.0) * intensity * 0.5;
+            }
+          `,
+          transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        this.sunGlow = new THREE.Mesh(glowGeo, glowMat);
+        this.scene.add(this.sunGlow);
+      }
+
+      createOrbitRing(dist, color) {
+        const pts = [];
+        const segments = 256;
+        for (let i=0; i<=segments; i++) {
+          const angle = (i/segments) * Math.PI * 2;
+          pts.push(new THREE.Vector3(Math.cos(angle)*dist, 0, Math.sin(angle)*dist));
+        }
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        const mat = new THREE.LineBasicMaterial({ color, transparent:true, opacity:0.15, depthTest:true });
+        return new THREE.Line(geo, mat);
+      }
+
+      createPlanets() {
+        PLANET_DATA.filter(p => p.type !== '矮行星').forEach((p, idx) => {
+          // Orbit group (tilts the entire orbit plane)
+          const group = new THREE.Group();
+          if (p.incl) group.rotation.x = p.incl * Math.PI / 180;
+          this.scene.add(group);
+          this.orbitGroups[p.key] = group;
+
+          // Orbit ring
+          const ring = this.createOrbitRing(p.dist, 0x334466);
+          group.add(ring);
+          this.orbitLines[p.key] = ring;
+
+          // Planet
+          const geo = new THREE.SphereGeometry(p.size * 0.45, 48, 48);
+          const mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(p.color),
+            roughness: 0.7, metalness: 0.05
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set(p.dist, 0, 0);
+          mesh.userData = { planetKey: p.key, type:'planet' };
+          mesh.castShadow = true;
+          group.add(mesh);
+          this.planetMeshes[p.key] = mesh;
+
+          // Saturn ring
+          if (p.key === 'saturn') {
+            const ringGeo = new THREE.TorusGeometry(p.size*0.55, p.size*0.12, 16, 64);
+            const ringMat = new THREE.MeshStandardMaterial({ color:0xd4c090, roughness:0.6, metalness:0.2, side:THREE.DoubleSide });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.rotation.x = Math.PI/2.3;
+            mesh.add(ringMesh);
+          }
+        });
+      }
+
+      createDwarfPlanets() {
+        const dwarfPlanets = PLANET_DATA.filter(p => p.type === '矮行星' && p.dist > 450);
+        dwarfPlanets.forEach(p => {
+          // Orbit group (tilts the entire orbit plane)
+          const group = new THREE.Group();
+          if (p.incl) group.rotation.x = p.incl * Math.PI / 180;
+          this.scene.add(group);
+          this.orbitGroups[p.key] = group;
+
+          // Orbit ring (thinner, more transparent)
+          const ring = this.createOrbitRing(p.dist, 0x554466);
+          ring.material.opacity = 0.08;
+          group.add(ring);
+          this.orbitLines[p.key] = ring;
+
+          // Dwarf planet (smaller than full planets)
+          const geo = new THREE.SphereGeometry(p.size * 0.35, 32, 32);
+          const mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(p.color),
+            roughness: 0.8, metalness: 0.02
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set(p.dist, 0, 0);
+          mesh.userData = { planetKey: p.key, type: 'dwarf' };
+          group.add(mesh);
+          this.dwarfMeshes[p.key] = mesh;
+        });
+      }
+
+      createMoons() {
+        MOON_DATA.forEach(m => {
+          // Moon will be positioned relative to its parent planet
+          const geo = new THREE.SphereGeometry(m.size * 0.2, 24, 24);
+          const mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(m.color),
+            roughness: 0.7, metalness: 0.05
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.userData = { moonKey: m.key, parentKey: m.parentKey, type: 'moon' };
+          this.scene.add(mesh);
+          this.moonMeshes[m.key] = mesh;
+        });
+      }
+
+      createProbes() {
+        const geo = new THREE.SphereGeometry(0.25, 16, 16);
+        PROBE_DATA.forEach(probe => {
+          const mat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.position.set(probe.pos.x, probe.pos.y, probe.pos.z);
+          mesh.userData = { probeKey: probe.key, type:'probe' };
+          this.scene.add(mesh);
+          this.probeMeshes[probe.key] = mesh;
+
+          // Line from Sun
+          const pts = [new THREE.Vector3(0,0,0), new THREE.Vector3(probe.pos.x, probe.pos.y, probe.pos.z)];
+          const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+          const lineMat = new THREE.LineBasicMaterial({ color:0x338855, transparent:true, opacity:0.2, depthTest:true });
+          this.scene.add(new THREE.Line(lineGeo, lineMat));
+        });
+      }
+
+      createStarfield() {
+        const starsGeo = new THREE.BufferGeometry();
+        const count = 2000;
+        const positions = new Float32Array(count*3);
+        for (let i=0; i<count*3; i+=3) {
+          positions[i] = (Math.random()-0.5)*600;
+          positions[i+1] = (Math.random()-0.5)*400;
+          positions[i+2] = (Math.random()-0.5)*600;
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+        const starsMat = new THREE.PointsMaterial({ color:0xffffff, size:0.15, transparent:true, opacity:0.7 });
+        this.scene.add(new THREE.Points(starsGeo, starsMat));
+      }
+
+      bindEvents() {
+        this.renderer.domElement.addEventListener('click', (e) => {
+          const rect = this.renderer.domElement.getBoundingClientRect();
+          this.mouse.x = ((e.clientX-rect.left)/rect.width)*2-1;
+          this.mouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
+
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+          const allMeshes = [
+            this.sun,
+            ...Object.values(this.planetMeshes),
+            ...Object.values(this.dwarfMeshes),
+            ...Object.values(this.moonMeshes),
+            ...Object.values(this.probeMeshes)
+          ];
+          const intersects = this.raycaster.intersectObjects(allMeshes);
+
+          if (intersects.length > 0) {
+            const obj = intersects[0].object;
+            if (obj.userData.type === 'sun') {
+              this.selectSun();
+            } else if (obj.userData.type === 'planet') {
+              this.selectPlanet(obj.userData.planetKey);
+            } else if (obj.userData.type === 'dwarf') {
+              this.selectPlanet(obj.userData.planetKey);
+            } else if (obj.userData.type === 'moon') {
+              this.selectMoon(obj.userData.moonKey);
+            } else if (obj.userData.type === 'probe') {
+              this.selectProbe(obj.userData.probeKey);
+            }
+          }
+        });
+
+        document.querySelectorAll('.ctrl-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const spd = parseFloat(btn.dataset.speed);
+            this.speed = spd;
+            this.paused = spd === 0;
+            document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.toggle('active', b.dataset.speed === String(spd)));
+            document.getElementById('speedLabel').textContent = spd === 0 ? '暂停' : spd + 'x';
+          });
+        });
+
+        // Historian tag click (event delegation on detail panel)
+        document.getElementById('planetDetail').addEventListener('click', (e) => {
+          const tag = e.target.closest('.historian-tag');
+          if (tag && tag.dataset.hkey) {
+            this.selectHistorian(tag.dataset.hkey);
+          }
+        });
+
+        // Panel collapse buttons
+        document.getElementById('collapseLeft').addEventListener('click', () => {
+          const panel = document.getElementById('leftPanel');
+          panel.classList.toggle('collapsed');
+        });
+        document.getElementById('collapseRight').addEventListener('click', () => {
+          const panel = document.getElementById('rightPanel');
+          panel.classList.toggle('collapsed');
+        });
+      }
+
+      selectSun() {
+        this.selectedSun = true;
+        this.selectedPlanet = null;
+        this.selectedMoon = null;
+        this.selectedHistorian = null;
+        this.selectedProbe = null;
+        this.autoOrbit = false;
+        this.updateSidePanel();
+        // Clear all highlights
+        [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        Object.values(this.moonMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        // Pulse sun glow
+        this.sun.material.color.setHex(0xffffaa);
+        setTimeout(() => { this.sun.material.color.setHex(0xffcc33); }, 300);
+      }
+
+      selectPlanet(key) {
+        this.selectedPlanet = key;
+        this.selectedMoon = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
+        this.selectedProbe = null;
+        this.autoOrbit = false;
+        this.updateSidePanel();
+        // Highlight
+        [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        Object.values(this.moonMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        const targetMesh = this.planetMeshes[key] || this.dwarfMeshes[key];
+        if (targetMesh) {
+          targetMesh.material.emissive = new THREE.Color(0xffffff);
+          targetMesh.material.emissiveIntensity = 0.3;
+        }
+      }
+
+      selectMoon(key) {
+        this.selectedMoon = key;
+        this.selectedPlanet = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
+        this.selectedProbe = null;
+        this.autoOrbit = false;
+        this.updateSidePanel();
+        [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        Object.values(this.moonMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        if (this.moonMeshes[key]) {
+          this.moonMeshes[key].material.emissive = new THREE.Color(0xffffff);
+          this.moonMeshes[key].material.emissiveIntensity = 0.3;
+        }
+      }
+
+      selectHistorian(key) {
+        this.selectedHistorian = key;
+        this.selectedSun = null;
+        this.selectedPlanet = null;
+        this.selectedMoon = null;
+        this.selectedProbe = null;
+        this.updateSidePanel();
+        // Clear all 3D highlights
+        [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        Object.values(this.moonMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+      }
+
+      selectProbe(key) {
+        this.selectedProbe = key;
+        this.selectedPlanet = null;
+        this.selectedMoon = null;
+        this.selectedSun = null;
+        this.selectedHistorian = null;
+        this.autoOrbit = false;
+        this.updateSidePanel();
+        [...Object.values(this.planetMeshes), ...Object.values(this.dwarfMeshes)].forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+        Object.values(this.moonMeshes).forEach(m => {
+          m.material.emissive = new THREE.Color(0x000000);
+          m.material.emissiveIntensity = 0;
+        });
+      }
+
+      buildSidePanel() {
+        // Sun chip
+        const sl = document.getElementById('sunList');
+        const sunChip = document.createElement('button');
+        sunChip.className = 'planet-chip';
+        sunChip.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${SUN_DATA.color};margin-right:4px;box-shadow:0 0 4px ${SUN_DATA.color};"></span>${SUN_DATA.name}`;
+        sunChip.addEventListener('click', () => this.selectSun());
+        sunChip.dataset.key = 'sun';
+        sunChip.dataset.section = 'sun';
+        sl.appendChild(sunChip);
+
+        // Planet chips
+        const pl = document.getElementById('planetList');
+        const mainPlanets = PLANET_DATA.filter(p => p.type !== '矮行星');
+        mainPlanets.forEach(p => {
+          const chip = document.createElement('button');
+          chip.className = 'planet-chip';
+          chip.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:4px;"></span>${p.name}`;
+          chip.addEventListener('click', () => this.selectPlanet(p.key));
+          chip.dataset.key = p.key;
+          chip.dataset.section = 'planet';
+          pl.appendChild(chip);
+        });
+
+        // Dwarf planet chips
+        const dwarfPlanets = PLANET_DATA.filter(p => p.type === '矮行星' && p.dist > 450);
+        const dwl = document.getElementById('dwarfList');
+        dwarfPlanets.forEach(p => {
+          const chip = document.createElement('button');
+          chip.className = 'planet-chip';
+          chip.innerHTML = `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${p.color};margin-right:4px;"></span>${p.name}`;
+          chip.addEventListener('click', () => this.selectPlanet(p.key));
+          chip.dataset.key = p.key;
+          chip.dataset.section = 'dwarf';
+          dwl.appendChild(chip);
+        });
+
+        // Moon chips
+        const ml = document.getElementById('moonList');
+        MOON_DATA.forEach(m => {
+          const chip = document.createElement('button');
+          chip.className = 'planet-chip';
+          chip.innerHTML = `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${m.color};margin-right:4px;"></span>${m.name}`;
+          chip.addEventListener('click', () => this.selectMoon(m.key));
+          chip.dataset.key = m.key;
+          chip.dataset.section = 'moon';
+          ml.appendChild(chip);
+        });
+
+        // Historian chips
+        const hl = document.getElementById('historianList');
+        HISTORIAN_DATA.forEach(h => {
+          const chip = document.createElement('button');
+          chip.className = 'planet-chip';
+          chip.innerHTML = `${h.name}`;
+          chip.addEventListener('click', () => this.selectHistorian(h.key));
+          chip.dataset.key = h.key;
+          chip.dataset.section = 'historian';
+          hl.appendChild(chip);
+        });
+
+        // Probe chips
+        const prl = document.getElementById('probeList');
+        PROBE_DATA.forEach(probe => {
+          const chip = document.createElement('button');
+          chip.className = 'probe-chip';
+          chip.innerHTML = `<span class="p-dot"></span>${probe.name}`;
+          chip.addEventListener('click', () => this.selectProbe(probe.key));
+          chip.dataset.key = probe.key;
+          prl.appendChild(chip);
+        });
+      }
+
+      updateSidePanel() {
+        // Update chips
+        document.querySelectorAll('.planet-chip').forEach(c => {
+          c.classList.remove('active');
+        });
+        if (this.selectedSun) {
+          document.querySelectorAll(`.planet-chip[data-key="sun"]`).forEach(c => c.classList.add('active'));
+        }
+        if (this.selectedPlanet) {
+          document.querySelectorAll(`.planet-chip[data-key="${this.selectedPlanet}"]`).forEach(c => c.classList.add('active'));
+        }
+        if (this.selectedMoon) {
+          document.querySelectorAll(`.planet-chip[data-key="${this.selectedMoon}"]`).forEach(c => c.classList.add('active'));
+        }
+        if (this.selectedHistorian) {
+          document.querySelectorAll(`.planet-chip[data-key="${this.selectedHistorian}"]`).forEach(c => c.classList.add('active'));
+        }
+        document.querySelectorAll('#probeList .probe-chip').forEach(c => {
+          c.classList.toggle('active', c.dataset.key === this.selectedProbe);
+        });
+
+        const detail = document.getElementById('planetDetail');
+        const probeDetail = document.getElementById('probeDetail');
+
+        // Clear both panels first
+        detail.innerHTML = '';
+        probeDetail.innerHTML = '';
+
+        if (this.selectedSun) {
+          const s = SUN_DATA;
+          detail.innerHTML = `
+            <div class="planet-card">
+              <img class="card-img" src="${s.img}" alt="${s.name}" loading="lazy">
+              <div class="planet-name"><span class="dot" style="background:${s.color}"></span>${s.name} <span style="font-size:0.7rem;color:var(--sol-text2);font-weight:400;">${s.en}</span></div>
+              <div class="planet-type">${s.type}</div>
+              <div class="planet-stats">
+                <div class="planet-stat"><span>距太阳</span><span class="val">0 AU（中心）</span></div>
+                <div class="planet-stat"><span>自转周期</span><span class="val">${s.rot}天</span></div>
+                <div class="planet-stat"><span>直径</span><span class="val">${s.diameter}</span></div>
+                <div class="planet-stat"><span>温度</span><span class="val">${s.temp}</span></div>
+                <div class="planet-stat"><span>质量占比</span><span class="val">99.86%</span></div>
+                <div class="planet-stat"><span>表面重力</span><span class="val">${s.gravity}</span></div>
+              </div>
+              <div class="story">
+                ${s.story}
+              </div>
+            </div>`;
+        } else if (this.selectedPlanet) {
+          const p = PLANET_DATA.find(pl => pl.key === this.selectedPlanet);
+          detail.innerHTML = `
+            <div class="planet-card">
+              <img class="card-img" src="${p.img}" alt="${p.name}" loading="lazy">
+              <div class="planet-name"><span class="dot" style="background:${p.color}"></span>${p.name} <span style="font-size:0.7rem;color:var(--sol-text2);font-weight:400;">${p.en}</span></div>
+              <div class="planet-type">${p.type}</div>
+              <div class="planet-stats">
+                <div class="planet-stat"><span>距太阳</span><span class="val">${p.dist} AU</span></div>
+                <div class="planet-stat"><span>公转周期</span><span class="val">${typeof p.orbit==='number'&&p.orbit<10?p.orbit+'年':'约'+p.orbit+'天'}</span></div>
+                <div class="planet-stat"><span>直径</span><span class="val">${p.diameter}</span></div>
+                <div class="planet-stat"><span>温度</span><span class="val">${p.temp}</span></div>
+                <div class="planet-stat"><span>卫星</span><span class="val">${p.moons}颗</span></div>
+                <div class="planet-stat"><span>重力</span><span class="val">${p.gravity}</span></div>
+                <div class="planet-stat"><span>黄道面倾角</span><span class="val">${p.incl}°</span></div>
+              </div>
+              <div class="story">
+                <div style="font-size:0.7rem;color:var(--sol-accent);margin-bottom:4px;font-weight:600;">发现历史 · ${p.year}</div>
+                <strong>发现者：</strong>${tagDiscoverer(p.discoverer)}<br><br>
+                ${p.story}
+              </div>
+            </div>`;
+        } else if (this.selectedMoon) {
+          const m = MOON_DATA.find(mo => mo.key === this.selectedMoon);
+          detail.innerHTML = `
+            <div class="planet-card">
+              <img class="card-img" src="${m.img}" alt="${m.name}" loading="lazy">
+              <div class="planet-name"><span class="dot" style="background:${m.color}"></span>${m.name} <span style="font-size:0.7rem;color:var(--sol-text2);font-weight:400;">${m.en}</span></div>
+              <div class="planet-type">卫星 · 绕${m.parent}</div>
+              <div class="planet-stats">
+                <div class="planet-stat"><span>绕行距离</span><span class="val">${m.dist_planet >= 1 ? m.dist_planet.toFixed(0) + ' km' : (m.dist_planet*1000000).toFixed(0) + ' km'}</span></div>
+                <div class="planet-stat"><span>公转周期</span><span class="val">${Math.abs(m.orbit).toFixed(1)}天</span></div>
+                <div class="planet-stat"><span>直径</span><span class="val">${m.size_display}</span></div>
+                <div class="planet-stat"><span>温度</span><span class="val">${m.temp_mean}</span></div>
+                <div class="planet-stat"><span>自转</span><span class="val">${m.rotation}</span></div>
+                <div class="planet-stat"><span>重力</span><span class="val">${m.gravity}</span></div>
+              </div>
+              <div class="story">
+                <div style="font-size:0.7rem;color:var(--sol-accent);margin-bottom:4px;font-weight:600;">发现历史</div>
+                <strong>发现者：</strong>${tagDiscoverer(m.discoverer)}<br><br>
+                ${m.story}
+              </div>
+            </div>`;
+        } else {
+          detail.innerHTML = `<div class="empty-state"><div class="icon">&#9790;</div><div class="msg">点击3D场景中的天体<br>或选择上方标签查看详情</div></div>`;
+        }
+
+        if (this.selectedHistorian) {
+          const h = HISTORIAN_DATA.find(he => he.key === this.selectedHistorian);
+          probeDetail.innerHTML = `
+            <div class="planet-card">
+              <img class="card-img" src="${h.img}" alt="${h.name}" loading="lazy">
+              <div class="planet-name"><span class="dot" style="background:var(--sol-accent)"></span>${h.name} <span style="font-size:0.7rem;color:var(--sol-text2);font-weight:400;">${h.en}</span></div>
+              <div class="planet-type">${h.role} · ${h.country}</div>
+              <div class="planet-stats">
+                <div class="planet-stat"><span>生卒</span><span class="val">${h.period}</span></div>
+                <div class="planet-stat"><span>国籍</span><span class="val">${h.country}</span></div>
+              </div>
+              <div class="story">
+                <strong>生平：</strong>${h.bio}
+              </div>
+              <div class="story" style="margin-top:8px;">
+                <div style="font-size:0.7rem;color:var(--sol-accent);margin-bottom:4px;font-weight:600;">主要发现</div>
+                ${h.discoveries.map(d => `• ${d}`).join('<br>')}
+              </div>
+            </div>`;
+        } else if (this.selectedProbe) {
+          const pr = PROBE_DATA.find(pb => pb.key === this.selectedProbe);
+          probeDetail.innerHTML = `
+            <div class="probe-card" style="margin-top:8px;">
+              <div class="probe-name"><span class="status"></span>${pr.name} <span style="font-size:0.65rem;color:var(--sol-text2);font-weight:400;">${pr.en}</span></div>
+              <div class="probe-info">
+                <strong>机构：</strong>${pr.agency} &nbsp; <strong>发射：</strong>${pr.launch}<br>
+                <strong>位置：</strong>${pr.location}<br>
+                <strong>距离：</strong>${pr.distance}<br>
+                <strong>状态：</strong>${pr.status}
+              </div>
+              <div class="probe-instruments">
+                <strong>携带仪器：</strong>${pr.instruments}
+              </div>
+              <div class="probe-info" style="margin-top:4px;"><strong>任务目标：</strong>${pr.goal}</div>
+            </div>`;
+        }
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+
+        const time = Date.now() * 0.001;
+        if (!this.paused) {
+          const dt = 0.016 * this.speed;
+          // Update planets
+          PLANET_DATA.forEach(p => {
+            const isDwarf = p.type === '矮行星';
+            const mesh = isDwarf ? this.dwarfMeshes[p.key] : this.planetMeshes[p.key];
+            if (!mesh) return;
+            const period = p.orbit;
+            const angle = time * 0.3 / Math.max(period, 0.1) + p.key.charCodeAt(0) * 0.1;
+            mesh.position.x = Math.cos(angle) * p.dist;
+            mesh.position.z = Math.sin(angle) * p.dist;
+            mesh.rotation.y += dt * (isDwarf ? 1.5 : 2);
+          });
+
+          // Update moons (orbit around parent planets)
+          MOON_DATA.forEach(m => {
+            const moonMesh = this.moonMeshes[m.key];
+            const parentMesh = this.planetMeshes[m.parentKey];
+            if (!moonMesh || !parentMesh) return;
+            const moonAngle = time * 1.5 / Math.max(Math.abs(m.orbit), 0.1) + m.key.charCodeAt(0) * 0.2;
+            const dist = m.dist_planet * 8;
+            moonMesh.position.x = parentMesh.position.x + Math.cos(moonAngle) * dist;
+            moonMesh.position.z = parentMesh.position.z + Math.sin(moonAngle) * dist;
+            moonMesh.position.y = parentMesh.position.y + Math.sin(moonAngle * 0.7) * dist * 0.3;
+            moonMesh.rotation.y += dt * 3;
+          });
+
+          // Pulse probes
+          Object.values(this.probeMeshes).forEach(m => {
+            m.material.opacity = 0.5 + Math.sin(time*5) * 0.5;
+          });
+        }
+
+        // Camera behavior
+        const activeBody = this.getActiveBodyMesh();
+        if (activeBody) {
+          // Follow selected body: smooth target transition
+          const targetPos = activeBody.position.clone();
+          this.controls.target.lerp(targetPos, 0.05);
+          this.autoOrbit = false;
+        } else if (this.autoOrbit) {
+          // Default: slowly orbit around the sun
+          this.orbitAngle += 0.0008 * this.speed;
+          const camX = Math.cos(this.orbitAngle) * this.orbitRadius;
+          const camZ = Math.sin(this.orbitAngle) * this.orbitRadius;
+          this.camera.position.lerp(new THREE.Vector3(camX, this.orbitHeight, camZ), 0.02);
+          this.controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.02);
+        }
+
+        this.controls.update();
+
+        // Sun glow pulse
+        this.sunGlow.material.uniforms.time.value = time;
+        this.sunGlow.scale.setScalar(1 + Math.sin(time*2)*0.03);
+
+        this.renderer.render(this.scene, this.camera);
+      }
+
+      getActiveBodyMesh() {
+        if (this.selectedSun) return this.sun;
+        if (this.selectedPlanet) return this.planetMeshes[this.selectedPlanet] || this.dwarfMeshes[this.selectedPlanet];
+        if (this.selectedMoon) return this.moonMeshes[this.selectedMoon];
+        if (this.selectedProbe) return this.probeMeshes[this.selectedProbe];
+        return null;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      new SolarSystem();
+    });
+  </script>
+</body>
+</html>
