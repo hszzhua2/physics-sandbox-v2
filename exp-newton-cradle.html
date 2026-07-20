@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>牛顿摆 · 动量与能量守恒</title>
+  <link rel="stylesheet" href="shared-theme.css">
+  <style>
+    .exp-bg { z-index: -1; }
+    #canvas-container { position: fixed; inset: 0; z-index: 0; }
+    canvas { display: block; }
+
+    #app-title {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+      z-index: 12; pointer-events: none; text-align: center;
+      background: var(--panel-bg); border: 1px solid var(--panel-border);
+      border-radius: var(--radius); padding: 8px 24px;
+      backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop);
+      box-shadow: var(--shadow); transition: all 0.4s ease;
+    }
+    #app-title .main {
+      font-size: 1rem; font-weight: 700; color: var(--accent-1);
+      letter-spacing: 2px; transition: color 0.4s;
+    }
+    #app-title .subtitle {
+      display: block; font-size: 0.68rem; font-weight: 400;
+      color: var(--text-muted); letter-spacing: 1px; margin-top: 2px;
+      transition: color 0.4s;
+    }
+
+    #left-panel {
+      position: fixed; top: 140px; left: 16px; bottom: 20px;
+      width: 260px; z-index: 10;
+      display: flex; flex-direction: column;
+    }
+    #left-panel .panel-header {
+      padding: 12px 16px; font-size: 0.9rem; font-weight: 700;
+      color: var(--accent-1); border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      transition: color 0.4s, border-color 0.4s;
+    }
+    #left-panel .panel-body {
+      padding: 14px 16px; overflow-y: auto; flex: 1;
+    }
+    #left-panel .panel-body::-webkit-scrollbar { width: 4px; }
+    #left-panel .panel-body::-webkit-scrollbar-thumb {
+      background: var(--panel-border); border-radius: 2px;
+    }
+
+    .section { margin-bottom: 16px; }
+    .section:last-child { margin-bottom: 0; }
+    .section-label {
+      font-size: 0.72rem; color: var(--text-muted);
+      margin-bottom: 8px; text-transform: uppercase;
+      letter-spacing: 1px; font-weight: 600;
+      transition: color 0.4s;
+    }
+
+    .param-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; font-size: 0.82rem;
+      color: var(--text-muted); transition: color 0.4s;
+    }
+    .param-row .val {
+      color: var(--accent-1); font-weight: 600;
+      font-variant-numeric: tabular-nums; min-width: 40px; text-align: right;
+      transition: color 0.4s;
+    }
+    .param-row input[type="range"] {
+      flex: 1; margin: 0 8px; -webkit-appearance: none; height: 4px;
+      border-radius: 2px; background: var(--panel-border); outline: none;
+      transition: background 0.4s;
+    }
+    .param-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--accent-1);
+      cursor: pointer; border: 2px solid var(--text-color);
+      transition: all 0.3s;
+    }
+
+    button {
+      background: var(--panel-bg); color: var(--text-color);
+      border: 1px solid var(--panel-border); padding: 7px 14px;
+      border-radius: var(--radius); cursor: pointer; transition: all 0.25s;
+      font-size: 0.82rem; font-family: inherit;
+    }
+    button:hover { border-color: var(--accent-1); color: var(--accent-1); }
+    button.active {
+      background: var(--accent-1) !important; color: #fff !important;
+      border-color: var(--accent-1) !important; font-weight: 600;
+    }
+    .action-btn { width: 100%; padding: 8px; font-size: 0.82rem; margin-bottom: 6px; }
+
+    #right-panel {
+      position: fixed; top: 140px; right: 16px; bottom: 20px;
+      width: 320px; z-index: 10;
+      display: flex; flex-direction: column;
+    }
+    #right-panel .panel-header {
+      padding: 12px 16px; font-size: 0.9rem; font-weight: 700;
+      color: var(--accent-3); border-bottom: 1px solid var(--panel-border);
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      transition: color 0.4s, border-color 0.4s;
+    }
+    .knowledge-content {
+      padding: 14px 16px; overflow-y: auto; flex: 1;
+    }
+    .knowledge-content::-webkit-scrollbar { width: 4px; }
+    .knowledge-content::-webkit-scrollbar-thumb {
+      background: var(--panel-border); border-radius: 2px;
+    }
+
+    .status-badge {
+      display: inline-block; padding: 4px 12px;
+      border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+      margin-bottom: 14px;
+      border: 1px solid var(--panel-border);
+      transition: all 0.4s;
+    }
+    .status-idle { color: var(--text-muted); }
+    .status-drag { color: var(--accent-2); border-color: var(--accent-2); }
+    .status-active { color: var(--accent-1); border-color: var(--accent-1); }
+
+    .info-card {
+      margin-bottom: 12px; padding: 12px 14px;
+      border-left: 3px solid var(--panel-border);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      transition: all 0.3s; opacity: 0.5;
+    }
+    .info-card.active {
+      border-left-color: var(--accent-3); opacity: 1;
+      background: rgba(128,128,128,0.05);
+    }
+    .info-title {
+      font-size: 0.84rem; font-weight: 700;
+      color: var(--accent-3); margin-bottom: 6px;
+      transition: color 0.4s;
+    }
+    .info-content {
+      font-size: 0.78rem; color: var(--text-muted); line-height: 1.65;
+      transition: color 0.4s;
+    }
+    .info-content strong { color: var(--text-color); font-weight: 600; transition: color 0.4s; }
+    .info-content .formula {
+      display: inline-block; margin: 4px 0; padding: 2px 8px;
+      border-radius: var(--radius); font-size: 0.78rem;
+      background: rgba(128,128,128,0.08); color: var(--accent-1);
+      transition: all 0.4s;
+    }
+
+    .telemetry {
+      margin-top: 12px; padding-top: 12px;
+      border-top: 1px solid var(--panel-border);
+      font-size: 0.76rem; color: var(--text-muted); line-height: 1.9;
+      transition: border-color 0.4s, color 0.4s;
+    }
+    .telemetry .row {
+      display: flex; justify-content: space-between;
+    }
+    .telemetry .val {
+      color: var(--accent-1); font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.4s;
+    }
+
+    .hint-text {
+      font-size: 0.72rem; color: var(--accent-3); line-height: 1.5;
+      margin-top: 8px; transition: color 0.4s;
+    }
+
+    @media (max-width: 1100px) {
+      #left-panel { width: 220px; }
+      #right-panel { width: 280px; }
+    }
+    @media (max-width: 800px) {
+      #left-panel, #right-panel { display: none; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+</head>
+<body>
+<div class="exp-bg"></div>
+
+<a href="index.html" class="back-btn">&#8592; 返回首页</a>
+
+<div id="app-title">
+  <span class="main">牛顿摆 · Newton's Cradle</span>
+  <span class="subtitle">动量守恒 · 能量守恒 · 完全弹性碰撞</span>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- Left Panel: Controls -->
+<div id="left-panel" class="glass-panel">
+  <div class="panel-header">&#9881; 参数设置</div>
+  <div class="panel-body">
+    <div class="section">
+      <div class="section-label">系统参数</div>
+      <div class="param-row">
+        <span>小球数量</span>
+        <input type="range" id="slider-count" min="3" max="7" step="1" value="5">
+        <span class="val" id="val-count">5</span>
+      </div>
+      <div class="param-row">
+        <span>单球质量 (kg)</span>
+        <input type="range" id="slider-mass" min="0.1" max="5" step="0.1" value="1">
+        <span class="val" id="val-mass">1.0</span>
+      </div>
+      <div class="param-row">
+        <span>重力 (m/s²)</span>
+        <input type="range" id="slider-gravity" min="1" max="20" step="0.5" value="9.8">
+        <span class="val" id="val-gravity">9.8</span>
+      </div>
+      <div class="param-row">
+        <span>空气阻力</span>
+        <input type="range" id="slider-damping" min="0" max="0.5" step="0.01" value="0">
+        <span class="val" id="val-damping">0.00</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">操作</div>
+      <button id="btn-reset" class="action-btn">重置静止状态</button>
+      <button id="btn-demo" class="action-btn">演示：左侧拉起</button>
+    </div>
+
+    <div class="section">
+      <div class="section-label">交互提示</div>
+      <div class="hint-text">
+        点击最左侧或最右侧的小球并拖拽，释放后观察动量传递。<br>
+        鼠标右键拖拽空白处可旋转视角，滚轮缩放。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Right Panel: Knowledge -->
+<div id="right-panel" class="glass-panel">
+  <div class="panel-header">&#128214; 物理状态解析</div>
+  <div class="knowledge-content">
+    <div id="sim-status" class="status-badge status-idle">状态: 静止</div>
+
+    <div class="info-card active" id="card-history">
+      <div class="info-title">&#128214; 历史背景</div>
+      <div class="info-content">
+        牛顿摆以艾萨克·牛顿爵士命名，展示了其在<strong>1687年</strong>《自然哲学的数学原理》中提出的<strong>动量守恒</strong>和<strong>能量守恒</strong>定律。实际上，这个装置在<strong>1967年</strong>由英国演员 Simon Prebble 发明并命名，很快成为最流行的物理桌面玩具之一。
+      </div>
+    </div>
+
+    <div class="info-card" id="card-potential">
+      <div class="info-title">&#9889; 重力势能蓄能</div>
+      <div class="info-content">
+        当您拉起小球时，小球克服重力做功，动能转化为<strong>重力势能</strong>：
+        <div class="formula">E<sub>p</sub> = mgh</div>
+        抬得越高，储存的势能越大。此时由于小球静止，系统总动量仍为零。释放瞬间，势能开始转化为动能。
+      </div>
+    </div>
+
+    <div class="info-card" id="card-conservation">
+      <div class="info-title">&#9883; 动量与能量守恒</div>
+      <div class="info-content">
+        释放后，势能转化为动能。碰撞瞬间发生<strong>完全弹性碰撞</strong>（恢复系数 e=1）：
+        <div class="formula">m<sub>1</sub>v<sub>1</sub> = m<sub>2</sub>v<sub>2</sub></div>
+        <div class="formula">½m<sub>1</sub>v<sub>1</sub>² = ½m<sub>2</sub>v<sub>2</sub>²</div>
+        联立两式可得 v<sub>2</sub> = v<sub>1</sub>，即末端球获得与撞击球相同的速度。系统将动量和动能通过中间静止的小球传递给末端的小球。
+      </div>
+    </div>
+
+    <div class="telemetry">
+      <div class="row"><span>系统总动能</span><span class="val" id="tm-ke">0.00 J</span></div>
+      <div class="row"><span>系统总动量</span><span class="val" id="tm-p">0.00 kg·m/s</span></div>
+      <div class="row"><span>最大球速</span><span class="val" id="tm-vmax">0.00 m/s</span></div>
+      <div class="row"><span>碰撞次数</span><span class="val" id="tm-collisions">0</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// Three.js + Cannon.js 牛顿摆
+// ==========================================
+let scene, camera, renderer, controls;
+let world, physicsMaterial;
+const balls = [];
+let topBarMesh, topBarBody;
+
+const params = {
+  ballCount: 5,
+  mass: 1,
+  gravity: 9.8,
+  damping: 0.0,
+  radius: 0.5,
+  stringLength: 4,
+  spacing: 1.02
+};
+
+let isDragging = false;
+let draggedBall = null;
+let currentState = 'IDLE';
+let collisionCount = 0;
+let lastCollisionTime = 0;
+
+const container = document.getElementById('canvas-container');
+const viewport = container;
+const statusBadge = document.getElementById('sim-status');
+const cardHistory = document.getElementById('card-history');
+const cardPotential = document.getElementById('card-potential');
+const cardConservation = document.getElementById('card-conservation');
+
+function init() {
+  initThree();
+  initCannon();
+  buildCradle();
+  initInteraction();
+  window.addEventListener('resize', onWindowResize, false);
+  animate();
+}
+
+function initThree() {
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x000000, 0.015);
+
+  const aspect = container.clientWidth / container.clientHeight;
+  const frustumSize = 12;
+  camera = new THREE.OrthographicCamera(
+    frustumSize * aspect / -2, frustumSize * aspect / 2,
+    frustumSize / 2, frustumSize / -2, 0.1, 100
+  );
+  camera.position.set(0, 0, 20);
+  camera.lookAt(0, -2, 0);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  container.appendChild(renderer.domElement);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(5, 10, 8);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  dirLight.shadow.camera.left = -10;
+  dirLight.shadow.camera.right = 10;
+  dirLight.shadow.camera.top = 10;
+  dirLight.shadow.camera.bottom = -10;
+  scene.add(dirLight);
+
+  const fillLight = new THREE.DirectionalLight(0x4facfe, 0.3);
+  fillLight.position.set(-5, 3, 5);
+  scene.add(fillLight);
+
+  const gridHelper = new THREE.GridHelper(40, 40, 0x333333, 0x222222);
+  gridHelper.position.y = -6;
+  scene.add(gridHelper);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.maxPolarAngle = Math.PI / 2 + 0.1;
+}
+
+function initCannon() {
+  world = new CANNON.World();
+  world.gravity.set(0, -params.gravity, 0);
+  world.solver.iterations = 100;
+  world.solver.tolerance = 0.0001;
+
+  physicsMaterial = new CANNON.Material("standard");
+  const contactMaterial = new CANNON.ContactMaterial(
+    physicsMaterial, physicsMaterial,
+    { friction: 0.0, restitution: 1.0, contactEquationStiffness: 1e9, contactEquationRelaxation: 3 }
+  );
+  world.addContactMaterial(contactMaterial);
+
+  // Collision event for counting
+  world.addEventListener('postStep', () => {
+    // Count contacts
+    const now = performance.now();
+    if (world.contacts && world.contacts.length > 0 && now - lastCollisionTime > 100) {
+      collisionCount += world.contacts.length;
+      lastCollisionTime = now;
+    }
+  });
+}
+
+function clearCradle() {
+  balls.forEach(b => {
+    scene.remove(b.mesh);
+    scene.remove(b.line);
+    world.remove(b.body);
+  });
+  balls.length = 0;
+  if (topBarMesh) { scene.remove(topBarMesh); }
+  if (topBarBody) { world.remove(topBarBody); }
+}
+
+function buildCradle() {
+  clearCradle();
+  const count = params.ballCount;
+  const r = params.radius;
+  const totalWidth = (count - 1) * (r * params.spacing);
+  const startX = -totalWidth / 2;
+
+  const barWidth = totalWidth + 2;
+  const barHeight = 0.4;
+  const barDepth = 1.0;
+  const barY = 2;
+
+  const barGeo = new THREE.BoxGeometry(barWidth, barHeight, barDepth);
+  const barMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.5, roughness: 0.5 });
+  topBarMesh = new THREE.Mesh(barGeo, barMat);
+  topBarMesh.position.set(0, barY, 0);
+  topBarMesh.castShadow = true;
+  topBarMesh.receiveShadow = true;
+  scene.add(topBarMesh);
+
+  const barShape = new CANNON.Box(new CANNON.Vec3(barWidth/2, barHeight/2, barDepth/2));
+  topBarBody = new CANNON.Body({ mass: 0, material: physicsMaterial });
+  topBarBody.addShape(barShape);
+  topBarBody.position.set(0, barY, 0);
+  world.addBody(topBarBody);
+
+  const sphereGeo = new THREE.SphereGeometry(r, 32, 32);
+  const sphereMat = new THREE.MeshStandardMaterial({
+    color: 0xe0e0e0, metalness: 0.9, roughness: 0.1, envMapIntensity: 1.0
+  });
+  const lineMat = new THREE.LineBasicMaterial({ color: 0xaaaaaa, linewidth: 2 });
+
+  for (let i = 0; i < count; i++) {
+    const x = startX + i * (r * params.spacing);
+
+    const mesh = new THREE.Mesh(sphereGeo, sphereMat);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+
+    const lineGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(x, barY, 0),
+      new THREE.Vector3(x, barY - params.stringLength, 0)
+    ]);
+    const line = new THREE.Line(lineGeo, lineMat);
+    scene.add(line);
+
+    const shape = new CANNON.Sphere(r);
+    const body = new CANNON.Body({
+      mass: params.mass, material: physicsMaterial,
+      linearDamping: params.damping, angularDamping: 0.1
+    });
+    body.addShape(shape);
+    body.position.set(x, barY - params.stringLength, 0);
+
+    if (body.linearFactor) {
+      body.linearFactor.set(1, 1, 0);
+      body.angularFactor.set(0, 0, 1);
+    }
+    world.addBody(body);
+
+    const constraint = new CANNON.PointToPointConstraint(
+      topBarBody, new CANNON.Vec3(x, 0, 0),
+      body, new CANNON.Vec3(0, params.stringLength, 0)
+    );
+    constraint.collideConnected = false;
+    world.addConstraint(constraint);
+
+    balls.push({ mesh, body, line, pivotX: x, pivotY: barY });
+  }
+}
+
+function initInteraction() {
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+  function updateMouse(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
+  viewport.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return; // left button only
+    updateMouse(e);
+    raycaster.setFromCamera(mouse, camera);
+
+    const meshes = balls.map(b => b.mesh);
+    const intersects = raycaster.intersectObjects(meshes);
+
+    if (intersects.length > 0) {
+      const clickedMesh = intersects[0].object;
+      draggedBall = balls.find(b => b.mesh === clickedMesh);
+
+      const index = balls.indexOf(draggedBall);
+      if (index !== 0 && index !== balls.length - 1) {
+        draggedBall = null;
+        return;
+      }
+
+      isDragging = true;
+      draggedBall.body.type = CANNON.Body.KINEMATIC;
+      draggedBall.body.velocity.set(0, 0, 0);
+      if (controls) controls.enabled = false;
+    }
+  });
+
+  viewport.addEventListener('pointermove', (e) => {
+    if (!isDragging || !draggedBall) return;
+    updateMouse(e);
+    raycaster.setFromCamera(mouse, camera);
+
+    const targetPoint = new THREE.Vector3();
+    raycaster.ray.intersectPlane(dragPlane, targetPoint);
+
+    if (targetPoint) {
+      const pivot = new THREE.Vector3(draggedBall.pivotX, draggedBall.pivotY, 0);
+      const dir = new THREE.Vector3().subVectors(targetPoint, pivot);
+      const angle = Math.atan2(dir.y, dir.x);
+      const minAngle = -Math.PI/2 - Math.PI/3;
+      const maxAngle = -Math.PI/2 + Math.PI/3;
+
+      let clampedAngle = angle;
+      if (clampedAngle > maxAngle && clampedAngle < 0) clampedAngle = maxAngle;
+      if (clampedAngle < minAngle || clampedAngle > 0) clampedAngle = minAngle;
+
+      const newX = pivot.x + Math.cos(clampedAngle) * params.stringLength;
+      const newY = pivot.y + Math.sin(clampedAngle) * params.stringLength;
+      draggedBall.body.position.set(newX, newY, 0);
+      draggedBall.body.velocity.set(0, 0, 0);
+    }
+  });
+
+  const endDrag = () => {
+    if (isDragging && draggedBall) {
+      isDragging = false;
+      draggedBall.body.type = CANNON.Body.DYNAMIC;
+      draggedBall.body.wakeUp();
+      draggedBall = null;
+      if (controls) controls.enabled = true;
+    }
+  };
+  window.addEventListener('pointerup', endDrag);
+  viewport.addEventListener('pointerleave', endDrag);
+}
+
+function onWindowResize() {
+  const aspect = container.clientWidth / container.clientHeight;
+  const frustumSize = 12;
+  camera.left = -frustumSize * aspect / 2;
+  camera.right = frustumSize * aspect / 2;
+  camera.top = frustumSize / 2;
+  camera.bottom = -frustumSize / -2;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+}
+
+function updateUIState() {
+  let totalKE = 0;
+  let totalP = 0;
+  let maxV = 0;
+  balls.forEach(b => {
+    const v = b.body.velocity;
+    const speedSq = v.x*v.x + v.y*v.y;
+    const speed = Math.sqrt(speedSq);
+    totalKE += 0.5 * b.body.mass * speedSq;
+    totalP += b.body.mass * v.x;
+    if (speed > maxV) maxV = speed;
+  });
+
+  document.getElementById('tm-ke').textContent = totalKE.toFixed(2) + ' J';
+  document.getElementById('tm-p').textContent = totalP.toFixed(2) + ' kg·m/s';
+  document.getElementById('tm-vmax').textContent = maxV.toFixed(2) + ' m/s';
+  document.getElementById('tm-collisions').textContent = collisionCount;
+
+  let newState = 'IDLE';
+  if (isDragging) newState = 'DRAG';
+  else if (totalKE > 0.1) newState = 'ACTIVE';
+
+  if (currentState !== newState) {
+    currentState = newState;
+    cardHistory.classList.remove('active');
+    cardPotential.classList.remove('active');
+    cardConservation.classList.remove('active');
+    statusBadge.className = 'status-badge';
+
+    switch(currentState) {
+      case 'IDLE':
+        statusBadge.innerText = '状态: 静止';
+        statusBadge.classList.add('status-idle');
+        cardHistory.classList.add('active');
+        break;
+      case 'DRAG':
+        statusBadge.innerText = '状态: 蓄能中...';
+        statusBadge.classList.add('status-drag');
+        cardPotential.classList.add('active');
+        break;
+      case 'ACTIVE':
+        statusBadge.innerText = '状态: 动能转换';
+        statusBadge.classList.add('status-active');
+        cardConservation.classList.add('active');
+        break;
+    }
+  }
+}
+
+const timeStep = 1 / 60;
+let lastCallTime;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const time = performance.now() / 1000;
+  if (!lastCallTime) {
+    world.step(timeStep);
+  } else {
+    const dt = time - lastCallTime;
+    world.step(timeStep, dt, 3);
+  }
+  lastCallTime = time;
+
+  balls.forEach(b => {
+    if (!b.body.linearFactor) {
+      b.body.position.z = 0;
+      b.body.velocity.z = 0;
+    }
+    b.mesh.position.copy(b.body.position);
+    b.mesh.quaternion.copy(b.body.quaternion);
+
+    const positions = b.line.geometry.attributes.position.array;
+    positions[3] = b.body.position.x;
+    positions[4] = b.body.position.y;
+    positions[5] = b.body.position.z;
+    b.line.geometry.attributes.position.needsUpdate = true;
+  });
+
+  updateUIState();
+  if (controls) controls.update();
+  renderer.render(scene, camera);
+}
+
+// ==========================================
+// UI 绑定
+// ==========================================
+const sliderCount = document.getElementById('slider-count');
+const valCount = document.getElementById('val-count');
+sliderCount.addEventListener('input', (e) => {
+  params.ballCount = parseInt(e.target.value);
+  valCount.textContent = params.ballCount;
+  buildCradle();
+});
+
+const sliderMass = document.getElementById('slider-mass');
+const valMass = document.getElementById('val-mass');
+sliderMass.addEventListener('input', (e) => {
+  params.mass = parseFloat(e.target.value);
+  valMass.textContent = params.mass.toFixed(1);
+  balls.forEach(b => {
+    b.body.mass = params.mass;
+    b.body.updateMassProperties();
+  });
+});
+
+const sliderGravity = document.getElementById('slider-gravity');
+const valGravity = document.getElementById('val-gravity');
+sliderGravity.addEventListener('input', (e) => {
+  params.gravity = parseFloat(e.target.value);
+  valGravity.textContent = params.gravity.toFixed(1);
+  world.gravity.set(0, -params.gravity, 0);
+});
+
+const sliderDamping = document.getElementById('slider-damping');
+const valDamping = document.getElementById('val-damping');
+sliderDamping.addEventListener('input', (e) => {
+  params.damping = parseFloat(e.target.value);
+  valDamping.textContent = params.damping.toFixed(2);
+  balls.forEach(b => { b.body.linearDamping = params.damping; });
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  balls.forEach(b => {
+    b.body.position.set(b.pivotX, b.pivotY - params.stringLength, 0);
+    b.body.velocity.set(0,0,0);
+    b.body.angularVelocity.set(0,0,0);
+  });
+  collisionCount = 0;
+});
+
+document.getElementById('btn-demo').addEventListener('click', () => {
+  if (balls.length < 1) return;
+  const ball = balls[0];
+  ball.body.position.set(
+    ball.pivotX - params.stringLength * Math.sin(Math.PI/4),
+    ball.pivotY - params.stringLength * Math.cos(Math.PI/4),
+    0
+  );
+  ball.body.velocity.set(0, 0, 0);
+});
+
+window.onload = init;
+</script>
+<script src="shared-theme.js"></script>
+</body>
+</html>
