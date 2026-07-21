@@ -960,6 +960,7 @@ document.getElementById('pb-search').addEventListener('input', (e) => {
 // ===== Knowledge Graph (D3 force-directed) =====
 let svg, g, simulation, linkSel, nodeSel, labelSel;
 let graphMode = 'all';
+let nodesById = {};
 
 function initGraph() {
   const svgEl = document.getElementById('graph-svg');
@@ -1000,11 +1001,11 @@ function initGraph() {
 
 function buildGraphData() {
   if (!MANIFEST) return;
-  
+
   const svgEl = document.getElementById('graph-svg');
   const width = svgEl.clientWidth || 360;
   const height = svgEl.clientHeight || 500;
-  
+
   // Build nodes
   const nodes = MANIFEST.nodes.map(n => ({
     id: n.path,
@@ -1015,6 +1016,10 @@ function buildGraphData() {
     type: n.type,
     linkCount: n.linkCount
   }));
+
+  // Build lookup map for edge filtering
+  nodesById = {};
+  nodes.forEach(n => { nodesById[n.id] = n; });
   
   // Build links
   const links = MANIFEST.edges.map(e => ({
@@ -1119,42 +1124,94 @@ function buildGraphData() {
 }
 
 function updateGraphHighlight() {
-  if (!nodeSel || !currentNode) return;
-  
+  if (!nodeSel) return;
+
+  if (graphMode === 'all') {
+    // 全部: 所有节点和边正常显示
+    nodeSel
+      .attr('opacity', 1)
+      .attr('stroke', d => (currentNode && d.id === currentNode.path) ? 'var(--pb-accent)' : 'var(--pb-bg)')
+      .attr('stroke-width', d => (currentNode && d.id === currentNode.path) ? 2 : 1)
+      .attr('r', d => (currentNode && d.id === currentNode.path) ? 8 : Math.max(3, Math.min(7, 3 + d.linkCount * 0.15)));
+    linkSel
+      .attr('stroke-opacity', 0.3)
+      .attr('stroke', 'var(--pb-panel-border)');
+    labelSel.attr('opacity', 0.6);
+    return;
+  }
+
+  if (!currentNode) {
+    // 需要先选择节点
+    nodeSel.attr('opacity', 0.3);
+    linkSel.attr('stroke-opacity', 0.05);
+    labelSel.attr('opacity', 0.15);
+    document.getElementById('pb-graph-info').innerHTML = `<strong style="opacity:0.7;">请点击一个节点以过滤</strong>`;
+    return;
+  }
+
   const currentPath = currentNode.path;
-  // Find linked nodes
-  const linkedPaths = new Set([currentPath]);
-  MANIFEST.edges.forEach(e => {
-    if (e.source === currentPath) linkedPaths.add(e.target);
-    if (e.target === currentPath) linkedPaths.add(e.source);
-  });
-  
-  nodeSel
-    .attr('opacity', d => linkedPaths.has(d.id) ? 1 : 0.15)
-    .attr('stroke', d => d.id === currentPath ? 'var(--pb-accent)' : 'var(--pb-bg)')
-    .attr('stroke-width', d => d.id === currentPath ? 3 : 1)
-    .attr('r', d => d.id === currentPath ? 8 : Math.max(3, Math.min(7, 3 + d.linkCount * 0.15)));
-  
-  linkSel
-    .attr('stroke-opacity', d => {
-      const s = typeof d.source === 'object' ? d.source.id : d.source;
-      const t = typeof d.target === 'object' ? d.target.id : d.target;
-      return (s === currentPath || t === currentPath) ? 0.8 : 0.08;
-    })
-    .attr('stroke', d => {
-      const s = typeof d.source === 'object' ? d.source.id : d.source;
-      const t = typeof d.target === 'object' ? d.target.id : d.target;
-      return (s === currentPath || t === currentPath) ? 'var(--pb-accent)' : 'var(--pb-panel-border)';
+
+  if (graphMode === 'branch') {
+    // 同分支: 仅显示与选中节点相同 category 的节点
+    const currentCat = currentNode.category;
+    nodeSel
+      .attr('opacity', d => d.category === currentCat ? 1 : 0.08)
+      .attr('stroke', d => d.id === currentPath ? 'var(--pb-accent)' : 'var(--pb-bg)')
+      .attr('stroke-width', d => d.id === currentPath ? 3 : 1)
+      .attr('r', d => d.id === currentPath ? 8 : Math.max(3, Math.min(7, 3 + d.linkCount * 0.15)));
+    linkSel
+      .attr('stroke-opacity', d => {
+        const s = typeof d.source === 'object' ? d.source : nodesById[d.source];
+        const t = typeof d.target === 'object' ? d.target : nodesById[d.target];
+        const sCat = s ? s.category : '';
+        const tCat = t ? t.category : '';
+        return (sCat === currentCat && tCat === currentCat) ? 0.25 : 0.02;
+      })
+      .attr('stroke', 'var(--pb-panel-border)');
+    labelSel.attr('opacity', d => d.category === currentCat ? 0.8 : 0.05);
+    const count = MANIFEST.nodes.filter(n => n.category === currentCat).length;
+    const displayName = currentNode.name.includes('_') ? currentNode.name.split('_')[0] : currentNode.name;
+    document.getElementById('pb-graph-info').innerHTML = `<strong>${displayName}</strong> · 分支: ${currentCat} · ${count}个同类节点`;
+    return;
+  }
+
+  if (graphMode === 'links') {
+    // 关联: 仅显示选中节点及其直接相邻节点(1跳邻居)
+    const linkedPaths = new Set([currentPath]);
+    MANIFEST.edges.forEach(e => {
+      if (e.source === currentPath) linkedPaths.add(e.target);
+      if (e.target === currentPath) linkedPaths.add(e.source);
     });
+    nodeSel
+      .attr('opacity', d => linkedPaths.has(d.id) ? 1 : 0.05)
+      .attr('stroke', d => d.id === currentPath ? 'var(--pb-accent)' : 'var(--pb-bg)')
+      .attr('stroke-width', d => d.id === currentPath ? 3 : 1)
+      .attr('r', d => d.id === currentPath ? 8 : Math.max(3, Math.min(7, 3 + d.linkCount * 0.15)));
+    linkSel
+      .attr('stroke-opacity', d => {
+        const s = typeof d.source === 'object' ? d.source.id : d.source;
+        const t = typeof d.target === 'object' ? d.target.id : d.target;
+        return (s === currentPath || t === currentPath) ? 0.8 : 0.02;
+      })
+      .attr('stroke', d => {
+        const s = typeof d.source === 'object' ? d.source.id : d.source;
+        const t = typeof d.target === 'object' ? d.target.id : d.target;
+        return (s === currentPath || t === currentPath) ? 'var(--pb-accent)' : 'var(--pb-panel-border)';
+      });
+    labelSel.attr('opacity', d => linkedPaths.has(d.id) ? 0.9 : 0.05);
+    const displayName = currentNode.name.includes('_') ? currentNode.name.split('_')[0] : currentNode.name;
+    document.getElementById('pb-graph-info').innerHTML = `<strong>${displayName}</strong> · ${linkedPaths.size - 1}个直接关联节点`;
+    return;
+  }
 }
 
 // Graph mode buttons
-document.querySelectorAll('.pb-graph-btn').forEach(btn => {
+document.querySelectorAll('.pb-graph-btn[data-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.pb-graph-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.pb-graph-btn[data-mode]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     graphMode = btn.dataset.mode;
-    // Could filter graph by mode - for now just visual
+    updateGraphHighlight();
   });
 });
 
