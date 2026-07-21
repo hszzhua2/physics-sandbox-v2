@@ -458,6 +458,149 @@ body, html {
 }
 .pb-graph-info strong { color: var(--pb-accent); }
 
+/* Path Search Panel */
+.pb-path-panel {
+  border-bottom: 1px solid var(--pb-panel-border);
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: border-color 0.4s;
+}
+.pb-path-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.pb-path-row label {
+  font-size: 11px; font-weight: 600; color: var(--pb-accent);
+  min-width: 32px; text-align: right;
+  transition: color 0.4s;
+}
+.pb-path-input-wrap {
+  flex: 1; position: relative;
+}
+.pb-path-input {
+  width: 100%; padding: 4px 8px; font-size: 11px;
+  border: 1px solid var(--pb-panel-border); border-radius: var(--pb-radius);
+  background: var(--pb-bg); color: var(--pb-text);
+  font-family: inherit; transition: all 0.4s;
+}
+.pb-path-input:focus {
+  outline: none; border-color: var(--pb-accent);
+}
+.pb-path-input::placeholder { color: var(--pb-text-muted); opacity: 0.6; }
+.pb-path-input.start { border-color: var(--pb-accent); }
+.pb-path-input.end { border-color: #e85d3a; }
+
+.pb-autocomplete {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 100;
+  max-height: 160px; overflow-y: auto;
+  border: 1px solid var(--pb-panel-border); border-radius: var(--pb-radius);
+  background: var(--pb-panel-bg); backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  display: none;
+  transition: all 0.4s;
+}
+.pb-autocomplete.show { display: block; }
+.pb-autocomplete-item {
+  padding: 5px 8px; font-size: 11px; cursor: pointer;
+  color: var(--pb-text-muted);
+  border-bottom: 1px solid var(--pb-panel-border);
+  transition: all 0.2s;
+}
+.pb-autocomplete-item:last-child { border-bottom: none; }
+.pb-autocomplete-item:hover, .pb-autocomplete-item.selected {
+  background: var(--pb-accent); color: #fff;
+}
+.pb-autocomplete-item .ac-cat {
+  font-size: 9px; opacity: 0.6; margin-left: 4px;
+}
+
+.pb-path-modes {
+  display: flex; gap: 4px;
+}
+.pb-path-mode-btn {
+  flex: 1; padding: 3px 6px; font-size: 10px;
+  border: 1px solid var(--pb-panel-border); border-radius: var(--pb-radius);
+  background: transparent; color: var(--pb-text-muted);
+  cursor: pointer; transition: all 0.3s;
+}
+.pb-path-mode-btn:hover { border-color: var(--pb-accent); color: var(--pb-text); }
+.pb-path-mode-btn.active {
+  background: var(--pb-accent); color: #fff; border-color: var(--pb-accent);
+}
+
+.pb-path-actions {
+  display: flex; gap: 6px;
+}
+.pb-path-search-btn {
+  flex: 1; padding: 5px; font-size: 11px; font-weight: 600;
+  border: 1px solid var(--pb-accent); border-radius: var(--pb-radius);
+  background: var(--pb-accent); color: #fff; cursor: pointer;
+  transition: all 0.3s;
+}
+.pb-path-search-btn:hover { opacity: 0.85; }
+.pb-path-search-btn:disabled {
+  opacity: 0.4; cursor: not-allowed;
+}
+.pb-path-clear-btn {
+  padding: 5px 10px; font-size: 11px;
+  border: 1px solid var(--pb-panel-border); border-radius: var(--pb-radius);
+  background: transparent; color: var(--pb-text-muted); cursor: pointer;
+  transition: all 0.3s;
+}
+.pb-path-clear-btn:hover { border-color: var(--pb-text); color: var(--pb-text); }
+
+.pb-path-results {
+  max-height: 120px; overflow-y: auto;
+  font-size: 10px; color: var(--pb-text-muted);
+}
+.pb-path-results::-webkit-scrollbar { width: 3px; }
+.pb-path-results::-webkit-scrollbar-thumb { background: var(--pb-panel-border); border-radius: 2px; }
+.pb-path-result-item {
+  padding: 4px 6px; border-radius: var(--pb-radius);
+  cursor: pointer; transition: all 0.2s;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+.pb-path-result-item:hover {
+  background: rgba(128,128,128,0.1); border-color: var(--pb-panel-border);
+}
+.pb-path-result-item .path-len {
+  color: var(--pb-accent); font-weight: 600; margin-right: 4px;
+}
+.pb-path-result-item .path-nodes {
+  color: var(--pb-text-muted); line-height: 1.5;
+}
+.pb-path-result-item .path-arrow {
+  color: var(--pb-accent); margin: 0 2px;
+}
+.pb-path-empty {
+  padding: 8px; text-align: center; font-size: 10px;
+  color: var(--pb-text-muted); opacity: 0.6;
+}
+
+/* Path highlight on graph */
+.node-in-path {
+  stroke: #ff0 !important; stroke-width: 2.5 !important;
+  filter: drop-shadow(0 0 4px #ff0);
+}
+.link-in-path {
+  stroke: #ff0 !important; stroke-opacity: 0.9 !important;
+  stroke-width: 2 !important;
+}
+.node-start {
+  stroke: #0f0 !important; stroke-width: 3 !important;
+  filter: drop-shadow(0 0 6px #0f0);
+}
+.node-end {
+  stroke: #f40 !important; stroke-width: 3 !important;
+  filter: drop-shadow(0 0 6px #f40);
+}
+
+.pb-path-click-hint {
+  font-size: 9px; color: var(--pb-accent); padding: 2px 0;
+  text-align: center; opacity: 0.7;
+  transition: color 0.4s;
+}
+
 /* Drawer toggles for mobile */
 .pb-toggle {
   display: none;
@@ -519,7 +662,37 @@ body, html {
       <button class="pb-graph-btn active" data-mode="all">全部</button>
       <button class="pb-graph-btn" data-mode="branch">同分支</button>
       <button class="pb-graph-btn" data-mode="links">关联</button>
+      <button class="pb-graph-btn" id="pb-path-toggle">&#128269; 路径搜索</button>
     </div>
+    
+    <!-- Path Search Panel -->
+    <div class="pb-path-panel" id="pb-path-panel" style="display:none;">
+      <div class="pb-path-row">
+        <label>起点</label>
+        <div class="pb-path-input-wrap">
+          <input type="text" class="pb-path-input start" id="pb-path-start" placeholder="搜索或点击节点..." autocomplete="off" />
+          <div class="pb-autocomplete" id="pb-ac-start"></div>
+        </div>
+      </div>
+      <div class="pb-path-row">
+        <label>终点</label>
+        <div class="pb-path-input-wrap">
+          <input type="text" class="pb-path-input end" id="pb-path-end" placeholder="搜索或点击节点..." autocomplete="off" />
+          <div class="pb-autocomplete" id="pb-ac-end"></div>
+        </div>
+      </div>
+      <div class="pb-path-modes">
+        <button class="pb-path-mode-btn active" data-path-mode="shortest">最短路径</button>
+        <button class="pb-path-mode-btn" data-path-mode="all">所有路径</button>
+      </div>
+      <div class="pb-path-actions">
+        <button class="pb-path-search-btn" id="pb-path-search-btn">搜索路径</button>
+        <button class="pb-path-clear-btn" id="pb-path-clear-btn">清除</button>
+      </div>
+      <div class="pb-path-results" id="pb-path-results"></div>
+      <div class="pb-path-click-hint" id="pb-path-click-hint"></div>
+    </div>
+    
     <svg id="graph-svg"></svg>
     <div class="pb-graph-info" id="pb-graph-info">点击节点查看详情 · 拖拽节点重排</div>
   </div>
@@ -568,6 +741,7 @@ async function loadManifest() {
   
   renderTree();
   renderStats();
+  buildAdjacencyList();
   initGraph();
 }
 
@@ -878,6 +1052,14 @@ function buildGraphData() {
     .attr('cursor', 'pointer')
     .on('click', (event, d) => {
       event.stopPropagation();
+      if (pathPanelOpen) {
+        if (pathClickTarget === 'start') {
+          setStartNode(d.id, d.name);
+        } else {
+          setEndNode(d.id, d.name);
+        }
+        return;
+      }
       loadArticle(d.id);
     })
     .on('mouseover', function(event, d) {
@@ -975,6 +1157,389 @@ document.querySelectorAll('.pb-graph-btn').forEach(btn => {
     // Could filter graph by mode - for now just visual
   });
 });
+
+// ===== Path Search =====
+let pathMode = 'shortest';        // 'shortest' or 'all'
+let pathStartId = null;           // node path id
+let pathEndId = null;
+let pathClickTarget = 'start';    // 'start' or 'end' - which input to fill on graph click
+let pathPanelOpen = false;
+let activePathNodes = new Set();   // node ids on highlighted path
+let activePathEdges = new Set();  // "source|target" edge keys on highlighted path
+
+// Build adjacency list from MANIFEST edges
+let adjacencyList = null;
+function buildAdjacencyList() {
+  if (!MANIFEST) return;
+  adjacencyList = {};
+  MANIFEST.nodes.forEach(n => { adjacencyList[n.path] = new Set(); });
+  MANIFEST.edges.forEach(e => {
+    if (!adjacencyList[e.source]) adjacencyList[e.source] = new Set();
+    if (!adjacencyList[e.target]) adjacencyList[e.target] = new Set();
+    adjacencyList[e.source].add(e.target);
+    adjacencyList[e.target].add(e.source);
+  });
+}
+
+// BFS: shortest path
+function findShortestPath(start, end) {
+  if (!adjacencyList || !adjacencyList[start] || !adjacencyList[end]) return null;
+  if (start === end) return [start];
+  const queue = [[start]];
+  const visited = new Set([start]);
+  while (queue.length > 0) {
+    const path = queue.shift();
+    const node = path[path.length - 1];
+    const neighbors = adjacencyList[node];
+    if (!neighbors) continue;
+    for (const next of neighbors) {
+      if (visited.has(next)) continue;
+      if (next === end) return [...path, next];
+      visited.add(next);
+      queue.push([...path, next]);
+    }
+  }
+  return null;
+}
+
+// DFS: all paths (with depth limit to prevent explosion)
+function findAllPaths(start, end, maxPaths = 10, maxDepth = 8) {
+  if (!adjacencyList || !adjacencyList[start] || !adjacencyList[end]) return [];
+  const results = [];
+  const visited = new Set([start]);
+  function dfs(current, path) {
+    if (results.length >= maxPaths) return;
+    if (path.length - 1 > maxDepth) return;
+    if (current === end) {
+      results.push([...path]);
+      return;
+    }
+    const neighbors = adjacencyList[current];
+    if (!neighbors) return;
+    for (const next of neighbors) {
+      if (visited.has(next)) continue;
+      visited.add(next);
+      path.push(next);
+      dfs(next, path);
+      path.pop();
+      visited.delete(next);
+    }
+  }
+  dfs(start, [start]);
+  // Sort by length
+  results.sort((a, b) => a.length - b.length);
+  return results;
+}
+
+function edgeKey(a, b) {
+  return a < b ? a + '|' + b : b + '|' + a;
+}
+
+function highlightPath(pathNodeIds) {
+  activePathNodes.clear();
+  activePathEdges.clear();
+  pathNodeIds.forEach(id => activePathNodes.add(id));
+  for (let i = 0; i < pathNodeIds.length - 1; i++) {
+    activePathEdges.add(edgeKey(pathNodeIds[i], pathNodeIds[i + 1]));
+  }
+  applyPathHighlight();
+}
+
+function applyPathHighlight() {
+  if (!nodeSel || !linkSel) return;
+  nodeSel.attr('class', d => {
+    let cls = '';
+    if (d.id === pathStartId) cls = 'node-start';
+    else if (d.id === pathEndId) cls = 'node-end';
+    else if (activePathNodes.has(d.id)) cls = 'node-in-path';
+    return cls;
+  });
+  linkSel.attr('class', d => {
+    const k = edgeKey(d.source.id || d.source, d.target.id || d.target);
+    return activePathEdges.has(k) ? 'link-in-path' : '';
+  });
+}
+
+function clearPathHighlight() {
+  activePathNodes.clear();
+  activePathEdges.clear();
+  pathStartId = null;
+  pathEndId = null;
+  if (nodeSel) nodeSel.attr('class', '');
+  if (linkSel) linkSel.attr('class', '');
+  const startInput = document.getElementById('pb-path-start');
+  const endInput = document.getElementById('pb-path-end');
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
+  const results = document.getElementById('pb-path-results');
+  if (results) results.innerHTML = '';
+  const hint = document.getElementById('pb-path-click-hint');
+  if (hint) hint.textContent = '';
+  updateClickHint();
+}
+
+function updateClickHint() {
+  const hint = document.getElementById('pb-path-click-hint');
+  if (!hint) return;
+  if (!pathPanelOpen) { hint.textContent = ''; return; }
+  if (!pathStartId) {
+    hint.textContent = '👆 点击图谱节点或搜索选择「起点」';
+  } else if (!pathEndId) {
+    hint.textContent = '👆 点击图谱节点或搜索选择「终点」';
+  } else {
+    hint.textContent = '✓ 起点与终点已就绪，点击「搜索路径」';
+  }
+}
+
+// Node name lookup helper
+function findNodeByName(query) {
+  if (!MANIFEST) return null;
+  const q = query.trim().toLowerCase();
+  // Exact match first
+  let match = MANIFEST.nodes.find(n => n.name.toLowerCase() === q);
+  if (match) return match;
+  // Starts with
+  match = MANIFEST.nodes.find(n => n.name.toLowerCase().startsWith(q));
+  if (match) return match;
+  // Contains
+  match = MANIFEST.nodes.find(n => n.name.toLowerCase().includes(q));
+  return match || null;
+}
+
+// Autocomplete
+function setupAutocomplete(inputId, acId, onSelect) {
+  const input = document.getElementById(inputId);
+  const ac = document.getElementById(acId);
+  let debounceTimer = null;
+  let currentItems = [];
+  let selectedIndex = -1;
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const query = input.value.trim().toLowerCase();
+    if (query.length < 1) {
+      ac.classList.remove('show');
+      ac.innerHTML = '';
+      return;
+    }
+    debounceTimer = setTimeout(() => {
+      if (!MANIFEST) return;
+      const matches = MANIFEST.nodes
+        .filter(n => n.name.toLowerCase().includes(query))
+        .slice(0, 12);
+      currentItems = matches;
+      selectedIndex = -1;
+      if (matches.length === 0) {
+        ac.innerHTML = '<div class="pb-autocomplete-item">无匹配结果</div>';
+        ac.classList.add('show');
+        return;
+      }
+      ac.innerHTML = matches.map((n, i) =>
+        `<div class="pb-autocomplete-item" data-idx="${i}">${n.name}<span class="ac-cat">${n.category}</span></div>`
+      ).join('');
+      ac.classList.add('show');
+      ac.querySelectorAll('.pb-autocomplete-item').forEach((el, i) => {
+        el.addEventListener('click', () => {
+          input.value = matches[i].name;
+          ac.classList.remove('show');
+          onSelect(matches[i].path);
+        });
+      });
+    }, 150);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (!ac.classList.contains('show')) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, currentItems.length - 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, 0);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedIndex >= 0 && currentItems[selectedIndex]) {
+        input.value = currentItems[selectedIndex].name;
+        ac.classList.remove('show');
+        onSelect(currentItems[selectedIndex].path);
+      } else if (currentItems.length > 0) {
+        input.value = currentItems[0].name;
+        ac.classList.remove('show');
+        onSelect(currentItems[0].path);
+      }
+      return;
+    } else if (e.key === 'Escape') {
+      ac.classList.remove('show');
+      return;
+    } else return;
+    // Update selected styling
+    ac.querySelectorAll('.pb-autocomplete-item').forEach((el, i) => {
+      el.classList.toggle('selected', i === selectedIndex);
+    });
+  });
+
+  // Enter in input (when autocomplete not shown) triggers search
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !ac.classList.contains('show')) {
+      // Try name-based lookup
+      const query = input.value.trim();
+      if (query) {
+        const node = findNodeByName(query);
+        if (node) {
+          onSelect(node.path);
+          input.value = node.name;
+        }
+      }
+      // If both set, auto-search
+      if (pathStartId && pathEndId) executePathSearch();
+    }
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!input.contains(e.target) && !ac.contains(e.target)) {
+      ac.classList.remove('show');
+    }
+  });
+}
+
+function setStartNode(nodePath, nodeName) {
+  pathStartId = nodePath;
+  const input = document.getElementById('pb-path-start');
+  if (nodeName) input.value = nodeName;
+  pathClickTarget = 'end';
+  updateClickHint();
+  applyPathHighlight();
+}
+
+function setEndNode(nodePath, nodeName) {
+  pathEndId = nodePath;
+  const input = document.getElementById('pb-path-end');
+  if (nodeName) input.value = nodeName;
+  pathClickTarget = 'start';
+  updateClickHint();
+  applyPathHighlight();
+}
+
+function executePathSearch() {
+  if (!pathStartId || !pathEndId) {
+    document.getElementById('pb-path-results').innerHTML =
+      '<div class="pb-path-empty">请先选择起点和终点</div>';
+    return;
+  }
+  if (!adjacencyList) buildAdjacencyList();
+  const results = document.getElementById('pb-path-results');
+
+  if (pathStartId === pathEndId) {
+    results.innerHTML = '<div class="pb-path-empty">起点与终点相同</div>';
+    return;
+  }
+
+  if (pathMode === 'shortest') {
+    const path = findShortestPath(pathStartId, pathEndId);
+    if (!path) {
+      results.innerHTML = '<div class="pb-path-empty">未找到路径（节点不连通）</div>';
+      return;
+    }
+    highlightPath(path);
+    renderPathResults([path]);
+  } else {
+    const allPaths = findAllPaths(pathStartId, pathEndId, 15, 7);
+    if (allPaths.length === 0) {
+      results.innerHTML = '<div class="pb-path-empty">未找到路径（节点不连通或超出深度限制）</div>';
+      return;
+    }
+    if (allPaths.length === 1) {
+      highlightPath(allPaths[0]);
+    } else {
+      // Highlight the shortest one by default
+      highlightPath(allPaths[0]);
+    }
+    renderPathResults(allPaths);
+  }
+}
+
+function renderPathResults(paths) {
+  const results = document.getElementById('pb-path-results');
+  if (!MANIFEST) return;
+  const nameMap = {};
+  MANIFEST.nodes.forEach(n => { nameMap[n.path] = n.name.includes('_') ? n.name.split('_')[0] : n.name; });
+
+  let html = '';
+  paths.forEach((path, idx) => {
+    const names = path.map(id => nameMap[id] || id);
+    const pathStr = names.map((n, i) =>
+      i === 0 ? n : `<span class="path-arrow">→</span>${n}`
+    ).join('');
+    html += `<div class="pb-path-result-item" data-path-idx="${idx}">`;
+    html += `<span class="path-len">${path.length - 1}跳</span>`;
+    html += `<span class="path-nodes">${pathStr}</span>`;
+    html += '</div>';
+  });
+  html += `<div style="font-size:9px;padding:4px 6px;color:var(--pb-text-muted);opacity:0.6;">共 ${paths.length} 条路径 · 点击高亮</div>`;
+  results.innerHTML = html;
+
+  // Click to highlight specific path
+  results.querySelectorAll('.pb-path-result-item').forEach((el, i) => {
+    el.addEventListener('click', () => {
+      highlightPath(paths[i]);
+      results.querySelectorAll('.pb-path-result-item').forEach(e2 => e2.style.background = '');
+      el.style.background = 'rgba(128,128,128,0.15)';
+    });
+  });
+}
+
+// Toggle path panel
+document.getElementById('pb-path-toggle').addEventListener('click', function() {
+  pathPanelOpen = !pathPanelOpen;
+  const panel = document.getElementById('pb-path-panel');
+  panel.style.display = pathPanelOpen ? 'flex' : 'none';
+  this.classList.toggle('active', pathPanelOpen);
+  if (pathPanelOpen) {
+    if (!adjacencyList) buildAdjacencyList();
+    updateClickHint();
+  } else {
+    clearPathHighlight();
+  }
+});
+
+// Path mode toggle
+document.querySelectorAll('.pb-path-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pb-path-mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    pathMode = btn.dataset.pathMode;
+  });
+});
+
+// Search button
+document.getElementById('pb-path-search-btn').addEventListener('click', executePathSearch);
+
+// Clear button
+document.getElementById('pb-path-clear-btn').addEventListener('click', clearPathHighlight);
+
+// Setup autocomplete for both inputs
+setupAutocomplete('pb-path-start', 'pb-ac-start', (nodePath) => {
+  const node = MANIFEST.nodes.find(n => n.path === nodePath);
+  setStartNode(nodePath, node ? node.name : '');
+});
+setupAutocomplete('pb-path-end', 'pb-ac-end', (nodePath) => {
+  const node = MANIFEST.nodes.find(n => n.path === nodePath);
+  setEndNode(nodePath, node ? node.name : '');
+});
+
+// Hook into graph node click for path selection
+const originalNodeClick = (d) => {
+  if (pathPanelOpen && d && d.id) {
+    if (pathClickTarget === 'start') {
+      setStartNode(d.id, d.name);
+    } else {
+      setEndNode(d.id, d.name);
+    }
+    return true; // handled
+  }
+  return false; // not handled, proceed with normal click
+};
 
 // ===== Resizable panels =====
 function initResizer(resizerEl, leftEl, rightEl, opts) {
