@@ -450,13 +450,70 @@ body, html {
 #graph-svg:active { cursor: grabbing; }
 
 .pb-graph-info {
-  padding: 8px 12px;
   border-top: 1px solid var(--pb-panel-border);
+  transition: all 0.4s;
+  max-height: 140px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.pb-graph-info::-webkit-scrollbar { width: 3px; }
+.pb-graph-info::-webkit-scrollbar-thumb { background: var(--pb-panel-border); border-radius: 2px; }
+
+.pb-info-header {
+  padding: 6px 12px 4px;
   font-size: 11px;
   color: var(--pb-text-muted);
+  position: sticky; top: 0; z-index: 1;
+  background: var(--pb-panel-bg);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
   transition: all 0.4s;
 }
-.pb-graph-info strong { color: var(--pb-accent); }
+.pb-info-header .pb-info-selected {
+  font-size: 12px; font-weight: 700; color: var(--pb-accent);
+  display: block; margin-bottom: 2px;
+  transition: color 0.4s;
+}
+.pb-info-header .pb-info-meta {
+  font-size: 10px; opacity: 0.7;
+}
+
+.pb-info-chips {
+  padding: 2px 8px 8px;
+  display: flex; flex-wrap: wrap; gap: 3px;
+}
+.pb-info-chip {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 10px;
+  border-radius: var(--pb-radius);
+  border: 1px solid var(--pb-panel-border);
+  color: var(--pb-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pb-info-chip:hover {
+  border-color: var(--pb-accent);
+  color: var(--pb-accent);
+  background: rgba(128,128,128,0.1);
+}
+.pb-info-chip .chip-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.pb-info-empty {
+  padding: 10px 12px;
+  font-size: 11px;
+  color: var(--pb-text-muted);
+  opacity: 0.6;
+}
 
 /* Path Search Panel */
 .pb-path-panel {
@@ -1069,7 +1126,6 @@ function buildGraphData() {
     })
     .on('mouseover', function(event, d) {
       d3.select(this).attr('r', Math.max(5, Math.min(9, 5 + d.linkCount * 0.15)));
-      document.getElementById('pb-graph-info').innerHTML = `<strong>${d.name}</strong> · ${d.category} · ${d.linkCount}链接`;
     })
     .on('mouseout', function(event, d) {
       if (!d.id || d.id !== (currentNode ? currentNode.path : '')) {
@@ -1123,11 +1179,45 @@ function buildGraphData() {
   );
 }
 
+// Helper: render info bar with selected node + related node chips
+function renderInfoBar(selectedNode, relatedNodes, metaText) {
+  const infoEl = document.getElementById('pb-graph-info');
+  if (!selectedNode) {
+    infoEl.innerHTML = '<div class="pb-info-empty">点击节点查看详情 · 拖拽节点重排</div>';
+    return;
+  }
+  const selName = selectedNode.name.includes('_') ? selectedNode.name.split('_')[0] : selectedNode.name;
+  const selColor = CAT_COLORS[selectedNode.category] || '#999';
+
+  let html = `<div class="pb-info-header">`;
+  html += `<span class="pb-info-selected"><span class="chip-dot" style="background:${selColor}"></span>${selName}</span>`;
+  if (metaText) html += `<span class="pb-info-meta">${metaText}</span>`;
+  html += `</div>`;
+
+  if (relatedNodes.length === 0) {
+    html += `<div class="pb-info-empty">无关联节点</div>`;
+  } else {
+    html += `<div class="pb-info-chips">`;
+    relatedNodes.forEach(n => {
+      const name = n.name.includes('_') ? n.name.split('_')[0] : n.name;
+      const color = CAT_COLORS[n.category] || '#999';
+      html += `<span class="pb-info-chip" data-path="${n.path}" title="${n.name} · ${n.category}"><span class="chip-dot" style="background:${color}"></span>${name}</span>`;
+    });
+    html += `</div>`;
+  }
+  infoEl.innerHTML = html;
+
+  // Bind chip clicks
+  infoEl.querySelectorAll('.pb-info-chip[data-path]').forEach(el => {
+    el.onclick = () => loadArticle(el.dataset.path);
+  });
+}
+
 function updateGraphHighlight() {
   if (!nodeSel) return;
 
+  // 全部 mode: show selected node + its direct neighbors
   if (graphMode === 'all') {
-    // 全部: 所有节点和边正常显示
     nodeSel
       .attr('opacity', 1)
       .attr('stroke', d => (currentNode && d.id === currentNode.path) ? 'var(--pb-accent)' : 'var(--pb-bg)')
@@ -1137,22 +1227,36 @@ function updateGraphHighlight() {
       .attr('stroke-opacity', 0.3)
       .attr('stroke', 'var(--pb-panel-border)');
     labelSel.attr('opacity', 0.6);
+
+    if (!currentNode) {
+      renderInfoBar(null, [], '');
+    } else {
+      const currentPath = currentNode.path;
+      const neighborPaths = new Set();
+      MANIFEST.edges.forEach(e => {
+        if (e.source === currentPath) neighborPaths.add(e.target);
+        if (e.target === currentPath) neighborPaths.add(e.source);
+      });
+      const neighbors = MANIFEST.nodes
+        .filter(n => neighborPaths.has(n.path))
+        .sort((a, b) => b.linkCount - a.linkCount);
+      renderInfoBar(currentNode, neighbors, `${neighbors.length}个关联节点 · ${currentNode.category}`);
+    }
     return;
   }
 
   if (!currentNode) {
-    // 需要先选择节点
     nodeSel.attr('opacity', 0.3);
     linkSel.attr('stroke-opacity', 0.05);
     labelSel.attr('opacity', 0.15);
-    document.getElementById('pb-graph-info').innerHTML = `<strong style="opacity:0.7;">请点击一个节点以过滤</strong>`;
+    renderInfoBar(null, [], '<strong style="opacity:0.7;">请点击一个节点以过滤</strong>');
     return;
   }
 
   const currentPath = currentNode.path;
 
+  // 同分支 mode: show selected node + same-branch nodes (top 30 by link count)
   if (graphMode === 'branch') {
-    // 同分支: 仅显示与选中节点相同 category 的节点
     const currentCat = currentNode.category;
     nodeSel
       .attr('opacity', d => d.category === currentCat ? 1 : 0.08)
@@ -1169,14 +1273,17 @@ function updateGraphHighlight() {
       })
       .attr('stroke', 'var(--pb-panel-border)');
     labelSel.attr('opacity', d => d.category === currentCat ? 0.8 : 0.05);
-    const count = MANIFEST.nodes.filter(n => n.category === currentCat).length;
-    const displayName = currentNode.name.includes('_') ? currentNode.name.split('_')[0] : currentNode.name;
-    document.getElementById('pb-graph-info').innerHTML = `<strong>${displayName}</strong> · 分支: ${currentCat} · ${count}个同类节点`;
+
+    const sameBranchNodes = MANIFEST.nodes
+      .filter(n => n.category === currentCat && n.path !== currentPath)
+      .sort((a, b) => b.linkCount - a.linkCount)
+      .slice(0, 30);
+    renderInfoBar(currentNode, sameBranchNodes, `分支: ${currentCat} · 共${MANIFEST.nodes.filter(n => n.category === currentCat).length}个节点 · 显示前${sameBranchNodes.length}个`);
     return;
   }
 
+  // 关联 mode: show selected node + direct neighbors
   if (graphMode === 'links') {
-    // 关联: 仅显示选中节点及其直接相邻节点(1跳邻居)
     const linkedPaths = new Set([currentPath]);
     MANIFEST.edges.forEach(e => {
       if (e.source === currentPath) linkedPaths.add(e.target);
@@ -1199,8 +1306,11 @@ function updateGraphHighlight() {
         return (s === currentPath || t === currentPath) ? 'var(--pb-accent)' : 'var(--pb-panel-border)';
       });
     labelSel.attr('opacity', d => linkedPaths.has(d.id) ? 0.9 : 0.05);
-    const displayName = currentNode.name.includes('_') ? currentNode.name.split('_')[0] : currentNode.name;
-    document.getElementById('pb-graph-info').innerHTML = `<strong>${displayName}</strong> · ${linkedPaths.size - 1}个直接关联节点`;
+
+    const neighbors = MANIFEST.nodes
+      .filter(n => linkedPaths.has(n.path) && n.path !== currentPath)
+      .sort((a, b) => b.linkCount - a.linkCount);
+    renderInfoBar(currentNode, neighbors, `${neighbors.length}个直接关联节点`);
     return;
   }
 }
