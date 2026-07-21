@@ -430,9 +430,6 @@
             </div>
         </div>
     </div>
-
-    <a href="index.html" class="back-btn" id="back-btn">&#8592; 返回首页</a>
-
     <script>
         // Drawer toggle functions
         function toggleLeftDrawer() {
@@ -1306,10 +1303,6 @@
             const current = PSUTheme.get();
             document.documentElement.setAttribute('data-theme', current);
             PSUTheme.createSwitcher();
-            // Ensure back button exists
-            if (!document.getElementById('back-btn')) {
-                PSUTheme.createBackButton('index.html');
-            }
             // Initial material color update
             if (typeof updateMaterialColors === 'function') {
                 updateMaterialColors();

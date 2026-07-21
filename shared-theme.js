@@ -97,7 +97,7 @@
     a.id = 'back-btn';
     a.className = 'back-btn';
     a.href = href;
-    a.innerHTML = '← 返回空间站';
+    a.innerHTML = '← 返回上一级';
     document.body.appendChild(a);
   }
 
@@ -108,6 +108,26 @@
     nav.className = 'top-nav';
 
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    // Back link (only on non-index pages)
+    if (currentPage !== 'index.html' && currentPage !== '') {
+      const backLink = document.createElement('a');
+      backLink.href = 'index.html';
+      backLink.className = 'nav-back-link';
+      backLink.innerHTML = '← 返回上一级';
+      backLink.addEventListener('click', (e) => {
+        if (history.length > 1) {
+          e.preventDefault();
+          history.back();
+        }
+      });
+      nav.appendChild(backLink);
+
+      // Separator
+      const sep = document.createElement('span');
+      sep.className = 'nav-separator';
+      nav.appendChild(sep);
+    }
 
     // Home
     const homeLink = document.createElement('a');

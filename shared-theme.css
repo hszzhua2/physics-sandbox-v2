@@ -686,6 +686,19 @@ h1, h2, h3 {
   font-family: var(--font-main);
 }
 
+/* Back link in nav */
+.nav-back-link {
+  font-weight: 700 !important;
+  opacity: 0.85;
+}
+.nav-separator {
+  width: 1px;
+  height: 18px;
+  background: currentColor;
+  opacity: 0.2;
+  flex-shrink: 0;
+}
+
 /* Cartoon nav links */
 [data-theme="cartoon"] .top-nav a {
   color: var(--text-muted);
