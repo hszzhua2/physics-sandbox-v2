@@ -767,9 +767,11 @@ function updatePhysics(dt) {
   physicsState.netForce = netForce;
 
   // --- Euler Integration ---
-  let acceleration = netForce / mass;
+  // In Three.js, Y axis points UP. Gravity pulls DOWN (negative Y).
+  // netForce > 0 means net force is downward → acceleration should be negative (downward)
+  let acceleration = -netForce / mass;
 
-  // Apply damping
+  // Apply damping (opposes velocity)
   const isInWater = depth > 0;
   const damping = isInWater ? 2.0 : 0.1;  // water damping >> air damping
   acceleration -= sim.velocity * damping;
