@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多普勒效应 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 五种主题适配
+   ================================================================ */
+[data-theme="glass"]{
+  --d-bg:#080812;--d-bg2:#0e0e1c;--d-surface:rgba(255,255,255,0.04);--d-surface-hover:rgba(255,255,255,0.08);
+  --d-ink:#f1f5f9;--d-ink2:#cbd5e1;--d-muted:#64748b;--d-rule:rgba(255,255,255,0.07);
+  --d-accent:#74b9ff;--d-accent2:#a29bfe;--d-accent3:#34d399;--d-accent4:#fbbf24;
+  --d-card-bg:rgba(255,255,255,0.03);--d-card-border:rgba(255,255,255,0.06);
+  --d-card-shadow:0 6px 24px rgba(0,0,0,0.4);--d-glow:none;
+  --d-canvas-bg:#040410;--d-param-bg:rgba(255,255,255,0.03);--d-param-border:rgba(255,255,255,0.06);
+  --d-output-bg:rgba(0,0,0,0.3);--d-output-border:rgba(255,255,255,0.06);
+  --d-formula-bg:rgba(116,185,255,0.05);--d-formula-border:rgba(116,185,255,0.12);
+  --d-scrollbar-thumb:rgba(116,185,255,0.3);
+  --d-wave-front:rgba(116,185,255,0.5);--d-wave-back:rgba(253,121,168,0.4);
+  --d-source:#fbbf24;--d-observer:#34d399;--d-shock:rgba(255,0,0,0.6);
+}
+[data-theme="cyber"]{
+  --d-bg:#040410;--d-bg2:#08081a;--d-surface:rgba(0,243,255,0.03);--d-surface-hover:rgba(0,243,255,0.06);
+  --d-ink:#e0f7fa;--d-ink2:#b2ebf2;--d-muted:#4dd0e1;--d-rule:rgba(0,243,255,0.1);
+  --d-accent:#00f3ff;--d-accent2:#ff00ea;--d-accent3:#39ff14;--d-accent4:#ffb800;
+  --d-card-bg:rgba(0,243,255,0.02);--d-card-border:rgba(0,243,255,0.12);
+  --d-card-shadow:0 0 16px rgba(0,243,255,0.05);--d-glow:0 0 8px rgba(0,243,255,0.25);
+  --d-canvas-bg:#020208;--d-param-bg:rgba(0,243,255,0.02);--d-param-border:rgba(0,243,255,0.1);
+  --d-output-bg:rgba(0,0,0,0.4);--d-output-border:rgba(0,243,255,0.08);
+  --d-formula-bg:rgba(0,243,255,0.04);--d-formula-border:rgba(0,243,255,0.15);
+  --d-scrollbar-thumb:rgba(0,243,255,0.4);
+  --d-wave-front:rgba(0,243,255,0.5);--d-wave-back:rgba(255,0,234,0.4);
+  --d-source:#ffb800;--d-observer:#39ff14;--d-shock:rgba(255,0,0,0.8);
+}
+[data-theme="soviet"]{
+  --d-bg:#f0ebe4;--d-bg2:#e8e0d6;--d-surface:#fffaf2;--d-surface-hover:#f4f0ea;
+  --d-ink:#1a1a1a;--d-ink2:#3d3d3d;--d-muted:#6a5a4a;--d-rule:#d4c4a8;
+  --d-accent:#c41e1e;--d-accent2:#8b4513;--d-accent3:#a0522d;--d-accent4:#cd853f;
+  --d-card-bg:#fffaf2;--d-card-border:#c41e1e;
+  --d-card-shadow:none;--d-glow:none;
+  --d-canvas-bg:#e8e0d6;--d-param-bg:#f4f0ea;--d-param-border:#d4c4a8;
+  --d-output-bg:#f4f0ea;--d-output-border:#d4c4a8;
+  --d-formula-bg:rgba(196,30,30,0.04);--d-formula-border:rgba(196,30,30,0.2);
+  --d-scrollbar-thumb:#c41e1e;
+  --d-wave-front:rgba(196,30,30,0.5);--d-wave-back:rgba(139,69,19,0.4);
+  --d-source:#c41e1e;--d-observer:#556b2f;--d-shock:rgba(196,30,30,0.8);
+}
+[data-theme="cartoon"]{
+  --d-bg:#fef6e4;--d-bg2:#fff8f0;--d-surface:rgba(255,255,255,0.7);--d-surface-hover:rgba(255,255,255,0.9);
+  --d-ink:#2d3436;--d-ink2:#4a4a4a;--d-muted:#7a7a7a;--d-rule:rgba(0,0,0,0.08);
+  --d-accent:#ff6b6b;--d-accent2:#4ecdc4;--d-accent3:#ffe66d;--d-accent4:#a29bfe;
+  --d-card-bg:rgba(255,255,255,0.8);--d-card-border:rgba(0,0,0,0.1);
+  --d-card-shadow:0 6px 24px rgba(0,0,0,0.08);--d-glow:none;
+  --d-canvas-bg:#1a1a2e;--d-param-bg:rgba(255,255,255,0.5);--d-param-border:rgba(0,0,0,0.1);
+  --d-output-bg:rgba(255,255,255,0.6);--d-output-border:rgba(0,0,0,0.08);
+  --d-formula-bg:rgba(255,107,107,0.05);--d-formula-border:rgba(255,107,107,0.15);
+  --d-scrollbar-thumb:rgba(0,0,0,0.15);
+  --d-wave-front:rgba(78,205,196,0.5);--d-wave-back:rgba(255,107,107,0.4);
+  --d-source:#ffe66d;--d-observer:#4ecdc4;--d-shock:rgba(255,107,107,0.8);
+}
+[data-theme="academic"]{
+  --d-bg:#f8f9fa;--d-bg2:#f1f3f5;--d-surface:rgba(255,255,255,0.9);--d-surface-hover:#f0f0f0;
+  --d-ink:#1a1a2e;--d-ink2:#3d3d5c;--d-muted:#7a7a8a;--d-rule:#e0e0e0;
+  --d-accent:#6b8cae;--d-accent2:#8a7ca8;--d-accent3:#c4956a;--d-accent4:#6a9e8a;
+  --d-card-bg:#ffffff;--d-card-border:#e0e0e0;
+  --d-card-shadow:none;--d-glow:none;
+  --d-canvas-bg:#ffffff;--d-param-bg:#f8f9fa;--d-param-border:#e0e0e0;
+  --d-output-bg:#f4f5f7;--d-output-border:#e0e0e0;
+  --d-formula-bg:rgba(107,140,174,0.04);--d-formula-border:rgba(107,140,174,0.2);
+  --d-scrollbar-thumb:#d0d0d0;
+  --d-wave-front:rgba(107,140,174,0.5);--d-wave-back:rgba(138,124,168,0.4);
+  --d-source:#c4956a;--d-observer:#6a9e8a;--d-shock:rgba(196,30,30,0.6);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--d-bg);color:var(--d-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--d-bg)}
+::-webkit-scrollbar-thumb{background:var(--d-scrollbar-thumb);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--d-rule);background:var(--d-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--d-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--d-formula-bg);border:1px solid var(--d-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--d-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--d-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--d-accent);text-shadow:var(--d-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--d-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--d-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--d-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--d-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;font-size:0.82rem;color:var(--d-muted);opacity:0.5;text-align:center;font-family:monospace;letter-spacing:1px}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--d-rule);background:var(--d-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--d-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--d-formula-bg);border:1px solid var(--d-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--d-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--d-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--d-accent);text-shadow:var(--d-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--d-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--d-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--d-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--d-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--d-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:16px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--d-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--d-accent);font-weight:400;min-width:55px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--d-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--d-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--d-param-border);background:var(--d-param-bg);color:var(--d-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--d-accent);color:var(--d-accent);background:var(--d-formula-bg)}
+
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 模式按钮 ===== */
+.mode-indicator{display:flex;gap:6px}
+.mode-btn{flex:1;padding:7px 4px;border:1px solid var(--d-param-border);background:var(--d-param-bg);color:var(--d-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--d-accent);color:var(--d-accent);background:var(--d-formula-bg)}
+
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 控制按钮 ===== */
+.sim-btn{padding:8px 20px;border:1px solid var(--d-rule);background:rgba(0,0,0,0.4);color:var(--d-ink);border-radius:10px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--d-accent)}
+.sim-btn.primary{background:var(--d-accent);color:#0a0a1a;border-color:var(--d-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+
+/* ===== 输出卡片 ===== */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--d-output-bg);border:1px solid var(--d-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.15rem;font-weight:700;color:var(--d-accent);line-height:1.2;transition:color .4s ease}
+.output-num.b{color:var(--d-accent2)}.output-num.c{color:var(--d-accent3)}.output-num.d{color:var(--d-accent4)}
+.output-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--d-muted);margin-top:2px}
+
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 频率显示条 ===== */
+.freq-bar-container{background:var(--d-output-bg);border:1px solid var(--d-output-border);border-radius:12px;padding:14px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.freq-display{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:10px}
+.freq-arrow{font-size:1.5rem;transition:color .3s ease}
+.freq-value{font-family:monospace;font-size:1.6rem;font-weight:700;color:var(--d-accent);transition:color .4s ease}
+.freq-unit{font-size:0.75rem;color:var(--d-muted)}
+.freq-bar{height:8px;border-radius:4px;background:var(--d-param-border);position:relative;overflow:hidden;transition:background .4s ease}
+.freq-bar-fill{position:absolute;top:0;left:50%;height:100%;border-radius:4px;transition:all .3s ease}
+.freq-comparison{display:flex;justify-content:space-between;font-family:monospace;font-size:0.68rem;color:var(--d-muted);margin-top:6px}
+
+[data-theme="academic"] .freq-bar-container{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .freq-bar-container{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--d-output-bg);border:1px solid var(--d-output-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.76rem;color:var(--d-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--d-ink)}
+.info-card .muted{color:var(--d-muted);font-size:0.72rem}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .info-card h3{color:var(--d-accent)}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card h3{color:var(--d-accent)}
+[data-theme="cartoon"] .info-card h3{color:var(--d-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--d-accent);text-shadow:var(--d-glow)}
+
+/* ===== 公式块 ===== */
+.formula-block{background:var(--d-formula-bg);border:1px solid var(--d-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--d-ink);margin-bottom:6px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.76rem;color:var(--d-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.76rem;color:var(--d-muted);margin-top:6px;line-height:1.6}
+.formula-desc strong{color:var(--d-ink2)}
+.formula-note{font-size:0.7rem;color:var(--d-accent3);margin-top:6px;font-style:italic}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:18px}
+.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--d-rule)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--d-accent);border:2px solid var(--d-bg2)}
+.tl-year{font-size:0.72rem;font-weight:700;color:var(--d-accent);font-family:monospace;margin-bottom:2px}
+.tl-title{font-size:0.78rem;font-weight:600;color:var(--d-ink);margin-bottom:2px}
+.tl-desc{font-size:0.72rem;color:var(--d-muted);line-height:1.5}
+
+/* ===== 科学家卡片 ===== */
+.bio-box{padding:8px 12px;border-radius:10px;border:1px solid var(--d-output-border);background:var(--d-output-bg);margin-bottom:8px;transition:background-color .5s ease,border-color .4s ease}
+.bio-box:last-child{margin-bottom:0}
+.bio-box .bio-name{font-weight:700;font-size:0.76rem;color:var(--d-ink)}
+.bio-box .bio-desc{font-size:0.7rem;color:var(--d-muted);margin-top:2px;line-height:1.5}
+
+[data-theme="academic"] .bio-box{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .bio-box{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 马赫锥指示器 ===== */
+.mach-indicator{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--d-output-bg);border:1px solid var(--d-output-border);margin-bottom:12px;transition:all .4s ease}
+.mach-dot{width:10px;height:10px;border-radius:50%;background:var(--d-accent3);transition:all .3s ease}
+.mach-dot.warning{background:var(--d-accent4)}
+.mach-dot.danger{background:#ef4444;box-shadow:0 0 8px rgba(239,68,68,0.6)}
+.mach-text{font-size:0.76rem;font-weight:600;color:var(--d-ink2)}
+.mach-value{font-family:monospace;font-size:0.82rem;font-weight:700;color:var(--d-accent);margin-left:auto}
+
+[data-theme="academic"] .mach-indicator{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .mach-indicator{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--d-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--d-rule)}
+  .sim-panel{min-height:400px}
+}
+@media(max-width:600px){
+  .canvas-controls{flex-wrap:wrap;justify-content:center}
+  .sim-btn{padding:6px 14px;font-size:0.76rem}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">🚑</div>
+      <div>
+        <h1>多普勒效应</h1>
+        <div class="lp-sub">参数设置 · 波源控制</div>
+      </div>
+    </div>
+
+    <!-- 实验参数 -->
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">波源速度 vₛ</span><span class="param-value" id="valVs">0.50 c</span></div>
+        <input type="range" id="sliderVs" min="0" max="200" value="50" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">波源频率 f₀</span><span class="param-value" id="valFreq">440 Hz</span></div>
+        <input type="range" id="sliderFreq" min="100" max="1000" value="440" step="10">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">介质波速 c</span><span class="param-value" id="valC">340 m/s</span></div>
+        <input type="range" id="sliderC" min="100" max="600" value="340" step="10">
+      </div>
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="ambulance">🚑 救护车</button>
+        <button class="preset-btn" data-preset="jet">✈️ 超音速</button>
+        <button class="preset-btn" data-preset="star">⭐ 红移</button>
+        <button class="preset-btn" data-preset="static">静止波源</button>
+      </div>
+    </div>
+
+    <!-- 运动模式 -->
+    <div class="side-section">
+      <div class="section-label">运动模式</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-mode="linear">直线运动</button>
+        <button class="mode-btn" data-mode="orbit">圆周运动</button>
+        <button class="mode-btn" data-mode="oscillate">往复运动</button>
+      </div>
+    </div>
+
+    <!-- 显示选项 -->
+    <div class="side-section">
+      <div class="section-label">显示选项</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-display="wavefront">波前</button>
+        <button class="mode-btn" data-display="freqmap">频率图</button>
+      </div>
+    </div>
+
+    <!-- 操作指南 -->
+    <div class="side-section">
+      <div class="section-label">操作指南</div>
+      <div class="info-card">
+        <p><strong>📍 拖动观察者</strong>：按住绿色圆点拖动以改变观察位置</p>
+        <p><strong>🎛 调节速度</strong>：滑动波源速度，超过波速时产生激波</p>
+        <p><strong>▶ 播放/暂停</strong>：底部按钮控制动画</p>
+        <p><strong>🔄 重置</strong>：恢复初始状态</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeTime">t = 0.00 s</span>
+        <span class="overlay-badge" id="badgeMode">直线运动</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">拖动绿色观察者 · 调节左侧参数</div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+          播放
+        </button>
+        <button class="sim-btn" id="btnPause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+          暂停
+        </button>
+        <button class="sim-btn" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📡</div>
+      <div>
+        <h2>观测数据</h2>
+        <div class="rp-sub">实时频率分析</div>
+      </div>
+    </div>
+
+    <!-- 频率显示 -->
+    <div class="side-section">
+      <div class="section-label">观测频率</div>
+      <div class="freq-bar-container">
+        <div class="freq-display">
+          <span class="freq-arrow" id="freqArrow">→</span>
+          <span class="freq-value" id="observedFreq">440.0</span>
+          <span class="freq-unit">Hz</span>
+        </div>
+        <div class="freq-bar">
+          <div class="freq-bar-fill" id="freqBarFill" style="width:0%;left:50%;background:var(--d-accent);"></div>
+        </div>
+        <div class="freq-comparison">
+          <span id="freqMin">440 Hz</span>
+          <span style="color:var(--d-muted)">波源 f₀</span>
+          <span id="freqMax">440 Hz</span>
+        </div>
+      </div>
+      <div class="output-grid">
+        <div class="output-card">
+          <div class="output-num" id="freqShift">+0.0</div>
+          <div class="output-label">频移 Δf (Hz)</div>
+        </div>
+        <div class="output-card">
+          <div class="output-num b" id="freqRatio">1.000</div>
+          <div class="output-label">频率比 f'/f₀</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 马赫数 -->
+    <div class="side-section">
+      <div class="section-label">马赫数与激波</div>
+      <div class="mach-indicator" id="machIndicator">
+        <div class="mach-dot" id="machDot"></div>
+        <span class="mach-text" id="machText">亚音速</span>
+        <span class="mach-value" id="machValue">M = 0.50</span>
+      </div>
+      <div class="output-grid">
+        <div class="output-card">
+          <div class="output-num c" id="wavelengthObs">0.77</div>
+          <div class="output-label">观测波长 λ' (m)</div>
+        </div>
+        <div class="output-card">
+          <div class="output-num d" id="wavelengthSrc">0.77</div>
+          <div class="output-label">波源波长 λ (m)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 公式 -->
+    <div class="side-section">
+      <div class="section-label">物理公式</div>
+      <div class="formula-block">
+        <div class="formula-title">多普勒效应（波源运动）</div>
+        <div class="formula-expr">f' = f₀ · c / (c − vₛ·cosθ)</div>
+        <div class="formula-desc">
+          <strong>f₀</strong>：波源频率 · <strong>c</strong>：介质波速<br>
+          <strong>vₛ</strong>：波源速度 · <strong>θ</strong>：波源运动方向与观察方向夹角
+        </div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">特殊情形</div>
+        <div class="formula-expr">靠近: f' = f₀ · c / (c − vₛ)
+远离: f' = f₀ · c / (c + vₛ)
+激波: vₛ > c → 马赫锥 sinα = c/vₛ</div>
+        <div class="formula-note">当波源速度超过波速，波前叠加形成锥形激波面</div>
+      </div>
+    </div>
+
+    <!-- 应用领域 -->
+    <div class="side-section">
+      <div class="section-label">应用领域</div>
+      <div class="info-card">
+        <h3>🚑 交通与声学</h3>
+        <p>救护车警笛靠近时音调升高，远离时降低。这是最直观的多普勒效应体验。</p>
+      </div>
+      <div class="info-card">
+        <h3>⭐ 天体物理红移</h3>
+        <p>星系远离地球时，光谱向红端偏移（波长变长）。哈勃通过红移测量发现宇宙膨胀。</p>
+      </div>
+      <div class="info-card">
+        <h3>🩺 医学超声</h3>
+        <p>多普勒超声通过测量血流反射声波的频率变化，无创检测血流速度和方向。</p>
+      </div>
+      <div class="info-card">
+        <h3>🛰 雷达测速</h3>
+        <p>交通雷达发射微波，通过反射波的频率偏移精确测量车辆速度。</p>
+      </div>
+    </div>
+
+    <!-- 历史背景 -->
+    <div class="side-section">
+      <div class="section-label">历史背景</div>
+      <div class="bio-box">
+        <div class="bio-name">克里斯蒂安·多普勒 (1803-1853)</div>
+        <div class="bio-desc">奥地利数学家、物理学家。1842年提出多普勒效应，最初用于解释双星颜色的差异。</div>
+      </div>
+      <div class="timeline" style="margin-top:12px">
+        <div class="tl-item">
+          <div class="tl-year">1842</div>
+          <div class="tl-title">多普勒效应提出</div>
+          <div class="tl-desc">发表《论双星及天体彩色光》论文，阐述波源运动对观测频率的影响</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1845</div>
+          <div class="tl-title">实验验证</div>
+          <div class="tl-desc">Buys Ballot 用火车上的乐师验证声学多普勒效应</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1929</div>
+          <div class="tl-title">哈勃红移</div>
+          <div class="tl-desc">哈勃发现星系红移与距离成正比，奠定大爆炸宇宙学基础</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1942</div>
+          <div class="tl-title">马赫锥理论</div>
+          <div class="tl-desc">超音速飞行产生的激波锥（马赫锥）理论完善</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+// ==========================================
+// 状态管理
+// ==========================================
+const state = {
+  running: true,
+  time: 0,
+  lastFrame: 0,
+  fps: 60,
+  fpsCounter: 0,
+  fpsTimer: 0,
+
+  // 物理参数
+  vs: 0.5,        // 波源速度 (以 c 为单位, 0~2)
+  f0: 440,        // 波源频率 Hz
+  c: 340,         // 介质波速 m/s
+  c_px: 120,      // 画布上的波速 px/s
+
+  // 运动模式
+  mode: 'linear',  // linear | orbit | oscillate
+  display: 'wavefront', // wavefront | freqmap
+
+  // 波源位置
+  sourceX: 0,
+  sourceY: 0,
+  sourceAngle: 0,
+  sourceCenterX: 0,
+  sourceCenterY: 0,
+
+  // 观察者位置
+  observerX: 0,
+  observerY: 0,
+  draggingObserver: false,
+
+  // 波前记录
+  wavefronts: [],
+  lastEmit: 0,
+  emitInterval: 0.25, // s
+
+  // 轨迹
+  trail: [],
+};
+
+// ==========================================
+// Canvas 初始化
+// ==========================================
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+let cw = 0, ch = 0;
+
+function resizeCanvas(){
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cw = rect.width;
+  ch = rect.height;
+
+  // 初始化位置
+  state.sourceCenterX = cw * 0.5;
+  state.sourceCenterY = ch * 0.5;
+  if(state.sourceX === 0){
+    state.sourceX = cw * 0.3;
+    state.sourceY = ch * 0.5;
+    state.observerX = cw * 0.8;
+    state.observerY = ch * 0.5;
+  }
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ==========================================
+// 主题颜色获取
+// ==========================================
+function getThemeColors(){
+  const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+  const styles = getComputedStyle(document.documentElement);
+
+  const colorMap = {
+    'glass': { bg:'#040410', waveFront:'116,185,255', waveBack:'253,121,168', source:'#fbbf24', observer:'#34d399', text:'#cbd5e1', muted:'#64748b', grid:'255,255,255', shock:'255,80,80' },
+    'cyber': { bg:'#020208', waveFront:'0,243,255', waveBack:'255,0,234', source:'#ffb800', observer:'#39ff14', text:'#b2ebf2', muted:'#4dd0e1', grid:'0,243,255', shock:'255,0,0' },
+    'cartoon': { bg:'#1a1a2e', waveFront:'78,205,196', waveBack:'255,107,107', source:'#ffe66d', observer:'#4ecdc4', text:'#4a4a4a', muted:'#7a7a7a', grid:'255,255,255', shock:'255,107,107' },
+    'soviet': { bg:'#e8e0d6', waveFront:'196,30,30', waveBack:'139,69,19', source:'#c41e1e', observer:'#556b2f', text:'#3d3d3d', muted:'#6a5a4a', grid:'196,30,30', shock:'196,30,30' },
+    'academic': { bg:'#ffffff', waveFront:'107,140,174', waveBack:'138,124,168', source:'#c4956a', observer:'#6a9e8a', text:'#3d3d5c', muted:'#7a7a8a', grid:'200,200,210', shock:'196,30,30' },
+  };
+  return colorMap[theme] || colorMap['academic'];
+}
+
+// ==========================================
+// 物理更新
+// ==========================================
+function updatePhysics(dt){
+  if(!state.running) return;
+  state.time += dt;
+
+  const vsPx = state.vs * state.c_px; // 波源速度 px/s
+
+  // 更新波源位置
+  if(state.mode === 'linear'){
+    state.sourceX += vsPx * dt;
+    if(state.sourceX > cw + 50) state.sourceX = -50;
+  } else if(state.mode === 'orbit'){
+    state.sourceAngle += (vsPx / 150) * dt; // 角速度
+    state.sourceX = state.sourceCenterX + Math.cos(state.sourceAngle) * 150;
+    state.sourceY = state.sourceCenterY + Math.sin(state.sourceAngle) * 150;
+  } else if(state.mode === 'oscillate'){
+    state.sourceAngle += (vsPx / 100) * dt * 2;
+    state.sourceX = state.sourceCenterX + Math.sin(state.sourceAngle) * 200;
+    state.sourceY = state.sourceCenterY;
+  }
+
+  // 记录轨迹
+  state.trail.push({x: state.sourceX, y: state.sourceY, t: state.time});
+  if(state.trail.length > 200) state.trail.shift();
+
+  // 发射波前
+  if(state.time - state.lastEmit >= state.emitInterval){
+    state.lastEmit = state.time;
+    state.wavefronts.push({
+      x: state.sourceX,
+      y: state.sourceY,
+      r: 0,
+      t0: state.time,
+    });
+  }
+
+  // 更新波前半径
+  const c_px = state.c_px;
+  state.wavefronts = state.wavefronts.filter(w => {
+    w.r = (state.time - w.t0) * c_px;
+    return w.r < Math.max(cw, ch) * 1.5;
+  });
+}
+
+// ==========================================
+// 计算观测频率
+// ==========================================
+function computeObservedFreq(){
+  const dx = state.observerX - state.sourceX;
+  const dy = state.observerY - state.sourceY;
+  const dist = Math.hypot(dx, dy);
+  if(dist < 1) return state.f0;
+
+  // 波源速度向量
+  let vsx = 0, vsy = 0;
+  const vsPx = state.vs * state.c_px;
+  if(state.mode === 'linear'){
+    vsx = vsPx; vsy = 0;
+  } else if(state.mode === 'orbit'){
+    vsx = -Math.sin(state.sourceAngle) * vsPx;
+    vsy = Math.cos(state.sourceAngle) * vsPx;
+  } else if(state.mode === 'oscillate'){
+    vsx = Math.cos(state.sourceAngle) * vsPx * 2;
+    vsy = 0;
+  }
+
+  // 波源运动方向与观察方向的夹角
+  const cosTheta = (vsx * dx + vsy * dy) / (dist * Math.max(vsPx, 0.001));
+  const vs_real = state.vs * state.c; // 实际物理速度 m/s
+
+  // 多普勒公式: f' = f0 * c / (c - vs*cosθ)
+  const denom = state.c - vs_real * cosTheta;
+  if(denom <= 0) return state.f0 * 5; // 超音速激波
+  return state.f0 * state.c / denom;
+}
+
+// ==========================================
+// 渲染
+// ==========================================
+function render(){
+  const colors = getThemeColors();
+
+  // 背景
+  ctx.fillStyle = colors.bg;
+  ctx.fillRect(0, 0, cw, ch);
+
+  // 网格
+  ctx.strokeStyle = `rgba(${colors.grid},0.04)`;
+  ctx.lineWidth = 1;
+  const gridSize = 40;
+  for(let x = 0; x < cw; x += gridSize){
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ch); ctx.stroke();
+  }
+  for(let y = 0; y < ch; y += gridSize){
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y); ctx.stroke();
+  }
+
+  // 中心十字线
+  ctx.strokeStyle = `rgba(${colors.grid},0.08)`;
+  ctx.beginPath(); ctx.moveTo(cw/2, 0); ctx.lineTo(cw/2, ch); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, ch/2); ctx.lineTo(cw, ch/2); ctx.stroke();
+
+  if(state.display === 'wavefront'){
+    renderWavefronts(colors);
+  } else {
+    renderFreqMap(colors);
+  }
+
+  // 轨迹
+  if(state.trail.length > 1){
+    ctx.strokeStyle = `rgba(${colors.source},0.2)`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(let i = 0; i < state.trail.length; i++){
+      const p = state.trail[i];
+      if(i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+  }
+
+  // 波源
+  drawSource(colors);
+
+  // 观察者
+  drawObserver(colors);
+
+  // 连线
+  ctx.strokeStyle = `rgba(${colors.observer},0.2)`;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(state.sourceX, state.sourceY);
+  ctx.lineTo(state.observerX, state.observerY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 激波锥
+  if(state.vs > 1){
+    drawShockCone(colors);
+  }
+}
+
+function renderWavefronts(colors){
+  for(const w of state.wavefronts){
+    const age = state.time - w.t0;
+    const alpha = Math.max(0, 1 - age / 5);
+
+    // 判断波前在波源的哪一侧
+    const dx = w.x - state.sourceX;
+    const isFront = dx < 0; // 波源向右运动，左侧是前方
+
+    const color = isFront ? colors.waveFront : colors.waveBack;
+
+    ctx.strokeStyle = `rgba(${color},${alpha * 0.6})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, Math.max(1, w.r), 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function renderFreqMap(colors){
+  // 频率热力图模式
+  const step = 6;
+  const vsPx = state.vs * state.c_px;
+
+  for(let px = 0; px < cw; px += step){
+    for(let py = 0; py < ch; py += step){
+      const dx = px - state.sourceX;
+      const dy = py - state.sourceY;
+      const dist = Math.hypot(dx, dy);
+      if(dist < 5) continue;
+
+      // 波源速度方向
+      let vsx = vsPx, vsy = 0;
+      if(state.mode === 'orbit'){
+        vsx = -Math.sin(state.sourceAngle) * vsPx;
+        vsy = Math.cos(state.sourceAngle) * vsPx;
+      } else if(state.mode === 'oscillate'){
+        vsx = Math.cos(state.sourceAngle) * vsPx * 2;
+      }
+
+      const cosTheta = (vsx * dx + vsy * dy) / (dist * Math.max(vsPx, 0.001));
+      const denom = state.c - state.vs * state.c * cosTheta;
+      let freqRatio = denom > 0 ? state.c / denom : 2;
+
+      // 颜色映射
+      let r, g, b;
+      if(freqRatio > 1){
+        // 蓝移
+        const t = Math.min(1, (freqRatio - 1) * 2);
+        r = Math.round(colors.waveFront.split(',')[0] * t * 0.3);
+        g = Math.round(colors.waveFront.split(',')[1] * t * 0.5);
+        b = Math.round(255 * t * 0.8);
+      } else {
+        // 红移
+        const t = Math.min(1, (1 - freqRatio) * 2);
+        r = Math.round(255 * t * 0.6);
+        g = Math.round(colors.waveBack.split(',')[1] * t * 0.2);
+        b = Math.round(colors.waveBack.split(',')[2] * t * 0.2);
+      }
+
+      ctx.fillStyle = `rgba(${r},${g},${b},0.12)`;
+      ctx.fillRect(px, py, step, step);
+    }
+  }
+}
+
+function drawSource(colors){
+  // 光晕
+  const gradient = ctx.createRadialGradient(state.sourceX, state.sourceY, 0, state.sourceX, state.sourceY, 30);
+  gradient.addColorStop(0, colors.source + '80');
+  gradient.addColorStop(1, colors.source + '00');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(state.sourceX - 30, state.sourceY - 30, 60, 60);
+
+  // 速度方向箭头
+  const vsPx = state.vs * state.c_px;
+  let vx = vsPx, vy = 0;
+  if(state.mode === 'orbit'){
+    vx = -Math.sin(state.sourceAngle) * vsPx;
+    vy = Math.cos(state.sourceAngle) * vsPx;
+  } else if(state.mode === 'oscillate'){
+    vx = Math.cos(state.sourceAngle) * vsPx * 2;
+  }
+  const vmag = Math.hypot(vx, vy);
+  if(vmag > 1){
+    const len = 25;
+    const nx = vx / vmag, ny = vy / vmag;
+    ctx.strokeStyle = colors.source;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(state.sourceX, state.sourceY);
+    ctx.lineTo(state.sourceX + nx * len, state.sourceY + ny * len);
+    ctx.stroke();
+    // 箭头
+    const ax = state.sourceX + nx * len;
+    const ay = state.sourceY + ny * len;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(ax - nx * 6 + ny * 4, ay - ny * 6 - nx * 4);
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(ax - nx * 6 - ny * 4, ay - ny * 6 + nx * 4);
+    ctx.stroke();
+  }
+
+  // 圆
+  ctx.fillStyle = colors.source;
+  ctx.beginPath();
+  ctx.arc(state.sourceX, state.sourceY, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.bg;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // 标签
+  ctx.fillStyle = colors.text;
+  ctx.font = 'bold 11px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('波源', state.sourceX, state.sourceY - 16);
+}
+
+function drawObserver(colors){
+  // 光晕
+  const gradient = ctx.createRadialGradient(state.observerX, state.observerY, 0, state.observerX, state.observerY, 25);
+  gradient.addColorStop(0, colors.observer + '60');
+  gradient.addColorStop(1, colors.observer + '00');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(state.observerX - 25, state.observerY - 25, 50, 50);
+
+  // 圆
+  ctx.fillStyle = colors.observer;
+  ctx.beginPath();
+  ctx.arc(state.observerX, state.observerY, 7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = colors.bg;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // 标签
+  ctx.fillStyle = colors.text;
+  ctx.font = 'bold 11px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('观察者', state.observerX, state.observerY - 15);
+
+  // 脉动环
+  const pulse = (Math.sin(state.time * 4) + 1) * 0.5;
+  ctx.strokeStyle = `rgba(${colors.observer.split('#')[1] ? hexToRgb(colors.observer) : colors.observer},${0.3 * (1 - pulse)})`;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(state.observerX, state.observerY, 7 + pulse * 15, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function hexToRgb(hex){
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `${r},${g},${b}`;
+}
+
+function drawShockCone(colors){
+  // 马赫锥
+  const machAngle = Math.asin(1 / state.vs);
+  const vsPx = state.vs * state.c_px;
+  let vx = vsPx, vy = 0;
+  if(state.mode === 'orbit'){
+    vx = -Math.sin(state.sourceAngle) * vsPx;
+    vy = Math.cos(state.sourceAngle) * vsPx;
+  }
+
+  const angle = Math.atan2(vy, vx);
+  const len = Math.max(cw, ch);
+
+  ctx.strokeStyle = `rgba(${colors.shock},0.5)`;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 4]);
+
+  // 锥的两条线
+  for(const sign of [-1, 1]){
+    const ca = angle + Math.PI + sign * machAngle;
+    ctx.beginPath();
+    ctx.moveTo(state.sourceX, state.sourceY);
+    ctx.lineTo(state.sourceX + Math.cos(ca) * len, state.sourceY + Math.sin(ca) * len);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // 标注
+  ctx.fillStyle = `rgba(${colors.shock},0.8)`;
+  ctx.font = 'bold 10px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`马赫角 α = ${(machAngle * 180 / Math.PI).toFixed(1)}°`, state.sourceX + 15, state.sourceY + 25);
+}
+
+// ==========================================
+// UI 更新
+// ==========================================
+function updateUI(){
+  const observed = computeObservedFreq();
+  const shift = observed - state.f0;
+  const ratio = observed / state.f0;
+  const wavelengthSrc = state.c / state.f0;
+  const wavelengthObs = state.c / observed;
+  const mach = state.vs;
+
+  // 观测频率
+  document.getElementById('observedFreq').textContent = observed.toFixed(1);
+  document.getElementById('freqShift').textContent = (shift >= 0 ? '+' : '') + shift.toFixed(1);
+  document.getElementById('freqRatio').textContent = ratio.toFixed(3);
+  document.getElementById('wavelengthObs').textContent = wavelengthObs.toFixed(2);
+  document.getElementById('wavelengthSrc').textContent = wavelengthSrc.toFixed(2);
+
+  // 频率条
+  const maxShift = state.f0 * 2;
+  const barPct = Math.min(50, Math.abs(shift) / maxShift * 50);
+  const fill = document.getElementById('freqBarFill');
+  if(shift >= 0){
+    fill.style.left = '50%';
+    fill.style.width = barPct + '%';
+    fill.style.background = `var(--d-accent)`;
+  } else {
+    fill.style.left = (50 - barPct) + '%';
+    fill.style.width = barPct + '%';
+    fill.style.background = `var(--d-accent2)`;
+  }
+
+  // 箭头
+  const arrow = document.getElementById('freqArrow');
+  if(shift > 1) arrow.textContent = '↑↑';
+  else if(shift < -1) arrow.textContent = '↓↓';
+  else arrow.textContent = '→';
+
+  // 频率范围
+  const minF = state.f0 * state.c / (state.c + state.vs * state.c);
+  const maxF = state.vs < 1 ? state.f0 * state.c / (state.c - state.vs * state.c) : state.f0 * 3;
+  document.getElementById('freqMin').textContent = minF.toFixed(0) + ' Hz';
+  document.getElementById('freqMax').textContent = maxF.toFixed(0) + ' Hz';
+
+  // 马赫数
+  document.getElementById('machValue').textContent = `M = ${mach.toFixed(2)}`;
+  const machDot = document.getElementById('machDot');
+  const machText = document.getElementById('machText');
+  if(mach < 0.8){
+    machDot.className = 'mach-dot';
+    machText.textContent = '亚音速';
+  } else if(mach < 1.0){
+    machDot.className = 'mach-dot warning';
+    machText.textContent = '跨音速';
+  } else {
+    machDot.className = 'mach-dot danger';
+    machText.textContent = '超音速 · 激波!';
+  }
+
+  // Badge
+  document.getElementById('badgeTime').textContent = `t = ${state.time.toFixed(2)} s`;
+  const modeNames = {'linear':'直线运动','orbit':'圆周运动','oscillate':'往复运动'};
+  document.getElementById('badgeMode').textContent = modeNames[state.mode];
+}
+
+// ==========================================
+// 交互
+// ==========================================
+// 鼠标拖动观察者
+canvas.addEventListener('mousedown', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const dist = Math.hypot(mx - state.observerX, my - state.observerY);
+  if(dist < 20){
+    state.draggingObserver = true;
+    canvas.style.cursor = 'grabbing';
+  }
+});
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  if(state.draggingObserver){
+    state.observerX = mx;
+    state.observerY = my;
+  } else {
+    const dist = Math.hypot(mx - state.observerX, my - state.observerY);
+    canvas.style.cursor = dist < 20 ? 'grab' : 'default';
+  }
+});
+canvas.addEventListener('mouseup', () => {
+  state.draggingObserver = false;
+  canvas.style.cursor = 'default';
+});
+canvas.addEventListener('mouseleave', () => {
+  state.draggingObserver = false;
+});
+
+// 触屏支持
+canvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  const mx = t.clientX - rect.left;
+  const my = t.clientY - rect.top;
+  const dist = Math.hypot(mx - state.observerX, my - state.observerY);
+  if(dist < 30){
+    state.draggingObserver = true;
+  }
+});
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if(state.draggingObserver){
+    const rect = canvas.getBoundingClientRect();
+    const t = e.touches[0];
+    state.observerX = t.clientX - rect.left;
+    state.observerY = t.clientY - rect.top;
+  }
+});
+canvas.addEventListener('touchend', () => {
+  state.draggingObserver = false;
+});
+
+// 滑块
+document.getElementById('sliderVs').addEventListener('input', (e) => {
+  state.vs = parseInt(e.target.value) / 100;
+  document.getElementById('valVs').textContent = state.vs.toFixed(2) + ' c';
+});
+document.getElementById('sliderFreq').addEventListener('input', (e) => {
+  state.f0 = parseInt(e.target.value);
+  document.getElementById('valFreq').textContent = state.f0 + ' Hz';
+});
+document.getElementById('sliderC').addEventListener('input', (e) => {
+  state.c = parseInt(e.target.value);
+  state.c_px = state.c * 0.353; // 比例缩放
+  document.getElementById('valC').textContent = state.c + ' m/s';
+});
+
+// 模式按钮
+document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    state.time = 0;
+    state.wavefronts = [];
+    state.trail = [];
+    state.sourceAngle = 0;
+  });
+});
+
+// 显示模式
+document.querySelectorAll('.mode-btn[data-display]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn[data-display]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.display = btn.dataset.display;
+  });
+});
+
+// 预设
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const preset = btn.dataset.preset;
+    if(preset === 'ambulance'){
+      setParams(0.3, 700, 340);
+    } else if(preset === 'jet'){
+      setParams(1.5, 300, 340);
+    } else if(preset === 'star'){
+      setParams(0.8, 500, 300);
+    } else if(preset === 'static'){
+      setParams(0, 440, 340);
+    }
+  });
+});
+
+function setParams(vs, f0, c){
+  state.vs = vs;
+  state.f0 = f0;
+  state.c = c;
+  state.c_px = c * 0.353;
+  document.getElementById('sliderVs').value = Math.round(vs * 100);
+  document.getElementById('sliderFreq').value = f0;
+  document.getElementById('sliderC').value = c;
+  document.getElementById('valVs').textContent = vs.toFixed(2) + ' c';
+  document.getElementById('valFreq').textContent = f0 + ' Hz';
+  document.getElementById('valC').textContent = c + ' m/s';
+}
+
+// 控制按钮
+document.getElementById('btnPlay').addEventListener('click', () => {
+  state.running = true;
+});
+document.getElementById('btnPause').addEventListener('click', () => {
+  state.running = false;
+});
+document.getElementById('btnReset').addEventListener('click', () => {
+  state.time = 0;
+  state.wavefronts = [];
+  state.trail = [];
+  state.sourceAngle = 0;
+  state.lastEmit = 0;
+  state.sourceX = cw * 0.3;
+  state.sourceY = ch * 0.5;
+  state.observerX = cw * 0.8;
+  state.observerY = ch * 0.5;
+});
+
+// ==========================================
+// 主循环
+// ==========================================
+function loop(timestamp){
+  if(!state.lastFrame) state.lastFrame = timestamp;
+  const dt = Math.min(0.05, (timestamp - state.lastFrame) / 1000);
+  state.lastFrame = timestamp;
+
+  // FPS
+  state.fpsCounter++;
+  state.fpsTimer += dt;
+  if(state.fpsTimer >= 1){
+    state.fps = state.fpsCounter;
+    state.fpsCounter = 0;
+    state.fpsTimer = 0;
+    document.getElementById('badgeFPS').textContent = state.fps + ' FPS';
+  }
+
+  updatePhysics(dt);
+  render();
+  updateUI();
+
+  requestAnimationFrame(loop);
+}
+
+// 隐藏提示
+setTimeout(() => {
+  const hint = document.getElementById('canvasHint');
+  if(hint) hint.style.opacity = '0';
+}, 5000);
+
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
