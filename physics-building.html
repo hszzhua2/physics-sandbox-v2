@@ -856,6 +856,15 @@ function renderStats() {
 
 // ===== Load and render article =====
 async function loadArticle(path) {
+  // Update graph highlight immediately (before fetch), so node clicks always work
+  currentNode = MANIFEST.nodes.find(n => n.path === path) || null;
+  updateGraphHighlight();
+  // Update active state in tree
+  document.querySelectorAll('.pb-file-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.path === path);
+  });
+  // Update URL hash
+  history.replaceState(null, '', '#' + path);
   try {
     const res = await fetch('physics-vault/' + path);
     if (!res.ok) throw new Error('Not found');
@@ -954,19 +963,8 @@ async function loadArticle(path) {
       el.onclick = () => loadArticle(el.dataset.path);
     });
     
-    // Update active state in tree
-    document.querySelectorAll('.pb-file-item').forEach(el => {
-      el.classList.toggle('active', el.dataset.path === path);
-    });
-    
-    currentNode = MANIFEST.nodes.find(n => n.path === path);
-    updateGraphHighlight();
-    
     // Scroll content to top
     document.getElementById('pb-content').scrollTop = 0;
-    
-    // Update URL hash
-    history.replaceState(null, '', '#' + path);
   } catch (e) {
     console.error('Failed to load article:', e);
   }
