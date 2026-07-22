@@ -278,6 +278,29 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+    // ========== Texture URLs (from jeromeetienne/threex.planets via jsDelivr CDN) ==========
+    const PLANET_TEXTURES = {
+      sun:     'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/sunmap.jpg',
+      mercury: 'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/mercurymap.jpg',
+      venus:   'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/venusmap.jpg',
+      earth:   'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/earthmap1k.jpg',
+      mars:    'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/marsmap1k.jpg',
+      jupiter: 'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/jupitermap.jpg',
+      saturn:  'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/saturnmap.jpg',
+      uranus:  'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/uranusmap.jpg',
+      neptune: 'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/neptunemap.jpg',
+      pluto:   'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/plutomap1k.jpg',
+      moon:    'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/moonmap1k.jpg',
+      saturnRing: 'https://cdn.jsdelivr.net/gh/jeromeetienne/threex.planets@master/images/saturnringcolor.jpg'
+    };
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
+    function loadTexture(url) {
+      const tex = textureLoader.load(url);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
     // ========== Sun Data ==========
     const SUN_DATA = {
       key:'sun', name:'太阳', en:'Sun', type:'恒星', color:'#ffcc33',
@@ -650,7 +673,7 @@
 
       createSun() {
         const geo = new THREE.SphereGeometry(2.5, 64, 64);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xffcc33 });
+        const mat = new THREE.MeshBasicMaterial({ map: loadTexture(PLANET_TEXTURES.sun) });
         this.sun = new THREE.Mesh(geo, mat);
         this.sun.userData = { type:'sun' };
         this.scene.add(this.sun);
@@ -703,10 +726,11 @@
 
           // Planet
           const geo = new THREE.SphereGeometry(p.size * 0.45, 48, 48);
-          const mat = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(p.color),
-            roughness: 0.7, metalness: 0.05
-          });
+          const texUrl = PLANET_TEXTURES[p.key];
+          const matOpts = { roughness: 0.85, metalness: 0.05 };
+          if (texUrl) matOpts.map = loadTexture(texUrl);
+          else matOpts.color = new THREE.Color(p.color);
+          const mat = new THREE.MeshStandardMaterial(matOpts);
           const mesh = new THREE.Mesh(geo, mat);
           mesh.position.set(p.dist, 0, 0);
           mesh.userData = { planetKey: p.key, type:'planet' };
@@ -714,10 +738,10 @@
           group.add(mesh);
           this.planetMeshes[p.key] = mesh;
 
-          // Saturn ring
+          // Saturn ring (textured)
           if (p.key === 'saturn') {
             const ringGeo = new THREE.TorusGeometry(p.size*0.55, p.size*0.12, 16, 64);
-            const ringMat = new THREE.MeshStandardMaterial({ color:0xd4c090, roughness:0.6, metalness:0.2, side:THREE.DoubleSide });
+            const ringMat = new THREE.MeshStandardMaterial({ map: loadTexture(PLANET_TEXTURES.saturnRing), roughness:0.6, metalness:0.2, side:THREE.DoubleSide, transparent:true });
             const ringMesh = new THREE.Mesh(ringGeo, ringMat);
             ringMesh.rotation.x = Math.PI/2.3;
             mesh.add(ringMesh);
@@ -742,10 +766,11 @@
 
           // Dwarf planet (smaller than full planets)
           const geo = new THREE.SphereGeometry(p.size * 0.35, 32, 32);
-          const mat = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(p.color),
-            roughness: 0.8, metalness: 0.02
-          });
+          const texUrl = PLANET_TEXTURES[p.key];
+          const matOpts = { roughness: 0.9, metalness: 0.02 };
+          if (texUrl) matOpts.map = loadTexture(texUrl);
+          else matOpts.color = new THREE.Color(p.color);
+          const mat = new THREE.MeshStandardMaterial(matOpts);
           const mesh = new THREE.Mesh(geo, mat);
           mesh.position.set(p.dist, 0, 0);
           mesh.userData = { planetKey: p.key, type: 'dwarf' };
@@ -758,10 +783,11 @@
         MOON_DATA.forEach(m => {
           // Moon will be positioned relative to its parent planet
           const geo = new THREE.SphereGeometry(m.size * 0.2, 24, 24);
-          const mat = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(m.color),
-            roughness: 0.7, metalness: 0.05
-          });
+          const texUrl = PLANET_TEXTURES[m.key];
+          const matOpts = { roughness: 0.85, metalness: 0.05 };
+          if (texUrl) matOpts.map = loadTexture(texUrl);
+          else matOpts.color = new THREE.Color(m.color);
+          const mat = new THREE.MeshStandardMaterial(matOpts);
           const mesh = new THREE.Mesh(geo, mat);
           mesh.userData = { moonKey: m.key, parentKey: m.parentKey, type: 'moon' };
           this.scene.add(mesh);
