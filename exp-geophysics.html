@@ -3,74 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>地球物理 — 物理沙盒宇宙</title>
+<title>地球物理 3D — Geophysics Explorer | 物理沙盒宇宙</title>
 <link rel="stylesheet" href="shared-theme.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 <style>
 /* ================================================================ THEME VARS */
 [data-theme="glass"]{
-  --g-bg:#080812;--g-bg2:#0e0e1c;--g-surface:rgba(255,255,255,0.04);--g-surface-hover:rgba(255,255,255,0.08);
-  --g-ink:#f1f5f9;--g-ink2:#cbd5e1;--g-muted:#64748b;--g-rule:rgba(255,255,255,0.07);
-  --g-accent:#74b9ff;--g-accent2:#a29bfe;--g-accent3:#34d399;--g-accent4:#fbbf24;
-  --g-card-bg:rgba(255,255,255,0.03);--g-card-border:rgba(255,255,255,0.06);
-  --g-canvas-bg:#040410;--g-param-bg:rgba(255,255,255,0.03);--g-param-border:rgba(255,255,255,0.06);
-  --g-output-bg:rgba(0,0,0,0.3);--g-output-border:rgba(255,255,255,0.06);
-  --g-formula-bg:rgba(116,185,255,0.05);--g-formula-border:rgba(116,185,255,0.12);
-  --g-scrollbar:rgba(116,185,255,0.3);--g-glow:none;
-  --g-crust:#8b6914;--g-mantle:#c0392b;--g-outercore:#e67e22;--g-innercore:#f1c40f;
-  --g-pwave:#74b9ff;--g-swave:#e74c3c;--g-magfield:#a29bfe;--g-plate:#2ecc71;
+  --g-bg:#080812; --g-bg2:#0e0e1c; --g-surface:rgba(255,255,255,0.04); --g-surface-hover:rgba(255,255,255,0.08);
+  --g-ink:#f1f5f9; --g-ink2:#cbd5e1; --g-muted:#64748b; --g-rule:rgba(255,255,255,0.07);
+  --g-accent:#74b9ff; --g-accent2:#a29bfe; --g-accent3:#34d399; --g-accent4:#fbbf24;
+  --g-card-bg:rgba(255,255,255,0.03); --g-card-border:rgba(255,255,255,0.06);
+  --g-canvas-bg:#040410; --g-param-bg:rgba(255,255,255,0.03); --g-param-border:rgba(255,255,255,0.06);
+  --g-output-bg:rgba(0,0,0,0.3); --g-output-border:rgba(255,255,255,0.06);
+  --g-formula-bg:rgba(116,185,255,0.05); --g-formula-border:rgba(116,185,255,0.12);
+  --g-scrollbar:rgba(116,185,255,0.3); --g-glow:none;
+  --g-crust:#8b6914; --g-mantle:#c0392b; --g-outercore:#e67e22; --g-innercore:#f1c40f;
+  --g-pwave:#74b9ff; --g-swave:#e74c3c; --g-magfield:#a29bfe; --g-plate:#2ecc71;
 }
 [data-theme="cyber"]{
-  --g-bg:#040410;--g-bg2:#08081a;--g-surface:rgba(0,243,255,0.03);--g-surface-hover:rgba(0,243,255,0.06);
-  --g-ink:#e0f7fa;--g-ink2:#b2ebf2;--g-muted:#4dd0e1;--g-rule:rgba(0,243,255,0.1);
-  --g-accent:#00f3ff;--g-accent2:#ff00ea;--g-accent3:#39ff14;--g-accent4:#ffb800;
-  --g-card-bg:rgba(0,243,255,0.02);--g-card-border:rgba(0,243,255,0.12);
-  --g-canvas-bg:#020208;--g-param-bg:rgba(0,243,255,0.02);--g-param-border:rgba(0,243,255,0.1);
-  --g-output-bg:rgba(0,0,0,0.4);--g-output-border:rgba(0,243,255,0.08);
-  --g-formula-bg:rgba(0,243,255,0.04);--g-formula-border:rgba(0,243,255,0.15);
-  --g-scrollbar:rgba(0,243,255,0.4);--g-glow:0 0 8px rgba(0,243,255,0.25);
-  --g-crust:#ffb800;--g-mantle:#ff00ea;--g-outercore:#00f3ff;--g-innercore:#39ff14;
-  --g-pwave:#00f3ff;--g-swave:#ff00ea;--g-magfield:#bd00ff;--g-plate:#39ff14;
+  --g-bg:#040410; --g-bg2:#08081a; --g-surface:rgba(0,243,255,0.03); --g-surface-hover:rgba(0,243,255,0.06);
+  --g-ink:#e0f7fa; --g-ink2:#b2ebf2; --g-muted:#4dd0e1; --g-rule:rgba(0,243,255,0.1);
+  --g-accent:#00f3ff; --g-accent2:#ff00ea; --g-accent3:#39ff14; --g-accent4:#ffb800;
+  --g-card-bg:rgba(0,243,255,0.02); --g-card-border:rgba(0,243,255,0.12);
+  --g-canvas-bg:#020208; --g-param-bg:rgba(0,243,255,0.02); --g-param-border:rgba(0,243,255,0.1);
+  --g-output-bg:rgba(0,0,0,0.4); --g-output-border:rgba(0,243,255,0.08);
+  --g-formula-bg:rgba(0,243,255,0.04); --g-formula-border:rgba(0,243,255,0.15);
+  --g-scrollbar:rgba(0,243,255,0.4); --g-glow:0 0 8px rgba(0,243,255,0.25);
+  --g-crust:#ffb800; --g-mantle:#ff00ea; --g-outercore:#00f3ff; --g-innercore:#39ff14;
+  --g-pwave:#00f3ff; --g-swave:#ff00ea; --g-magfield:#bd00ff; --g-plate:#39ff14;
 }
 [data-theme="soviet"]{
-  --g-bg:#f0ebe4;--g-bg2:#e8e0d6;--g-surface:#fffaf2;--g-surface-hover:#f4f0ea;
-  --g-ink:#1a1a1a;--g-ink2:#3d3d3d;--g-muted:#6a5a4a;--g-rule:#d4c4a8;
-  --g-accent:#c41e1e;--g-accent2:#8b4513;--g-accent3:#a0522d;--g-accent4:#cd853f;
-  --g-card-bg:#fffaf2;--g-card-border:#c41e1e;
-  --g-canvas-bg:#e8e0d6;--g-param-bg:#f4f0ea;--g-param-border:#d4c4a8;
-  --g-output-bg:#f4f0ea;--g-output-border:#d4c4a8;
-  --g-formula-bg:rgba(196,30,30,0.04);--g-formula-border:rgba(196,30,30,0.2);
-  --g-scrollbar:#c41e1e;--g-glow:none;
-  --g-crust:#8b6914;--g-mantle:#c41e1e;--g-outercore:#cd853f;--g-innercore:#daa520;
-  --g-pwave:#c41e1e;--g-swave:#556b2f;--g-magfield:#8b4513;--g-plate:#556b2f;
+  --g-bg:#f0ebe4; --g-bg2:#e8e0d6; --g-surface:#fffaf2; --g-surface-hover:#f4f0ea;
+  --g-ink:#1a1a1a; --g-ink2:#3d3d3d; --g-muted:#6a5a4a; --g-rule:#d4c4a8;
+  --g-accent:#c41e1e; --g-accent2:#8b4513; --g-accent3:#a0522d; --g-accent4:#cd853f;
+  --g-card-bg:#fffaf2; --g-card-border:#c41e1e;
+  --g-canvas-bg:#e8e0d6; --g-param-bg:#f4f0ea; --g-param-border:#d4c4a8;
+  --g-output-bg:#f4f0ea; --g-output-border:#d4c4a8;
+  --g-formula-bg:rgba(196,30,30,0.04); --g-formula-border:rgba(196,30,30,0.2);
+  --g-scrollbar:#c41e1e; --g-glow:none;
+  --g-crust:#8b6914; --g-mantle:#c41e1e; --g-outercore:#cd853f; --g-innercore:#daa520;
+  --g-pwave:#c41e1e; --g-swave:#556b2f; --g-magfield:#8b4513; --g-plate:#556b2f;
 }
 [data-theme="cartoon"]{
-  --g-bg:#fef6e4;--g-bg2:#fff8f0;--g-surface:rgba(255,255,255,0.7);--g-surface-hover:rgba(255,255,255,0.9);
-  --g-ink:#2d3436;--g-ink2:#4a4a4a;--g-muted:#7a7a7a;--g-rule:rgba(0,0,0,0.08);
-  --g-accent:#ff6b6b;--g-accent2:#4ecdc4;--g-accent3:#ffe66d;--g-accent4:#a29bfe;
-  --g-card-bg:rgba(255,255,255,0.8);--g-card-border:rgba(0,0,0,0.1);
-  --g-canvas-bg:#1a1a2e;--g-param-bg:rgba(255,255,255,0.5);--g-param-border:rgba(0,0,0,0.1);
-  --g-output-bg:rgba(255,255,255,0.6);--g-output-border:rgba(0,0,0,0.08);
-  --g-formula-bg:rgba(255,107,107,0.05);--g-formula-border:rgba(255,107,107,0.15);
-  --g-scrollbar:rgba(0,0,0,0.15);--g-glow:none;
-  --g-crust:#d4a017;--g-mantle:#ff6b6b;--g-outercore:#ffa502;--g-innercore:#ffe66d;
-  --g-pwave:#4ecdc4;--g-swave:#ff6b6b;--g-magfield:#a29bfe;--g-plate:#26de81;
+  --g-bg:#fef6e4; --g-bg2:#fff8f0; --g-surface:rgba(255,255,255,0.7); --g-surface-hover:rgba(255,255,255,0.9);
+  --g-ink:#2d3436; --g-ink2:#4a4a4a; --g-muted:#7a7a7a; --g-rule:rgba(0,0,0,0.08);
+  --g-accent:#ff6b6b; --g-accent2:#4ecdc4; --g-accent3:#ffe66d; --g-accent4:#a29bfe;
+  --g-card-bg:rgba(255,255,255,0.8); --g-card-border:rgba(0,0,0,0.1);
+  --g-canvas-bg:#1a1a2e; --g-param-bg:rgba(255,255,255,0.5); --g-param-border:rgba(0,0,0,0.1);
+  --g-output-bg:rgba(255,255,255,0.6); --g-output-border:rgba(0,0,0,0.08);
+  --g-formula-bg:rgba(255,107,107,0.05); --g-formula-border:rgba(255,107,107,0.15);
+  --g-scrollbar:rgba(0,0,0,0.15); --g-glow:none;
+  --g-crust:#d4a017; --g-mantle:#ff6b6b; --g-outercore:#ffa502; --g-innercore:#ffe66d;
+  --g-pwave:#4ecdc4; --g-swave:#ff6b6b; --g-magfield:#a29bfe; --g-plate:#26de81;
 }
 [data-theme="academic"]{
-  --g-bg:#f8f9fa;--g-bg2:#f1f3f5;--g-surface:rgba(255,255,255,0.9);--g-surface-hover:#f0f0f0;
-  --g-ink:#1a1a2e;--g-ink2:#3d3d5c;--g-muted:#7a7a8a;--g-rule:#e0e0e0;
-  --g-accent:#6b8cae;--g-accent2:#8a7ca8;--g-accent3:#c4956a;--g-accent4:#6a9e8a;
-  --g-card-bg:#ffffff;--g-card-border:#e0e0e0;
-  --g-canvas-bg:#ffffff;--g-param-bg:#f8f9fa;--g-param-border:#e0e0e0;
-  --g-output-bg:#f4f5f7;--g-output-border:#e0e0e0;
-  --g-formula-bg:rgba(107,140,174,0.04);--g-formula-border:rgba(107,140,174,0.2);
-  --g-scrollbar:#d0d0d0;--g-glow:none;
-  --g-crust:#b8860b;--g-mantle:#cd5c5c;--g-outercore:#daa520;--g-innercore:#ffd700;
-  --g-pwave:#6b8cae;--g-swave:#cd5c5c;--g-magfield:#8a7ca8;--g-plate:#6a9e8a;
+  --g-bg:#f8f9fa; --g-bg2:#f1f3f5; --g-surface:rgba(255,255,255,0.9); --g-surface-hover:#f0f0f0;
+  --g-ink:#1a1a2e; --g-ink2:#3d3d5c; --g-muted:#7a7a8a; --g-rule:#e0e0e0;
+  --g-accent:#6b8cae; --g-accent2:#8a7ca8; --g-accent3:#c4956a; --g-accent4:#6a9e8a;
+  --g-card-bg:#ffffff; --g-card-border:#e0e0e0;
+  --g-canvas-bg:#000000; --g-param-bg:#f8f9fa; --g-param-border:#e0e0e0;
+  --g-output-bg:#f4f5f7; --g-output-border:#e0e0e0;
+  --g-formula-bg:rgba(107,140,174,0.04); --g-formula-border:rgba(107,140,174,0.2);
+  --g-scrollbar:#d0d0d0; --g-glow:none;
+  --g-crust:#b8860b; --g-mantle:#cd5c5c; --g-outercore:#daa520; --g-innercore:#ffd700;
+  --g-pwave:#6b8cae; --g-swave:#cd5c5c; --g-magfield:#8a7ca8; --g-plate:#6a9e8a;
 }
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{font-size:16px}
-body{font-family:var(--font-main);background:var(--g-bg);color:var(--g-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+body{font-family:var(--font-main,'Segoe UI','Microsoft YaHei',system-ui,sans-serif);background:var(--g-bg);color:var(--g-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--g-bg)}
 ::-webkit-scrollbar-thumb{background:var(--g-scrollbar);border-radius:999px}
 [data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
@@ -99,13 +107,35 @@ body{font-family:var(--font-main);background:var(--g-bg);color:var(--g-ink);line
 
 /* Mode buttons */
 .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.mode-btn{padding:8px 4px;border:1px solid var(--g-param-border);background:var(--g-param-bg);color:var(--g-muted);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn{padding:9px 4px;border:1px solid var(--g-param-border);background:var(--g-param-bg);color:var(--g-muted);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;transition:all .3s ease}
 .mode-btn.active{border-color:var(--g-accent);color:var(--g-accent);background:var(--g-formula-bg)}
 .mode-btn:hover{border-color:var(--g-accent)}
 [data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
 [data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
 [data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
 [data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* Toggle layer buttons */
+.layer-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.toggle-btn{padding:8px 6px;border:1px solid var(--g-param-border);background:var(--g-param-bg);color:var(--g-muted);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .3s ease;user-select:none}
+.toggle-btn .dot{width:7px;height:7px;border-radius:50%;background:var(--g-muted);transition:background .3s ease}
+.toggle-btn.active{border-color:var(--g-accent);color:var(--g-accent);background:var(--g-formula-bg)}
+.toggle-btn.active .dot{background:var(--g-accent)}
+.toggle-btn:hover{border-color:var(--g-accent)}
+[data-theme="academic"] .toggle-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .toggle-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .toggle-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .toggle-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* Texture tabs */
+.tex-tabs{display:flex;gap:6px}
+.tex-tab{flex:1;padding:8px 4px;border:1px solid var(--g-param-border);background:var(--g-param-bg);color:var(--g-muted);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;transition:all .3s ease}
+.tex-tab.active{border-color:var(--g-accent);color:var(--g-accent);background:var(--g-formula-bg)}
+.tex-tab:hover{border-color:var(--g-accent)}
+[data-theme="academic"] .tex-tab{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .tex-tab.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .tex-tab{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .tex-tab.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
 
 /* Params */
 .param-group{margin-bottom:14px}.param-group:last-child{margin-bottom:0}
@@ -119,11 +149,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 [data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
 [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
 
-.param-presets{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
-.preset-btn{padding:4px 10px;border:1px solid var(--g-param-border);background:var(--g-param-bg);color:var(--g-muted);border-radius:6px;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .3s ease}
-.preset-btn:hover{border-color:var(--g-accent);color:var(--g-accent);background:var(--g-formula-bg)}
-[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
-[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+.hint-text{font-size:.72rem;color:var(--g-muted);margin-top:8px;line-height:1.5}
 
 /* Info card */
 .info-card{background:var(--g-output-bg);border:1px solid var(--g-output-border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:background-color .5s ease,border-color .4s ease}
@@ -137,13 +163,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 [data-theme="cyber"] .info-card h3{color:var(--g-accent);text-shadow:var(--g-glow)}
 
 /* ===== CENTER CANVAS ===== */
-.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
-.canvas-container{flex:1;position:relative;background:var(--g-canvas-bg);overflow:hidden;transition:background-color .5s ease}
-#simCanvas{display:block;width:100%;height:100%}
-.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.sim-panel{flex:1;position:relative;overflow:hidden;background:var(--g-canvas-bg);transition:background-color .5s ease}
+.canvas-container{position:absolute;inset:0;overflow:hidden}
+.canvas-container canvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;pointer-events:none}
 .overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--g-rule);border-radius:8px;font-family:monospace;font-size:.7rem;color:var(--g-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
-.sim-btn{padding:8px 20px;border:1px solid var(--g-rule);background:rgba(0,0,0,0.4);color:var(--g-ink);border-radius:10px;font-family:var(--font-main);font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn{padding:8px 20px;border:1px solid var(--g-rule);background:rgba(0,0,0,0.4);color:var(--g-ink);border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--g-accent)}
 .sim-btn.primary{background:var(--g-accent);color:#0a0a1a;border-color:var(--g-accent)}
 .sim-btn.primary:hover{filter:brightness(1.15)}
@@ -155,6 +181,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 [data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
 [data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
 [data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+.scene-hint{position:absolute;bottom:14px;right:16px;font-size:.66rem;color:var(--g-muted);font-family:monospace;pointer-events:none;opacity:.6;z-index:4}
 
 /* ===== RIGHT PANEL ===== */
 .right-panel{width:380px;min-width:340px;border-left:1px solid var(--g-rule);background:var(--g-bg2);overflow-y:auto;transition:background-color .5s ease,border-color .4s ease}
@@ -196,23 +223,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 [data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
 [data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
 
-/* Timeline */
-.timeline{position:relative;padding-left:18px}
-.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--g-rule)}
-.tl-item{position:relative;margin-bottom:14px}
-.tl-item:last-child{margin-bottom:0}
-.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--g-accent);border:2px solid var(--g-bg2)}
-.tl-year{font-size:.72rem;font-weight:700;color:var(--g-accent);font-family:monospace;margin-bottom:2px}
-.tl-title{font-size:.78rem;font-weight:600;color:var(--g-ink);margin-bottom:2px}
-.tl-desc{font-size:.72rem;color:var(--g-muted);line-height:1.5}
-
 /* Quiz */
 .quiz-box{background:var(--g-output-bg);border:1px solid var(--g-output-border);border-radius:10px;padding:14px;transition:background-color .5s ease,border-color .4s ease}
 .quiz-q{font-size:.8rem;font-weight:600;color:var(--g-ink);margin-bottom:10px;line-height:1.5}
 .quiz-opts{display:flex;flex-direction:column;gap:6px}
 .quiz-opt{padding:8px 12px;border:1px solid var(--g-param-border);background:var(--g-param-bg);border-radius:8px;font-size:.76rem;color:var(--g-ink2);cursor:pointer;transition:all .2s ease}
 .quiz-opt:hover{border-color:var(--g-accent);color:var(--g-accent)}
-.quiz-opt.correct{border-color:var(--g-accent3);background:rgba(52,211,153,0.1);color:var(--g-accent3)}
+.quiz-opt.correct{border-color:var(--g-accent3);background:rgba(52,211,153,0.12);color:var(--g-accent3)}
 .quiz-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,0.1);color:#ef4444}
 .quiz-feedback{margin-top:8px;font-size:.74rem;color:var(--g-muted);line-height:1.5;display:none}
 .quiz-feedback.show{display:block}
@@ -225,7 +242,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 
 /* Responsive */
 @media(max-width:1100px){.left-panel{width:260px;min-width:240px}.right-panel{width:340px;min-width:300px}}
-@media(max-width:900px){.app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}.left-panel{width:100%;min-width:unset;border-right:none;border-bottom:1px solid var(--g-rule)}.right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--g-rule)}.sim-panel{min-height:400px}}
+@media(max-width:900px){.app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}.left-panel{width:100%;min-width:unset;border-right:none;border-bottom:1px solid var(--g-rule)}.right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--g-rule)}.sim-panel{min-height:420px}}
 </style>
 </head>
 <body>
@@ -237,51 +254,73 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
       <div class="lp-icon">🌍</div>
       <div>
         <h1>地球物理</h1>
-        <div class="lp-sub">内部结构 · 地震波 · 地磁场</div>
+        <div class="lp-sub">Geophysics Explorer · 3D 地球</div>
       </div>
     </div>
 
     <div class="side-section">
       <div class="section-label">可视化模式</div>
       <div class="mode-grid">
-        <button class="mode-btn active" data-mode="structure">🔍 内部结构</button>
+        <button class="mode-btn active" data-mode="surface">🌐 地表视图</button>
+        <button class="mode-btn" data-mode="internal">🧱 内部结构</button>
         <button class="mode-btn" data-mode="seismic">📡 地震波</button>
         <button class="mode-btn" data-mode="magnetic">🧲 地磁场</button>
-        <button class="mode-btn" data-mode="tectonic">🌋 板块构造</button>
+        <button class="mode-btn" data-mode="tectonic" style="grid-column:span 2">🌋 板块构造</button>
       </div>
-    </div>
-
-    <div class="side-section" id="param-section">
-      <div class="section-label">实验参数</div>
-      <div id="param-container"></div>
-      <div class="param-presets" id="preset-container"></div>
     </div>
 
     <div class="side-section">
-      <div class="section-label">操作指南</div>
-      <div class="info-card">
-        <p><strong>🔍 内部结构</strong>：查看地球分层剖面，了解各层密度与温度</p>
-        <p><strong>📡 地震波</strong>：点击地球表面发射地震，观察P波S波传播</p>
-        <p><strong>🧲 地磁场</strong>：调节地磁参数，观察磁力线分布</p>
-        <p><strong>🌋 板块构造</strong>：观察板块边界类型与地幔对流</p>
+      <div class="section-label">显示图层</div>
+      <div class="layer-grid">
+        <button class="toggle-btn active" data-layer="grid"><span class="dot"></span>网格</button>
+        <button class="toggle-btn active" data-layer="axis"><span class="dot"></span>地轴</button>
+        <button class="toggle-btn active" data-layer="sun"><span class="dot"></span>太阳</button>
+        <button class="toggle-btn active" data-layer="twilight"><span class="dot"></span>晨昏线</button>
+        <button class="toggle-btn active" data-layer="cities"><span class="dot"></span>城市</button>
+        <button class="toggle-btn active" data-layer="rotation"><span class="dot"></span>自转</button>
+        <button class="toggle-btn active" data-layer="climate"><span class="dot"></span>气候带</button>
+        <button class="toggle-btn active" data-layer="stars"><span class="dot"></span>星空</button>
       </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">地表纹理</div>
+      <div class="tex-tabs">
+        <button class="tex-tab active" data-tex="satellite">🛰 卫星</button>
+        <button class="tex-tab" data-tex="topo">⛰ 地形</button>
+        <button class="tex-tab" data-tex="political">🗺 政区</button>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">自转速度</span><span class="param-value" id="valRot">1.0×</span></div>
+        <input type="range" id="sliderRot" min="0" max="50" value="10" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">地轴倾角</span><span class="param-value" id="valTilt">23.5°</span></div>
+        <input type="range" id="sliderTilt" min="0" max="45" value="23.5" step="0.5">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">太阳高度</span><span class="param-value" id="valSun">20°</span></div>
+        <input type="range" id="sliderSun" min="-90" max="90" value="20" step="1">
+      </div>
+      <div class="hint-text" id="modeHint">拖拽旋转 · 滚轮缩放 · 右键平移</div>
     </div>
   </aside>
 
   <!-- ===== CENTER CANVAS ===== -->
   <div class="sim-panel">
-    <div class="canvas-container">
-      <canvas id="simCanvas"></canvas>
-      <div class="canvas-overlay">
-        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
-        <span class="overlay-badge" id="badgeMode">内部结构</span>
-        <span class="overlay-badge" id="badgeInfo">R = 6371 km</span>
-      </div>
-      <div class="canvas-controls">
-        <button class="sim-btn primary" id="btnPlay">▶ 播放</button>
-        <button class="sim-btn" id="btnPause">⏸ 暂停</button>
-        <button class="sim-btn" id="btnReset">🔄 重置</button>
-      </div>
+    <div class="canvas-container" id="canvasContainer"></div>
+    <div class="canvas-overlay">
+      <span class="overlay-badge" id="badgeMode">地表视图</span>
+      <span class="overlay-badge" id="badgeCam">R = 5.39</span>
+      <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+    </div>
+    <div class="scene-hint" id="sceneHint">左键旋转 · 滚轮缩放 · 右键平移</div>
+    <div class="canvas-controls">
+      <button class="sim-btn primary" id="btnReset">🔄 重置视角</button>
     </div>
   </div>
 
@@ -290,38 +329,24 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
     <div class="rp-header">
       <div class="rp-icon">📊</div>
       <div>
-        <h2>实时数据</h2>
-        <div class="rp-sub">物理参数与知识</div>
+        <h2>实时信息</h2>
+        <div class="rp-sub">观测数据 · 知识卡片</div>
       </div>
     </div>
 
-    <div class="side-section" id="output-section">
-      <div class="section-label">观测输出</div>
-      <div id="output-container"></div>
+    <div class="side-section">
+      <div class="section-label">实时数据</div>
+      <div class="output-grid" id="liveGrid"></div>
     </div>
 
-    <div class="side-section" id="formula-section">
+    <div class="side-section" id="knowledgeSection">
+      <div class="section-label">知识卡片</div>
+      <div id="knowledgeContainer"></div>
+    </div>
+
+    <div class="side-section" id="formulaSection">
       <div class="section-label">物理公式</div>
-      <div id="formula-container"></div>
-    </div>
-
-    <div class="side-section">
-      <div class="section-label">应用领域</div>
-      <div class="info-card"><h3>🔭 地震勘探</h3><p>利用人工震源产生的地震波在地下传播特性，探测油气藏和矿产分布。</p></div>
-      <div class="info-card"><h3>🧭 地磁导航</h3><p>地磁场为航海、航空提供方向参考，地磁异常可辅助寻找铁矿床。</p></div>
-      <div class="info-card"><h3>🌋 地震预警</h3><p>P波速度快于破坏性S波，利用时差可提前数秒至数十秒预警。</p></div>
-      <div class="info-card"><h3>🛰 空间天气</h3><p>太阳风与地磁场相互作用产生极光，地磁暴可影响卫星和电网。</p></div>
-    </div>
-
-    <div class="side-section">
-      <div class="section-label">历史时间线</div>
-      <div class="timeline">
-        <div class="tl-item"><div class="tl-year">1906</div><div class="tl-title">旧金山大地震</div><div class="tl-desc">里德提出弹性回跳理论，解释地震成因与断层运动</div></div>
-        <div class="tl-item"><div class="tl-year">1909</div><div class="tl-title">莫霍洛维奇不连续面</div><div class="tl-desc">莫霍洛维奇通过地震波速突变发现地壳-地幔边界</div></div>
-        <div class="tl-item"><div class="tl-year">1914</div><div class="tl-title">古登堡发现核幔边界</div><div class="tl-desc">古登堡通过S波阴影区确定地核深度约2900km</div></div>
-        <div class="tl-item"><div class="tl-year">1936</div><div class="tl-title">莱曼发现内核</div><div class="tl-desc">英厄·莱曼通过P波微弱反射发现固态内核</div></div>
-        <div class="tl-item"><div class="tl-year">1960s</div><div class="tl-title">板块构造理论</div><div class="tl-desc">海底扩张与板块俯冲统一了大陆漂移与地震带分布</div></div>
-      </div>
+      <div id="formulaContainer"></div>
     </div>
 
     <div class="side-section">
@@ -340,917 +365,916 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;hei
 </div>
 
 <script src="shared-theme.js"></script>
-<script>
-(function(){
-'use strict';
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// ========================================== STATE
-const state = {
-  running: true, time: 0, lastFrame: 0, fps: 60, fpsCounter: 0, fpsTimer: 0,
-  mode: 'structure',
-  // structure mode
-  rotation: 0,
-  cutaway: 0.35,
-  // seismic mode
-  quakes: [], pWaves: [], sWaves: [],
-  quakePower: 1.0,
-  // magnetic mode
-  magTilt: 11.5, magStrength: 1.0, showSolar: true,
-  magParticles: [],
-  // tectonic mode
-  plateSpeed: 1.0, showConvection: true,
-  mantleCells: [],
-};
-
-// Earth layer data (radius in km, density g/cm³, temp °C)
-const layers = [
-  { name:'地壳',     r0:0,      r1:35,     density:2.8,  temp:15,    color:'crust',      vp:6.0, vs:3.5 },
-  { name:'上地幔',   r0:35,     r1:660,    density:3.3,  temp:1400,  color:'mantle',     vp:8.0, vs:4.5 },
-  { name:'下地幔',   r0:660,    r1:2890,   density:5.0,  temp:3500,  color:'mantle',     vp:13.0,vs:7.0 },
-  { name:'外核',     r0:2890,   r1:5150,   density:11.0, temp:5000,  color:'outercore',  vp:10.0,vs:0   },
-  { name:'内核',     r0:5150,   r1:6371,   density:13.0, temp:5700,  color:'innercore',  vp:11.0,vs:3.6 },
-];
-const earthR = 6371; // km
-
-// ========================================== CANVAS
-const canvas = document.getElementById('simCanvas');
-const ctx = canvas.getContext('2d');
-let cw=0, ch=0, cx=0, cy=0, earthPx=0;
-
-function resizeCanvas(){
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  canvas.style.width = rect.width + 'px';
-  canvas.style.height = rect.height + 'px';
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  cw = rect.width; ch = rect.height;
-  cx = cw / 2; cy = ch / 2;
-  earthPx = Math.min(cw, ch) * 0.36;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-// ========================================== THEME COLORS
-function getColors(){
-  const theme = document.documentElement.getAttribute('data-theme') || 'academic';
-  // Detect dark vs light themes
-  const isDark = ['glass','cyber','cartoon','dark','midnight','night'].includes(theme);
-  const colorMap = {
-    'glass':    { bg:'#040410', accent:'#74b9ff', accent2:'#a29bfe', accent3:'#34d399', accent4:'#fbbf24', ink:'#f1f5f9', ink2:'#cbd5e1', muted:'#64748b', rule:'rgba(255,255,255,0.07)', crust:'#8b6914', mantle:'#c0392b', outercore:'#e67e22', innercore:'#f1c40f', pwave:'#74b9ff', swave:'#e74c3c', magfield:'#a29bfe', plate:'#2ecc71' },
-    'cyber':    { bg:'#020208', accent:'#00f3ff', accent2:'#ff00ea', accent3:'#39ff14', accent4:'#ffb800', ink:'#e0f7fa', ink2:'#b2ebf2', muted:'#4dd0e1', rule:'rgba(0,243,255,0.1)', crust:'#ffb800', mantle:'#ff00ea', outercore:'#00f3ff', innercore:'#39ff14', pwave:'#00f3ff', swave:'#ff00ea', magfield:'#bd00ff', plate:'#39ff14' },
-    'soviet':   { bg:'#e8e0d6', accent:'#c41e1e', accent2:'#8b4513', accent3:'#a0522d', accent4:'#cd853f', ink:'#1a1a1a', ink2:'#3d3d3d', muted:'#6a5a4a', rule:'#d4c4a8', crust:'#8b6914', mantle:'#c41e1e', outercore:'#cd853f', innercore:'#daa520', pwave:'#c41e1e', swave:'#556b2f', magfield:'#8b4513', plate:'#556b2f' },
-    'cartoon':  { bg:'#1a1a2e', accent:'#ff6b6b', accent2:'#4ecdc4', accent3:'#ffe66d', accent4:'#a29bfe', ink:'#2d3436', ink2:'#4a4a4a', muted:'#7a7a7a', rule:'rgba(0,0,0,0.08)', crust:'#d4a017', mantle:'#ff6b6b', outercore:'#ffa502', innercore:'#ffe66d', pwave:'#4ecdc4', swave:'#ff6b6b', magfield:'#a29bfe', plate:'#26de81' },
-    'academic': { bg:'#ffffff', accent:'#6b8cae', accent2:'#8a7ca8', accent3:'#c4956a', accent4:'#6a9e8a', ink:'#1a1a2e', ink2:'#3d3d5c', muted:'#7a7a8a', rule:'#e0e0e0', crust:'#b8860b', mantle:'#cd5c5c', outercore:'#daa520', innercore:'#ffd700', pwave:'#6b8cae', swave:'#cd5c5c', magfield:'#8a7ca8', plate:'#6a9e8a' },
-    'dark':     { bg:'#0a0a1a', accent:'#74b9ff', accent2:'#a29bfe', accent3:'#34d399', accent4:'#fbbf24', ink:'#f1f5f9', ink2:'#cbd5e1', muted:'#64748b', rule:'rgba(255,255,255,0.07)', crust:'#8b6914', mantle:'#c0392b', outercore:'#e67e22', innercore:'#f1c40f', pwave:'#74b9ff', swave:'#e74c3c', magfield:'#a29bfe', plate:'#2ecc71' },
+/* ================================================================ THEME COLORS */
+function getThemeColors(){
+  let theme = document.documentElement.getAttribute('data-theme');
+  if(!theme){ try { theme = localStorage.getItem('psu-theme-v1') || 'academic'; } catch(e){ theme = 'academic'; } }
+  const map = {
+    'glass':    { bg:0x040410, grid:0x64ffda, axis:0xef4444, accent:0x74b9ff, sun:0xffe066, star:0xffffff },
+    'cyber':    { bg:0x020208, grid:0x00f3ff, axis:0xff00ea, accent:0x00f3ff, sun:0xffb800, star:0xe0f7fa },
+    'soviet':   { bg:0xe8e0d6, grid:0xc41e1e, axis:0xc41e1e, accent:0xc41e1e, sun:0xdaa520, star:0x6a5a4a },
+    'cartoon':  { bg:0x1a1a2e, grid:0x4ecdc4, axis:0xff6b6b, accent:0xff6b6b, sun:0xffe66d, star:0xffffff },
+    'academic': { bg:0x000000, grid:0x6b8cae, axis:0xe74c3c, accent:0x6b8cae, sun:0xffd700, star:0xffffff },
   };
-  // Fallback for any unknown theme: use dark or academic based on brightness
-  if(colorMap[theme]) return colorMap[theme];
-  return isDark ? colorMap['dark'] : colorMap['academic'];
+  return map[theme] || map['academic'];
+}
+function getThemeHex(name){
+  const c = getThemeColors();
+  return '#' + c[name].toString(16).padStart(6,'0');
 }
 
-// ========================================== PHYSICS UPDATE
-function update(dt){
-  if(!state.running) return;
-  state.time += dt;
+/* ================================================================ STATE */
+const options = { grid:true, axis:true, sun:true, twilight:true, cities:true, rotation:true, climate:true, stars:true };
+let currentMode = 'surface';
+let rotationSpeed = 1.0;
+let axisTilt = 23.5;
+let sunHeight = 20;
+let textureType = 'satellite';
+let isUserInteracting = false;
 
-  if(state.mode === 'structure'){
-    state.rotation += dt * 0.1;
+const simTime = { hours:0, fps:60, fpsCount:0, fpsTimer:0, lastFrame:0 };
+
+/* ================================================================ CITY DATA */
+const cities = [
+  {n:'北京', lon:116.4, lat:39.9}, {n:'上海', lon:121.5, lat:31.2},
+  {n:'东京', lon:139.7, lat:35.7}, {n:'首尔', lon:127.0, lat:37.6},
+  {n:'香港', lon:114.2, lat:22.3}, {n:'新加坡', lon:103.8, lat:1.4},
+  {n:'曼谷', lon:100.5, lat:13.8}, {n:'雅加达', lon:106.8, lat:-6.2},
+  {n:'孟买', lon:72.9, lat:19.1},  {n:'新德里', lon:77.2, lat:28.6},
+  {n:'迪拜', lon:55.3, lat:25.3},  {n:'德黑兰', lon:51.4, lat:35.7},
+  {n:'莫斯科', lon:37.6, lat:55.8},{n:'伊斯坦布尔', lon:29.0, lat:41.0},
+  {n:'开罗', lon:31.2, lat:30.0},  {n:'约翰内斯堡', lon:28.0, lat:-26.2},
+  {n:'拉各斯', lon:3.4, lat:6.5},  {n:'内罗毕', lon:36.8, lat:-1.3},
+  {n:'伦敦', lon:-0.1, lat:51.5},  {n:'巴黎', lon:2.4, lat:48.9},
+  {n:'柏林', lon:13.4, lat:52.5},  {n:'罗马', lon:12.5, lat:41.9},
+  {n:'马德里', lon:-3.7, lat:40.4},{n:'纽约', lon:-74.0, lat:40.7},
+  {n:'洛杉矶', lon:-118.2, lat:34.1},{n:'芝加哥', lon:-87.6, lat:41.9},
+  {n:'多伦多', lon:-79.4, lat:43.7},{n:'墨西哥城', lon:-99.1, lat:19.4},
+  {n:'里约热内卢', lon:-43.2, lat:-22.9},{n:'圣保罗', lon:-46.6, lat:-23.5},
+  {n:'布宜诺斯艾利斯', lon:-58.4, lat:-34.6},{n:'悉尼', lon:151.2, lat:-33.9},
+  {n:'墨尔本', lon:144.96, lat:-37.8},{n:'奥克兰', lon:174.8, lat:-36.8},
+  {n:'檀香山', lon:-157.9, lat:21.3},{n:'温哥华', lon:-123.1, lat:49.3},
+  {n:'开普敦', lon:18.4, lat:-33.9},
+];
+
+/* ================================================================ HELPERS */
+function lonLatToVector3(lon, lat, radius){
+  const phi = (90 - lat) * Math.PI / 180;
+  const theta = (lon + 180) * Math.PI / 180;
+  return new THREE.Vector3(
+    -radius * Math.sin(phi) * Math.cos(theta),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.sin(theta)
+  );
+}
+function vector3ToLonLat(v){
+  const r = v.length();
+  const lat = Math.asin(v.y / Math.max(r, 1e-6)) * 180 / Math.PI;
+  const phi = Math.acos(v.y / Math.max(r, 1e-6));
+  const sinPhi = Math.sin(phi);
+  let lon = 0;
+  if(sinPhi > 1e-6){
+    let theta = Math.atan2(v.z, -v.x);
+    lon = theta * 180 / Math.PI - 180;
+    if(lon < -180) lon += 360;
+    if(lon > 180) lon -= 360;
   }
-  else if(state.mode === 'seismic'){
-    // propagate P waves (compressional, faster)
-    state.pWaves = state.pWaves.filter(w => {
-      w.r += w.speed * dt * 60;
-      return w.r < earthPx * 2.5;
-    });
-    // propagate S waves (shear, slower, cannot pass through liquid outer core)
-    state.sWaves = state.sWaves.filter(w => {
-      w.r += w.speed * dt * 60;
-      return w.r < earthPx * 2.5;
-    });
+  return { lon, lat };
+}
+
+/* ================================================================ THREE.JS SETUP */
+const container = document.getElementById('canvasContainer');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
+camera.position.set(0, 2, 5);
+
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.localClippingEnabled = true;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 1.5;
+controls.maxDistance = 15;
+controls.rotateSpeed = 0.8;
+controls.enablePan = true;
+controls.addEventListener('start', () => { isUserInteracting = true; });
+controls.addEventListener('end', () => { isUserInteracting = false; });
+
+/* Lights */
+const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
+sunLight.position.set(5, 2, 0);
+scene.add(sunLight);
+const ambientLight = new THREE.AmbientLight(0x445566, 0.55);
+scene.add(ambientLight);
+const fillLight = new THREE.DirectionalLight(0x6688aa, 0.35);
+fillLight.position.set(-5, -1, 2);
+scene.add(fillLight);
+
+/* ================================================================ EARTH GROUP */
+const earthGroup = new THREE.Group();
+scene.add(earthGroup);
+
+const TEX_BASE = 'https://unpkg.com/three-globe@2.31.0/example/img/';
+const texLoader = new THREE.TextureLoader();
+texLoader.crossOrigin = 'anonymous';
+const textures = {
+  satellite: texLoader.load(TEX_BASE + 'earth-blue-marble.jpg'),
+  topo:      texLoader.load(TEX_BASE + 'earth-topology.png'),
+  political: texLoader.load(TEX_BASE + 'earth-night.jpg'),
+};
+const earthMaterial = new THREE.MeshPhongMaterial({ map: textures.satellite, shininess: 8, specular: 0x222233 });
+const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 48), earthMaterial);
+earthGroup.add(earthMesh);
+
+/* ---- Sun marker (yellow sphere on surface, world-space) ---- */
+const sunMarker = new THREE.Mesh(
+  new THREE.SphereGeometry(0.035, 16, 12),
+  new THREE.MeshBasicMaterial({ color: 0xffe066 })
+);
+scene.add(sunMarker);
+const sunGlow = new THREE.Mesh(
+  new THREE.SphereGeometry(0.07, 16, 12),
+  new THREE.MeshBasicMaterial({ color: 0xffe066, transparent:true, opacity:0.25 })
+);
+scene.add(sunGlow);
+
+/* ================================================================ GRID LINES */
+const gridGroup = new THREE.Group();
+earthGroup.add(gridGroup);
+(function buildGrid(){
+  const gridMat = new THREE.LineBasicMaterial({ color: 0x64ffda, transparent:true, opacity:0.35 });
+  // Longitude lines every 15 deg
+  for(let lon = -180; lon < 180; lon += 15){
+    const pts = [];
+    for(let lat = -90; lat <= 90; lat += 3){
+      pts.push(lonLatToVector3(lon, lat, 1.002));
+    }
+    gridGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
   }
-  else if(state.mode === 'magnetic'){
-    // solar wind particles
-    if(state.showSolar){
-      for(let i = 0; i < 2; i++){
-        const angle = (Math.random() - 0.5) * 0.6;
-        const side = Math.random() > 0.5 ? 1 : -1;
-        state.magParticles.push({
-          x: cx + side * cw * 0.6,
-          y: cy + (Math.random() - 0.5) * ch * 0.8,
-          vx: -side * (2 + Math.random() * 2),
-          vy: (Math.random() - 0.5) * 0.5,
-          life: 1.0,
-        });
+  // Latitude lines every 15 deg
+  for(let lat = -75; lat <= 75; lat += 15){
+    const pts = [];
+    for(let lon = -180; lon <= 180; lon += 3){
+      pts.push(lonLatToVector3(lon, lat, 1.002));
+    }
+    gridGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
+  }
+  // Equator emphasis
+  const eqPts = [];
+  for(let lon = -180; lon <= 180; lon += 2) eqPts.push(lonLatToVector3(lon, 0, 1.004));
+  gridGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(eqPts),
+    new THREE.LineBasicMaterial({ color: 0x64ffda, transparent:true, opacity:0.6 })));
+})();
+
+/* ================================================================ EARTH AXIS */
+const axisGroup = new THREE.Group();
+earthGroup.add(axisGroup);
+(function buildAxis(){
+  const axisMat = new THREE.LineBasicMaterial({ color: 0xef4444 });
+  const pts = [ new THREE.Vector3(0,-1.25,0), new THREE.Vector3(0,1.25,0) ];
+  axisGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), axisMat));
+  const npMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+  const spMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+  axisGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), npMat).translateY(1.25));
+  axisGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), spMat).translateY(-1.25));
+})();
+
+/* ================================================================ CITY MARKERS */
+const cityGroup = new THREE.Group();
+earthGroup.add(cityGroup);
+(function buildCities(){
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff3b3b });
+  const haloMat = new THREE.MeshBasicMaterial({ color: 0xff3b3b, transparent:true, opacity:0.3 });
+  for(const c of cities){
+    const pos = lonLatToVector3(c.lon, c.lat, 1.012);
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.012, 10, 8), mat);
+    dot.position.copy(pos);
+    cityGroup.add(dot);
+    const halo = new THREE.Mesh(new THREE.SphereGeometry(0.024, 10, 8), haloMat);
+    halo.position.copy(pos);
+    cityGroup.add(halo);
+  }
+})();
+
+/* ================================================================ CLIMATE ZONES */
+const climateGroup = new THREE.Group();
+earthGroup.add(climateGroup);
+function climateShell(lat1, lat2, color, opacity){
+  const theta1 = (90 - lat1) * Math.PI / 180;
+  const theta2 = (90 - lat2) * Math.PI / 180;
+  const thetaStart = Math.min(theta1, theta2);
+  const thetaLength = Math.abs(theta1 - theta2);
+  const geo = new THREE.SphereGeometry(1.018, 48, 24, 0, Math.PI*2, thetaStart, thetaLength);
+  const mat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity, side:THREE.DoubleSide, depthWrite:false });
+  return new THREE.Mesh(geo, mat);
+}
+(function buildClimate(){
+  climateGroup.add(climateShell(-23.5, 23.5, 0xffe066, 0.12));   // tropical
+  climateGroup.add(climateShell(23.5, 35, 0xff9f43, 0.10));      // N subtropical
+  climateGroup.add(climateShell(-35, -23.5, 0xff9f43, 0.10));    // S subtropical
+  climateGroup.add(climateShell(35, 66.5, 0x4ecdc4, 0.10));      // N temperate
+  climateGroup.add(climateShell(-66.5, -35, 0x4ecdc4, 0.10));    // S temperate
+  climateGroup.add(climateShell(66.5, 90, 0x74b9ff, 0.14));      // N frigid
+  climateGroup.add(climateShell(-90, -66.5, 0x74b9ff, 0.14));    // S frigid
+})();
+
+/* ================================================================ TWILIGHT / TERMINATOR */
+const twilightMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    sunDir: { value: new THREE.Vector3(1,0,0) },
+    darkness: { value: 1.0 },
+  },
+  vertexShader: `
+    varying vec3 vNormal;
+    void main(){
+      vNormal = normalize(normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 sunDir;
+    varying vec3 vNormal;
+    uniform float darkness;
+    void main(){
+      float intensity = dot(vNormal, sunDir);
+      if(intensity < -0.1){
+        gl_FragColor = vec4(0.05, 0.1, 0.25, 0.7 * darkness);
+      } else if(intensity < 0.1){
+        float alpha = (intensity + 0.1) / 0.2;
+        gl_FragColor = vec4(0.08, 0.15, 0.3, 0.45 * (1.0 - alpha) * darkness);
+      } else {
+        discard;
       }
     }
-    state.magParticles = state.magParticles.filter(p => {
-      p.x += p.vx; p.y += p.vy;
-      // deflect near earth
-      const dx = p.x - cx, dy = p.y - cy;
-      const d = Math.hypot(dx, dy);
-      if(d < earthPx * 2){
-        const force = state.magStrength * 50 / (d * d + 100);
-        p.vx += dx / d * force;
-        p.vy += dy / d * force * 0.5;
-      }
-      p.life -= 0.003;
-      return p.life > 0 && p.x > -50 && p.x < cw + 50;
-    });
-  }
-  else if(state.mode === 'tectonic'){
-    // animate mantle convection
-    for(const cell of state.mantleCells){
-      cell.phase += dt * cell.speed * state.plateSpeed;
-    }
-  }
-}
+  `,
+  transparent: true,
+  depthWrite: false,
+  side: THREE.FrontSide,
+});
+const twilightMesh = new THREE.Mesh(new THREE.SphereGeometry(1.01, 64, 48), twilightMaterial);
+earthGroup.add(twilightMesh);
 
-// ========================================== RENDER
-function render(){
-  const c = getColors();
-  ctx.fillStyle = c.bg;
-  ctx.fillRect(0, 0, cw, ch);
-
-  if(state.mode === 'structure') renderStructure(c);
-  else if(state.mode === 'seismic') renderSeismic(c);
-  else if(state.mode === 'magnetic') renderMagnetic(c);
-  else if(state.mode === 'tectonic') renderTectonic(c);
-}
-
-// ===== STRUCTURE MODE =====
-function renderStructure(c){
-  const r = earthPx;
-  ctx.save();
-  ctx.translate(cx, cy);
-
-  // Full circle on right (3D-ish)
-  // Cutaway on left showing layers
-  const cutAngle = state.cutaway * Math.PI;
-
-  // Draw layers from outside in
-  for(let i = layers.length - 1; i >= 0; i--){
-    const layer = layers[i];
-    const rOut = r * (layer.r1 / earthR);
-    const rIn = r * (layer.r0 / earthR);
-
-    // Right hemisphere: full
-    ctx.beginPath();
-    ctx.arc(0, 0, rOut, -cutAngle, 0);
-    ctx.arc(0, 0, rIn, 0, -cutAngle, true);
-    ctx.closePath();
-    ctx.fillStyle = c[layer.color];
-    ctx.globalAlpha = 0.85;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Left hemisphere: cutaway wedge
-    ctx.beginPath();
-    ctx.arc(0, 0, rOut, Math.PI - cutAngle, Math.PI + cutAngle);
-    ctx.arc(0, 0, rIn, Math.PI + cutAngle, Math.PI - cutAngle, true);
-    ctx.closePath();
-    ctx.fillStyle = c[layer.color];
-    ctx.globalAlpha = 0.7;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Border
-    ctx.beginPath();
-    ctx.arc(0, 0, rOut, 0, Math.PI * 2);
-    ctx.strokeStyle = c.rule;
-    ctx.lineWidth = 0.5;
-    ctx.globalAlpha = 0.3;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
-
-  // Labels on left cutaway
-  ctx.textAlign = 'right';
-  ctx.font = 'bold 11px monospace';
-  for(let i = 0; i < layers.length; i++){
-    const layer = layers[i];
-    const rMid = r * ((layer.r0 + layer.r1) / 2 / earthR);
-    const labelAngle = Math.PI;
-    const lx = Math.cos(labelAngle) * rMid - 8;
-    const ly = Math.sin(labelAngle) * rMid;
-    ctx.fillStyle = c.ink;
-    ctx.fillText(layer.name, lx, ly + 4);
-    // depth
-    ctx.fillStyle = c.muted;
-    ctx.font = '9px monospace';
-    ctx.fillText(layer.r0 + 'km', lx, ly + 16);
-    ctx.font = 'bold 11px monospace';
-  }
-
-  // Surface features on right (continents)
-  ctx.save();
-  ctx.rotate(state.rotation);
-  ctx.fillStyle = c.plate;
-  ctx.globalAlpha = 0.3;
-  for(let i = 0; i < 8; i++){
-    const a = (i / 8) * Math.PI * 2;
-    const sz = 15 + Math.sin(i * 2.3) * 8;
-    ctx.beginPath();
-    ctx.ellipse(Math.cos(a) * r * 0.7, Math.sin(a) * r * 0.7, sz, sz * 0.6, a, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-  ctx.restore();
-
-  // Temperature gradient bar (right side)
-  const barX = r + 30, barY = -r * 0.8, barH = r * 1.6;
-  const grad = ctx.createLinearGradient(0, barY, 0, barY + barH);
-  grad.addColorStop(0, c.innercore || '#ffd700');
-  grad.addColorStop(0.2, c.outercore || '#daa520');
-  grad.addColorStop(0.6, c.mantle || '#cd5c5c');
-  grad.addColorStop(1, c.crust || '#b8860b');
-  ctx.fillStyle = grad;
-  ctx.fillRect(barX, barY, 14, barH);
-  ctx.strokeStyle = c.rule;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(barX, barY, 14, barH);
-  ctx.fillStyle = c.muted;
-  ctx.font = '9px monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('5700°C', barX + 20, barY + 8);
-  ctx.fillText('3500°C', barX + 20, barY + barH * 0.3);
-  ctx.fillText('1400°C', barX + 20, barY + barH * 0.6);
-  ctx.fillText('15°C', barX + 20, barY + barH - 4);
-  ctx.fillText('温度', barX, barY - 8);
-
-  ctx.restore();
-}
-
-// ===== SEISMIC MODE =====
-function renderSeismic(c){
-  const r = earthPx;
-  ctx.save();
-  ctx.translate(cx, cy);
-
-  // Earth interior (simplified)
-  const layerRs = [
-    { r: r * (5150/earthR), color: c.innercore, a: 0.8 },
-    { r: r * (2890/earthR), color: c.outercore, a: 0.6 },
-    { r: r * (660/earthR),  color: c.mantle,    a: 0.5 },
-    { r: r,                  color: c.crust,     a: 0.7 },
+/* ================================================================ STARS */
+let stars;
+(function buildStars(){
+  const N = 3000;
+  const positions = new Float32Array(N * 3);
+  const colors = new Float32Array(N * 3);
+  const palette = [
+    [1,1,1],         // white
+    [0.6,0.8,1],     // blue
+    [1,1,0.7],       // yellow
+    [1,0.7,0.4],     // orange
   ];
-  for(const lr of layerRs){
-    ctx.beginPath();
-    ctx.arc(0, 0, lr.r, 0, Math.PI * 2);
-    ctx.fillStyle = lr.color;
-    ctx.globalAlpha = lr.a;
-    ctx.fill();
-    ctx.globalAlpha = 1;
+  for(let i=0;i<N;i++){
+    const r = 80 + Math.random() * 20;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    positions[i*3+1] = r * Math.cos(phi);
+    positions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    const col = palette[Math.floor(Math.random() * palette.length)];
+    const b = 0.5 + Math.random() * 0.5;
+    colors[i*3]   = col[0] * b;
+    colors[i*3+1] = col[1] * b;
+    colors[i*3+2] = col[2] * b;
   }
-  // layer boundaries
-  ctx.strokeStyle = c.rule;
-  ctx.globalAlpha = 0.3;
-  for(const lr of layerRs){
-    ctx.beginPath();
-    ctx.arc(0, 0, lr.r, 0, Math.PI * 2);
-    ctx.lineWidth = 1;
-    ctx.stroke();
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.PointsMaterial({ size:0.35, vertexColors:true, transparent:true, opacity:0.9, sizeAttenuation:true });
+  stars = new THREE.Points(geo, mat);
+  scene.add(stars);
+})();
+
+/* ================================================================ INTERNAL STRUCTURE */
+const internalGroup = new THREE.Group();
+scene.add(internalGroup);
+const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0); // removes +Z half
+const internalLayers = [
+  { name:'内核',   rIn:0,     rOut:0.19, color:0xffd700, label:'固态铁镍' },
+  { name:'外核',   rIn:0.19,  rOut:0.55, color:0xe67e22, label:'液态铁镍' },
+  { name:'下地幔', rIn:0.55,  rOut:0.85, color:0xc0392b, label:'固态硅酸盐' },
+  { name:'上地幔', rIn:0.85,  rOut:0.97, color:0x8b6914, label:'软流层' },
+  { name:'地壳',   rIn:0.97,  rOut:1.0,  color:0x2ecc71, label:'岩石圈' },
+];
+(function buildInternal(){
+  // Nested spheres clipped at +Z (front removed). BackSide renders the back
+  // hemisphere outer walls; smaller (inner) layers are closer to camera and
+  // occlude larger ones at the centre, producing clean concentric colour rings.
+  for(let i = 0; i < internalLayers.length; i++){
+    const L = internalLayers[i];
+    const rOut = Math.max(0.001, L.rOut);
+    const geo = new THREE.SphereGeometry(rOut, 64, 48);
+    const mat = new THREE.MeshPhongMaterial({
+      color: L.color,
+      transparent: true,
+      opacity: 0.92,
+      side: THREE.BackSide,
+      shininess: 5,
+      clippingPlanes: [clipPlane],
+      clipShadows: true,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.userData = L;
+    mesh.renderOrder = internalLayers.length - i; // inner renders first
+    internalGroup.add(mesh);
   }
-  ctx.globalAlpha = 1;
-
-  // P waves (blue, fast, pass through everything)
-  for(const w of state.pWaves){
-    const alpha = Math.max(0, 1 - w.r / (earthPx * 2.5));
-    ctx.strokeStyle = c.pwave;
-    ctx.globalAlpha = alpha * 0.7;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(w.x, w.y, Math.max(1, w.r), 0, Math.PI * 2);
-    ctx.stroke();
-
-    // inner ring
-    ctx.globalAlpha = alpha * 0.3;
-    ctx.beginPath();
-    ctx.arc(w.x, w.y, Math.max(1, w.r * 0.85), 0, Math.PI * 2);
-    ctx.stroke();
+  // Filled cross-section disks at z=0 (paint largest->smallest) for a clean cut face
+  for(let i = internalLayers.length - 1; i >= 0; i--){
+    const L = internalLayers[i];
+    const r = Math.max(0.001, L.rOut);
+    const diskGeo = new THREE.CircleGeometry(r, 64);
+    const diskMat = new THREE.MeshBasicMaterial({
+      color: L.color, transparent:true, opacity:0.55, side:THREE.DoubleSide,
+      depthWrite:false, clippingPlanes:[clipPlane],
+    });
+    const disk = new THREE.Mesh(diskGeo, diskMat);
+    disk.position.z = -0.002;
+    disk.renderOrder = 50 + (internalLayers.length - i);
+    internalGroup.add(disk);
   }
-
-  // S waves (red, slower, stop at outer core)
-  for(const w of state.sWaves){
-    const alpha = Math.max(0, 1 - w.r / (earthPx * 2.5));
-    ctx.strokeStyle = c.swave;
-    ctx.globalAlpha = alpha * 0.7;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath();
-    ctx.arc(w.x, w.y, Math.max(1, w.r), 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
+  // Cross-section ring outlines at each boundary (in z=0 plane)
+  for(const L of internalLayers){
+    const r = Math.max(0.001, L.rOut);
+    const pts = [];
+    for(let a=0;a<=Math.PI*2;a+=Math.PI/64){
+      pts.push(new THREE.Vector3(Math.cos(a)*r, Math.sin(a)*r, -0.003));
+    }
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.5, clippingPlanes:[clipPlane] });
+    internalGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat));
   }
-  ctx.globalAlpha = 1;
+})();
+internalGroup.visible = false;
 
-  // S-wave shadow zone indicator (103°-142°)
-  ctx.strokeStyle = c.swave;
-  ctx.globalAlpha = 0.15;
-  ctx.fillStyle = c.swave;
-  ctx.globalAlpha = 0.08;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.arc(0, 0, r * 1.15, -Math.PI * (142/180), -Math.PI * (103/180));
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.arc(0, 0, r * 1.15, Math.PI * (103/180), Math.PI * (142/180));
-  ctx.closePath();
-  ctx.fill();
-  ctx.globalAlpha = 1;
+/* ================================================================ SEISMIC WAVES */
+const seismicGroup = new THREE.Group();
+scene.add(seismicGroup);
+let epicenterMarker = null;
+const seismicWaves = []; // {mesh, type:'p'|'s', r, speed, maxR, mat}
 
-  // Quake markers
-  for(const q of state.quakes){
-    ctx.fillStyle = c.accent4;
-    ctx.beginPath();
-    ctx.arc(q.x, q.y, 4, 0, Math.PI * 2);
-    ctx.fill();
-    const pulse = (Math.sin(state.time * 6) + 1) * 0.5;
-    ctx.strokeStyle = c.accent4;
-    ctx.globalAlpha = 1 - pulse;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(q.x, q.y, 4 + pulse * 12, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
+function setEpicenter(point){
+  // point in earthGroup local space (on surface)
+  if(epicenterMarker){ seismicGroup.remove(epicenterMarker); epicenterMarker.geometry.dispose(); }
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+  epicenterMarker = new THREE.Mesh(new THREE.SphereGeometry(0.025, 16, 12), mat);
+  // place in world: convert local surface point to world via earthGroup
+  const worldP = point.clone().applyMatrix4(earthGroup.matrixWorld);
+  epicenterMarker.position.copy(worldP);
+  seismicGroup.add(epicenterMarker);
 
-  // Legend
-  ctx.fillStyle = c.ink2;
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('━ P波 (纵波, ~10 km/s)', -r - 10, -r - 20);
-  ctx.fillStyle = c.pwave;
-  ctx.fillRect(-r - 20, -r - 24, 8, 2);
-  ctx.fillStyle = c.ink2;
-  ctx.fillText('┄ S波 (横波, ~6 km/s, 不穿液态外核)', -r - 10, -r - 6);
-  ctx.fillStyle = c.swave;
-  ctx.fillRect(-r - 20, -r - 10, 8, 2);
-
-  ctx.restore();
+  // spawn P and S waves centered at epicenter (world space)
+  spawnWave('p', worldP);
+  spawnWave('s', worldP);
+}
+function spawnWave(type, center){
+  const color = type === 'p' ? 0x74b9ff : 0xe74c3c;
+  const mat = new THREE.MeshBasicMaterial({ color, wireframe:true, transparent:true, opacity:0.7 });
+  const geo = new THREE.SphereGeometry(1, 24, 16);
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(center);
+  mesh.scale.setScalar(0.02);
+  seismicGroup.add(mesh);
+  seismicWaves.push({
+    mesh, type, r:0.02,
+    speed: type === 'p' ? 0.045 : 0.026,
+    maxR: type === 'p' ? 2.6 : 1.5, // S-wave capped (cannot pass outer core)
+    mat,
+  });
+}
+function clearSeismic(){
+  for(const w of seismicWaves){ seismicGroup.remove(w.mesh); w.mesh.geometry.dispose(); w.mat.dispose(); }
+  seismicWaves.length = 0;
+  if(epicenterMarker){ seismicGroup.remove(epicenterMarker); epicenterMarker.geometry.dispose(); epicenterMarker = null; }
 }
 
-// ===== MAGNETIC MODE =====
-function renderMagnetic(c){
-  const r = earthPx;
-  ctx.save();
-  ctx.translate(cx, cy);
+/* ================================================================ MAGNETIC FIELD */
+const magneticGroup = new THREE.Group();
+scene.add(magneticGroup);
+let solarWind = null;
+let magTiltMesh = null;
 
-  // Solar wind particles
-  for(const p of state.magParticles){
-    ctx.fillStyle = c.accent4;
-    ctx.globalAlpha = p.life * 0.5;
-    ctx.beginPath();
-    ctx.arc(p.x - cx, p.y - cy, 2, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-
-  // Earth
-  ctx.beginPath();
-  ctx.arc(0, 0, r, 0, Math.PI * 2);
-  ctx.fillStyle = c.crust;
-  ctx.globalAlpha = 0.8;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // Magnetic dipole field lines
-  const tilt = state.magTilt * Math.PI / 180;
-  ctx.save();
-  ctx.rotate(tilt);
-
-  for(let L = 1.2; L <= 4; L += 0.4){
-    const strength = state.magStrength;
-    ctx.strokeStyle = c.magfield;
-    ctx.globalAlpha = Math.max(0.1, 0.5 - (L - 1.2) * 0.1);
-    ctx.lineWidth = 1.2;
-
-    // Northern hemisphere
-    ctx.beginPath();
-    for(let theta = 0.01; theta < Math.PI; theta += 0.02){
-      const rDip = L * r * Math.sin(theta) * Math.sin(theta);
-      if(rDip < r) continue;
-      const x = rDip * Math.sin(theta);
-      const y = -rDip * Math.cos(theta);
-      if(theta === 0.01) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+function buildMagnetic(){
+  // Dipole field lines: r = L * sin^2(theta), theta = colatitude
+  for(let L = 1.3; L <= 4.2; L += 0.38){
+    const pts = [];
+    for(let th = 0.12; th <= Math.PI - 0.12; th += 0.04){
+      const r = L * Math.sin(th) * Math.sin(th);
+      if(r < 1.0) continue; // inside earth
+      const x = r * Math.sin(th);
+      const y = -r * Math.cos(th);
+      pts.push(new THREE.Vector3(x, y, 0));
     }
-    ctx.stroke();
-
-    // Southern hemisphere
-    ctx.beginPath();
-    for(let theta = 0.01; theta < Math.PI; theta += 0.02){
-      const rDip = L * r * Math.sin(theta) * Math.sin(theta);
-      if(rDip < r) continue;
-      const x = -rDip * Math.sin(theta);
-      const y = -rDip * Math.cos(theta);
-      if(theta === 0.01) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
+    if(pts.length < 2) continue;
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const tubeGeo = new THREE.TubeGeometry(curve, 80, 0.006, 6, false);
+    const tubeMat = new THREE.MeshBasicMaterial({ color: 0xa29bfe, transparent:true, opacity:0.5 });
+    magneticGroup.add(new THREE.Mesh(tubeGeo, tubeMat));
+    // mirror to other side
+    const pts2 = pts.map(p => new THREE.Vector3(-p.x, p.y, p.z));
+    const curve2 = new THREE.CatmullRomCurve3(pts2);
+    const tubeGeo2 = new THREE.TubeGeometry(curve2, 80, 0.006, 6, false);
+    magneticGroup.add(new THREE.Mesh(tubeGeo2, new THREE.MeshBasicMaterial({ color: 0xa29bfe, transparent:true, opacity:0.5 })));
   }
-  ctx.globalAlpha = 1;
-
   // Magnetic poles
-  const poleR = r * 1.05;
-  ctx.fillStyle = c.accent;
-  ctx.beginPath();
-  ctx.arc(0, -poleR, 5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = c.accent3;
-  ctx.beginPath();
-  ctx.arc(0, poleR, 5, 0, Math.PI * 2);
-  ctx.fill();
+  const poleN = new THREE.Mesh(new THREE.SphereGeometry(0.04,16,12), new THREE.MeshBasicMaterial({ color:0x74b9ff }));
+  poleN.position.set(0, 1.06, 0);
+  magneticGroup.add(poleN);
+  const poleS = new THREE.Mesh(new THREE.SphereGeometry(0.04,16,12), new THREE.MeshBasicMaterial({ color:0xff6b6b }));
+  poleS.position.set(0, -1.06, 0);
+  magneticGroup.add(poleS);
 
-  // Pole labels
-  ctx.fillStyle = c.ink;
-  ctx.font = 'bold 10px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('N', 0, -poleR - 8);
-  ctx.fillText('S', 0, poleR + 16);
-
-  ctx.restore();
-
-  // Magnetosphere boundary (bow shock)
-  ctx.strokeStyle = c.magfield;
-  ctx.globalAlpha = 0.2;
-  ctx.lineWidth = 2;
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  const sunSide = -1; // sun on left
-  for(let a = -Math.PI/2.2; a <= Math.PI/2.2; a += 0.05){
-    const dist = r * 3 * state.magStrength * (1 + 0.3 * Math.cos(a));
-    const x = sunSide * dist * Math.cos(a);
-    const y = dist * Math.sin(a);
-    if(a === -Math.PI/2.2) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+  // Solar wind particle system streaming from -X side
+  const N = 1200;
+  const positions = new Float32Array(N*3);
+  const vels = new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const y = (Math.random()-0.5) * 6;
+    const z = (Math.random()-0.5) * 6;
+    positions[i*3]   = -8 - Math.random()*3;
+    positions[i*3+1] = y;
+    positions[i*3+2] = z;
+    vels[i*3]   = 0.06 + Math.random()*0.04;
+    vels[i*3+1] = 0;
+    vels[i*3+2] = 0;
   }
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.globalAlpha = 1;
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  solarWind = new THREE.Points(geo, new THREE.PointsMaterial({ color:0xffe066, size:0.06, transparent:true, opacity:0.7 }));
+  solarWind.userData = { vels };
+  magneticGroup.add(solarWind);
 
-  // Sun direction indicator
-  ctx.fillStyle = c.accent4;
-  ctx.globalAlpha = 0.6;
-  ctx.beginPath();
-  ctx.arc(-cw * 0.45, 0, 20, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = c.ink2;
-  ctx.font = '10px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('太阳风', -cw * 0.45, 30);
+  // Bow shock (dashed line) on sunward side
+  const shockPts = [];
+  for(let a = -Math.PI/2.1; a <= Math.PI/2.1; a += 0.05){
+    const dist = 2.8 * (1 + 0.35*Math.cos(a));
+    shockPts.push(new THREE.Vector3(-dist*Math.cos(a), dist*Math.sin(a), 0));
+  }
+  const shockLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(shockPts),
+    new THREE.LineDashedMaterial({ color:0xa29bfe, dashSize:0.1, gapSize:0.08, transparent:true, opacity:0.5 }));
+  shockLine.computeLineDistances();
+  magneticGroup.add(shockLine);
 
-  ctx.restore();
+  magTiltMesh = magneticGroup;
+}
+buildMagnetic();
+
+/* ================================================================ TECTONIC PLATES */
+const tectonicGroup = new THREE.Group();
+earthGroup.add(tectonicGroup);
+const convectionArrows = [];
+
+// Approximate major plate boundary polylines [lon,lat]
+const plateBoundaries = [
+  // Pacific Ring of Fire (east pacific + west americas)
+  [[-180,60],[-170,55],[-160,50],[-150,45],[-140,40],[-130,35],[-120,30],[-115,25],[-110,20],[-100,15],[-95,10],[-85,5],[-80,0],[-75,-5],[-72,-15],[-72,-25],[-75,-35],[-74,-45],[-73,-55]],
+  // Mid-Atlantic Ridge
+  [[-30,75],[-32,65],[-30,55],[-28,45],[-30,35],[-32,25],[-33,15],[-32,5],[-31,-5],[-13,-10],[-12,-25],[-8,-40],[-5,-55]],
+  // Pacific west (Japan -> Philippines -> Indonesia)
+  [[140,55],[142,45],[140,35],[135,28],[130,20],[125,12],[122,5],[125,-5],[130,-10],[145,-15],[155,-25],[170,-35],[175,-50]],
+  // Indian Ridge
+  [[60,-10],[65,-20],[70,-30],[75,-40],[80,-50]],
+  // Himalaya / Alpine belt
+  [[0,38],[20,37],[40,38],[60,37],[75,35],[88,28],[95,27],[105,25],[120,24]],
+  // East African Rift
+  [[35,15],[36,5],[37,-5],[34,-15],[30,-25]],
+];
+const plateColors = [0xff6b6b, 0x4ecdc4, 0xffe06d, 0xa29bfe, 0x26de81, 0xfd79a8];
+(function buildPlates(){
+  plateBoundaries.forEach((poly, idx) => {
+    const pts = poly.map(p => lonLatToVector3(p[0], p[1], 1.008));
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color: plateColors[idx % plateColors.length], linewidth: 2 });
+    tectonicGroup.add(new THREE.Line(geo, mat));
+    // boundary markers
+    poly.forEach(p => {
+      const pos = lonLatToVector3(p[0], p[1], 1.012);
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(0.014,10,8),
+        new THREE.MeshBasicMaterial({ color: plateColors[idx % plateColors.length] }));
+      dot.position.copy(pos);
+      tectonicGroup.add(dot);
+    });
+  });
+  // Mantle convection arrows beneath surface
+  for(let i=0;i<10;i++){
+    const ang = (i/10)*Math.PI*2 + 0.2;
+    const baseR = 0.82;
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(0.025, 0.12, 8),
+      new THREE.MeshBasicMaterial({ color: 0xff9f43, transparent:true, opacity:0.7 })
+    );
+    const pos = new THREE.Vector3(Math.cos(ang)*baseR, Math.sin(ang)*baseR, 0);
+    cone.position.copy(pos);
+    // orient outward
+    cone.lookAt(pos.clone().multiplyScalar(2));
+    cone.rotateX(Math.PI/2);
+    tectonicGroup.add(cone);
+    convectionArrows.push({ mesh:cone, angle:ang, baseR, phase:i*0.6, dir: i%2===0?1:-1 });
+  }
+})();
+
+/* ================================================================ MODE SWITCHING */
+function setMode(mode){
+  currentMode = mode;
+  const modeNames = { surface:'地表视图', internal:'内部结构', seismic:'地震波', magnetic:'地磁场', tectonic:'板块构造' };
+  document.getElementById('badgeMode').textContent = modeNames[mode];
+
+  // Default visibility
+  earthMesh.visible = (mode !== 'internal');
+  internalGroup.visible = (mode === 'internal');
+  gridGroup.visible = options.grid && (mode === 'surface');
+  axisGroup.visible = options.axis && (mode !== 'internal');
+  cityGroup.visible = options.cities && (mode === 'surface');
+  climateGroup.visible = options.climate && (mode === 'surface');
+  twilightMesh.visible = options.twilight && (mode === 'surface');
+  sunMarker.visible = options.sun && (mode === 'surface');
+  sunGlow.visible = options.sun && (mode === 'surface');
+  tectonicGroup.visible = (mode === 'tectonic');
+  magneticGroup.visible = (mode === 'magnetic');
+
+  if(mode === 'seismic'){
+    sunLight.intensity = 1.0; ambientLight.intensity = 0.6;
+  } else if(mode === 'magnetic'){
+    sunLight.intensity = 0.5; ambientLight.intensity = 0.6;
+  } else if(mode === 'internal'){
+    sunLight.intensity = 1.2; ambientLight.intensity = 0.7;
+  } else {
+    sunLight.intensity = 1.4; ambientLight.intensity = 0.55;
+  }
+
+  if(mode !== 'seismic') clearSeismic();
+
+  const hints = {
+    surface: '拖拽旋转 · 滚轮缩放 · 观察昼夜与晨昏线',
+    internal: '剖切半球 · 展示地壳/地幔/外核/内核',
+    seismic: '点击地球表面发射地震 · 观察P/S波传播',
+    magnetic: '偶极磁力线 · 太阳风偏转 · 磁层',
+    tectonic: '板块边界 · 地幔对流驱动板块运动',
+  };
+  document.getElementById('sceneHint').textContent = hints[mode];
+  document.getElementById('modeHint').textContent = hints[mode];
+
+  updateRightPanel();
 }
 
-// ===== TECTONIC MODE =====
-function renderTectonic(c){
-  const r = earthPx;
-  ctx.save();
-  ctx.translate(cx, cy);
-
-  // Mantle (background)
-  ctx.beginPath();
-  ctx.arc(0, 0, r, 0, Math.PI * 2);
-  ctx.fillStyle = c.mantle;
-  ctx.globalAlpha = 0.3;
-  ctx.fill();
-  ctx.globalAlpha = 1;
-
-  // Mantle convection cells
-  if(state.showConvection){
-    for(const cell of state.mantleCells){
-      const px = cell.x, py = cell.y;
-      const phase = cell.phase;
-      ctx.strokeStyle = c.outercore;
-      ctx.globalAlpha = 0.3;
-      ctx.lineWidth = 1.5;
-      // convection loop
-      const w = cell.w, h = cell.h;
-      ctx.beginPath();
-      for(let t = 0; t <= 1; t += 0.05){
-        const ang = t * Math.PI * 2 + phase;
-        const x = px + Math.cos(ang) * w;
-        const y = py + Math.sin(ang) * h * 0.7;
-        if(t === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // arrows at top (moving sideways)
-      const topX = px + Math.cos(phase) * w;
-      const dir = Math.sin(phase) > 0 ? 1 : -1;
-      ctx.globalAlpha = 0.5;
-      ctx.strokeStyle = c.accent4;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(topX - dir * 8, py - h * 0.7);
-      ctx.lineTo(topX + dir * 8, py - h * 0.7);
-      ctx.lineTo(topX + dir * 4, py - h * 0.7 - 3);
-      ctx.moveTo(topX + dir * 8, py - h * 0.7);
-      ctx.lineTo(topX + dir * 4, py - h * 0.7 + 3);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  // Plate boundaries (on surface)
-  const plateCount = 7;
-  for(let i = 0; i < plateCount; i++){
-    const a1 = (i / plateCount) * Math.PI * 2;
-    const a2 = ((i + 1) / plateCount) * Math.PI * 2;
-    const am = (a1 + a2) / 2;
-
-    // Plate fill
-    ctx.beginPath();
-    ctx.moveTo(Math.cos(a1) * r, Math.sin(a1) * r);
-    ctx.arc(0, 0, r, a1, a2);
-    ctx.closePath();
-    ctx.fillStyle = c.plate;
-    ctx.globalAlpha = 0.15 + (i % 2) * 0.1;
-    ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Boundary type
-    const type = i % 3; // 0=divergent, 1=convergent, 2=transform
-    const bx = Math.cos(am) * r;
-    const by = Math.sin(am) * r;
-
-    if(type === 0){
-      // Divergent: arrows apart
-      ctx.strokeStyle = c.accent3;
-      ctx.lineWidth = 2;
-      const dx = Math.cos(am), dy = Math.sin(am);
-      const px = Math.cos(am + 0.03) * r, py = Math.sin(am + 0.03) * r;
-      const nx = Math.cos(am - 0.03) * r, ny = Math.sin(am - 0.03) * r;
-      drawArrow(px, py, px + dx * 12, py + dy * 12, c.accent3);
-      drawArrow(nx, ny, nx - dx * 12, ny - dy * 12, c.accent3);
-    } else if(type === 1){
-      // Convergent: arrows together
-      const dx = Math.cos(am), dy = Math.sin(am);
-      const px = Math.cos(am + 0.03) * r, py = Math.sin(am + 0.03) * r;
-      const nx = Math.cos(am - 0.03) * r, ny = Math.sin(am - 0.03) * r;
-      drawArrow(px + dx * 12, py + dy * 12, px, py, c.swave);
-      drawArrow(nx - dx * 12, ny - dy * 12, nx, ny, c.swave);
-    } else {
-      // Transform: arrows parallel
-      const tx = -Math.sin(am), ty = Math.cos(am);
-      const px = Math.cos(am + 0.03) * r, py = Math.sin(am + 0.03) * r;
-      const nx = Math.cos(am - 0.03) * r, ny = Math.sin(am - 0.03) * r;
-      drawArrow(px - tx * 10, py - ty * 10, px + tx * 10, py + ty * 10, c.accent4);
-      drawArrow(nx + tx * 10, ny + ty * 10, nx - tx * 10, ny - ty * 10, c.accent4);
-    }
-  }
-
-  // Legend
-  ctx.fillStyle = c.ink2;
-  ctx.font = '10px monospace';
-  ctx.textAlign = 'left';
-  const ly = -r - 15;
-  ctx.fillStyle = c.accent3; ctx.fillRect(-r, ly, 10, 3);
-  ctx.fillStyle = c.ink2; ctx.fillText('离散型', -r + 14, ly + 4);
-  ctx.fillStyle = c.swave; ctx.fillRect(-r + 70, ly, 10, 3);
-  ctx.fillStyle = c.ink2; ctx.fillText('汇聚型', -r + 84, ly + 4);
-  ctx.fillStyle = c.accent4; ctx.fillRect(-r + 140, ly, 10, 3);
-  ctx.fillStyle = c.ink2; ctx.fillText('转换型', -r + 154, ly + 4);
-
-  ctx.restore();
+/* ================================================================ LAYER TOGGLES */
+function applyLayerVisibility(){
+  gridGroup.visible = options.grid && (currentMode === 'surface');
+  axisGroup.visible = options.axis && (currentMode !== 'internal');
+  cityGroup.visible = options.cities && (currentMode === 'surface');
+  climateGroup.visible = options.climate && (currentMode === 'surface');
+  twilightMesh.visible = options.twilight && (currentMode === 'surface');
+  sunMarker.visible = options.sun && (currentMode === 'surface');
+  sunGlow.visible = options.sun && (currentMode === 'surface');
+  if(stars) stars.visible = options.stars;
 }
 
-function drawArrow(x1, y1, x2, y2, color){
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
-  const ang = Math.atan2(y2 - y1, x2 - x1);
-  const ah = 5;
-  ctx.beginPath();
-  ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - ah * Math.cos(ang - 0.4), y2 - ah * Math.sin(ang - 0.4));
-  ctx.lineTo(x2 - ah * Math.cos(ang + 0.4), y2 - ah * Math.sin(ang + 0.4));
-  ctx.closePath();
-  ctx.fill();
+/* ================================================================ RESIZE */
+function resize(){
+  const rect = container.getBoundingClientRect();
+  const w = Math.max(1, rect.width), h = Math.max(1, rect.height);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false);
 }
+window.addEventListener('resize', resize);
+const ro = new ResizeObserver(resize);
+ro.observe(container);
+resize();
 
-// ========================================== UI UPDATE
-function updateUI(){
-  const modeNames = {'structure':'内部结构','seismic':'地震波','magnetic':'地磁场','tectonic':'板块构造'};
-  document.getElementById('badgeMode').textContent = modeNames[state.mode];
-  document.getElementById('badgeFPS').textContent = state.fps + ' FPS';
-
-  const container = document.getElementById('output-container');
-  const formulaContainer = document.getElementById('formula-container');
-  const paramContainer = document.getElementById('param-container');
-  const presetContainer = document.getElementById('preset-container');
-
-  if(state.mode === 'structure'){
-    document.getElementById('badgeInfo').textContent = 'R = 6371 km';
-    paramContainer.innerHTML = `
-      <div class="param-group">
-        <div class="param-header"><span class="param-label">剖面深度</span><span class="param-value" id="valCut">${(state.cutaway * 180 / Math.PI).toFixed(0)}°</span></div>
-        <input type="range" id="sliderCut" min="10" max="90" value="${state.cutaway * 180 / Math.PI}" step="1">
-      </div>`;
-    document.getElementById('sliderCut').addEventListener('input', e => {
-      state.cutaway = parseInt(e.target.value) * Math.PI / 180;
-      document.getElementById('valCut').textContent = e.target.value + '°';
-    });
-    presetContainer.innerHTML = '';
-
-    // Output: layer table
-    let tableHtml = '<table class="layer-table"><tr><th>层级</th><th>深度</th><th>密度</th><th>温度</th></tr>';
-    for(const l of layers){
-      tableHtml += `<tr><td><span class="layer-dot" style="background:var(--g-${l.color})"></span>${l.name}</td><td>${l.r0}-${l.r1}km</td><td>${l.density}</td><td>${l.temp}°C</td></tr>`;
-    }
-    tableHtml += '</table>';
-    container.innerHTML = tableHtml + `
-      <div class="output-grid" style="margin-top:10px">
-        <div class="output-card"><div class="output-num">6371</div><div class="output-label">半径 (km)</div></div>
-        <div class="output-card"><div class="output-num b">5.51</div><div class="output-label">平均密度</div></div>
-        <div class="output-card"><div class="output-num c">5700</div><div class="output-label">核心温度 (°C)</div></div>
-        <div class="output-card"><div class="output-num d">11.5°</div><div class="output-label">磁极偏角</div></div>
-      </div>`;
-
-    formulaContainer.innerHTML = `
-      <div class="formula-block">
-        <div class="formula-title">地球内部密度</div>
-        <div class="formula-expr">ρ(r) = ρ₀(1 - αr²)</div>
-        <div class="formula-desc">密度随深度增加，地壳约2.8 g/cm³，内核约13.0 g/cm³</div>
-      </div>
-      <div class="formula-block">
-        <div class="formula-title">压力梯度</div>
-        <div class="formula-expr">dP/dr = -ρ(r) · g(r)</div>
-        <div class="formula-desc">地心压力约360 GPa，由上覆物质重力产生</div>
-      </div>`;
+/* ================================================================ RAYCAST (seismic click) */
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  if(currentMode !== 'seismic') return;
+  if(e.button !== 0) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObject(earthMesh, false);
+  if(hits.length > 0){
+    // convert world hit point to earthGroup local space
+    const localP = hits[0].point.clone();
+    earthGroup.worldToLocal(localP);
+    localP.normalize().multiplyScalar(1.0);
+    setEpicenter(localP);
+    updateRightPanel();
   }
-  else if(state.mode === 'seismic'){
-    document.getElementById('badgeInfo').textContent = `${state.pWaves.length} P波 / ${state.sWaves.length} S波`;
-    paramContainer.innerHTML = `
-      <div class="param-group">
-        <div class="param-header"><span class="param-label">震源强度</span><span class="param-value" id="valPower">${state.quakePower.toFixed(1)}</span></div>
-        <input type="range" id="sliderPower" min="5" max="30" value="${state.quakePower * 10}" step="1">
-      </div>
-      <p style="font-size:.72rem;color:var(--g-muted);margin-top:8px">点击地球表面发射地震波</p>`;
-    document.getElementById('sliderPower').addEventListener('input', e => {
-      state.quakePower = parseInt(e.target.value) / 10;
-      document.getElementById('valPower').textContent = state.quakePower.toFixed(1);
-    });
-    presetContainer.innerHTML = `
-      <button class="preset-btn" data-preset="surface">📍 浅源地震</button>
-      <button class="preset-btn" data-preset="deep">🔺 深源地震</button>
-      <button class="preset-btn" data-preset="multi">💥 多源</button>`;
+});
 
-    document.querySelectorAll('[data-preset]').forEach(b => {
-      b.addEventListener('click', () => {
-        if(b.dataset.preset === 'surface') triggerQuake(0, -earthPx, 1.0);
-        else if(b.dataset.preset === 'deep') triggerQuake(0, -earthPx * 0.3, 1.5);
-        else if(b.dataset.preset === 'multi'){
-          triggerQuake(earthPx * 0.7, -earthPx * 0.3, 1.0);
-          setTimeout(() => triggerQuake(-earthPx * 0.7, earthPx * 0.3, 1.0), 500);
-        }
-      });
-    });
-
-    const totalE = state.pWaves.length + state.sWaves.length;
-    container.innerHTML = `
-      <div class="output-grid">
-        <div class="output-card"><div class="output-num" id="numP">${state.pWaves.length}</div><div class="output-label">P波数量</div></div>
-        <div class="output-card"><div class="output-num b" id="numS">${state.sWaves.length}</div><div class="output-label">S波数量</div></div>
-        <div class="output-card"><div class="output-num c">10.0</div><div class="output-label">P波速度 (km/s)</div></div>
-        <div class="output-card"><div class="output-num d">6.0</div><div class="output-label">S波速度 (km/s)</div></div>
-      </div>
-      <div class="info-card" style="margin-top:10px">
-        <h3>📡 S波阴影区</h3>
-        <p>S波无法穿透液态外核，在103°-142°形成<strong>阴影区</strong>。这是推断外核为液态的关键证据。</p>
-      </div>`;
-
-    formulaContainer.innerHTML = `
-      <div class="formula-block">
-        <div class="formula-title">P波（纵波）</div>
-        <div class="formula-expr">vP = √((K + 4μ/3) / ρ)</div>
-        <div class="formula-desc">压缩波，可在固体和液体中传播，速度最快</div>
-      </div>
-      <div class="formula-block">
-        <div class="formula-title">S波（横波）</div>
-        <div class="formula-expr">vS = √(μ / ρ)</div>
-        <div class="formula-desc">剪切波，仅在固体中传播，无法穿过液态外核</div>
-      </div>`;
-  }
-  else if(state.mode === 'magnetic'){
-    document.getElementById('badgeInfo').textContent = `倾角 ${state.magTilt}° / 强度 ${state.magStrength.toFixed(1)}`;
-    paramContainer.innerHTML = `
-      <div class="param-group">
-        <div class="param-header"><span class="param-label">磁极倾角</span><span class="param-value" id="valTilt">${state.magTilt}°</span></div>
-        <input type="range" id="sliderTilt" min="0" max="30" value="${state.magTilt}" step="0.5">
-      </div>
-      <div class="param-group">
-        <div class="param-header"><span class="param-label">磁场强度</span><span class="param-value" id="valMag">${state.magStrength.toFixed(1)}×</span></div>
-        <input type="range" id="sliderMag" min="3" max="20" value="${state.magStrength * 10}" step="1">
-      </div>
-      <div class="param-group">
-        <div class="param-header"><span class="param-label">太阳风</span></div>
-        <div class="mode-grid"><button class="mode-btn ${state.showSolar?'active':''}" id="solarOn">开启</button><button class="mode-btn ${!state.showSolar?'active':''}" id="solarOff">关闭</button></div>
-      </div>`;
-    document.getElementById('sliderTilt').addEventListener('input', e => {
-      state.magTilt = parseFloat(e.target.value);
-      document.getElementById('valTilt').textContent = state.magTilt + '°';
-    });
-    document.getElementById('sliderMag').addEventListener('input', e => {
-      state.magStrength = parseInt(e.target.value) / 10;
-      document.getElementById('valMag').textContent = state.magStrength.toFixed(1) + '×';
-    });
-    document.getElementById('solarOn').addEventListener('click', () => { state.showSolar = true; updateUI(); });
-    document.getElementById('solarOff').addEventListener('click', () => { state.showSolar = false; state.magParticles = []; updateUI(); });
-    presetContainer.innerHTML = `
-      <button class="preset-btn" data-preset="normal">🌐 标准</button>
-      <button class="preset-btn" data-preset="storm">⚡ 磁暴</button>
-      <button class="preset-btn" data-preset="quiet">🌙 平静</button>`;
-    document.querySelectorAll('[data-preset]').forEach(b => {
-      b.addEventListener('click', () => {
-        if(b.dataset.preset === 'normal'){ state.magTilt = 11.5; state.magStrength = 1.0; state.showSolar = true; }
-        else if(b.dataset.preset === 'storm'){ state.magTilt = 20; state.magStrength = 2.0; state.showSolar = true; }
-        else if(b.dataset.preset === 'quiet'){ state.magTilt = 5; state.magStrength = 0.5; state.showSolar = false; state.magParticles = []; }
-        updateUI();
-      });
-    });
-
-    container.innerHTML = `
-      <div class="output-grid">
-        <div class="output-card"><div class="output-num">11.5°</div><div class="output-label">磁极偏角</div></div>
-        <div class="output-card"><div class="output-num b">25-65</div><div class="output-label">μT 磁场强度</div></div>
-        <div class="output-card"><div class="output-num c">780k</div><div class="output-label">核心温度 (°C)</div></div>
-        <div class="output-card"><div class="output-num d">~11°</div><div class="output-label">极光纬度</div></div>
-      </div>
-      <div class="info-card" style="margin-top:10px">
-        <h3>🧲 地磁偶极子</h3>
-        <p>地磁场近似<strong>磁偶极子</strong>，由外核液态铁的对流运动（<strong>发电机效应</strong>）产生。磁极与地理极有约11.5°偏角。</p>
-      </div>`;
-
-    formulaContainer.innerHTML = `
-      <div class="formula-block">
-        <div class="formula-title">磁偶极子场</div>
-        <div class="formula-expr">B = (μ₀/4π) · m / r³ · √(1+3cos²θ)</div>
-        <div class="formula-desc">磁场强度随距离立方衰减，赤道处最弱，磁极处最强</div>
-      </div>
-      <div class="formula-block">
-        <div class="formula-title">洛伦兹力（带电粒子）</div>
-        <div class="formula-expr">F = qv × B</div>
-        <div class="formula-desc">太阳风带电粒子受洛伦兹力偏转，形成磁层和极光</div>
-      </div>`;
-  }
-  else if(state.mode === 'tectonic'){
-    document.getElementById('badgeInfo').textContent = `速度 ×${state.plateSpeed.toFixed(1)}`;
-    paramContainer.innerHTML = `
-      <div class="param-group">
-        <div class="param-header"><span class="param-label">板块运动速度</span><span class="param-value" id="valPlate">${state.plateSpeed.toFixed(1)}×</span></div>
-        <input type="range" id="sliderPlate" min="0" max="30" value="${state.plateSpeed * 10}" step="1">
-      </div>
-      <div class="param-group">
-        <div class="param-header"><span class="param-label">地幔对流</span></div>
-        <div class="mode-grid"><button class="mode-btn ${state.showConvection?'active':''}" id="convOn">显示</button><button class="mode-btn ${!state.showConvection?'active':''}" id="convOff">隐藏</button></div>
-      </div>`;
-    document.getElementById('sliderPlate').addEventListener('input', e => {
-      state.plateSpeed = parseInt(e.target.value) / 10;
-      document.getElementById('valPlate').textContent = state.plateSpeed.toFixed(1) + '×';
-    });
-    document.getElementById('convOn').addEventListener('click', () => { state.showConvection = true; initMantleCells(); updateUI(); });
-    document.getElementById('convOff').addEventListener('click', () => { state.showConvection = false; updateUI(); });
-    presetContainer.innerHTML = `
-      <button class="preset-btn" data-preset="ring">🌋 火山环</button>
-      <button class="preset-btn" data-preset="rift">🌊 洋中脊</button>
-      <button class="preset-btn" data-preset="collision">🏔️ 造山带</button>`;
-    document.querySelectorAll('[data-preset]').forEach(b => {
-      b.addEventListener('click', () => {
-        if(b.dataset.preset === 'ring'){ state.plateSpeed = 2.0; state.showConvection = true; }
-        else if(b.dataset.preset === 'rift'){ state.plateSpeed = 1.0; state.showConvection = true; }
-        else if(b.dataset.preset === 'collision'){ state.plateSpeed = 0.5; state.showConvection = true; }
-        updateUI();
-      });
-    });
-
-    container.innerHTML = `
-      <div class="output-grid">
-        <div class="output-card"><div class="output-num">7</div><div class="output-label">主要板块</div></div>
-        <div class="output-card"><div class="output-num b">2-10</div><div class="output-label">cm/年 运动速度</div></div>
-        <div class="output-card"><div class="output-num c">3</div><div class="output-label">边界类型</div></div>
-        <div class="output-card"><div class="output-num d">~1200</div><div class="output-label">°C 地幔温度</div></div>
-      </div>
-      <div class="info-card" style="margin-top:10px">
-        <h3>🌋 三种板块边界</h3>
-        <p><strong>离散型</strong>：板块分离，形成洋中脊</p>
-        <p><strong>汇聚型</strong>：板块碰撞，形成俯冲带和山脉</p>
-        <p><strong>转换型</strong>：板块滑动，引发走滑断层</p>
-      </div>`;
-
-    formulaContainer.innerHTML = `
-      <div class="formula-block">
-        <div class="formula-title">地幔对流驱动力</div>
-        <div class="formula-expr">Ra = αgΔTd³/(κν)</div>
-        <div class="formula-desc">瑞利数Ra超过临界值时地幔发生对流，驱动板块运动</div>
-      </div>
-      <div class="formula-block">
-        <div class="formula-title">弹性回跳理论</div>
-        <div class="formula-expr">σ = E · ε  →  断层突然释放</div>
-        <div class="formula-desc">应力积累超过岩石强度时，断层突然滑动释放弹性能量</div>
-      </div>`;
-  }
+/* ================================================================ THEME UPDATE */
+function applyThemeRender(){
+  const c = getThemeColors();
+  renderer.setClearColor(c.bg, 1);
+  // recolor grid
+  gridGroup.traverse(o => { if(o.isLine && o.material) o.material.color.setHex(c.grid); });
+  // recolor axis
+  axisGroup.traverse(o => { if(o.material) o.material.color.setHex(c.axis); });
+  // recolor stars
+  if(stars) stars.material.color.setHex(c.star);
 }
+applyThemeRender();
 
-// ========================================== INTERACTIONS
-// Mode switching
+// Observe theme attribute changes
+const themeObserver = new MutationObserver(() => { applyThemeRender(); updateRightPanel(); });
+themeObserver.observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+window.addEventListener('storage', (e) => { if(e.key === 'psu-theme-v1') applyThemeRender(); });
+
+/* ================================================================ UI EVENTS */
+// Mode buttons
 document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    state.mode = btn.dataset.mode;
-    state.quakes = []; state.pWaves = []; state.sWaves = [];
-    state.magParticles = [];
-    if(state.mode === 'tectonic') initMantleCells();
-    updateUI();
+    setMode(btn.dataset.mode);
   });
 });
-
-// Canvas click for seismic mode
-canvas.addEventListener('click', (e) => {
-  if(state.mode !== 'seismic') return;
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left - cx;
-  const my = e.clientY - rect.top - cy;
-  triggerQuake(mx, my, state.quakePower);
+// Layer toggles
+document.querySelectorAll('.toggle-btn[data-layer]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.layer;
+    options[key] = !options[key];
+    btn.classList.toggle('active', options[key]);
+    applyLayerVisibility();
+  });
 });
-canvas.addEventListener('touchstart', (e) => {
-  if(state.mode !== 'seismic') return;
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const t = e.touches[0];
-  const mx = t.clientX - rect.left - cx;
-  const my = t.clientY - rect.top - cy;
-  triggerQuake(mx, my, state.quakePower);
+// Texture tabs
+document.querySelectorAll('.tex-tab[data-tex]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tex-tab[data-tex]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    textureType = btn.dataset.tex;
+    earthMaterial.map = textures[textureType];
+    earthMaterial.needsUpdate = true;
+  });
 });
-
-function triggerQuake(x, y, power){
-  // Only on/near earth surface
-  const d = Math.hypot(x, y);
-  if(d > earthPx * 1.15) return;
-  // Snap to surface
-  if(d > earthPx * 0.9){
-    x = x / d * earthPx;
-    y = y / d * earthPx;
-  }
-  state.quakes.push({ x, y, power });
-  state.pWaves.push({ x, y, r: 0, speed: 1.8 * power });
-  state.sWaves.push({ x, y, r: 0, speed: 1.0 * power });
-  if(state.quakes.length > 5) state.quakes.shift();
-}
-
-// Controls
-document.getElementById('btnPlay').addEventListener('click', () => { state.running = true; });
-document.getElementById('btnPause').addEventListener('click', () => { state.running = false; });
+// Sliders
+document.getElementById('sliderRot').addEventListener('input', e => {
+  rotationSpeed = parseInt(e.target.value) / 10;
+  document.getElementById('valRot').textContent = rotationSpeed.toFixed(1) + '×';
+});
+document.getElementById('sliderTilt').addEventListener('input', e => {
+  axisTilt = parseFloat(e.target.value);
+  document.getElementById('valTilt').textContent = axisTilt.toFixed(1) + '°';
+});
+document.getElementById('sliderSun').addEventListener('input', e => {
+  sunHeight = parseInt(e.target.value);
+  document.getElementById('valSun').textContent = sunHeight + '°';
+});
+// Reset view
 document.getElementById('btnReset').addEventListener('click', () => {
-  state.time = 0;
-  state.quakes = []; state.pWaves = []; state.sWaves = [];
-  state.magParticles = [];
-  state.rotation = 0;
-  if(state.mode === 'tectonic') initMantleCells();
+  camera.position.set(0, 2, 5);
+  controls.target.set(0, 0, 0);
+  controls.update();
 });
 
-// ========================================== MANTLE CELLS
-function initMantleCells(){
-  state.mantleCells = [];
-  for(let i = 0; i < 4; i++){
-    const angle = (i / 4) * Math.PI * 2 + 0.3;
-    const dist = earthPx * 0.55;
-    state.mantleCells.push({
-      x: Math.cos(angle) * dist,
-      y: Math.sin(angle) * dist,
-      w: earthPx * 0.25,
-      h: earthPx * 0.18,
-      speed: 0.3 + Math.random() * 0.3,
-      phase: i * Math.PI / 2,
-    });
-  }
+/* ================================================================ ANIMATION */
+function updateSun(){
+  const el = sunHeight * Math.PI / 180;
+  sunLight.position.set(Math.cos(el) * 5, Math.sin(el) * 5, 0);
+  const sunWorldDir = sunLight.position.clone().normalize();
+  sunMarker.position.copy(sunWorldDir).multiplyScalar(1.04);
+  sunGlow.position.copy(sunMarker.position);
+  // sun direction in earthGroup local space for twilight shader
+  const inv = new THREE.Matrix4().copy(earthGroup.matrixWorld).invert();
+  const sunLocal = sunWorldDir.clone().transformDirection(inv);
+  twilightMaterial.uniforms.sunDir.value.copy(sunLocal);
+  // local time: longitude facing sun
+  const ll = vector3ToLonLat(sunLocal.clone().multiplyScalar(1));
+  simTime.subsolarLon = ll.lon;
 }
-initMantleCells();
 
-// ========================================== QUIZ
+function animate(timestamp){
+  requestAnimationFrame(animate);
+  if(!simTime.lastFrame) simTime.lastFrame = timestamp;
+  const dt = Math.min(0.05, (timestamp - simTime.lastFrame) / 1000);
+  simTime.lastFrame = timestamp;
+
+  // FPS
+  simTime.fpsCount++;
+  simTime.fpsTimer += dt;
+  if(simTime.fpsTimer >= 1){
+    simTime.fps = simTime.fpsCount;
+    simTime.fpsCount = 0;
+    simTime.fpsTimer = 0;
+    document.getElementById('badgeFPS').textContent = simTime.fps + ' FPS';
+  }
+
+  // Axis tilt
+  earthGroup.rotation.z = axisTilt * Math.PI / 180;
+  internalGroup.rotation.z = axisTilt * Math.PI / 180;
+
+  // Earth rotation
+  if(options.rotation && !isUserInteracting && currentMode !== 'internal'){
+    earthGroup.rotation.y += 0.002 * rotationSpeed;
+    simTime.hours = (simTime.hours + 0.002 * rotationSpeed * (24 / (Math.PI * 2))) % 24;
+  }
+  // internal group slow rotation for cross-section viewing
+  if(currentMode === 'internal' && !isUserInteracting){
+    internalGroup.rotation.y += 0.001 * rotationSpeed;
+  }
+
+  // Ensure matrixWorld is current before deriving local sun direction
+  earthGroup.updateMatrixWorld();
+  internalGroup.updateMatrixWorld();
+  updateSun();
+
+  // Seismic waves
+  if(currentMode === 'seismic'){
+    for(let i = seismicWaves.length - 1; i >= 0; i--){
+      const w = seismicWaves[i];
+      w.r += w.speed * (1 + rotationSpeed * 0.2);
+      w.mesh.scale.setScalar(Math.max(0.001, w.r));
+      const lifeFrac = w.r / w.maxR;
+      w.mat.opacity = Math.max(0, 0.7 * (1 - lifeFrac));
+      if(w.r >= w.maxR){
+        seismicGroup.remove(w.mesh);
+        w.mesh.geometry.dispose();
+        w.mat.dispose();
+        seismicWaves.splice(i, 1);
+      }
+    }
+    if(epicenterMarker){
+      const pulse = (Math.sin(timestamp * 0.008) + 1) * 0.5;
+      epicenterMarker.scale.setScalar(1 + pulse * 0.8);
+    }
+  }
+
+  // Solar wind particles
+  if(currentMode === 'magnetic' && solarWind){
+    const pos = solarWind.geometry.attributes.position;
+    const vels = solarWind.userData.vels;
+    for(let i=0;i<pos.count;i++){
+      let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+      x += vels[i*3];
+      // deflect near earth
+      const d = Math.hypot(x, y, z);
+      if(d < 2.2 && x > -1.5){
+        const f = 0.08 / (d*d + 0.2);
+        y += y * f * 6;
+        z += z * f * 6;
+        vels[i*3] *= 0.96;
+      }
+      if(x > 8 || d < 1.05){
+        // respawn on -X side
+        x = -8 - Math.random()*3;
+        y = (Math.random()-0.5) * 6;
+        z = (Math.random()-0.5) * 6;
+        vels[i*3] = 0.06 + Math.random()*0.04;
+      }
+      pos.setXYZ(i, x, y, z);
+    }
+    pos.needsUpdate = true;
+    // magnetic tilt
+    magneticGroup.rotation.y = timestamp * 0.0001;
+  }
+
+  // Mantle convection arrows
+  if(currentMode === 'tectonic'){
+    for(const a of convectionArrows){
+      a.phase += dt * 0.8 * (1 + rotationSpeed * 0.3);
+      const r = a.baseR + Math.sin(a.phase) * 0.06;
+      const ang = a.angle + Math.cos(a.phase) * 0.15 * a.dir;
+      const pos = new THREE.Vector3(Math.cos(ang)*r, Math.sin(ang)*r, 0);
+      a.mesh.position.copy(pos);
+      a.mesh.lookAt(pos.clone().multiplyScalar(2));
+      a.mesh.rotateX(Math.PI/2);
+      a.mesh.material.opacity = 0.4 + 0.4 * (0.5 + 0.5*Math.sin(a.phase));
+    }
+  }
+
+  // Camera distance badge
+  document.getElementById('badgeCam').textContent = 'R = ' + camera.position.length().toFixed(2);
+
+  // Right panel live update (throttled)
+  if(simTime.fpsCount % 15 === 0) updateLiveData();
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+/* ================================================================ RIGHT PANEL */
+function updateLiveData(){
+  const grid = document.getElementById('liveGrid');
+  if(!grid.children.length) return; // only update if built
+  // recompute view center lat/lon
+  const dir = camera.position.clone().normalize();
+  const ll = vector3ToLonLat(dir);
+  let localHour = (simTime.hours + (ll.lon / 15) + 24) % 24;
+  if(localHour < 0) localHour += 24;
+  const hh = Math.floor(localHour).toString().padStart(2,'0');
+  const mm = Math.floor((localHour % 1) * 60).toString().padStart(2,'0');
+  let season;
+  if(sunHeight > 10) season = '北半球夏';
+  else if(sunHeight < -10) season = '北半球冬';
+  else season = '春秋分';
+
+  const items = grid.children;
+  if(items[0]) items[0].querySelector('.output-num').textContent = ll.lat.toFixed(1) + '°';
+  if(items[1]) items[1].querySelector('.output-num').textContent = ll.lon.toFixed(1) + '°';
+  if(items[2]) items[2].querySelector('.output-num').textContent = hh + ':' + mm;
+  if(items[3]) items[3].querySelector('.output-num').textContent = season;
+}
+
+function buildLiveData(){
+  const grid = document.getElementById('liveGrid');
+  grid.innerHTML = `
+    <div class="output-card"><div class="output-num">0°</div><div class="output-label">视点纬度</div></div>
+    <div class="output-card"><div class="output-num b">0°</div><div class="output-label">视点经度</div></div>
+    <div class="output-card"><div class="output-num c">00:00</div><div class="output-label">当地时间</div></div>
+    <div class="output-card"><div class="output-num d">春秋分</div><div class="output-label">季节</div></div>`;
+}
+
+const knowledgeBank = {
+  surface: [
+    { t:'🌏 地球自转', p:'地球自西向东自转，周期约<strong>23时56分</strong>（恒星日）。赤道线速度约465 m/s，产生昼夜交替与地转偏向力。' },
+    { t:'🌓 昼夜与晨昏线', p:'地球被太阳照亮一半，<strong>晨昏线</strong>（terminator）是昼夜分界。大气折射使昼夜不等长。' },
+    { t:'漪 地轴倾角', p:'地轴倾斜<strong>23.5°</strong>，导致太阳直射点南北移动，形成四季与回归线。' },
+  ],
+  internal: [
+    { t:'🟡 内核', p:'半径约1220km，固态铁镍，密度<strong>13 g/cm³</strong>，温度约5700°C，与太阳表面相当。' },
+    { t:'🟠 外核', p:'厚度约2260km，<strong>液态</strong>铁镍，对流运动产生地磁场（发电机效应），S波无法穿透。' },
+    { t:'🔴 地幔', p:'厚约2850km，固态硅酸盐，下地幔密度5.0、上地幔3.3。软流层塑性流动驱动板块。' },
+    { t:'🟢 地壳', p:'厚5-70km，大陆壳花岗岩质(2.7)，洋壳玄武岩质(3.0)。莫霍面为其下界。' },
+  ],
+  seismic: [
+    { t:'🔵 P波（纵波）', p:'压缩波，速度<strong>6-13 km/s</strong>，可在固液气中传播，最先到达，推拉质点沿传播方向振动。' },
+    { t:'🔴 S波（横波）', p:'剪切波，速度<strong>3.5-7 km/s</strong>，仅固体传播，质点垂直传播方向振动，<strong>不能穿过液态外核</strong>。' },
+    { t:'🌑 S波阴影区', p:'S波在103°-142°范围消失，证明<strong>外核为液态</strong>。P波在103°-142°减弱形成P波阴影区。' },
+    { t:'📍 不连续面', p:'<strong>莫霍面</strong>(35km)分地壳地幔；<strong>古登堡面</strong>(2900km)分地幔外核；<strong>莱曼面</strong>(5150km)分外核内核。' },
+  ],
+  magnetic: [
+    { t:'🧲 地磁偶极子', p:'地磁场近似磁偶极子，由<strong>外核液态铁对流</strong>（发电机理论）产生。磁极与地理极偏约11.5°。' },
+    { t:'💨 太阳风', p:'太阳喷发的高能带电粒子流，受<strong>洛伦兹力</strong>F=qv×B偏转，被磁层屏蔽。' },
+    { t:'🛡 磁层', p:'太阳风压缩磁层，向阳面约10地球半径，背阳面拖出长达百倍半径的<strong>磁尾</strong>。' },
+    { t:'✨ 极光', p:'带电粒子沿磁力线沉降进入极区高层大气，激发氧氮原子发光，形成极光。' },
+  ],
+  tectonic: [
+    { t:'🌋 板块边界类型', p:'<strong>离散型</strong>(洋中脊)、<strong>汇聚型</strong>(俯冲带/造山带)、<strong>转换型</strong>(走滑断层)三种边界。' },
+    { t:'🔥 地幔对流', p:'地幔高温塑性物质上升-水平流动-下沉的循环，<strong>瑞利数</strong>超临界即对流，驱动板块运动。' },
+    { t:'🗺 大陆漂移', p:'魏格纳1912年提出大陆漂移说，后由海底扩张与板块构造理论统一解释。' },
+    { t:'⚡ 弹性回跳', p:'板块边界应力积累超过岩石强度时断层突然滑动，释放弹性能量引发地震。' },
+  ],
+};
+
+const formulaBank = {
+  surface: [
+    { t:'自转线速度', e:'v = ω · R · cos(φ)', d:'赤道最快(465 m/s)，随纬度φ升高递减，两极为零。' },
+    { t:'地转偏向力', e:'F = 2m·v·ω·sin(φ)', d:'科里奥利力使北半球运动物体右偏，南半球左偏。' },
+  ],
+  internal: [
+    { t:'压力梯度', e:'dP/dr = -ρ(r)·g(r)', d:'地心压力约360 GPa，由上覆物质重力产生。' },
+    { t:'地震波速与弹性', e:'vP=√((K+4μ/3)/ρ)  vS=√(μ/ρ)', d:'波速由体积模量K、剪切模量μ、密度ρ决定。' },
+  ],
+  seismic: [
+    { t:'P波速度', e:'vP = √((K + 4μ/3) / ρ)', d:'纵波，固液气均可传播，速度最快。' },
+    { t:'S波速度', e:'vS = √(μ / ρ)', d:'横波，液体μ=0故vS=0，无法穿过液态外核。' },
+  ],
+  magnetic: [
+    { t:'磁偶极子场', e:'B = (μ₀/4π)·m/r³·√(1+3cos²θ)', d:'磁场随距离立方衰减，赤道最弱、磁极最强。' },
+    { t:'洛伦兹力', e:'F = qv × B', d:'太阳风带电粒子受洛伦兹力偏转，形成磁层与极光。' },
+  ],
+  tectonic: [
+    { t:'瑞利数(对流判据)', e:'Ra = αgΔTd³/(κν)', d:'Ra超过临界值(~1708)地幔发生对流，驱动板块。' },
+    { t:'弹性回跳', e:'σ = E·ε → 断层突然释放', d:'应力积累超过岩石强度时断层滑动释放能量。' },
+  ],
+};
+
+function updateRightPanel(){
+  buildLiveData();
+  updateLiveData();
+  // Knowledge cards
+  const kc = document.getElementById('knowledgeContainer');
+  const cards = knowledgeBank[currentMode] || knowledgeBank.surface;
+  kc.innerHTML = cards.map(c => `<div class="info-card"><h3>${c.t}</h3><p>${c.p}</p></div>`).join('');
+  // Formula
+  const fc = document.getElementById('formulaContainer');
+  const fms = formulaBank[currentMode] || formulaBank.surface;
+  fc.innerHTML = fms.map(f => `<div class="formula-block"><div class="formula-title">${f.t}</div><div class="formula-expr">${f.e}</div><div class="formula-desc">${f.d}</div></div>`).join('');
+}
+
+/* ================================================================ QUIZ */
 const quizBank = [
+  { q:'地球自转一周（恒星日）约需要多长时间？', opts:['24小时','23时56分','23时4分','25小时'], a:1, exp:'恒星日约23时56分4秒，太阳日为24小时。' },
   { q:'地球内部最厚的圈层是？', opts:['地壳','地幔','外核','内核'], a:1, exp:'地幔厚约2855km，是地球内部最厚的圈层。' },
   { q:'S波（横波）不能穿过地球的哪个圈层？', opts:['地壳','地幔','外核','内核'], a:2, exp:'S波只能在固体中传播，外核为液态故S波无法穿过。' },
   { q:'地球磁场主要由什么产生？', opts:['地壳岩石','内核铁镍','外核液态金属对流','太阳风'], a:2, exp:'外核液态铁镍的对流运动产生发电机效应，形成地磁场。' },
   { q:'板块构造的主要驱动力是？', opts:['风力','地幔对流','潮汐力','重力'], a:1, exp:'地幔对流带动岩石圈板块运动，是板块构造的主要驱动力。' },
   { q:'地震波中传播速度最快的是？', opts:['S波','P波','面波','声波'], a:1, exp:'P波（纵波）速度最快，约6-13 km/s，最先到达观测站。' },
   { q:'地球的平均密度约为？', opts:['2.8','5.5','11.0','13.0'], a:1, exp:'地球平均密度约5.51 g/cm³，比地壳密度(2.8)大得多。' },
-  { q:'莫霍洛维奇不连续面是哪两个圈层的分界？', opts:['地壳-地幔','地幔-外核','外核-内核','岩石圈-软流圈'], a:0, exp:'莫霍面是地壳与地幔的分界面，平均深度约35km。' },
+  { q:'地轴倾角约为多少度？', opts:['0°','11.5°','23.5°','45°'], a:2, exp:'地轴倾斜约23.5°，导致四季更替与回归线。' },
+  { q:'古登堡不连续面是哪两个圈层的分界？', opts:['地壳-地幔','地幔-外核','外核-内核','岩石圈-软流圈'], a:1, exp:'古登堡面位于约2900km深处，是地幔与外核的分界。' },
   { q:'地磁极与地理极的夹角约为？', opts:['0°','11.5°','23.5°','45°'], a:1, exp:'地磁极与地理极有约11.5°偏角，且随时间缓慢漂移。' },
 ];
 let quizIdx = 0, quizScore = 0, quizTotal = 0;
-
 function renderQuiz(){
   const q = quizBank[quizIdx];
   document.getElementById('quizQ').textContent = `Q${quizIdx+1}. ${q.q}`;
@@ -1269,13 +1293,8 @@ function renderQuiz(){
 function answerQuiz(idx, q){
   const opts = document.querySelectorAll('.quiz-opt');
   opts.forEach(o => o.style.pointerEvents = 'none');
-  if(idx === q.a){
-    opts[idx].classList.add('correct');
-    quizScore++;
-  } else {
-    opts[idx].classList.add('wrong');
-    opts[q.a].classList.add('correct');
-  }
+  if(idx === q.a){ opts[idx].classList.add('correct'); quizScore++; }
+  else { opts[idx].classList.add('wrong'); opts[q.a].classList.add('correct'); }
   quizTotal++;
   const fb = document.getElementById('quizFeedback');
   fb.textContent = q.exp;
@@ -1288,27 +1307,10 @@ document.getElementById('quizNext').addEventListener('click', () => {
 });
 renderQuiz();
 
-// ========================================== MAIN LOOP
-function loop(timestamp){
-  if(!state.lastFrame) state.lastFrame = timestamp;
-  const dt = Math.min(0.05, (timestamp - state.lastFrame) / 1000);
-  state.lastFrame = timestamp;
-  state.fpsCounter++;
-  state.fpsTimer += dt;
-  if(state.fpsTimer >= 1){
-    state.fps = state.fpsCounter;
-    state.fpsCounter = 0;
-    state.fpsTimer = 0;
-  }
-  update(dt);
-  render();
-  requestAnimationFrame(loop);
-}
-
-updateUI();
-requestAnimationFrame(loop);
-
-})();
+/* ================================================================ INIT */
+setMode('surface');
+updateRightPanel();
+requestAnimationFrame(animate);
 </script>
 </body>
 </html>
