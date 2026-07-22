@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浮力 — 阿基米德原理 | 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES — 五种主题适配 (--bu- prefix for buoyancy)
+   ================================================================ */
+
+/* ---------- GLASS (Liquid Glass) ---------- */
+[data-theme="glass"]{
+  --bu-bg:#080812;--bu-bg2:#0e0e1c;--bu-ink:#f1f5f9;--bu-ink2:#cbd5e1;--bu-muted:#64748b;
+  --bu-rule:rgba(255,255,255,0.07);--bu-accent:#38bdf8;--bu-accent2:#a29bfe;--bu-accent3:#34d399;--bu-accent4:#fbbf24;
+  --bu-canvas-bg:#0f172a;--bu-param-bg:rgba(255,255,255,0.03);--bu-param-border:rgba(255,255,255,0.06);
+  --bu-data-bg:rgba(255,255,255,0.05);--bu-data-border:rgba(255,255,255,0.06);
+  --bu-formula-bg:rgba(56,189,248,0.05);--bu-formula-border:rgba(56,189,248,0.15);
+  --bu-card-bg:rgba(255,255,255,0.03);--bu-card-border:rgba(255,255,255,0.06);
+  --bu-highlight:#10b981;--bu-warn:#f59e0b;--bu-danger:#ef4444;
+  --bu-scrollbar-thumb:rgba(56,189,248,0.3);--bu-glow:none;
+}
+
+/* ---------- CYBER ---------- */
+[data-theme="cyber"]{
+  --bu-bg:#040410;--bu-bg2:#08081a;--bu-ink:#e0f7fa;--bu-ink2:#b2ebf2;--bu-muted:#4dd0e1;
+  --bu-rule:rgba(0,243,255,0.1);--bu-accent:#00f3ff;--bu-accent2:#ff00ea;--bu-accent3:#39ff14;--bu-accent4:#ffb800;
+  --bu-canvas-bg:#020208;--bu-param-bg:rgba(0,243,255,0.02);--bu-param-border:rgba(0,243,255,0.1);
+  --bu-data-bg:rgba(0,243,255,0.02);--bu-data-border:rgba(0,243,255,0.12);
+  --bu-formula-bg:rgba(0,243,255,0.04);--bu-formula-border:rgba(0,243,255,0.15);
+  --bu-card-bg:rgba(0,243,255,0.02);--bu-card-border:rgba(0,243,255,0.12);
+  --bu-highlight:#39ff14;--bu-warn:#ffb800;--bu-danger:#ff00ea;
+  --bu-scrollbar-thumb:rgba(0,243,255,0.4);--bu-glow:0 0 8px rgba(0,243,255,0.25);
+}
+
+/* ---------- CARTOON ---------- */
+[data-theme="cartoon"]{
+  --bu-bg:#fef6e4;--bu-bg2:#fff8f0;--bu-ink:#2d3436;--bu-ink2:#4a4a4a;--bu-muted:#7a7a7a;
+  --bu-rule:rgba(0,0,0,0.08);--bu-accent:#ff6b6b;--bu-accent2:#4ecdc4;--bu-accent3:#ffe66d;--bu-accent4:#a29bfe;
+  --bu-canvas-bg:#1a1a2e;--bu-param-bg:rgba(255,255,255,0.5);--bu-param-border:rgba(0,0,0,0.1);
+  --bu-data-bg:rgba(255,255,255,0.6);--bu-data-border:rgba(0,0,0,0.08);
+  --bu-formula-bg:rgba(255,107,107,0.05);--bu-formula-border:rgba(255,107,107,0.15);
+  --bu-card-bg:rgba(255,255,255,0.8);--bu-card-border:rgba(0,0,0,0.1);
+  --bu-highlight:#4ecdc4;--bu-warn:#ff9f43;--bu-danger:#ff6b6b;
+  --bu-scrollbar-thumb:rgba(0,0,0,0.15);--bu-glow:none;
+}
+
+/* ---------- ACADEMIC (Wolfram Minimal) ---------- */
+[data-theme="academic"]{
+  --bu-bg:#f8f9fa;--bu-bg2:#f1f3f5;--bu-ink:#1a1a2e;--bu-ink2:#3d3d5c;--bu-muted:#7a7a8a;
+  --bu-rule:#e0e0e0;--bu-accent:#6b8cae;--bu-accent2:#8a7ca8;--bu-accent3:#c4956a;--bu-accent4:#6a9e8a;
+  --bu-canvas-bg:#ffffff;--bu-param-bg:#f8f9fa;--bu-param-border:#e0e0e0;
+  --bu-data-bg:#f4f5f7;--bu-data-border:#e0e0e0;
+  --bu-formula-bg:rgba(107,140,174,0.04);--bu-formula-border:rgba(107,140,174,0.2);
+  --bu-card-bg:#ffffff;--bu-card-border:#e0e0e0;
+  --bu-highlight:#6a9e8a;--bu-warn:#c4956a;--bu-danger:#c0392b;
+  --bu-scrollbar-thumb:#d0d0d0;--bu-glow:none;
+}
+
+/* ---------- SOVIET (Soviet Industrial) ---------- */
+[data-theme="soviet"]{
+  --bu-bg:#f0ebe4;--bu-bg2:#e8e0d8;--bu-ink:#1a1a1a;--bu-ink2:#3d3d3d;--bu-muted:#6a5a4a;
+  --bu-rule:rgba(196,30,30,0.15);--bu-accent:#c41e1e;--bu-accent2:#8b4513;--bu-accent3:#b8860b;--bu-accent4:#556b2f;
+  --bu-canvas-bg:#faf6f0;--bu-param-bg:#f4f0ea;--bu-param-border:#d4c4a8;
+  --bu-data-bg:#f4f0ea;--bu-data-border:#d4c4a8;
+  --bu-formula-bg:rgba(196,30,30,0.04);--bu-formula-border:rgba(196,30,30,0.15);
+  --bu-card-bg:#fffaf2;--bu-card-border:#d4c4a8;
+  --bu-highlight:#556b2f;--bu-warn:#b8860b;--bu-danger:#c41e1e;
+  --bu-scrollbar-thumb:#c41e1e;--bu-glow:none;
+}
+
+/* ================================================================
+   BASE RESET
+   ================================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;background:var(--bu-bg);color:var(--bu-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bu-bg)}
+::-webkit-scrollbar-thumb{background:var(--bu-scrollbar-thumb);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb,
+[data-theme="academic"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ================================================================
+   THREE-COLUMN LAYOUT
+   ================================================================ */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ---------- LEFT PANEL (300px) ---------- */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--bu-rule);background:var(--bu-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--bu-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--bu-formula-bg);border:1px solid var(--bu-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--bu-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--bu-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--bu-accent);text-shadow:var(--bu-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--bu-accent)}
+
+/* ---------- CENTER PANEL ---------- */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;position:relative}
+#webgl-container{flex:1;position:relative;background:var(--bu-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#webgl-container canvas{display:block}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--bu-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--bu-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .3s ease}
+.overlay-badge.state{font-weight:700;font-size:0.78rem}
+.canvas-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;font-size:0.78rem;color:var(--bu-muted);opacity:0.6;text-align:center;font-family:monospace;letter-spacing:1px;transition:opacity .3s ease}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ---------- RIGHT PANEL (380px) ---------- */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--bu-rule);background:var(--bu-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--bu-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--bu-formula-bg);border:1px solid var(--bu-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--bu-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--bu-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--bu-accent);text-shadow:var(--bu-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--bu-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--bu-accent)}
+
+/* ================================================================
+   SHARED SECTION STYLES
+   ================================================================ */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--bu-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--bu-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--bu-accent);border-radius:2px;transition:background .4s ease}
+
+/* ================================================================
+   PARAMETER CONTROLS (Left Panel)
+   ================================================================ */
+.param-group{margin-bottom:16px}
+.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--bu-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--bu-accent);font-weight:400;min-width:55px;text-align:right}
+
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--bu-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--bu-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3);transition:transform .2s}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--bu-accent);cursor:pointer;border:none;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+/* ---------- Button Group (Liquid Type / Shape Toggle) ---------- */
+.btn-group{display:flex;gap:6px}
+.btn-toggle{flex:1;padding:8px 4px;border:1px solid var(--bu-param-border);background:var(--bu-param-bg);color:var(--bu-muted);border-radius:8px;font-size:0.74rem;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;transition:all .3s ease}
+.btn-toggle:hover{border-color:var(--bu-accent);color:var(--bu-ink2)}
+.btn-toggle.active{border-color:var(--bu-accent);color:var(--bu-accent);background:var(--bu-formula-bg)}
+
+[data-theme="academic"] .btn-toggle{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .btn-toggle.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .btn-toggle{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .btn-toggle.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+[data-theme="cyber"] .btn-toggle.active{border-color:#00f3ff;color:#00f3ff;background:rgba(0,243,255,0.08);text-shadow:var(--bu-glow)}
+
+/* ---------- Tip Card ---------- */
+.tip-card{background:var(--bu-card-bg);border:1px solid var(--bu-card-border);border-radius:10px;padding:12px 14px;transition:background-color .5s ease,border-color .4s ease}
+.tip-card p{font-size:0.74rem;color:var(--bu-ink2);line-height:1.7;margin:3px 0}
+.tip-card p strong{color:var(--bu-ink)}
+
+[data-theme="academic"] .tip-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .tip-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ================================================================
+   DATA GRID (Right Panel)
+   ================================================================ */
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.data-card{background:var(--bu-data-bg);border:1px solid var(--bu-data-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.data-card.full{grid-column:1/-1}
+.data-num{font-family:monospace;font-size:1.15rem;font-weight:700;color:var(--bu-accent);line-height:1.2;transition:color .4s ease}
+.data-num.warn{color:var(--bu-warn)}
+.data-num.highlight{color:var(--bu-highlight)}
+.data-num.neutral{color:var(--bu-ink2)}
+.data-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--bu-muted);margin-top:2px}
+.data-direction{font-family:monospace;font-size:1.0rem;font-weight:700;line-height:1.2;transition:color .4s ease}
+
+[data-theme="academic"] .data-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .data-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ================================================================
+   FORMULA BLOCK (Right Panel)
+   ================================================================ */
+.formula-block{background:var(--bu-formula-bg);border:1px solid var(--bu-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--bu-ink);margin-bottom:6px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.82rem;color:var(--bu-accent);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-expr.center{text-align:center;font-size:0.88rem}
+.formula-desc{font-size:0.74rem;color:var(--bu-muted);margin-top:6px;line-height:1.6}
+.formula-desc strong{color:var(--bu-ink2)}
+.formula-rule{display:flex;align-items:center;gap:6px;font-size:0.74rem;color:var(--bu-ink2);margin-top:4px}
+.formula-rule .arrow{font-family:monospace;color:var(--bu-accent);font-weight:700}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* ================================================================
+   KNOWLEDGE CARDS (Right Panel)
+   ================================================================ */
+.info-card{background:var(--bu-card-bg);border:1px solid var(--bu-card-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.74rem;color:var(--bu-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--bu-ink)}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .info-card h3{color:var(--bu-accent)}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card h3{color:var(--bu-accent)}
+[data-theme="cartoon"] .info-card h3{color:var(--bu-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--bu-accent);text-shadow:var(--bu-glow)}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--bu-rule)}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--bu-rule)}
+  .sim-panel{min-height:400px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ================================================================
+       LEFT PANEL — Parameters (300px)
+       ================================================================ -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">🌊</div>
+      <div>
+        <h1>浮力 · 阿基米德原理</h1>
+        <div class="lp-sub">参数设置 · 液体与物体</div>
+      </div>
+    </div>
+
+    <!-- 液体属性 -->
+    <div class="side-section">
+      <div class="section-label">液体属性</div>
+      <div class="btn-group" id="liquidGroup">
+        <button class="btn-toggle active" data-liquid="water">纯水<br><span style="font-size:0.62rem;opacity:0.7">1000 kg/m³</span></button>
+        <button class="btn-toggle" data-liquid="seawater">海水<br><span style="font-size:0.62rem;opacity:0.7">1030 kg/m³</span></button>
+        <button class="btn-toggle" data-liquid="alcohol">酒精<br><span style="font-size:0.62rem;opacity:0.7">800 kg/m³</span></button>
+      </div>
+    </div>
+
+    <!-- 物体属性 -->
+    <div class="side-section">
+      <div class="section-label">物体属性</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">形状</span></div>
+        <div class="btn-group" id="shapeGroup">
+          <button class="btn-toggle active" data-shape="cube">正方体</button>
+          <button class="btn-toggle" data-shape="sphere">球体</button>
+        </div>
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">体积 V</span><span class="param-value" id="valVolume">1.0 m³</span></div>
+        <input type="range" id="sliderVolume" min="0.1" max="5.0" value="1.0" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">密度 ρ</span><span class="param-value" id="valDensity">800 kg/m³</span></div>
+        <input type="range" id="sliderDensity" min="100" max="3000" value="800" step="100">
+      </div>
+    </div>
+
+    <!-- 环境参数 -->
+    <div class="side-section">
+      <div class="section-label">环境参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">重力加速度 g</span><span class="param-value" id="valGravity">9.8 m/s²</span></div>
+        <input type="range" id="sliderGravity" min="1.6" max="20.0" value="9.8" step="0.1">
+      </div>
+    </div>
+
+    <!-- 操作提示 -->
+    <div class="side-section">
+      <div class="section-label">操作提示</div>
+      <div class="tip-card">
+        <p><strong>🖱 鼠标拖拽</strong>：按住物体可手动上下移动</p>
+        <p><strong>🔄 右键拖拽</strong>：旋转视角观察</p>
+        <p><strong>🔍 滚轮</strong>：缩放视角远近</p>
+        <p><strong>💧 密度判定</strong>：ρ&lt;1000 漂浮，ρ&gt;1000 下沉</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================================================================
+       CENTER PANEL — 3D Canvas
+       ================================================================ -->
+  <div class="sim-panel">
+    <div id="webgl-container"></div>
+    <div class="canvas-overlay">
+      <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+      <span class="overlay-badge state" id="badgeState">漂浮中</span>
+      <span class="overlay-badge" id="badgeLiquid">纯水 · 1000 kg/m³</span>
+    </div>
+    <div class="canvas-hint">拖拽物体上下移动 · 右键旋转视角 · 滚轮缩放</div>
+  </div>
+
+  <!-- ================================================================
+       RIGHT PANEL — Data & Knowledge (380px)
+       ================================================================ -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>实时数据与原理</h2>
+        <div class="rp-sub">阿基米德原理 · 浮力分析</div>
+      </div>
+    </div>
+
+    <!-- 实时数据看板 -->
+    <div class="side-section">
+      <div class="section-label">实时数据看板</div>
+      <div class="data-grid">
+        <div class="data-card">
+          <div class="data-num" id="dataDepth">0.000 m</div>
+          <div class="data-label">浸入深度 h</div>
+        </div>
+        <div class="data-card">
+          <div class="data-num" id="dataVdisp">0.000 m³</div>
+          <div class="data-label">排开体积 V排</div>
+        </div>
+        <div class="data-card">
+          <div class="data-num warn" id="dataGravity">0.0 N</div>
+          <div class="data-label">重力 G</div>
+        </div>
+        <div class="data-card">
+          <div class="data-num highlight" id="dataBuoyancy">0.0 N</div>
+          <div class="data-label">浮力 F浮</div>
+        </div>
+        <div class="data-card full">
+          <div class="data-direction" id="dataDirection" style="color:var(--bu-highlight)">平衡</div>
+          <div class="data-label">合力方向</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阿基米德原理 -->
+    <div class="side-section">
+      <div class="section-label">阿基米德原理</div>
+      <div class="formula-block">
+        <div class="formula-title">浮力公式</div>
+        <div class="formula-expr center">F浮 = G排 = ρ液 · g · V排</div>
+        <div class="formula-desc">浸在液体中的物体受到向上的浮力，浮力大小等于物体排开的液体所受的重力。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">浮沉条件</div>
+        <div class="formula-rule"><span class="arrow">F浮 &lt; G</span> → 物体下沉 ⬇</div>
+        <div class="formula-rule"><span class="arrow">F浮 = G</span> → 悬浮 / 漂浮 ⚖</div>
+        <div class="formula-rule"><span class="arrow">F浮 &gt; G</span> → 物体上浮 ⬆</div>
+      </div>
+    </div>
+
+    <!-- 知识卡片 -->
+    <div class="side-section">
+      <div class="section-label">知识卡片</div>
+      <div class="info-card">
+        <h3>📐 阿基米德原理</h3>
+        <p>浸在液体里的物体受到向上的浮力，浮力大小等于被该物体<strong>排开的液体的重力</strong>。这是公元前 3 世纪由古希腊学者阿基米德发现的基本原理。</p>
+      </div>
+      <div class="info-card">
+        <h3>⚖ 密度与浮沉</h3>
+        <p><strong>ρ物 &lt; ρ液</strong> → 漂浮（物体部分露出液面）</p>
+        <p><strong>ρ物 = ρ液</strong> → 悬浮（物体可停留在任意深度）</p>
+        <p><strong>ρ物 &gt; ρ液</strong> → 沉底（物体沉至容器底部）</p>
+      </div>
+      <div class="info-card">
+        <h3>🔍 影响因素</h3>
+        <p>浮力大小只与<strong>液体密度</strong>和<strong>排开体积</strong>有关，与物体的深度、形状、质量<strong>无关</strong>。改变液体种类或物体浸入体积即可改变浮力。</p>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ================================================================
+     THREE.JS IMPORT MAP
+     ================================================================ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script src="shared-theme.js"></script>
+
+<!-- ================================================================
+     MAIN MODULE — Three.js + Physics
+     ================================================================ -->
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Water } from 'three/addons/objects/Water.js';
+import { Sky } from 'three/addons/objects/Sky.js';
+
+// ================================================================
+// CONFIGURATION
+// ================================================================
+const LIQUIDS = {
+  water:     { name: '纯水',   density: 1000, color: 0x001a33 },
+  seawater:  { name: '海水',   density: 1030, color: 0x001528 },
+  alcohol:   { name: '酒精',   density: 800,  color: 0x1a1a00 }
+};
+
+const WATER_LEVEL = 0;       // y = 0 is the water surface
+const SEABED_Y = -5;         // seabed collision
+const SUN_PARAMS = { elevation: 2, azimuth: 180 };
+
+// ================================================================
+// SIMULATION STATE
+// ================================================================
+const sim = {
+  liquidType: 'water',
+  shape: 'cube',
+  volume: 1.0,
+  density: 800,
+  g: 9.8,
+  velocity: 0,
+  isDragging: false,
+  dragPlaneY: 0
+};
+
+const physicsState = {
+  depth: 0,        // immersion depth in meters
+  v_disp: 0,       // displaced volume in m³
+  G: 0,            // gravity force in N
+  F_buoyancy: 0,   // buoyancy force in N
+  netForce: 0,     // net force
+  state: '平衡'    // state string
+};
+
+// ================================================================
+// THREE.JS SCENE SETUP
+// ================================================================
+let scene, camera, renderer, controls;
+let water, sky, sun, pmremGenerator;
+let floatingObject, objectMesh, objectEdges, objectWireframe;
+let raycaster, mouse;
+let gridHelper1, gridHelper2;
+let dom; // renderer DOM element reference for drag events
+
+const container = document.getElementById('webgl-container');
+
+function init() {
+  // --- Scene ---
+  scene = new THREE.Scene();
+
+  // --- Camera ---
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 1000);
+  camera.position.set(8, 4, 12);
+  camera.lookAt(0, 0, 0);
+
+  // --- Renderer ---
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.5;
+  container.appendChild(renderer.domElement);
+
+  // --- Controls ---
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.minDistance = 5;
+  controls.maxDistance = 40;
+  controls.maxPolarAngle = Math.PI * 0.85; // allow underwater viewing
+  controls.target.set(0, 0, 0);
+  // Use right mouse button for rotate, so left can be used for drag
+  controls.mouseButtons = {
+    LEFT: null,        // disable left for orbit — we use it for drag
+    MIDDLE: THREE.MOUSE.DOLLY,
+    RIGHT: THREE.MOUSE.ROTATE
+  };
+
+  // --- Raycaster ---
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  // --- Sun ---
+  sun = new THREE.Vector3();
+
+  // --- Sky ---
+  sky = new Sky();
+  sky.scale.setScalar(10000);
+  scene.add(sky);
+
+  const skyUniforms = sky.material.uniforms;
+  skyUniforms['turbidity'].value = 10;
+  skyUniforms['rayleigh'].value = 2;
+  skyUniforms['mieCoefficient'].value = 0.005;
+  skyUniforms['mieDirectionalG'].value = 0.8;
+
+  // --- PMREM Generator ---
+  pmremGenerator = new THREE.PMREMGenerator(renderer);
+
+  updateSun();
+
+  // --- Water ---
+  const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+
+  // Load water normals texture with fallback URL
+  const textureLoader = new THREE.TextureLoader();
+  const waternormalsURL1 = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/waternormals.jpg';
+  const waternormalsURL2 = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg';
+
+  function loadWaterNormals(url, isFallback) {
+    textureLoader.load(
+      url,
+      (texture) => {
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        if (water) {
+          water.material.uniforms['normalSampler'].value = texture;
+        }
+      },
+      undefined,
+      () => {
+        if (!isFallback) {
+          loadWaterNormals(waternormalsURL2, true);
+        }
+      }
+    );
+  }
+
+  // Start loading from primary CDN
+  const waterNormals = textureLoader.load(waternormalsURL1,
+    (texture) => { texture.wrapS = texture.wrapT = THREE.RepeatWrapping; },
+    undefined,
+    () => { loadWaterNormals(waternormalsURL2, true); }
+  );
+
+  water = new Water(waterGeometry, {
+    textureWidth: 512,
+    textureHeight: 512,
+    waterNormals: waterNormals,
+    sunDirection: sun.clone(),
+    sunColor: 0xffffff,
+    waterColor: LIQUIDS[sim.liquidType].color,
+    distortionScale: 3.7,
+    fog: scene.fog !== undefined
+  });
+  water.rotation.x = -Math.PI / 2;
+  scene.add(water);
+
+  // --- Grid Helpers ---
+  gridHelper1 = new THREE.GridHelper(20, 20, 0x4488ff, 0x224466);
+  gridHelper1.position.y = -2;
+  gridHelper1.material.opacity = 0.3;
+  gridHelper1.material.transparent = true;
+  scene.add(gridHelper1);
+
+  gridHelper2 = new THREE.GridHelper(20, 20, 0x4488ff, 0x224466);
+  gridHelper2.position.y = SEABED_Y;
+  gridHelper2.material.opacity = 0.5;
+  gridHelper2.material.transparent = true;
+  scene.add(gridHelper2);
+
+  // --- Floating Object ---
+  createObject();
+
+  // --- Event Listeners ---
+  setupDragEvents();
+  window.addEventListener('resize', onResize);
+
+  // --- Theme observer: detect data-theme attribute changes on <html> ---
+  const themeObs = new MutationObserver(() => {
+    const t = document.documentElement.getAttribute('data-theme') || 'academic';
+    updateSceneForTheme(t);
+  });
+  themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // Initial theme adaptation
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'academic';
+  updateSceneForTheme(currentTheme);
+}
+
+// ================================================================
+// SUN UPDATE
+// ================================================================
+function updateSun() {
+  const phi = THREE.MathUtils.degToRad(90 - SUN_PARAMS.elevation);
+  const theta = THREE.MathUtils.degToRad(SUN_PARAMS.azimuth);
+  sun.setFromSphericalCoords(1, phi, theta);
+  sky.material.uniforms['sunPosition'].value.copy(sun);
+  if (water) {
+    water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+  }
+  if (pmremGenerator && scene) {
+    const renderTarget = pmremGenerator.fromScene(sky);
+    scene.environment = renderTarget.texture;
+  }
+}
+
+// ================================================================
+// CREATE FLOATING OBJECT
+// ================================================================
+function createObject() {
+  // Remove old object if exists
+  if (floatingObject) {
+    scene.remove(floatingObject);
+    floatingObject.traverse(child => {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) child.material.dispose();
+    });
+  }
+
+  floatingObject = new THREE.Group();
+
+  // Determine size from volume
+  let geometry;
+  const vol = sim.volume;
+
+  if (sim.shape === 'cube') {
+    const size = Math.cbrt(vol); // edge length
+    geometry = new THREE.BoxGeometry(size, size, size);
+  } else {
+    const radius = Math.pow((3 * vol) / (4 * Math.PI), 1 / 3);
+    geometry = new THREE.SphereGeometry(radius, 32, 32);
+  }
+
+  // Determine color from density
+  let color;
+  if (sim.density < 1000) {
+    color = 0xf59e0b; // amber/wood
+  } else if (sim.density === 1000) {
+    color = 0x14b8a6; // teal/water
+  } else {
+    color = 0x64748b; // slate/iron
+  }
+
+  const material = new THREE.MeshStandardMaterial({
+    color: color,
+    roughness: 0.4,
+    metalness: sim.density > 1000 ? 0.6 : 0.1
+  });
+
+  objectMesh = new THREE.Mesh(geometry, material);
+  floatingObject.add(objectMesh);
+
+  // Edges / wireframe overlay
+  const edgesGeometry = new THREE.EdgesGeometry(geometry);
+  const edgesMaterial = new THREE.LineBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.4
+  });
+  objectEdges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+  floatingObject.add(objectEdges);
+
+  // Wireframe overlay
+  const wireGeometry = new THREE.WireframeGeometry(geometry);
+  const wireMaterial = new THREE.LineBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.08
+  });
+  objectWireframe = new THREE.LineSegments(wireGeometry, wireMaterial);
+  floatingObject.add(objectWireframe);
+
+  // Set initial position — start above water
+  const sizeY = sim.shape === 'cube' ? Math.cbrt(sim.volume) : Math.pow((3 * sim.volume) / (4 * Math.PI), 1 / 3) * 2;
+  floatingObject.position.set(0, 3, 0);
+
+  scene.add(floatingObject);
+}
+
+// ================================================================
+// PHYSICS — UPDATE
+// ================================================================
+function updatePhysics(dt) {
+  if (!floatingObject) return;
+  if (sim.isDragging) {
+    // While dragging, just compute current state values
+    computePhysicsState();
+    physicsState.state = '拖拽中';
+    return;
+  }
+
+  const objY = floatingObject.position.y;
+  const sizeY = getObjectSizeY();
+
+  // --- Compute immersion depth ---
+  // Object bottom is at objY - sizeY/2, top is at objY + sizeY/2
+  // Water surface is at WATER_LEVEL (y=0)
+  const objBottom = objY - sizeY / 2;
+  const objTop = objY + sizeY / 2;
+
+  let depth = 0; // how much of the object is below water
+  if (objBottom < WATER_LEVEL) {
+    // Some part is underwater
+    if (objTop <= WATER_LEVEL) {
+      // Fully submerged
+      depth = sizeY;
+    } else {
+      // Partially submerged
+      depth = WATER_LEVEL - objBottom;
+    }
+  }
+  physicsState.depth = depth;
+
+  // --- Compute displaced volume ---
+  let v_disp = 0;
+  if (sim.shape === 'cube') {
+    const edge = Math.cbrt(sim.volume);
+    const bottomArea = edge * edge;
+    v_disp = Math.min(bottomArea * depth, sim.volume);
+  } else {
+    // Sphere: spherical cap formula V = (π/3) * h² * (3R - h)
+    const R = Math.pow((3 * sim.volume) / (4 * Math.PI), 1 / 3);
+    const h = Math.min(depth, 2 * R);
+    if (h <= 0) {
+      v_disp = 0;
+    } else if (h >= 2 * R) {
+      v_disp = sim.volume;
+    } else {
+      v_disp = (Math.PI / 3) * h * h * (3 * R - h);
+    }
+  }
+  physicsState.v_disp = v_disp;
+
+  // --- Forces ---
+  const liquidDensity = LIQUIDS[sim.liquidType].density;
+  const mass = sim.density * sim.volume;
+
+  const G = mass * sim.g;                           // gravity (downward, positive)
+  const F_buoyancy = liquidDensity * sim.g * v_disp; // buoyancy (upward)
+
+  physicsState.G = G;
+  physicsState.F_buoyancy = F_buoyancy;
+
+  // Net force (positive = downward)
+  const netForce = G - F_buoyancy;
+  physicsState.netForce = netForce;
+
+  // --- Euler Integration ---
+  let acceleration = netForce / mass;
+
+  // Apply damping
+  const isInWater = depth > 0;
+  const damping = isInWater ? 2.0 : 0.1;  // water damping >> air damping
+  acceleration -= sim.velocity * damping;
+
+  sim.velocity += acceleration * dt;
+  floatingObject.position.y += sim.velocity * dt;
+
+  // --- Seabed collision ---
+  const newBottom = floatingObject.position.y - sizeY / 2;
+  if (newBottom < SEABED_Y) {
+    floatingObject.position.y = SEABED_Y + sizeY / 2;
+    sim.velocity = 0;
+  }
+
+  // --- State determination ---
+  if (Math.abs(netForce) < 0.5 && Math.abs(sim.velocity) < 0.05) {
+    physicsState.state = '平衡';
+  } else if (netForce > 0.5) {
+    physicsState.state = '向下⬇';
+  } else if (netForce < -0.5) {
+    physicsState.state = '向上⬆';
+  } else {
+    physicsState.state = '平衡';
+  }
+}
+
+// Compute physics state when dragging (no velocity integration)
+function computePhysicsState() {
+  const objY = floatingObject.position.y;
+  const sizeY = getObjectSizeY();
+  const objBottom = objY - sizeY / 2;
+  const objTop = objY + sizeY / 2;
+
+  let depth = 0;
+  if (objBottom < WATER_LEVEL) {
+    if (objTop <= WATER_LEVEL) {
+      depth = sizeY;
+    } else {
+      depth = WATER_LEVEL - objBottom;
+    }
+  }
+  physicsState.depth = depth;
+
+  let v_disp = 0;
+  if (sim.shape === 'cube') {
+    const edge = Math.cbrt(sim.volume);
+    const bottomArea = edge * edge;
+    v_disp = Math.min(bottomArea * depth, sim.volume);
+  } else {
+    const R = Math.pow((3 * sim.volume) / (4 * Math.PI), 1 / 3);
+    const h = Math.min(depth, 2 * R);
+    if (h <= 0) {
+      v_disp = 0;
+    } else if (h >= 2 * R) {
+      v_disp = sim.volume;
+    } else {
+      v_disp = (Math.PI / 3) * h * h * (3 * R - h);
+    }
+  }
+  physicsState.v_disp = v_disp;
+
+  const liquidDensity = LIQUIDS[sim.liquidType].density;
+  const mass = sim.density * sim.volume;
+  physicsState.G = mass * sim.g;
+  physicsState.F_buoyancy = liquidDensity * sim.g * v_disp;
+  physicsState.netForce = physicsState.G - physicsState.F_buoyancy;
+}
+
+function getObjectSizeY() {
+  if (sim.shape === 'cube') {
+    return Math.cbrt(sim.volume);
+  } else {
+    return 2 * Math.pow((3 * sim.volume) / (4 * Math.PI), 1 / 3);
+  }
+}
+
+// ================================================================
+// DRAG INTERACTION
+// ================================================================
+function setupDragEvents() {
+  dom = renderer.domElement;
+
+  dom.addEventListener('pointerdown', onPointerDown);
+  dom.addEventListener('pointermove', onPointerMove);
+  dom.addEventListener('pointerup', onPointerUp);
+  dom.addEventListener('pointerleave', onPointerUp);
+}
+
+function onPointerDown(event) {
+  if (event.button !== 0) return; // left button only
+
+  const rect = container.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObject(floatingObject, true);
+
+  if (intersects.length > 0) {
+    sim.isDragging = true;
+    controls.enabled = false;
+    // Set drag plane at the object's current Y
+    sim.dragPlaneY = floatingObject.position.y;
+    dom.style.cursor = 'grabbing';
+  }
+}
+
+function onPointerMove(event) {
+  const rect = container.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+  if (sim.isDragging) {
+    raycaster.setFromCamera(mouse, camera);
+
+    // Use a camera-facing plane through the object's current position
+    // so we can drag the object along the Y axis naturally
+    const camDir = new THREE.Vector3();
+    camera.getWorldDirection(camDir);
+    const facingPlane = new THREE.Plane();
+    facingPlane.setFromNormalAndCoplanarPoint(camDir, floatingObject.position);
+    const facingPoint = new THREE.Vector3();
+    raycaster.ray.intersectPlane(facingPlane, facingPoint);
+
+    if (facingPoint) {
+      // Only update Y position (keep X, Z fixed)
+      floatingObject.position.y = facingPoint.y;
+      // Clamp to seabed
+      const sizeY = getObjectSizeY();
+      if (floatingObject.position.y - sizeY / 2 < SEABED_Y) {
+        floatingObject.position.y = SEABED_Y + sizeY / 2;
+      }
+      // Clamp to a reasonable upper limit
+      if (floatingObject.position.y > 8) {
+        floatingObject.position.y = 8;
+      }
+      sim.velocity = 0;
+    }
+  } else {
+    // Hover detection — change cursor
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(floatingObject, true);
+    dom.style.cursor = intersects.length > 0 ? 'grab' : 'default';
+  }
+}
+
+function onPointerUp() {
+  if (sim.isDragging) {
+    sim.isDragging = false;
+    controls.enabled = true;
+    sim.velocity = 0;
+    if (dom) dom.style.cursor = 'default';
+  }
+}
+
+// ================================================================
+// THEME ADAPTATION
+// ================================================================
+function updateSceneForTheme(theme) {
+  if (!renderer) return;
+
+  let bgColor;
+  switch (theme) {
+    case 'glass':
+      bgColor = new THREE.Color(0x0f172a);
+      renderer.toneMappingExposure = 0.5;
+      break;
+    case 'cyber':
+      bgColor = new THREE.Color(0x020208);
+      renderer.toneMappingExposure = 0.4;
+      break;
+    case 'cartoon':
+      bgColor = new THREE.Color(0x1a1a2e);
+      renderer.toneMappingExposure = 0.6;
+      break;
+    case 'soviet':
+      bgColor = new THREE.Color(0x2a2218);
+      renderer.toneMappingExposure = 0.6;
+      break;
+    case 'academic':
+    default:
+      bgColor = new THREE.Color(0x87ceeb);
+      renderer.toneMappingExposure = 0.5;
+      break;
+  }
+  scene.background = bgColor;
+}
+
+// ================================================================
+// RESIZE
+// ================================================================
+function onResize() {
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+
+// ================================================================
+// UI UPDATE
+// ================================================================
+function updateUI() {
+  // Data panel
+  document.getElementById('dataDepth').textContent = physicsState.depth.toFixed(3) + ' m';
+  document.getElementById('dataVdisp').textContent = physicsState.v_disp.toFixed(3) + ' m³';
+  document.getElementById('dataGravity').textContent = physicsState.G.toFixed(1) + ' N';
+  document.getElementById('dataBuoyancy').textContent = physicsState.F_buoyancy.toFixed(1) + ' N';
+
+  // Direction with color
+  const dirEl = document.getElementById('dataDirection');
+  dirEl.textContent = physicsState.state;
+  if (physicsState.state === '平衡') {
+    dirEl.style.color = 'var(--bu-highlight)';
+  } else if (physicsState.state.includes('向上')) {
+    dirEl.style.color = 'var(--bu-accent)';
+  } else if (physicsState.state.includes('向下')) {
+    dirEl.style.color = 'var(--bu-danger)';
+  } else {
+    dirEl.style.color = 'var(--bu-warn)';
+  }
+
+  // Overlay badges
+  document.getElementById('badgeState').textContent = physicsState.state;
+  const liquid = LIQUIDS[sim.liquidType];
+  document.getElementById('badgeLiquid').textContent = `${liquid.name} · ${liquid.density} kg/m³`;
+}
+
+// ================================================================
+// FPS COUNTER
+// ================================================================
+let frameCount = 0;
+let lastFPSUpdate = performance.now();
+function updateFPS(now) {
+  frameCount++;
+  if (now - lastFPSUpdate >= 1000) {
+    const fps = Math.round((frameCount * 1000) / (now - lastFPSUpdate));
+    document.getElementById('badgeFPS').textContent = fps + ' FPS';
+    frameCount = 0;
+    lastFPSUpdate = now;
+  }
+}
+
+// ================================================================
+// ANIMATION LOOP
+// ================================================================
+let lastTime = performance.now();
+function animate() {
+  requestAnimationFrame(animate);
+
+  const now = performance.now();
+  const dt = Math.min((now - lastTime) / 1000, 0.033); // cap at ~30fps min step
+  lastTime = now;
+
+  // Update physics
+  updatePhysics(dt);
+
+  // Update water animation
+  if (water) {
+    water.material.uniforms['time'].value += dt * 0.6;
+  }
+
+  // Update controls
+  controls.update();
+
+  // Update underwater fog
+  const cameraY = camera.position.y;
+  if (cameraY < WATER_LEVEL - 0.1) {
+    // Underwater
+    if (!scene.fog) {
+      scene.fog = new THREE.FogExp2(LIQUIDS[sim.liquidType].color, 0.08);
+    } else {
+      scene.fog.color.setHex(LIQUIDS[sim.liquidType].color);
+      scene.fog.density = 0.08;
+    }
+  } else {
+    // Above water — remove fog
+    if (scene.fog) {
+      scene.fog = null;
+    }
+  }
+
+  // Render
+  renderer.render(scene, camera);
+
+  // Update UI
+  updateUI();
+  updateFPS(now);
+}
+
+// ================================================================
+// CONTROL EVENT HANDLERS
+// ================================================================
+function setupControls() {
+  // Liquid type buttons
+  document.querySelectorAll('#liquidGroup .btn-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#liquidGroup .btn-toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sim.liquidType = btn.dataset.liquid;
+      // Update water color
+      if (water) {
+        water.material.uniforms['waterColor'].value.setHex(LIQUIDS[sim.liquidType].color);
+      }
+    });
+  });
+
+  // Shape toggle buttons
+  document.querySelectorAll('#shapeGroup .btn-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#shapeGroup .btn-toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sim.shape = btn.dataset.shape;
+      createObject();
+      sim.velocity = 0;
+    });
+  });
+
+  // Volume slider
+  const sliderVolume = document.getElementById('sliderVolume');
+  sliderVolume.addEventListener('input', () => {
+    sim.volume = parseFloat(sliderVolume.value);
+    document.getElementById('valVolume').textContent = sim.volume.toFixed(1) + ' m³';
+    createObject();
+    sim.velocity = 0;
+  });
+
+  // Density slider
+  const sliderDensity = document.getElementById('sliderDensity');
+  sliderDensity.addEventListener('input', () => {
+    sim.density = parseInt(sliderDensity.value);
+    document.getElementById('valDensity').textContent = sim.density + ' kg/m³';
+    // Update object color
+    createObject();
+  });
+
+  // Gravity slider
+  const sliderGravity = document.getElementById('sliderGravity');
+  sliderGravity.addEventListener('input', () => {
+    sim.g = parseFloat(sliderGravity.value);
+    document.getElementById('valGravity').textContent = sim.g.toFixed(1) + ' m/s²';
+  });
+}
+
+// ================================================================
+// INITIALIZATION
+// ================================================================
+function start() {
+  init();
+  setupControls();
+  animate();
+
+  // Create theme switcher (shared-theme.js provides PSUTheme API)
+  if (window.PSUTheme && typeof window.PSUTheme.createSwitcher === 'function') {
+    window.PSUTheme.createSwitcher();
+  }
+}
+
+// Wait for DOM and theme to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', start);
+} else {
+  start();
+}
+</script>
+
+</body>
+</html>

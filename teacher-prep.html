@@ -384,6 +384,7 @@
   const EXPERIMENTS = [
     { id:'taylor', name:'泰勒-库埃特流', parent:'fluid', target:'exp-taylor.html', desc:'旋转圆柱间的流体不稳定性', year:1923, history:'泰勒通过实验发现了旋转圆柱间流体的不稳定性，为流体力学稳定性理论奠定了基础。' },
     { id:'bernoulli', name:'伯努利原理', parent:'fluid', target:'exp-bernoulli.html', desc:'流体速度与压强关系', year:1738, history:'丹尼尔·伯努利在《流体动力学》中提出伯努利方程，描述了流体能量守恒。' },
+    { id:'buoyancy', name:'浮力', parent:'fluid', target:'exp-buoyancy.html', desc:'阿基米德原理 · 浮力与排开体积', year:-250, history:'阿基米德在公元前250年左右发现浮力定律：浸在液体中的物体受到向上的浮力，浮力大小等于物体排开液体的重力(F_浮=ρ_液·g·V_排)。传说阿基米德在浴缸中顿悟时兴奋地裸奔高喊"Eureka!"。本实验通过3D交互式水槽模拟，可调节液体密度(纯水/海水/酒精)、物体形状(正方体/球体)、体积、密度和重力加速度，实时显示浸入深度、排开体积、重力、浮力和合力方向，直观验证阿基米德原理。' },
     { id:'matter', name:'刚体沙盒', parent:'mechanics', target:'exp-matter.html', desc:'刚体碰撞与链式反应模拟', year:1687, history:'牛顿在《自然哲学的数学原理》中确立了运动定律，为刚体动力学提供了基础。' },
     { id:'spring', name:'弹簧振子', parent:'mechanics', target:'exp-spring.html', desc:'简谐振动与阻尼振荡', year:1676, history:'胡克发现弹性定律 F=kx，成为简谐运动的理论基础。' },
     { id:'cantilever', name:'悬臂梁分析', parent:'mechanics', target:'exp-cantilever.html', desc:'悬臂梁受力与变形分析', year:1744, history:'欧拉和伯努利共同发展了梁理论，描述了细长杆件的弯曲行为。' },
@@ -436,6 +437,7 @@
     { id:'sci-lorenz', name:'洛伦兹', icon:'🦋', color:'#ff6b6b', desc:'混沌理论先驱 · 蝴蝶效应', experiments:['lorenz','pendulum'], years:'1917-2008' },
     { id:'sci-mandelbrot', name:'曼德博', icon:'🌀', color:'#fdcb6e', desc:'分形几何学之父 · 自相似理论', experiments:['fractal'], years:'1924-2010' },
     { id:'sci-bernoulli', name:'伯努利', icon:'🌊', color:'#4ecdc4', desc:'流体力学奠基人 · 伯努利方程', experiments:['bernoulli','taylor'], years:'1700-1782' },
+    { id:'sci-archimedes', name:'阿基米德', icon:'🛁', color:'#10b981', desc:'浮力定律发现者 · 杠杆原理', experiments:['buoyancy'], years:'前287-前212' },
     { id:'sci-chladni', name:'克拉尼', icon:'🎵', color:'#fd79a8', desc:'声学振动模式可视化先驱', experiments:['chladni'], years:'1756-1827' },
     { id:'sci-tesla', name:'特斯拉', icon:'⚡', color:'#ffeaa7', desc:'交流电与高频电力先驱', experiments:['tesla'], years:'1856-1943' },
     { id:'sci-faraday', name:'法拉第', icon:'🧲', color:'#fdcb6e', desc:'电磁感应之父 · 磁力线提出者', experiments:['magnetic'], years:'1791-1867' },
