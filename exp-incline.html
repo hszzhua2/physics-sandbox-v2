@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>斜面滑块实验 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 五种主题适配 (前缀 --in-)
+   ================================================================ */
+[data-theme="glass"]{
+  --in-bg:#080812;--in-bg2:#0e0e1c;--in-surface:rgba(255,255,255,0.04);--in-surface-hover:rgba(255,255,255,0.08);
+  --in-ink:#f1f5f9;--in-ink2:#cbd5e1;--in-muted:#64748b;--in-rule:rgba(255,255,255,0.07);
+  --in-accent:#74b9ff;--in-accent2:#a29bfe;--in-accent3:#34d399;--in-accent4:#fbbf24;
+  --in-card-bg:rgba(255,255,255,0.03);--in-card-border:rgba(255,255,255,0.06);
+  --in-card-shadow:0 6px 24px rgba(0,0,0,0.4);--in-glow:none;
+  --in-canvas-bg:#040410;--in-param-bg:rgba(255,255,255,0.03);--in-param-border:rgba(255,255,255,0.06);
+  --in-output-bg:rgba(0,0,0,0.3);--in-output-border:rgba(255,255,255,0.06);
+  --in-formula-bg:rgba(116,185,255,0.05);--in-formula-border:rgba(116,185,255,0.12);
+  --in-scrollbar-thumb:rgba(116,185,255,0.3);
+  --in-block:#fbbf24;--in-surface-line:#74b9ff;--in-ground:#475569;--in-grid:rgba(255,255,255,0.04);
+  --in-f-grav:#ef4444;--in-f-norm:#3b82f6;--in-f-fric:#22c55e;
+}
+[data-theme="cyber"]{
+  --in-bg:#040410;--in-bg2:#08081a;--in-surface:rgba(0,243,255,0.03);--in-surface-hover:rgba(0,243,255,0.06);
+  --in-ink:#e0f7fa;--in-ink2:#b2ebf2;--in-muted:#4dd0e1;--in-rule:rgba(0,243,255,0.1);
+  --in-accent:#00f3ff;--in-accent2:#ff00ea;--in-accent3:#39ff14;--in-accent4:#ffb800;
+  --in-card-bg:rgba(0,243,255,0.02);--in-card-border:rgba(0,243,255,0.12);
+  --in-card-shadow:0 0 16px rgba(0,243,255,0.05);--in-glow:0 0 8px rgba(0,243,255,0.25);
+  --in-canvas-bg:#020208;--in-param-bg:rgba(0,243,255,0.02);--in-param-border:rgba(0,243,255,0.1);
+  --in-output-bg:rgba(0,0,0,0.4);--in-output-border:rgba(0,243,255,0.08);
+  --in-formula-bg:rgba(0,243,255,0.04);--in-formula-border:rgba(0,243,255,0.15);
+  --in-scrollbar-thumb:rgba(0,243,255,0.4);
+  --in-block:#ffb800;--in-surface-line:#00f3ff;--in-ground:#4dd0e1;--in-grid:rgba(0,243,255,0.03);
+  --in-f-grav:#ff00ea;--in-f-norm:#00f3ff;--in-f-fric:#39ff14;
+}
+[data-theme="soviet"]{
+  --in-bg:#f0ebe4;--in-bg2:#e8e0d6;--in-surface:#fffaf2;--in-surface-hover:#f4f0ea;
+  --in-ink:#1a1a1a;--in-ink2:#3d3d3d;--in-muted:#6a5a4a;--in-rule:#d4c4a8;
+  --in-accent:#c41e1e;--in-accent2:#8b4513;--in-accent3:#556b2f;--in-accent4:#b8860b;
+  --in-card-bg:#fffaf2;--in-card-border:#c41e1e;
+  --in-card-shadow:none;--in-glow:none;
+  --in-canvas-bg:#e8e0d6;--in-param-bg:#f4f0ea;--in-param-border:#d4c4a8;
+  --in-output-bg:#f4f0ea;--in-output-border:#d4c4a8;
+  --in-formula-bg:rgba(196,30,30,0.04);--in-formula-border:rgba(196,30,30,0.2);
+  --in-scrollbar-thumb:#c41e1e;
+  --in-block:#c41e1e;--in-surface-line:#8b4513;--in-ground:#6a5a4a;--in-grid:rgba(106,90,74,0.08);
+  --in-f-grav:#c41e1e;--in-f-norm:#8b4513;--in-f-fric:#556b2f;
+}
+[data-theme="cartoon"]{
+  --in-bg:#fef6e4;--in-bg2:#fff8f0;--in-surface:rgba(255,255,255,0.7);--in-surface-hover:rgba(255,255,255,0.9);
+  --in-ink:#2d3436;--in-ink2:#4a4a4a;--in-muted:#7a7a7a;--in-rule:rgba(0,0,0,0.08);
+  --in-accent:#ff6b6b;--in-accent2:#4ecdc4;--in-accent3:#ffe66d;--in-accent4:#a29bfe;
+  --in-card-bg:rgba(255,255,255,0.8);--in-card-border:rgba(0,0,0,0.1);
+  --in-card-shadow:0 6px 24px rgba(0,0,0,0.08);--in-glow:none;
+  --in-canvas-bg:#1a1a2e;--in-param-bg:rgba(255,255,255,0.5);--in-param-border:rgba(0,0,0,0.1);
+  --in-output-bg:rgba(255,255,255,0.6);--in-output-border:rgba(0,0,0,0.08);
+  --in-formula-bg:rgba(255,107,107,0.05);--in-formula-border:rgba(255,107,107,0.15);
+  --in-scrollbar-thumb:rgba(0,0,0,0.15);
+  --in-block:#ff6b6b;--in-surface-line:#4ecdc4;--in-ground:#636e72;--in-grid:rgba(255,255,255,0.05);
+  --in-f-grav:#ff6b6b;--in-f-norm:#4ecdc4;--in-f-fric:#22c55e;
+}
+[data-theme="academic"]{
+  --in-bg:#f8f9fa;--in-bg2:#f1f3f5;--in-surface:rgba(255,255,255,0.9);--in-surface-hover:#f0f0f0;
+  --in-ink:#1a1a2e;--in-ink2:#3d3d5c;--in-muted:#7a7a8a;--in-rule:#e0e0e0;
+  --in-accent:#6b8cae;--in-accent2:#8a7ca8;--in-accent3:#c4956a;--in-accent4:#6a9e8a;
+  --in-card-bg:#ffffff;--in-card-border:#e0e0e0;
+  --in-card-shadow:none;--in-glow:none;
+  --in-canvas-bg:#ffffff;--in-param-bg:#f8f9fa;--in-param-border:#e0e0e0;
+  --in-output-bg:#f4f5f7;--in-output-border:#e0e0e0;
+  --in-formula-bg:rgba(107,140,174,0.04);--in-formula-border:rgba(107,140,174,0.2);
+  --in-scrollbar-thumb:#d0d0d0;
+  --in-block:#6b8cae;--in-surface-line:#6b8cae;--in-ground:#7a7a8a;--in-grid:rgba(0,0,0,0.04);
+  --in-f-grav:#e74c3c;--in-f-norm:#3498db;--in-f-fric:#27ae60;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--in-bg);color:var(--in-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--in-bg)}
+::-webkit-scrollbar-thumb{background:var(--in-scrollbar-thumb);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--in-rule);background:var(--in-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--in-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--in-formula-bg);border:1px solid var(--in-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--in-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--in-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--in-accent);text-shadow:var(--in-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--in-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--in-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--in-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--in-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;font-size:0.82rem;color:var(--in-muted);opacity:0.5;text-align:center;font-family:monospace;letter-spacing:1px}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--in-rule);background:var(--in-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--in-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--in-formula-bg);border:1px solid var(--in-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--in-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--in-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--in-accent);text-shadow:var(--in-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--in-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--in-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--in-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--in-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--in-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:16px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--in-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--in-accent);font-weight:400;min-width:55px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--in-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--in-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--in-param-border);background:var(--in-param-bg);color:var(--in-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--in-accent);color:var(--in-accent);background:var(--in-formula-bg)}
+
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 控制按钮 ===== */
+.sim-btn{padding:8px 20px;border:1px solid var(--in-rule);background:rgba(0,0,0,0.4);color:var(--in-ink);border-radius:10px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--in-accent)}
+.sim-btn.primary{background:var(--in-accent);color:#0a0a1a;border-color:var(--in-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+
+/* ===== 输出卡片 ===== */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--in-output-bg);border:1px solid var(--in-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.05rem;font-weight:700;color:var(--in-accent);line-height:1.2;transition:color .4s ease}
+.output-num.b{color:var(--in-accent2)}.output-num.c{color:var(--in-accent3)}.output-num.d{color:var(--in-accent4)}
+.output-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--in-muted);margin-top:2px}
+
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--in-output-bg);border:1px solid var(--in-output-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.76rem;color:var(--in-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--in-ink)}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 公式块 ===== */
+.formula-block{background:var(--in-formula-bg);border:1px solid var(--in-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--in-ink);margin-bottom:6px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.76rem;color:var(--in-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.76rem;color:var(--in-muted);margin-top:6px;line-height:1.6}
+.formula-desc strong{color:var(--in-ink2)}
+.formula-note{font-size:0.7rem;color:var(--in-accent3);margin-top:6px;font-style:italic}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* ===== 应用卡片 ===== */
+.app-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.app-card{background:var(--in-output-bg);border:1px solid var(--in-output-border);border-radius:10px;padding:12px;transition:background-color .5s ease,border-color .4s ease}
+.app-card .app-icon{font-size:1.3rem;margin-bottom:6px}
+.app-card .app-name{font-size:0.76rem;font-weight:700;color:var(--in-ink);margin-bottom:3px;transition:color .4s ease}
+.app-card .app-desc{font-size:0.68rem;color:var(--in-muted);line-height:1.5}
+
+[data-theme="academic"] .app-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .app-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:18px}
+.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--in-rule)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--in-accent);border:2px solid var(--in-bg2)}
+.tl-year{font-size:0.72rem;font-weight:700;color:var(--in-accent);font-family:monospace;margin-bottom:2px}
+.tl-title{font-size:0.78rem;font-weight:600;color:var(--in-ink);margin-bottom:2px}
+.tl-desc{font-size:0.72rem;color:var(--in-muted);line-height:1.5}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--in-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--in-rule)}
+  .sim-panel{min-height:400px}
+}
+@media(max-width:600px){
+  .canvas-controls{flex-wrap:wrap;justify-content:center}
+  .sim-btn{padding:6px 14px;font-size:0.76rem}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">📐</div>
+      <div>
+        <h1>斜面滑块</h1>
+        <div class="lp-sub">参数设置 · 力学分析</div>
+      </div>
+    </div>
+
+    <!-- 实验参数 -->
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">斜面倾角 θ</span><span class="param-value" id="valAngle">30°</span></div>
+        <input type="range" id="sliderAngle" min="10" max="80" value="30" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">质量 m</span><span class="param-value" id="valMass">1.0 kg</span></div>
+        <input type="range" id="sliderMass" min="0.5" max="10" value="1" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">摩擦系数 μ</span><span class="param-value" id="valMu">0.00</span></div>
+        <input type="range" id="sliderMu" min="0" max="1" value="0" step="0.01">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">重力 g</span><span class="param-value" id="valG">9.8 m/s²</span></div>
+        <input type="range" id="sliderG" min="1" max="20" value="9.8" step="0.1">
+      </div>
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="smooth"> slippery30°</button>
+        <button class="preset-btn" data-preset="rough"> rough37°</button>
+        <button class="preset-btn" data-preset="critical"> critical</button>
+        <button class="preset-btn" data-preset="steep"> steep60°</button>
+      </div>
+    </div>
+
+    <!-- 力图说明 -->
+    <div class="side-section">
+      <div class="section-label">力图说明</div>
+      <div class="info-card">
+        <p><strong style="color:#ef4444">↓ 重力 mg</strong>：竖直向下，大小为 m·g</p>
+        <p><strong style="color:#3b82f6">↗ 法向力 N</strong>：垂直斜面向外，N = mg·cosθ</p>
+        <p><strong style="color:#22c55e">↖ 摩擦力 f</strong>：沿斜面向上，f = μ·N</p>
+        <p class="muted" style="color:var(--in-muted);font-size:0.72rem">提示：当 μ ≥ tanθ 时，物体保持静止</p>
+      </div>
+    </div>
+
+    <!-- 操作指南 -->
+    <div class="side-section">
+      <div class="section-label">操作指南</div>
+      <div class="info-card">
+        <p><strong>▶ 播放</strong>：释放滑块，开始下滑</p>
+        <p><strong>⏸ 暂停</strong>：暂停当前运动</p>
+        <p><strong>🔄 重置</strong>：滑块回到斜面顶端</p>
+        <p><strong>📐 预设</strong>：快速加载典型斜面场景</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeTime">t = 0.00 s</span>
+        <span class="overlay-badge" id="badgeState">就绪</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">调整倾角与摩擦系数 · 点击播放释放滑块</div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+          播放
+        </button>
+        <button class="sim-btn" id="btnPause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+          暂停
+        </button>
+        <button class="sim-btn" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>输出与知识</h2>
+        <div class="rp-sub">实时数据 · 公式讲解 · 历史脉络</div>
+      </div>
+    </div>
+
+    <!-- 实时输出 -->
+    <div class="side-section">
+      <div class="section-label">实时输出</div>
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num" id="outA">0.0</div><div class="output-label">加速度 a (m/s²)</div></div>
+        <div class="output-card"><div class="output-num b" id="outV">0.0</div><div class="output-label">速度 v (m/s)</div></div>
+        <div class="output-card"><div class="output-num c" id="outS">0.0</div><div class="output-label">位移 s (m)</div></div>
+        <div class="output-card"><div class="output-num d" id="outN">0.0</div><div class="output-label">法向力 N (N)</div></div>
+        <div class="output-card"><div class="output-num" id="outF">0.0</div><div class="output-label">摩擦力 f (N)</div></div>
+        <div class="output-card"><div class="output-num b" id="outMgSin">0.0</div><div class="output-label">重力分量 (N)</div></div>
+      </div>
+    </div>
+
+    <!-- 知识点讲解 -->
+    <div class="side-section">
+      <div class="section-label">知识点讲解</div>
+
+      <div class="formula-block">
+        <div class="formula-title">加速度公式</div>
+        <div class="formula-expr">a = g · (sinθ − μ · cosθ)</div>
+        <div class="formula-desc">沿斜面方向，重力分量 <strong>mg·sinθ</strong> 驱动下滑，摩擦力 <strong>μmg·cosθ</strong> 阻碍下滑。两者之差除以质量即为加速度。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">临界角</div>
+        <div class="formula-expr">tanθ_c = μ
+
+当 θ ≤ θ_c 时：a ≤ 0，物体静止
+当 θ > θ_c 时：a > 0，物体加速下滑</div>
+        <div class="formula-desc">当倾角的正切等于摩擦系数时，物体处于<strong>临界平衡状态</strong>。此时重力分量恰好等于最大静摩擦力。</div>
+        <div class="formula-note">💡 临界角仅与摩擦系数有关，与质量无关。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">法向力</div>
+        <div class="formula-expr">N = m · g · cosθ</div>
+        <div class="formula-desc">法向力是斜面对物体的支持力，垂直于接触面。它等于重力在垂直斜面方向的分量。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">摩擦力</div>
+        <div class="formula-expr">f = μ · N = μ · m · g · cosθ
+
+（运动时为滑动摩擦力）
+
+（静止时 f = mg·sinθ，为静摩擦力）</div>
+        <div class="formula-desc">滑动摩擦力与法向力成正比，比例系数为<strong>摩擦系数 μ</strong>。静止时，静摩擦力自动调节以平衡重力分量。</div>
+      </div>
+    </div>
+
+    <!-- 应用场景 -->
+    <div class="side-section">
+      <div class="section-label">应用场景</div>
+      <div class="app-grid">
+        <div class="app-card">
+          <div class="app-icon">⛰️</div>
+          <div class="app-name">滑坡预防</div>
+          <div class="app-desc">分析山坡倾角与岩土摩擦系数，评估滑坡风险并设计防护措施。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-icon">🏭</div>
+          <div class="app-name">传送带设计</div>
+          <div class="app-desc">根据倾角和摩擦系数设计传送带的最大安全输送角度。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-icon">🛝</div>
+          <div class="app-name">滑梯安全</div>
+          <div class="app-desc">滑梯倾角和表面摩擦系数共同决定下滑速度与安全性。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-icon">🛣️</div>
+          <div class="app-name">道路坡度</div>
+          <div class="app-desc">道路坡度设计需考虑轮胎与路面摩擦力及制动距离。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史脉络 -->
+    <div class="side-section">
+      <div class="section-label">斜面力学历史</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-year">1604</div>
+          <div class="tl-title">伽利略斜面实验</div>
+          <div class="tl-desc">伽利略通过精心设计的斜面实验研究了匀加速运动，发现了位移与时间平方成正比的规律，首次量化了加速度概念。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1687</div>
+          <div class="tl-title">牛顿力学体系</div>
+          <div class="tl-desc">牛顿在《自然哲学的数学原理》中提出三大运动定律，为斜面上的受力分析提供了完整的力学基础，确立了力的合成与分解原理。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1785</div>
+          <div class="tl-title">库仑摩擦定律</div>
+          <div class="tl-desc">库仑通过大量实验建立了摩擦力与法向力成正比的定律 f = μN，区分了静摩擦与动摩擦，为斜面滑块问题提供了摩擦力的定量公式。</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   STATE
+   ================================================================ */
+var INCLINE_LENGTH = 10; // meters
+var state = {
+  angle: 30, mass: 1, mu: 0, g: 9.8,
+  t: 0, v: 0, s: 0, a: 0,
+  running: false, reachedBottom: false, isStatic: false,
+  fric: 0,
+  scale: 30,
+};
+
+/* ================================================================
+   DOM
+   ================================================================ */
+var simCanvas = document.getElementById('simCanvas');
+var ctx = simCanvas.getContext('2d');
+var html = document.documentElement;
+
+var sliders = {
+  angle: document.getElementById('sliderAngle'),
+  mass: document.getElementById('sliderMass'),
+  mu: document.getElementById('sliderMu'),
+  g: document.getElementById('sliderG'),
+};
+var vals = {
+  angle: document.getElementById('valAngle'),
+  mass: document.getElementById('valMass'),
+  mu: document.getElementById('valMu'),
+  g: document.getElementById('valG'),
+};
+var outs = {
+  a: document.getElementById('outA'),
+  v: document.getElementById('outV'),
+  s: document.getElementById('outS'),
+  N: document.getElementById('outN'),
+  f: document.getElementById('outF'),
+  mgSin: document.getElementById('outMgSin'),
+};
+var badgeFPS = document.getElementById('badgeFPS');
+var badgeTime = document.getElementById('badgeTime');
+var badgeState = document.getElementById('badgeState');
+var canvasHint = document.getElementById('canvasHint');
+
+/* ================================================================
+   THEME SYNC
+   ================================================================ */
+var themeObs = new MutationObserver(function(){ drawSim(); });
+themeObs.observe(html, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ================================================================
+   RESIZE
+   ================================================================ */
+function resizeAll(){
+  var sc = simCanvas.parentElement;
+  var dpr = window.devicePixelRatio || 1;
+  simCanvas.width = sc.clientWidth * dpr;
+  simCanvas.height = sc.clientHeight * dpr;
+  simCanvas.style.width = sc.clientWidth + 'px';
+  simCanvas.style.height = sc.clientHeight + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  computeScale();
+}
+window.addEventListener('resize', resizeAll);
+
+/* ================================================================
+   PHYSICS
+   ================================================================ */
+function rad(){ return state.angle * Math.PI / 180; }
+
+function computeAcceleration(){
+  var r = rad();
+  var a = state.g * (Math.sin(r) - state.mu * Math.cos(r));
+  return a;
+}
+
+function computeScale(){
+  var w = simCanvas.clientWidth, h = simCanvas.clientHeight;
+  var r = rad();
+  var baseLen = INCLINE_LENGTH * Math.cos(r);
+  var heightLen = INCLINE_LENGTH * Math.sin(r);
+  var margin = 80;
+  var availW = w - 2 * margin;
+  var availH = h - 2 * margin;
+  var sx = availW / Math.max(baseLen, 2);
+  var sy = availH / Math.max(heightLen, 2);
+  state.scale = Math.min(sx, sy);
+  state.scale = Math.max(8, Math.min(state.scale, 80));
+}
+
+function updatePhysics(dt){
+  if (state.reachedBottom) return;
+  var r = rad();
+  var a = computeAcceleration();
+
+  if (a <= 0){
+    state.isStatic = true;
+    state.a = 0;
+    state.v = 0;
+    state.fric = state.mass * state.g * Math.sin(r);
+    state.running = false;
+    badgeState.textContent = '静止';
+    return;
+  }
+
+  state.isStatic = false;
+  state.a = a;
+  state.v += a * dt;
+  state.s += state.v * dt;
+  state.t += dt;
+  state.fric = state.mu * state.mass * state.g * Math.cos(r);
+
+  if (state.s >= INCLINE_LENGTH){
+    state.s = INCLINE_LENGTH;
+    state.reachedBottom = true;
+    state.running = false;
+    badgeState.textContent = '到达底部';
+  }
+}
+
+/* ================================================================
+   SLIDER SYNC
+   ================================================================ */
+function syncSliders(){
+  state.angle = +sliders.angle.value;
+  state.mass = +sliders.mass.value;
+  state.mu = +sliders.mu.value;
+  state.g = +sliders.g.value;
+  vals.angle.textContent = state.angle + '°';
+  vals.mass.textContent = state.mass.toFixed(1) + ' kg';
+  vals.mu.textContent = state.mu.toFixed(2);
+  vals.g.textContent = state.g.toFixed(1) + ' m/s²';
+  computeScale();
+}
+
+function resetSim(){
+  state.t = 0; state.v = 0; state.s = 0; state.a = 0;
+  state.reachedBottom = false;
+  state.running = false;
+  state.isStatic = false;
+  state.fric = 0;
+  badgeState.textContent = '就绪';
+  badgeTime.textContent = 't = 0.00 s';
+  canvasHint.style.display = '';
+
+  var a = computeAcceleration();
+  if (a <= 0){
+    state.isStatic = true;
+    state.fric = state.mass * state.g * Math.sin(rad());
+    badgeState.textContent = '静止';
+  }
+}
+
+Object.keys(sliders).forEach(function(k){
+  sliders[k].addEventListener('input', function(){
+    syncSliders();
+    resetSim();
+  });
+});
+
+/* ================================================================
+   PRESETS
+   ================================================================ */
+document.querySelectorAll('.preset-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var p = btn.dataset.preset;
+    if (p === 'smooth'){ sliders.angle.value = 30; sliders.mu.value = 0; sliders.mass.value = 1; sliders.g.value = 9.8; }
+    if (p === 'rough'){ sliders.angle.value = 37; sliders.mu.value = 0.2; sliders.mass.value = 1; sliders.g.value = 9.8; }
+    if (p === 'critical'){ sliders.angle.value = 30; sliders.mu.value = 0.58; sliders.mass.value = 1; sliders.g.value = 9.8; }
+    if (p === 'steep'){ sliders.angle.value = 60; sliders.mu.value = 0.1; sliders.mass.value = 1; sliders.g.value = 9.8; }
+    syncSliders();
+    resetSim();
+  });
+});
+
+/* ================================================================
+   OUTPUTS
+   ================================================================ */
+function updateOutputs(){
+  var r = rad();
+  var N = state.mass * state.g * Math.cos(r);
+  var mgSin = state.mass * state.g * Math.sin(r);
+  outs.a.textContent = state.a.toFixed(2);
+  outs.v.textContent = state.v.toFixed(2);
+  outs.s.textContent = state.s.toFixed(2);
+  outs.N.textContent = N.toFixed(2);
+  outs.f.textContent = state.fric.toFixed(2);
+  outs.mgSin.textContent = mgSin.toFixed(2);
+  badgeTime.textContent = 't = ' + state.t.toFixed(2) + ' s';
+}
+
+/* ================================================================
+   RENDER HELPERS
+   ================================================================ */
+function getCSSVar(name){
+  return getComputedStyle(html).getPropertyValue(name).trim();
+}
+
+function drawArrow(x1, y1, x2, y2, color, width){
+  var dx = x2 - x1, dy = y2 - y1;
+  var len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 2) return;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  var angle = Math.atan2(dy, dx);
+  var headLen = Math.min(9, len * 0.35);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+  ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+  ctx.closePath();
+  ctx.fill();
+}
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+function drawSim(){
+  var w = simCanvas.clientWidth, h = simCanvas.clientHeight;
+  var r = rad();
+  var sinT = Math.sin(r), cosT = Math.cos(r);
+  var scale = state.scale;
+  var L = INCLINE_LENGTH;
+
+  var baseLen = L * cosT * scale;
+  var heightLen = L * sinT * scale;
+
+  var originX = (w - baseLen) / 2;
+  var groundY = h - 60;
+  if (groundY - heightLen < 50) groundY = h - 50;
+
+  var cornerBLx = originX, cornerBLy = groundY;
+  var cornerBRx = originX + baseLen, cornerBRy = groundY;
+  var cornerTX = originX, cornerTY = groundY - heightLen;
+
+  ctx.fillStyle = getCSSVar('--in-canvas-bg');
+  ctx.fillRect(0, 0, w, h);
+
+  /* grid */
+  ctx.strokeStyle = getCSSVar('--in-grid');
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  var gridStep = 5;
+  for (var mx = 0; mx <= L + 2; mx += gridStep){
+    ctx.moveTo(mx * scale + 10, 0);
+    ctx.lineTo(mx * scale + 10, h);
+  }
+  for (var my = 0; my * scale < h; my += gridStep){
+    ctx.moveTo(0, my * scale);
+    ctx.lineTo(w, my * scale);
+  }
+  ctx.stroke();
+
+  /* ground line */
+  ctx.strokeStyle = getCSSVar('--in-ground');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, groundY);
+  ctx.lineTo(w, groundY);
+  ctx.stroke();
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.3;
+  for (var gx = 0; gx < w; gx += 12){
+    ctx.beginPath();
+    ctx.moveTo(gx, groundY);
+    ctx.lineTo(gx - 8, groundY + 8);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  /* incline triangle fill */
+  var surfaceColor = getCSSVar('--in-surface-line');
+  ctx.beginPath();
+  ctx.moveTo(cornerBLx, cornerBLy);
+  ctx.lineTo(cornerBRx, cornerBRy);
+  ctx.lineTo(cornerTX, cornerTY);
+  ctx.closePath();
+  ctx.fillStyle = surfaceColor;
+  ctx.globalAlpha = 0.08;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  /* incline surface (hypotenuse) */
+  ctx.strokeStyle = surfaceColor;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(cornerTX, cornerTY);
+  ctx.lineTo(cornerBRx, cornerBRy);
+  ctx.stroke();
+
+  /* triangle sides */
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cornerBLx, cornerBLy);
+  ctx.lineTo(cornerBRx, cornerBRy);
+  ctx.moveTo(cornerBLx, cornerBLy);
+  ctx.lineTo(cornerTX, cornerTY);
+  ctx.stroke();
+
+  /* distance markers on incline */
+  ctx.font = '9px monospace';
+  ctx.fillStyle = getCSSVar('--in-muted');
+  ctx.textAlign = 'center';
+  for (var d = 0; d <= L; d += 2){
+    var mx = cornerTX + d * cosT * scale;
+    var my = cornerTY + d * sinT * scale;
+    var perpX = sinT * 5, perpY = -cosT * 5;
+    ctx.strokeStyle = getCSSVar('--in-muted');
+    ctx.globalAlpha = 0.4;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(mx, my);
+    ctx.lineTo(mx - perpX, my - perpY);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillText(d + 'm', mx - perpX * 2, my - perpY * 2 + 3);
+  }
+
+  /* angle indicator at bottom-right corner */
+  ctx.strokeStyle = getCSSVar('--in-accent');
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(cornerBRx, cornerBRy, 28, Math.PI, Math.PI + r);
+  ctx.stroke();
+  ctx.fillStyle = getCSSVar('--in-accent');
+  ctx.font = '12px monospace';
+  ctx.textAlign = 'center';
+  var labelAngle = Math.PI + r / 2;
+  var labelR = 38;
+  ctx.fillText(state.angle + '°', cornerBRx + labelR * Math.cos(labelAngle), cornerBRy + labelR * Math.sin(labelAngle) + 4);
+
+  /* block position */
+  var s = state.s;
+  var surfX = cornerTX + s * cosT * scale;
+  var surfY = cornerTY + s * sinT * scale;
+
+  var blockSize = 14 + state.mass * 2.5;
+  var perpX = sinT, perpY = -cosT;
+  var blockCX = surfX + perpX * (blockSize / 2);
+  var blockCY = surfY + perpY * (blockSize / 2);
+
+  /* block */
+  var blockColor = getCSSVar('--in-block');
+  ctx.save();
+  ctx.translate(blockCX, blockCY);
+  ctx.rotate(r);
+  ctx.shadowColor = blockColor;
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = blockColor;
+  ctx.fillRect(-blockSize / 2, -blockSize / 2, blockSize, blockSize);
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(-blockSize / 2, -blockSize / 2, blockSize, blockSize);
+  ctx.restore();
+
+  /* force vectors */
+  var mg = state.mass * state.g;
+  var N = mg * cosT;
+  var r2 = rad();
+  var fDisplay = state.fric;
+  var forceScale = 35 / Math.max(mg, 0.5);
+
+  /* gravity (red, down) */
+  var gravLen = mg * forceScale;
+  drawArrow(blockCX, blockCY, blockCX, blockCY + gravLen, getCSSVar('--in-f-grav'), 2.5);
+
+  /* normal force (blue, perpendicular to surface, away from surface) */
+  var normLen = N * forceScale;
+  drawArrow(blockCX, blockCY, blockCX + perpX * normLen, blockCY + perpY * normLen, getCSSVar('--in-f-norm'), 2);
+
+  /* friction (green, along surface, up the slope) */
+  var fricLen = fDisplay * forceScale;
+  var upX = -cosT, upY = -sinT;
+  drawArrow(blockCX, blockCY, blockCX + upX * fricLen, blockCY + upY * fricLen, getCSSVar('--in-f-fric'), 2);
+
+  /* force labels */
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  if (gravLen > 12){
+    ctx.fillStyle = getCSSVar('--in-f-grav');
+    ctx.fillText('mg', blockCX + 10, blockCY + gravLen - 4);
+  }
+  if (normLen > 12){
+    ctx.fillStyle = getCSSVar('--in-f-norm');
+    ctx.fillText('N', blockCX + perpX * normLen + 8, blockCY + perpY * normLen - 4);
+  }
+  if (fricLen > 12){
+    ctx.fillStyle = getCSSVar('--in-f-fric');
+    ctx.fillText('f', blockCX + upX * fricLen - 8, blockCY + upY * fricLen - 4);
+  }
+
+  /* state label near block */
+  if (state.isStatic){
+    ctx.fillStyle = getCSSVar('--in-accent4');
+    ctx.font = 'bold 11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('静止', blockCX, blockCY - blockSize - 6);
+  } else if (state.reachedBottom){
+    ctx.fillStyle = getCSSVar('--in-accent3');
+    ctx.font = 'bold 11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('到达底部', blockCX, blockCY - blockSize - 6);
+  }
+
+  /* start marker at top */
+  ctx.beginPath();
+  ctx.arc(cornerTX, cornerTY, 4, 0, Math.PI * 2);
+  ctx.fillStyle = getCSSVar('--in-accent');
+  ctx.fill();
+
+  /* axis labels */
+  ctx.fillStyle = getCSSVar('--in-muted');
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('L = ' + L + ' m', cornerBLx + 4, cornerBLy + 16);
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+document.getElementById('btnPlay').addEventListener('click', function(){
+  if (state.reachedBottom) resetSim();
+  var a = computeAcceleration();
+  if (a <= 0){
+    state.isStatic = true;
+    badgeState.textContent = '静止';
+    return;
+  }
+  state.running = true;
+  canvasHint.style.display = 'none';
+  badgeState.textContent = '下滑中';
+});
+document.getElementById('btnPause').addEventListener('click', function(){
+  state.running = false;
+  if (!state.isStatic && !state.reachedBottom){
+    badgeState.textContent = '已暂停';
+  }
+});
+document.getElementById('btnReset').addEventListener('click', function(){
+  resetSim();
+});
+
+/* ================================================================
+   MAIN LOOP
+   ================================================================ */
+var lastTime = performance.now();
+var frameCount = 0, lastFpsTime = performance.now(), fps = 60;
+
+function mainLoop(now){
+  var dt = (now - lastTime) / 1000;
+  lastTime = now;
+  if (dt > 0.05) dt = 0.05;
+  if (dt < 0.001) dt = 0.001;
+
+  if (state.running){
+    updatePhysics(dt);
+  }
+
+  drawSim();
+  updateOutputs();
+
+  frameCount++;
+  if (now - lastFpsTime >= 1000){
+    fps = frameCount;
+    frameCount = 0;
+    lastFpsTime = now;
+    badgeFPS.textContent = fps + ' FPS';
+  }
+
+  requestAnimationFrame(mainLoop);
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+PSUTheme.createSwitcher();
+PSUTheme.createBackButton('index.html');
+
+syncSliders();
+resizeAll();
+resetSim();
+updateOutputs();
+requestAnimationFrame(mainLoop);
+
+})();
+</script>
+</body>
+</html>

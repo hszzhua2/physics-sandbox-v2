@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>磁场圆周运动实验 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 五种主题适配 (前缀 --mc-)
+   ================================================================ */
+[data-theme="glass"]{
+  --mc-bg:#080812;--mc-bg2:#0e0e1c;--mc-surface:rgba(255,255,255,0.04);--mc-surface-hover:rgba(255,255,255,0.08);
+  --mc-ink:#f1f5f9;--mc-ink2:#cbd5e1;--mc-muted:#64748b;--mc-rule:rgba(255,255,255,0.07);
+  --mc-accent:#74b9ff;--mc-accent2:#a29bfe;--mc-accent3:#34d399;--mc-accent4:#fbbf24;
+  --mc-card-bg:rgba(255,255,255,0.03);--mc-card-border:rgba(255,255,255,0.06);
+  --mc-card-shadow:0 6px 24px rgba(0,0,0,0.4);--mc-glow:none;
+  --mc-canvas-bg:#040410;--mc-param-bg:rgba(255,255,255,0.03);--mc-param-border:rgba(255,255,255,0.06);
+  --mc-output-bg:rgba(0,0,0,0.3);--mc-output-border:rgba(255,255,255,0.06);
+  --mc-formula-bg:rgba(116,185,255,0.05);--mc-formula-border:rgba(116,185,255,0.12);
+  --mc-scrollbar-thumb:rgba(116,185,255,0.3);--mc-pos:#74b9ff;--mc-neg:#fbbf24;--mc-neu:#94a3b8;
+  --mc-field:rgba(148,163,184,0.18);
+}
+[data-theme="cyber"]{
+  --mc-bg:#040410;--mc-bg2:#08081a;--mc-surface:rgba(0,243,255,0.03);--mc-surface-hover:rgba(0,243,255,0.06);
+  --mc-ink:#e0f7fa;--mc-ink2:#b2ebf2;--mc-muted:#4dd0e1;--mc-rule:rgba(0,243,255,0.1);
+  --mc-accent:#00f3ff;--mc-accent2:#ff00ea;--mc-accent3:#39ff14;--mc-accent4:#ffb800;
+  --mc-card-bg:rgba(0,243,255,0.02);--mc-card-border:rgba(0,243,255,0.12);
+  --mc-card-shadow:0 0 16px rgba(0,243,255,0.05);--mc-glow:0 0 8px rgba(0,243,255,0.25);
+  --mc-canvas-bg:#020208;--mc-param-bg:rgba(0,243,255,0.02);--mc-param-border:rgba(0,243,255,0.1);
+  --mc-output-bg:rgba(0,0,0,0.4);--mc-output-border:rgba(0,243,255,0.08);
+  --mc-formula-bg:rgba(0,243,255,0.04);--mc-formula-border:rgba(0,243,255,0.15);
+  --mc-scrollbar-thumb:rgba(0,243,255,0.4);--mc-pos:#00f3ff;--mc-neg:#ffb800;--mc-neu:#4dd0e1;
+  --mc-field:rgba(0,243,255,0.16);
+}
+[data-theme="soviet"]{
+  --mc-bg:#f0ebe4;--mc-bg2:#e8e0d6;--mc-surface:#fffaf2;--mc-surface-hover:#f4f0ea;
+  --mc-ink:#1a1a1a;--mc-ink2:#3d3d3d;--mc-muted:#6a5a4a;--mc-rule:#d4c4a8;
+  --mc-accent:#c41e1e;--mc-accent2:#8b4513;--mc-accent3:#a0522d;--mc-accent4:#cd853f;
+  --mc-card-bg:#fffaf2;--mc-card-border:#c41e1e;
+  --mc-card-shadow:none;--mc-glow:none;
+  --mc-canvas-bg:#e8e0d6;--mc-param-bg:#f4f0ea;--mc-param-border:#d4c4a8;
+  --mc-output-bg:#f4f0ea;--mc-output-border:#d4c4a8;
+  --mc-formula-bg:rgba(196,30,30,0.04);--mc-formula-border:rgba(196,30,30,0.2);
+  --mc-scrollbar-thumb:#c41e1e;--mc-pos:#c41e1e;--mc-neg:#8b4513;--mc-neu:#6a5a4a;
+  --mc-field:rgba(106,90,74,0.22);
+}
+[data-theme="cartoon"]{
+  --mc-bg:#fef6e4;--mc-bg2:#fff8f0;--mc-surface:rgba(255,255,255,0.7);--mc-surface-hover:rgba(255,255,255,0.9);
+  --mc-ink:#2d3436;--mc-ink2:#4a4a4a;--mc-muted:#7a7a7a;--mc-rule:rgba(0,0,0,0.08);
+  --mc-accent:#ff6b6b;--mc-accent2:#4ecdc4;--mc-accent3:#ffe66d;--mc-accent4:#a29bfe;
+  --mc-card-bg:rgba(255,255,255,0.8);--mc-card-border:rgba(0,0,0,0.1);
+  --mc-card-shadow:0 6px 24px rgba(0,0,0,0.08);--mc-glow:none;
+  --mc-canvas-bg:#1a1a2e;--mc-param-bg:rgba(255,255,255,0.5);--mc-param-border:rgba(0,0,0,0.1);
+  --mc-output-bg:rgba(255,255,255,0.6);--mc-output-border:rgba(0,0,0,0.08);
+  --mc-formula-bg:rgba(255,107,107,0.05);--mc-formula-border:rgba(255,107,107,0.15);
+  --mc-scrollbar-thumb:rgba(0,0,0,0.15);--mc-pos:#ff6b6b;--mc-neg:#4ecdc4;--mc-neu:#a29bfe;
+  --mc-field:rgba(255,255,255,0.14);
+}
+[data-theme="academic"]{
+  --mc-bg:#f8f9fa;--mc-bg2:#f1f3f5;--mc-surface:rgba(255,255,255,0.9);--mc-surface-hover:#f0f0f0;
+  --mc-ink:#1a1a2e;--mc-ink2:#3d3d5c;--mc-muted:#7a7a8a;--mc-rule:#e0e0e0;
+  --mc-accent:#6b8cae;--mc-accent2:#8a7ca8;--mc-accent3:#c4956a;--mc-accent4:#6a9e8a;
+  --mc-card-bg:#ffffff;--mc-card-border:#e0e0e0;
+  --mc-card-shadow:none;--mc-glow:none;
+  --mc-canvas-bg:#ffffff;--mc-param-bg:#f8f9fa;--mc-param-border:#e0e0e0;
+  --mc-output-bg:#f4f5f7;--mc-output-border:#e0e0e0;
+  --mc-formula-bg:rgba(107,140,174,0.04);--mc-formula-border:rgba(107,140,174,0.2);
+  --mc-scrollbar-thumb:#d0d0d0;--mc-pos:#6b8cae;--mc-neg:#c4956a;--mc-neu:#9a9a9a;
+  --mc-field:rgba(154,154,154,0.22);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--mc-bg);color:var(--mc-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--mc-bg)}
+::-webkit-scrollbar-thumb{background:var(--mc-scrollbar-thumb);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--mc-rule);background:var(--mc-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--mc-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--mc-formula-bg);border:1px solid var(--mc-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--mc-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--mc-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--mc-accent);text-shadow:var(--mc-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--mc-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--mc-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--mc-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--mc-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;font-size:0.82rem;color:var(--mc-muted);opacity:0.5;text-align:center;font-family:monospace;letter-spacing:1px}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--mc-rule);background:var(--mc-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--mc-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--mc-formula-bg);border:1px solid var(--mc-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--mc-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--mc-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--mc-accent);text-shadow:var(--mc-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--mc-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--mc-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--mc-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--mc-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--mc-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:16px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--mc-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--mc-accent);font-weight:400;min-width:90px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--mc-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--mc-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--mc-param-border);background:var(--mc-param-bg);color:var(--mc-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--mc-accent);color:var(--mc-accent);background:var(--mc-formula-bg)}
+
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 模式按钮 ===== */
+.mode-indicator{display:flex;gap:6px}
+.mode-btn{flex:1;padding:7px 4px;border:1px solid var(--mc-param-border);background:var(--mc-param-bg);color:var(--mc-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--mc-accent);color:var(--mc-accent);background:var(--mc-formula-bg)}
+
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 控制按钮 ===== */
+.sim-btn{padding:8px 20px;border:1px solid var(--mc-rule);background:rgba(0,0,0,0.4);color:var(--mc-ink);border-radius:10px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--mc-accent)}
+.sim-btn.primary{background:var(--mc-accent);color:#0a0a1a;border-color:var(--mc-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+
+/* ===== 输出卡片 ===== */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--mc-output-bg);border:1px solid var(--mc-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.05rem;font-weight:700;color:var(--mc-accent);line-height:1.2;transition:color .4s ease}
+.output-num.b{color:var(--mc-accent2)}.output-num.c{color:var(--mc-accent3)}.output-num.d{color:var(--mc-accent4)}
+.output-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--mc-muted);margin-top:2px}
+
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--mc-output-bg);border:1px solid var(--mc-output-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.76rem;color:var(--mc-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--mc-ink)}
+.info-card .muted{color:var(--mc-muted);font-size:0.72rem}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .info-card h3{color:var(--mc-accent)}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card h3{color:var(--mc-accent)}
+[data-theme="cartoon"] .info-card h3{color:var(--mc-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--mc-accent);text-shadow:var(--mc-glow)}
+
+/* ===== 应用卡片 ===== */
+.app-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.app-card{background:var(--mc-output-bg);border:1px solid var(--mc-output-border);border-radius:10px;padding:10px 12px;transition:background-color .5s ease,border-color .4s ease}
+.app-card .app-ic{font-size:1.1rem;margin-bottom:4px}
+.app-card .app-name{font-size:0.76rem;font-weight:700;color:var(--mc-ink);margin-bottom:2px}
+.app-card .app-desc{font-size:0.68rem;color:var(--mc-muted);line-height:1.5}
+
+[data-theme="academic"] .app-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .app-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 公式块 ===== */
+.formula-block{background:var(--mc-formula-bg);border:1px solid var(--mc-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--mc-ink);margin-bottom:6px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.76rem;color:var(--mc-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.76rem;color:var(--mc-muted);margin-top:6px;line-height:1.6}
+.formula-desc strong{color:var(--mc-ink2)}
+.formula-note{font-size:0.7rem;color:var(--mc-accent3);margin-top:6px;font-style:italic}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:18px}
+.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--mc-rule)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--mc-accent);border:2px solid var(--mc-bg2)}
+.tl-year{font-size:0.72rem;font-weight:700;color:var(--mc-accent);font-family:monospace;margin-bottom:2px}
+.tl-title{font-size:0.78rem;font-weight:600;color:var(--mc-ink);margin-bottom:2px}
+.tl-desc{font-size:0.72rem;color:var(--mc-muted);line-height:1.5}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--mc-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--mc-rule)}
+  .sim-panel{min-height:400px}
+}
+@media(max-width:600px){
+  .canvas-controls{flex-wrap:wrap;justify-content:center}
+  .sim-btn{padding:6px 14px;font-size:0.76rem}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">🧲</div>
+      <div>
+        <h1>磁场圆周运动</h1>
+        <div class="lp-sub">参数设置 · 粒子控制</div>
+      </div>
+    </div>
+
+    <!-- 实验参数 -->
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">电荷 q</span><span class="param-value" id="valQ">1.0 ×10⁻³ C</span></div>
+        <input type="range" id="sliderQ" min="-5" max="5" value="1" step="0.5">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">质量 m</span><span class="param-value" id="valM">1.0 ×10⁻⁴ kg</span></div>
+        <input type="range" id="sliderM" min="0.5" max="5" value="1" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">速度 v</span><span class="param-value" id="valV">10.0 m/s</span></div>
+        <input type="range" id="sliderV" min="1" max="30" value="10" step="0.5">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">磁感应强度 B</span><span class="param-value" id="valB">0.50 T</span></div>
+        <input type="range" id="sliderB" min="0.1" max="2" value="0.5" step="0.05">
+      </div>
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="standard">🎯 标准圆周</button>
+        <button class="preset-btn" data-preset="fast">⚡ 快速小圆</button>
+        <button class="preset-btn" data-preset="negative">➖ 负电荷</button>
+        <button class="preset-btn" data-preset="compare">🔬 对比三种粒子</button>
+      </div>
+    </div>
+
+    <!-- 磁场方向 -->
+    <div class="side-section">
+      <div class="section-label">磁场方向</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-dir="out">⊙ 垂直出屏</button>
+        <button class="mode-btn" data-dir="in">⊗ 垂直入屏</button>
+      </div>
+    </div>
+
+    <!-- 粒子模式 -->
+    <div class="side-section">
+      <div class="section-label">粒子模式</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-pmode="single">单粒子</button>
+        <button class="mode-btn" data-pmode="compare">三粒子对比</button>
+      </div>
+    </div>
+
+    <!-- 动画速率 -->
+    <div class="side-section">
+      <div class="section-label">视图控制</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">动画速率</span><span class="param-value" id="valSpeed">1.0×</span></div>
+        <input type="range" id="sliderSpeed" min="0.1" max="2" value="1" step="0.1">
+      </div>
+      <div class="info-card">
+        <p class="muted">磁场对运动电荷施加洛伦兹力，方向始终垂直于速度，故只改变方向不改变速率——粒子做匀速圆周运动。调节参数可观察半径与周期的变化，速率滑块用于放慢高速轨道。</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeTime">t = 0.00 s</span>
+        <span class="overlay-badge" id="badgeDir">B ⊙ 出屏</span>
+        <span class="overlay-badge" id="badgeMode">单粒子</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">点击「播放」开始圆周运动</div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+          播放
+        </button>
+        <button class="sim-btn" id="btnPause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+          暂停
+        </button>
+        <button class="sim-btn" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">🌀</div>
+      <div>
+        <h2>输出与知识</h2>
+        <div class="rp-sub">实时数据 · 公式讲解 · 历史脉络</div>
+      </div>
+    </div>
+
+    <!-- 实时输出 -->
+    <div class="side-section">
+      <div class="section-label">实时输出</div>
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num" id="outR">2.00 m</div><div class="output-label">半径 r</div></div>
+        <div class="output-card"><div class="output-num b" id="outT">1.26 s</div><div class="output-label">周期 T</div></div>
+        <div class="output-card"><div class="output-num c" id="outF">0.796 Hz</div><div class="output-label">频率 f</div></div>
+        <div class="output-card"><div class="output-num d" id="outW">5.00 rad/s</div><div class="output-label">角频率 ω</div></div>
+        <div class="output-card"><div class="output-num" id="outForce">5.00 mN</div><div class="output-label">洛伦兹力 F</div></div>
+        <div class="output-card"><div class="output-num b" id="outEk">5.00 mJ</div><div class="output-label">动能 Ek</div></div>
+      </div>
+    </div>
+
+    <!-- 知识点讲解 -->
+    <div class="side-section">
+      <div class="section-label">知识点讲解</div>
+
+      <div class="formula-block">
+        <div class="formula-title">洛伦兹力</div>
+        <div class="formula-expr">F = q v B  (v ⊥ B)
+
+方向由左手定则判定：
+  正电荷：F ⊥ v，指向圆心
+  负电荷：方向相反</div>
+        <div class="formula-desc">磁场对运动电荷的作用力始终<strong>垂直于速度</strong>，因此不做功，只改变速度方向而不改变速率——这是粒子做圆周运动的根本原因。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">回旋半径</div>
+        <div class="formula-expr">qvB = mv² / r
+
+  ⇒  r = mv / (qB)
+
+r ∝ m·v，r ∝ 1/(qB)</div>
+        <div class="formula-desc">由洛伦兹力提供向心力 qvB = mv²/r 解得。<strong>质量越大、速度越快</strong>，半径越大；<strong>电荷或磁场越强</strong>，半径越小。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">回旋周期与频率</div>
+        <div class="formula-expr">T = 2πr / v = 2πm / (qB)
+
+f = 1/T = qB / (2πm)
+ω = 2πf = qB / m</div>
+        <div class="formula-desc"><strong>回旋周期与速度、半径无关</strong>，仅由 m、q、B 决定。这一性质是回旋加速器得以工作的关键（粒子无论被加速到多快，仍与电源同步）。</div>
+        <div class="formula-note">⚠ ω = qB/m 称为回旋角频率，是带电粒子在磁场中的特征频率。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">动能守恒</div>
+        <div class="formula-expr">Ek = ½ m v² = const
+
+因 F ⊥ v ⇒ W = F·v·cos90° = 0</div>
+        <div class="formula-desc">洛伦兹力始终垂直于速度，<strong>不做功</strong>，故粒子动能守恒、速率恒定。磁场只“转弯”不“加速”。</div>
+      </div>
+    </div>
+
+    <!-- 应用实例 -->
+    <div class="side-section">
+      <div class="section-label">应用实例</div>
+      <div class="app-grid">
+        <div class="app-card">
+          <div class="app-ic">🌀</div>
+          <div class="app-name">回旋加速器</div>
+          <div class="app-desc">利用 T 与 v 无关的特性，用交变电场在 D 形盒间反复加速带电粒子至高能。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-ic">📐</div>
+          <div class="app-name">质谱仪</div>
+          <div class="app-desc">同荷异速粒子在磁场中半径不同，依此分离并测量离子质量，用于同位素分析。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-ic">☄️</div>
+          <div class="app-name">磁约束聚变</div>
+          <div class="app-desc">托卡马克用强磁场约束高温等离子体做螺旋运动，避免触碰器壁以实现受控核聚变。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-ic">🌌</div>
+          <div class="app-name">极光现象</div>
+          <div class="app-desc">太阳风带电粒子被地磁场捕获，沿磁力线做螺旋运动并轰击高层大气分子发光。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史脉络 -->
+    <div class="side-section">
+      <div class="section-label">电磁动力学历史</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-year">1892</div>
+          <div class="tl-title">洛伦兹力公式</div>
+          <div class="tl-desc">荷兰物理学家洛伦兹提出电子论，给出运动电荷在电磁场中受力的完整公式 F=q(E+v×B)，奠定经典电子学基础。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1919</div>
+          <div class="tl-title">质谱仪发展</div>
+          <div class="tl-desc">阿斯顿改进阳极射线管建成首台精密质谱仪，利用磁场偏转测定原子质量，发现同位素并获诺贝尔化学奖。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1932</div>
+          <div class="tl-title">回旋加速器发明</div>
+          <div class="tl-desc">劳伦斯发明回旋加速器，巧妙利用回旋频率与速度无关的原理，用紧凑装置将粒子加速至兆电子伏量级，开启现代粒子物理。</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   STATE
+   ================================================================ */
+var state = {
+  q:1, m:1, v:10, B:0.5,        // 滑块值 (q,m 为无量纲倍数)
+  dir:'out',                      // 磁场方向 out / in
+  mode:'single',                  // single / compare
+  speed:1.0,                      // 动画速率
+  time:0, running:false,
+  particles:[],
+};
+// 单位换算
+var Q_UNIT = 1e-3;   // C
+var M_UNIT = 1e-4;   // kg
+
+/* ================================================================
+   DOM
+   ================================================================ */
+var simCanvas = document.getElementById('simCanvas');
+var ctx = simCanvas.getContext('2d');
+var html = document.documentElement;
+
+var sliders = {
+  q:document.getElementById('sliderQ'),
+  m:document.getElementById('sliderM'),
+  v:document.getElementById('sliderV'),
+  b:document.getElementById('sliderB'),
+  speed:document.getElementById('sliderSpeed'),
+};
+var vals = {
+  q:document.getElementById('valQ'),
+  m:document.getElementById('valM'),
+  v:document.getElementById('valV'),
+  b:document.getElementById('valB'),
+  speed:document.getElementById('valSpeed'),
+};
+var outs = {
+  r:document.getElementById('outR'),
+  t:document.getElementById('outT'),
+  f:document.getElementById('outF'),
+  w:document.getElementById('outW'),
+  force:document.getElementById('outForce'),
+  ek:document.getElementById('outEk'),
+};
+var badgeFPS=document.getElementById('badgeFPS');
+var badgeTime=document.getElementById('badgeTime');
+var badgeDir=document.getElementById('badgeDir');
+var badgeMode=document.getElementById('badgeMode');
+var canvasHint=document.getElementById('canvasHint');
+
+/* ================================================================
+   THEME SYNC
+   ================================================================ */
+var themeObs = new MutationObserver(function(){ drawSim(); });
+themeObs.observe(html,{attributes:true,attributeFilter:['data-theme']});
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+function getCSSVar(n){ return getComputedStyle(html).getPropertyValue(n).trim(); }
+function qSI(){ return state.q*Q_UNIT; }
+function mSI(){ return state.m*M_UNIT; }
+function bSI(){ var s = state.dir==='out'?1:-1; return state.B*s; }
+function absB(){ return state.B; }
+
+function computePhysics(){
+  var q=Math.abs(qSI()), m=mSI(), B=absB(), v=state.v;
+  if(q<1e-12 || B<1e-12){
+    return {r:Infinity,T:Infinity,f:0,w:0,F:0,ek:0.5*m*v*v};
+  }
+  var r=m*v/(q*B);
+  var T=2*Math.PI*m/(q*B);
+  var f=1/T;
+  var w=q*B/m;
+  var F=q*v*B;
+  var ek=0.5*m*v*v;
+  return {r:r,T:T,f:f,w:w,F:F,ek:ek};
+}
+
+function fmtR(r){
+  if(!isFinite(r)) return '∞';
+  if(r<1) return (r*100).toFixed(1)+' cm';
+  if(r<100) return r.toFixed(2)+' m';
+  return r.toFixed(0)+' m';
+}
+function fmtT(t){
+  if(!isFinite(t)) return '∞';
+  if(t<1) return (t*1000).toFixed(1)+' ms';
+  return t.toFixed(2)+' s';
+}
+function fmtF(F){
+  if(F<1e-3) return (F*1e6).toFixed(1)+' µN';
+  if(F<1) return (F*1e3).toFixed(2)+' mN';
+  return F.toFixed(3)+' N';
+}
+function fmtE(ek){
+  if(ek<1e-3) return (ek*1e6).toFixed(1)+' µJ';
+  if(ek<1) return (ek*1e3).toFixed(2)+' mJ';
+  return ek.toFixed(3)+' J';
+}
+
+/* ================================================================
+   RESIZE
+   ================================================================ */
+var scale = 40;   // px / m
+function resizeAll(){
+  var sc=simCanvas.parentElement;
+  var dpr=window.devicePixelRatio||1;
+  simCanvas.width=sc.clientWidth*dpr;
+  simCanvas.height=sc.clientHeight*dpr;
+  simCanvas.style.width=sc.clientWidth+'px';
+  simCanvas.style.height=sc.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  computeScale();
+}
+window.addEventListener('resize',resizeAll);
+
+function computeScale(){
+  var w=simCanvas.clientWidth, h=simCanvas.clientHeight;
+  var minDim=Math.min(w,h);
+  var ph=computePhysics();
+  var target = state.mode==='compare' ? 0.20*minDim : 0.34*minDim;
+  var r = isFinite(ph.r) && ph.r>0 ? ph.r : (state.v*0.5 || 1);
+  scale = target / r;
+  if(scale<1) scale=1;
+  if(scale>800) scale=800;
+}
+
+/* ================================================================
+   PARTICLE INIT
+   ================================================================ */
+function makeParticle(qSign){
+  // qSign: 实际电荷符号乘数 (1, -1, 0)；compare 模式用 |q| 配 ±
+  var qMag = Math.abs(state.q);
+  var charge = qSign*qMag;            // 滑块倍数（带符号）
+  var q_si = charge*Q_UNIT;
+  var m_si = state.m*M_UNIT;
+  var v = state.v;
+  var B = bSI();
+  var qB = q_si*B;
+  var pos={x:0,y:0}, vel={x:v,y:0};
+  if(state.mode==='single'){
+    if(Math.abs(qB)>1e-15){
+      var r = m_si*v/(Math.abs(q_si)*Math.abs(B));
+      var sign = qB>0 ? 1 : -1;
+      pos={x:0, y:sign*r};   // qB>0 → 粒子在中心下方(+y)，力向上指向圆心
+      vel={x:v, y:0};
+    } else {
+      pos={x:0,y:0}; vel={x:v,y:0};
+    }
+  } else {
+    // compare: 都从中心出发
+    pos={x:0,y:0}; vel={x:v,y:0};
+  }
+  return {
+    q:q_si, m:m_si, x:pos.x, y:pos.y, vx:vel.x, vy:vel.y,
+    chargeSign:qSign, trail:[]
+  };
+}
+
+function initParticles(){
+  if(state.mode==='compare'){
+    state.particles=[
+      makeParticle(1),    // 正
+      makeParticle(-1),   // 负
+      makeParticle(0),    // 中性
+    ];
+  } else {
+    var sgn = state.q>0?1:(state.q<0?-1:0);
+    state.particles=[makeParticle(sgn)];
+  }
+}
+
+/* ================================================================
+   OUTPUT UPDATE
+   ================================================================ */
+function updateOutputs(){
+  var p=computePhysics();
+  outs.r.textContent=fmtR(p.r);
+  outs.t.textContent=fmtT(p.T);
+  outs.f.textContent=isFinite(p.f)?p.f.toFixed(3)+' Hz':'0 Hz';
+  outs.w.textContent=p.w.toFixed(2)+' rad/s';
+  outs.force.textContent=fmtF(p.F);
+  outs.ek.textContent=fmtE(p.ek);
+}
+
+/* ================================================================
+   SLIDER SYNC
+   ================================================================ */
+function syncSliders(){
+  state.q=+sliders.q.value;
+  state.m=+sliders.m.value;
+  state.v=+sliders.v.value;
+  state.B=+sliders.b.value;
+  state.speed=+sliders.speed.value;
+  vals.q.textContent=state.q.toFixed(1)+' ×10⁻³ C';
+  vals.m.textContent=state.m.toFixed(1)+' ×10⁻⁴ kg';
+  vals.v.textContent=state.v.toFixed(1)+' m/s';
+  vals.b.textContent=state.B.toFixed(2)+' T';
+  vals.speed.textContent=state.speed.toFixed(1)+'×';
+  updateOutputs();
+}
+Object.keys(sliders).forEach(function(k){
+  sliders[k].addEventListener('input',function(){
+    syncSliders();
+    // 实时更新粒子属性（不重置位置），保持交互性
+    liveUpdateParticles();
+  });
+});
+
+function liveUpdateParticles(){
+  var qMag=Math.abs(state.q);
+  for(var i=0;i<state.particles.length;i++){
+    var p=state.particles[i];
+    p.m=state.m*M_UNIT;
+    if(state.mode==='single'){
+      // 单粒子：电荷符号实时跟随滑块（过零时旋转方向反转）
+      p.chargeSign = state.q>0?1:(state.q<0?-1:0);
+      p.q = state.q*Q_UNIT;
+    } else {
+      // 对比模式：各粒子保持原有 ±/0 符号，幅度跟随 |q|
+      p.q = p.chargeSign*qMag*Q_UNIT;
+    }
+    // 速率保持为滑块 v（方向不变）
+    var sp=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+    if(sp>1e-9){ p.vx=p.vx/sp*state.v; p.vy=p.vy/sp*state.v; }
+    else { p.vx=state.v; p.vy=0; }
+  }
+}
+
+/* ================================================================
+   MODE / DIR SWITCH
+   ================================================================ */
+document.querySelectorAll('.mode-btn[data-dir]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.mode-btn[data-dir]').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    state.dir=btn.dataset.dir;
+    badgeDir.textContent = state.dir==='out' ? 'B ⊙ 出屏' : 'B ⊗ 入屏';
+    liveUpdateParticles();
+  });
+});
+document.querySelectorAll('.mode-btn[data-pmode]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.mode-btn[data-pmode]').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    state.mode=btn.dataset.pmode;
+    badgeMode.textContent = state.mode==='single'?'单粒子':'三粒子对比';
+    resetSim();
+  });
+});
+
+/* ================================================================
+   PRESETS
+   ================================================================ */
+document.querySelectorAll('.preset-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var p=btn.dataset.preset;
+    if(p==='standard'){sliders.q.value=1;sliders.m.value=1;sliders.v.value=10;sliders.b.value=0.5;state.mode='single';}
+    if(p==='fast'){sliders.q.value=1;sliders.m.value=1;sliders.v.value=20;sliders.b.value=1;state.mode='single';}
+    if(p==='negative'){sliders.q.value=-1;sliders.m.value=1;sliders.v.value=10;sliders.b.value=0.5;state.mode='single';}
+    if(p==='compare'){sliders.q.value=1;sliders.m.value=1;sliders.v.value=10;sliders.b.value=0.5;state.mode='compare';}
+    // 同步模式按钮
+    document.querySelectorAll('.mode-btn[data-pmode]').forEach(function(b){b.classList.toggle('active',b.dataset.pmode===state.mode);});
+    badgeMode.textContent = state.mode==='single'?'单粒子':'三粒子对比';
+    resetSim();
+  });
+});
+
+/* ================================================================
+   RESET
+   ================================================================ */
+function resetSim(){
+  syncSliders();
+  computeScale();
+  initParticles();
+  state.time=0; state.running=false;
+  badgeTime.textContent='t = 0.00 s';
+  canvasHint.style.display='block';
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+document.getElementById('btnPlay').addEventListener('click',function(){ state.running=true; canvasHint.style.display='none'; });
+document.getElementById('btnPause').addEventListener('click',function(){ state.running=false; });
+document.getElementById('btnReset').addEventListener('click',function(){ resetSim(); });
+
+/* ================================================================
+   STEP PHYSICS — 精确旋转积分
+   vx' = vx cos(ωdt) + vy sin(ωdt)
+   vy' = vy cos(ωdt) - vx sin(ωdt)
+   ω = qB/m (B 带符号, 出屏为正)
+   ================================================================ */
+function stepParticle(p,dt){
+  var omega = (p.q*bSI())/p.m;   // 带符号角频率
+  if(Math.abs(omega)>1e-15){
+    var ang = omega*dt;
+    var c=Math.cos(ang), s=Math.sin(ang);
+    var nvx = p.vx*c + p.vy*s;
+    var nvy = p.vy*c - p.vx*s;
+    p.vx=nvx; p.vy=nvy;
+  }
+  p.x += p.vx*dt;
+  p.y += p.vy*dt;
+  // 轨迹
+  p.trail.push({x:p.x,y:p.y});
+  if(p.trail.length>160) p.trail.shift();
+  // 出界重生（中性直线飞行等）
+  var w=simCanvas.clientWidth, h=simCanvas.clientHeight;
+  var sx=p.x*scale, sy=p.y*scale;
+  var lim=Math.max(w,h)*1.6;
+  if(Math.abs(sx)>lim || Math.abs(sy)>lim){
+    var np=makeParticle(p.chargeSign);
+    if(state.mode==='compare'){ np.x=0; np.y=0; np.vx=state.v; np.vy=0; np.trail=[]; }
+    p.x=np.x; p.y=np.y; p.vx=np.vx; p.vy=np.vy; p.trail=[];
+  }
+}
+
+function step(dt){
+  // 子步长：限制每子步旋转 ≤ 0.15 rad
+  for(var i=0;i<state.particles.length;i++){
+    var p=state.particles[i];
+    var omega=Math.abs(p.q*bSI()/p.m);
+    var n = omega>1e-15 ? Math.ceil(omega*dt/0.15) : 1;
+    if(n>300) n=300;
+    var sub=dt/n;
+    for(var k=0;k<n;k++) stepParticle(p,sub);
+  }
+}
+
+/* ================================================================
+   DRAW
+   ================================================================ */
+function drawArrow(cx,cy,ex,ey,color,lw){
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw||2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
+  var ang=Math.atan2(ey-cy,ex-cx);
+  var ah=7;
+  ctx.beginPath();
+  ctx.moveTo(ex,ey);
+  ctx.lineTo(ex-ah*Math.cos(ang-0.4),ey-ah*Math.sin(ang-0.4));
+  ctx.lineTo(ex-ah*Math.cos(ang+0.4),ey-ah*Math.sin(ang+0.4));
+  ctx.closePath(); ctx.fill();
+}
+
+function drawFieldGrid(w,h){
+  var fieldCol=getCSSVar('--mc-field');
+  var isOut = state.dir==='out';
+  ctx.strokeStyle=fieldCol; ctx.fillStyle=fieldCol; ctx.lineWidth=1;
+  var step=64;
+  var offx=(w%step)/2, offy=(h%step)/2;
+  for(var y=offy;y<h;y+=step){
+    for(var x=offx;x<w;x+=step){
+      ctx.beginPath();
+      ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.stroke();
+      if(isOut){
+        ctx.beginPath(); ctx.arc(x,y,1.4,0,Math.PI*2); ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(x-3,y-3); ctx.lineTo(x+3,y+3);
+        ctx.moveTo(x+3,y-3); ctx.lineTo(x-3,y+3);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function particleColor(p){
+  if(p.chargeSign>0) return getCSSVar('--mc-pos');
+  if(p.chargeSign<0) return getCSSVar('--mc-neg');
+  return getCSSVar('--mc-neu');
+}
+
+function drawSim(){
+  var w=simCanvas.clientWidth, h=simCanvas.clientHeight;
+  var cx=w/2, cy=h/2;
+  ctx.fillStyle=getCSSVar('--mc-canvas-bg');
+  ctx.fillRect(0,0,w,h);
+
+  drawFieldGrid(w,h);
+
+  var accent=getCSSVar('--mc-accent');
+  var accent2=getCSSVar('--mc-accent2');
+  var muted=getCSSVar('--mc-muted');
+  var rule=getCSSVar('--mc-rule');
+
+  // 中心十字
+  ctx.strokeStyle=rule; ctx.lineWidth=1; ctx.globalAlpha=0.5;
+  ctx.beginPath(); ctx.moveTo(cx-10,cy); ctx.lineTo(cx+10,cy); ctx.moveTo(cx,cy-10); ctx.lineTo(cx,cy+10); ctx.stroke();
+  ctx.globalAlpha=1;
+
+  for(var i=0;i<state.particles.length;i++){
+    var p=state.particles[i];
+    var col=particleColor(p);
+    var sx=cx+p.x*scale, sy=cy+p.y*scale;
+
+    // 轨道圆（带电粒子）
+    var qB=p.q*bSI();
+    if(Math.abs(qB)>1e-15){
+      var r_m=p.m*state.v/(Math.abs(p.q)*Math.abs(bSI()));
+      if(isFinite(r_m) && r_m>0){
+        // 圆心 = 当前位置 + 垂直于速度指向力方向 * r
+        var sp=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+        if(sp>1e-9){
+          // 力方向单位向量 = sign(qB)*(vy,-vx)/sp
+          var fs = qB>0?1:-1;
+          var fcx=p.x + fs*(p.vy/sp)*r_m;
+          var fcy=p.y + fs*(-p.vx/sp)*r_m;
+          var scx=cx+fcx*scale, scy=cy+fcy*scale;
+          ctx.strokeStyle=col; ctx.globalAlpha=0.18; ctx.lineWidth=1.2;
+          ctx.setLineDash([4,5]);
+          ctx.beginPath(); ctx.arc(scx,scy,r_m*scale,0,Math.PI*2); ctx.stroke();
+          ctx.setLineDash([]); ctx.globalAlpha=1;
+          // 圆心点
+          ctx.fillStyle=col; ctx.globalAlpha=0.5;
+          ctx.beginPath(); ctx.arc(scx,scy,2,0,Math.PI*2); ctx.fill();
+          ctx.globalAlpha=1;
+        }
+      }
+    }
+
+    // 轨迹（渐隐）
+    if(p.trail.length>1){
+      for(var j=0;j<p.trail.length-1;j++){
+        var a=j/p.trail.length;
+        ctx.globalAlpha=a*0.7;
+        ctx.strokeStyle=col; ctx.lineWidth=a*2.5+0.5;
+        ctx.beginPath();
+        ctx.moveTo(cx+p.trail[j].x*scale, cy+p.trail[j].y*scale);
+        ctx.lineTo(cx+p.trail[j+1].x*scale, cy+p.trail[j+1].y*scale);
+        ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+    }
+
+    // 粒子
+    ctx.beginPath(); ctx.arc(sx,sy,8,0,Math.PI*2);
+    ctx.fillStyle=col; ctx.globalAlpha=0.9; ctx.fill();
+    ctx.globalAlpha=1; ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
+    // 电荷符号
+    ctx.fillStyle='#fff'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+    ctx.fillText(p.chargeSign>0?'+':(p.chargeSign<0?'−':'0'),sx,sy+3.5);
+
+    // 速度矢量（切向）
+    var sp2=Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+    if(sp2>1e-9){
+      var vlen=Math.max(25,Math.min(70,22+sp2*1.4));
+      var vx2=sx+p.vx/sp2*vlen, vy2=sy+p.vy/sp2*vlen;
+      drawArrow(sx,sy,vx2,vy2,col,2.5);
+      ctx.fillStyle=col; ctx.font='9px monospace'; ctx.textAlign='left';
+      ctx.fillText('v',vx2+4,vy2+2);
+    }
+
+    // 洛伦兹力矢量（指向圆心，垂直于速度）— 仅带电粒子
+    if(Math.abs(qB)>1e-15 && sp2>1e-9){
+      var fs2=qB>0?1:-1;
+      var fux=fs2*(p.vy/sp2), fuy=fs2*(-p.vx/sp2);
+      var flen=34;
+      var fx2=sx+fux*flen, fy2=sy+fuy*flen;
+      drawArrow(sx,sy,fx2,fy2,accent2,2);
+      ctx.fillStyle=accent2; ctx.font='9px monospace'; ctx.textAlign='left';
+      ctx.fillText('F',fx2+4,fy2+2);
+    }
+  }
+
+  // 图例
+  ctx.font='10px monospace'; ctx.textAlign='left';
+  var ly=18;
+  if(state.mode==='compare'){
+    ctx.fillStyle=getCSSVar('--mc-pos'); ctx.fillText('● 正电荷 (+q)',w-150,ly); ly+=16;
+    ctx.fillStyle=getCSSVar('--mc-neg'); ctx.fillText('● 负电荷 (−q)',w-150,ly); ly+=16;
+    ctx.fillStyle=getCSSVar('--mc-neu'); ctx.fillText('● 中性 (q=0)',w-150,ly);
+  }
+  // B 标签
+  ctx.fillStyle=accent; ctx.font='11px monospace';
+  ctx.fillText('B = '+state.B.toFixed(2)+' T  '+(state.dir==='out'?'⊙ 出屏':'⊗ 入屏'),12,h-14);
+  ctx.fillStyle=muted; ctx.font='9px monospace';
+  ctx.fillText('蓝箭头=速度v  紫箭头=洛伦兹力F',12,h-28);
+}
+
+/* ================================================================
+   MAIN LOOP
+   ================================================================ */
+var last=performance.now(), frameCount=0, lastFps=performance.now(), fps=60;
+function mainLoop(now){
+  var dt=(now-last)/1000; last=now;
+  if(dt>0.05) dt=0.05;
+  if(state.running){
+    var sdt=dt*state.speed;
+    step(sdt);
+    state.time+=sdt;
+    badgeTime.textContent='t = '+state.time.toFixed(2)+' s';
+  }
+  drawSim();
+  frameCount++;
+  if(now-lastFps>=1000){ fps=frameCount; frameCount=0; lastFps=now; badgeFPS.textContent=fps+' FPS'; }
+  requestAnimationFrame(mainLoop);
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+PSUTheme.createSwitcher();
+PSUTheme.createBackButton('index.html');
+
+resizeAll();
+syncSliders();
+resetSim();
+requestAnimationFrame(mainLoop);
+
+})();
+</script>
+</body>
+</html>

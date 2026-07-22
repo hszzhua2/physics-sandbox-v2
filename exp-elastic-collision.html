@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弹性碰撞实验 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 五种主题适配 (前缀 --ec-)
+   ================================================================ */
+[data-theme="glass"]{
+  --ec-bg:#080812;--ec-bg2:#0e0e1c;--ec-surface:rgba(255,255,255,0.04);--ec-surface-hover:rgba(255,255,255,0.08);
+  --ec-ink:#f1f5f9;--ec-ink2:#cbd5e1;--ec-muted:#64748b;--ec-rule:rgba(255,255,255,0.07);
+  --ec-accent:#74b9ff;--ec-accent2:#a29bfe;--ec-accent3:#34d399;--ec-accent4:#fbbf24;
+  --ec-card-bg:rgba(255,255,255,0.03);--ec-card-border:rgba(255,255,255,0.06);
+  --ec-card-shadow:0 6px 24px rgba(0,0,0,0.4);--ec-glow:none;
+  --ec-canvas-bg:#040410;--ec-param-bg:rgba(255,255,255,0.03);--ec-param-border:rgba(255,255,255,0.06);
+  --ec-output-bg:rgba(0,0,0,0.3);--ec-output-border:rgba(255,255,255,0.06);
+  --ec-formula-bg:rgba(116,185,255,0.05);--ec-formula-border:rgba(116,185,255,0.12);
+  --ec-scrollbar-thumb:rgba(116,185,255,0.3);--ec-ball1:#74b9ff;--ec-ball2:#fbbf24;
+  --ec-ground:rgba(255,255,255,0.18);--ec-wall:rgba(255,255,255,0.25);
+}
+[data-theme="cyber"]{
+  --ec-bg:#040410;--ec-bg2:#08081a;--ec-surface:rgba(0,243,255,0.03);--ec-surface-hover:rgba(0,243,255,0.06);
+  --ec-ink:#e0f7fa;--ec-ink2:#b2ebf2;--ec-muted:#4dd0e1;--ec-rule:rgba(0,243,255,0.1);
+  --ec-accent:#00f3ff;--ec-accent2:#ff00ea;--ec-accent3:#39ff14;--ec-accent4:#ffb800;
+  --ec-card-bg:rgba(0,243,255,0.02);--ec-card-border:rgba(0,243,255,0.12);
+  --ec-card-shadow:0 0 16px rgba(0,243,255,0.05);--ec-glow:0 0 8px rgba(0,243,255,0.25);
+  --ec-canvas-bg:#020208;--ec-param-bg:rgba(0,243,255,0.02);--ec-param-border:rgba(0,243,255,0.1);
+  --ec-output-bg:rgba(0,0,0,0.4);--ec-output-border:rgba(0,243,255,0.08);
+  --ec-formula-bg:rgba(0,243,255,0.04);--ec-formula-border:rgba(0,243,255,0.15);
+  --ec-scrollbar-thumb:rgba(0,243,255,0.4);--ec-ball1:#00f3ff;--ec-ball2:#ffb800;
+  --ec-ground:rgba(0,243,255,0.25);--ec-wall:rgba(0,243,255,0.4);
+}
+[data-theme="soviet"]{
+  --ec-bg:#f0ebe4;--ec-bg2:#e8e0d6;--ec-surface:#fffaf2;--ec-surface-hover:#f4f0ea;
+  --ec-ink:#1a1a1a;--ec-ink2:#3d3d3d;--ec-muted:#6a5a4a;--ec-rule:#d4c4a8;
+  --ec-accent:#c41e1e;--ec-accent2:#8b4513;--ec-accent3:#a0522d;--ec-accent4:#cd853f;
+  --ec-card-bg:#fffaf2;--ec-card-border:#c41e1e;
+  --ec-card-shadow:none;--ec-glow:none;
+  --ec-canvas-bg:#e8e0d6;--ec-param-bg:#f4f0ea;--ec-param-border:#d4c4a8;
+  --ec-output-bg:#f4f0ea;--ec-output-border:#d4c4a8;
+  --ec-formula-bg:rgba(196,30,30,0.04);--ec-formula-border:rgba(196,30,30,0.2);
+  --ec-scrollbar-thumb:#c41e1e;--ec-ball1:#c41e1e;--ec-ball2:#8b4513;
+  --ec-ground:#6a5a4a;--ec-wall:#3d3d3d;
+}
+[data-theme="cartoon"]{
+  --ec-bg:#fef6e4;--ec-bg2:#fff8f0;--ec-surface:rgba(255,255,255,0.7);--ec-surface-hover:rgba(255,255,255,0.9);
+  --ec-ink:#2d3436;--ec-ink2:#4a4a4a;--ec-muted:#7a7a7a;--ec-rule:rgba(0,0,0,0.08);
+  --ec-accent:#ff6b6b;--ec-accent2:#4ecdc4;--ec-accent3:#ffe66d;--ec-accent4:#a29bfe;
+  --ec-card-bg:rgba(255,255,255,0.8);--ec-card-border:rgba(0,0,0,0.1);
+  --ec-card-shadow:0 6px 24px rgba(0,0,0,0.08);--ec-glow:none;
+  --ec-canvas-bg:#1a1a2e;--ec-param-bg:rgba(255,255,255,0.5);--ec-param-border:rgba(0,0,0,0.1);
+  --ec-output-bg:rgba(255,255,255,0.6);--ec-output-border:rgba(0,0,0,0.08);
+  --ec-formula-bg:rgba(255,107,107,0.05);--ec-formula-border:rgba(255,107,107,0.15);
+  --ec-scrollbar-thumb:rgba(0,0,0,0.15);--ec-ball1:#ff6b6b;--ec-ball2:#4ecdc4;
+  --ec-ground:rgba(255,255,255,0.35);--ec-wall:rgba(255,255,255,0.4);
+}
+[data-theme="academic"]{
+  --ec-bg:#f8f9fa;--ec-bg2:#f1f3f5;--ec-surface:rgba(255,255,255,0.9);--ec-surface-hover:#f0f0f0;
+  --ec-ink:#1a1a2e;--ec-ink2:#3d3d5c;--ec-muted:#7a7a8a;--ec-rule:#e0e0e0;
+  --ec-accent:#6b8cae;--ec-accent2:#8a7ca8;--ec-accent3:#c4956a;--ec-accent4:#6a9e8a;
+  --ec-card-bg:#ffffff;--ec-card-border:#e0e0e0;
+  --ec-card-shadow:none;--ec-glow:none;
+  --ec-canvas-bg:#ffffff;--ec-param-bg:#f8f9fa;--ec-param-border:#e0e0e0;
+  --ec-output-bg:#f4f5f7;--ec-output-border:#e0e0e0;
+  --ec-formula-bg:rgba(107,140,174,0.04);--ec-formula-border:rgba(107,140,174,0.2);
+  --ec-scrollbar-thumb:#d0d0d0;--ec-ball1:#6b8cae;--ec-ball2:#c4956a;
+  --ec-ground:#bdbdbd;--ec-wall:#9a9a9a;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--ec-bg);color:var(--ec-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--ec-bg)}
+::-webkit-scrollbar-thumb{background:var(--ec-scrollbar-thumb);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--ec-rule);background:var(--ec-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--ec-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--ec-formula-bg);border:1px solid var(--ec-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--ec-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--ec-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--ec-accent);text-shadow:var(--ec-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--ec-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--ec-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--ec-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--ec-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;font-size:0.82rem;color:var(--ec-muted);opacity:0.5;text-align:center;font-family:monospace;letter-spacing:1px}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--ec-rule);background:var(--ec-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--ec-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--ec-formula-bg);border:1px solid var(--ec-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--ec-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--ec-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--ec-accent);text-shadow:var(--ec-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--ec-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--ec-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--ec-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--ec-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--ec-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:16px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--ec-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--ec-accent);font-weight:400;min-width:70px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--ec-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ec-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--ec-param-border);background:var(--ec-param-bg);color:var(--ec-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--ec-accent);color:var(--ec-accent);background:var(--ec-formula-bg)}
+
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 控制按钮 ===== */
+.sim-btn{padding:8px 20px;border:1px solid var(--ec-rule);background:rgba(0,0,0,0.4);color:var(--ec-ink);border-radius:10px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--ec-accent)}
+.sim-btn.primary{background:var(--ec-accent);color:#0a0a1a;border-color:var(--ec-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+
+/* ===== 输出卡片 ===== */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--ec-output-bg);border:1px solid var(--ec-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.1rem;font-weight:700;color:var(--ec-accent);line-height:1.2;transition:color .4s ease}
+.output-num.b{color:var(--ec-accent2)}.output-num.c{color:var(--ec-accent3)}.output-num.d{color:var(--ec-accent4)}
+.output-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--ec-muted);margin-top:2px}
+
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 对比图表 ===== */
+.chart-container{background:var(--ec-output-bg);border:1px solid var(--ec-output-border);border-radius:12px;overflow:hidden;position:relative;transition:background-color .5s ease,border-color .4s ease}
+.chart-container canvas{display:block;width:100%;height:150px}
+.chart-label{position:absolute;top:8px;left:10px;font-family:monospace;font-size:0.65rem;color:var(--ec-muted);letter-spacing:1px;text-transform:uppercase;pointer-events:none}
+
+[data-theme="academic"] .chart-container{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .chart-container{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--ec-output-bg);border:1px solid var(--ec-output-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.76rem;color:var(--ec-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--ec-ink)}
+.info-card .muted{color:var(--ec-muted);font-size:0.72rem}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .info-card h3{color:var(--ec-accent)}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card h3{color:var(--ec-accent)}
+[data-theme="cartoon"] .info-card h3{color:var(--ec-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--ec-accent);text-shadow:var(--ec-glow)}
+
+/* ===== 应用卡片 ===== */
+.app-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.app-card{background:var(--ec-output-bg);border:1px solid var(--ec-output-border);border-radius:10px;padding:10px 12px;transition:background-color .5s ease,border-color .4s ease}
+.app-card .app-ic{font-size:1.1rem;margin-bottom:4px}
+.app-card .app-name{font-size:0.76rem;font-weight:700;color:var(--ec-ink);margin-bottom:2px}
+.app-card .app-desc{font-size:0.68rem;color:var(--ec-muted);line-height:1.5}
+
+[data-theme="academic"] .app-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .app-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 公式块 ===== */
+.formula-block{background:var(--ec-formula-bg);border:1px solid var(--ec-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--ec-ink);margin-bottom:6px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.76rem;color:var(--ec-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.76rem;color:var(--ec-muted);margin-top:6px;line-height:1.6}
+.formula-desc strong{color:var(--ec-ink2)}
+.formula-note{font-size:0.7rem;color:var(--ec-accent3);margin-top:6px;font-style:italic}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:18px}
+.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--ec-rule)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--ec-accent);border:2px solid var(--ec-bg2)}
+.tl-year{font-size:0.72rem;font-weight:700;color:var(--ec-accent);font-family:monospace;margin-bottom:2px}
+.tl-title{font-size:0.78rem;font-weight:600;color:var(--ec-ink);margin-bottom:2px}
+.tl-desc{font-size:0.72rem;color:var(--ec-muted);line-height:1.5}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--ec-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--ec-rule)}
+  .sim-panel{min-height:400px}
+}
+@media(max-width:600px){
+  .canvas-controls{flex-wrap:wrap;justify-content:center}
+  .sim-btn{padding:6px 14px;font-size:0.76rem}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">⚪</div>
+      <div>
+        <h1>弹性碰撞</h1>
+        <div class="lp-sub">参数设置 · 碰撞控制</div>
+      </div>
+    </div>
+
+    <!-- 实验参数 -->
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">质量 m₁</span><span class="param-value" id="valM1">1.0 kg</span></div>
+        <input type="range" id="sliderM1" min="0.5" max="10" value="1" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">初速度 v₁</span><span class="param-value" id="valV1">6.0 m/s</span></div>
+        <input type="range" id="sliderV1" min="-20" max="20" value="6" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">质量 m₂</span><span class="param-value" id="valM2">1.0 kg</span></div>
+        <input type="range" id="sliderM2" min="0.5" max="10" value="1" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">初速度 v₂</span><span class="param-value" id="valV2">0.0 m/s</span></div>
+        <input type="range" id="sliderV2" min="-20" max="20" value="0" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">恢复系数 e</span><span class="param-value" id="valE">1.00</span></div>
+        <input type="range" id="sliderE" min="0" max="1" value="1" step="0.01">
+      </div>
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="equal">🎱 等质量正碰</button>
+        <button class="preset-btn" data-preset="bigsmall">🚗 大撞小</button>
+        <button class="preset-btn" data-preset="inelastic">🧱 完全非弹</button>
+        <button class="preset-btn" data-preset="super">⚡ 超弹碰撞</button>
+      </div>
+    </div>
+
+    <!-- 操作指南 -->
+    <div class="side-section">
+      <div class="section-label">操作指南</div>
+      <div class="info-card">
+        <p><strong>🎚 调节参数</strong>：拖动滑块改变质量、速度与恢复系数</p>
+        <p><strong>▶ 播放/暂停</strong>：底部按钮控制小球运动</p>
+        <p><strong>🔄 重置</strong>：恢复初始位置，应用当前滑块速度</p>
+        <p><strong>📌 预设</strong>：一键载入经典碰撞场景</p>
+        <p class="muted">小球在水平面与弹性墙壁间反复碰撞，e=1 时动能守恒，e&lt;1 时动能损失。</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeTime">t = 0.00 s</span>
+        <span class="overlay-badge" id="badgeCount">碰撞 0 次</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">点击「播放」开始碰撞模拟</div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+          播放
+        </button>
+        <button class="sim-btn" id="btnPause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+          暂停
+        </button>
+        <button class="sim-btn" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>输出与知识</h2>
+        <div class="rp-sub">实时数据 · 公式讲解 · 历史脉络</div>
+      </div>
+    </div>
+
+    <!-- 实时输出 -->
+    <div class="side-section">
+      <div class="section-label">碰撞结果（理论值）</div>
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num" id="outV1p">0.00</div><div class="output-label">v₁′ (m/s)</div></div>
+        <div class="output-card"><div class="output-num b" id="outV2p">6.00</div><div class="output-label">v₂′ (m/s)</div></div>
+        <div class="output-card"><div class="output-num c" id="outPbefore">6.00</div><div class="output-label">动量前 (kg·m/s)</div></div>
+        <div class="output-card"><div class="output-num c" id="outPafter">6.00</div><div class="output-label">动量后 (kg·m/s)</div></div>
+        <div class="output-card"><div class="output-num d" id="outEbefore">18.00</div><div class="output-label">动能前 (J)</div></div>
+        <div class="output-card"><div class="output-num d" id="outEafter">18.00</div><div class="output-label">动能后 (J)</div></div>
+        <div class="output-card"><div class="output-num" id="outLoss">0.0%</div><div class="output-label">能量损失</div></div>
+        <div class="output-card"><div class="output-num b" id="outCheck">✓</div><div class="output-label">动量守恒</div></div>
+      </div>
+    </div>
+
+    <!-- 动量对比图 -->
+    <div class="side-section">
+      <div class="section-label">动量对比（碰撞前后）</div>
+      <div class="chart-container">
+        <span class="chart-label">p = m₁v₁ + m₂v₂</span>
+        <canvas id="momentumChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 能量对比图 -->
+    <div class="side-section">
+      <div class="section-label">动能对比（碰撞前后）</div>
+      <div class="chart-container">
+        <span class="chart-label">E = ½m₁v₁² + ½m₂v₂²</span>
+        <canvas id="energyChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 知识点讲解 -->
+    <div class="side-section">
+      <div class="section-label">知识点讲解</div>
+
+      <div class="formula-block">
+        <div class="formula-title">动量守恒定律</div>
+        <div class="formula-expr">m₁v₁ + m₂v₂ = m₁v₁′ + m₂v₂′
+
+即系统碰撞前后总动量不变。
+该定律在任何碰撞中都成立（无外力时）。</div>
+        <div class="formula-desc">无论碰撞是否弹性，只要系统所受合外力为零，<strong>总动量守恒</strong>。这是自然界最深刻的对称性之一——空间平移不变性的体现。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">恢复系数与碰撞后速度</div>
+        <div class="formula-expr">v₁′ = [(m₁−e·m₂)v₁ + (1+e)m₂v₂] / (m₁+m₂)
+v₂′ = [(1+e)m₁v₁ + (m₂−e·m₁)v₂] / (m₁+m₂)</div>
+        <div class="formula-desc">联立动量守恒与恢复系数定义即可解出。<strong>e=1</strong> 完全弹性（动能守恒）；<strong>e=0</strong> 完全非弹性（粘合，动能损失最大）。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">恢复系数定义</div>
+        <div class="formula-expr">e = (v₂′ − v₁′) / (v₁ − v₂)
+
+e = 分离速度 / 接近速度</div>
+        <div class="formula-desc">恢复系数衡量碰撞的弹性程度，仅取决于碰撞体的材料性质。<strong>0 ≤ e ≤ 1</strong>，e 越大能量损失越小。</div>
+        <div class="formula-note">⚠ 动能守恒仅当 e=1；e&lt;1 时损失的动能转化为热、形变、声能。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">动能与能量损失</div>
+        <div class="formula-expr">E_before = ½m₁v₁² + ½m₂v₂²
+E_after  = ½m₁v₁′² + ½m₂v₂′²
+ΔE = E_before − E_after</div>
+        <div class="formula-desc">碰撞中动量永远守恒，但动能一般会损失。<strong>损失率</strong> = ΔE / E_before × 100%。</div>
+      </div>
+    </div>
+
+    <!-- 应用实例 -->
+    <div class="side-section">
+      <div class="section-label">应用实例</div>
+      <div class="app-grid">
+        <div class="app-card">
+          <div class="app-ic">🎱</div>
+          <div class="app-name">台球游戏</div>
+          <div class="app-desc">母球撞击目标球近似弹性碰撞，等质量时速度近乎传递。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-ic">🚗</div>
+          <div class="app-name">汽车碰撞测试</div>
+          <div class="app-desc">通过设计吸能区降低 e 值，延长碰撞时间以保护乘员。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-ic">⚛️</div>
+          <div class="app-name">中子慢化</div>
+          <div class="app-desc">快中子与轻核（氢、碳）弹性碰撞损失动能，实现核反应堆慢化。</div>
+        </div>
+        <div class="app-card">
+          <div class="app-ic">🪀</div>
+          <div class="app-name">牛顿摆</div>
+          <div class="app-desc">一排钢球交替碰撞，动量与能量近乎无耗传递，e 接近 1。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史脉络 -->
+    <div class="side-section">
+      <div class="section-label">碰撞力学历史</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-year">1669</div>
+          <div class="tl-title">惠更斯碰撞定律</div>
+          <div class="tl-desc">惠更斯研究硬球碰撞，提出动量守恒的雏形与“同向运动量”概念，首次定量描述弹性碰撞规律。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1687</div>
+          <div class="tl-title">牛顿运动定律</div>
+          <div class="tl-desc">牛顿在《自然哲学的数学原理》中确立三大运动定律，为碰撞问题提供完整力学框架，并定义恢复系数。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1746</div>
+          <div class="tl-title">动量守恒的普适化</div>
+          <div class="tl-desc">欧拉等人将动量守恒推广为普适原理，使其超越碰撞范畴，成为分析力学与场论的基石。</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   STATE
+   ================================================================ */
+var state = {
+  m1:1, v1:6, m2:1, v2:0, e:1,
+  x1:5, x2:17, vx1:6, vx2:0,
+  r1:0.5, r2:0.5,
+  time:0, running:false, collisions:0,
+  trail1:[], trail2:[],
+};
+var WORLD_W = 24;            // 物理世界宽度 (m)
+var scale = 30;              // px / m (resize 时重算)
+var groundY = 0;             // 地面 canvas y
+var X1_INIT = 5, X2_INIT = 17;
+
+/* ================================================================
+   DOM
+   ================================================================ */
+var simCanvas = document.getElementById('simCanvas');
+var ctx = simCanvas.getContext('2d');
+var momCanvas = document.getElementById('momentumChart');
+var momCtx = momCanvas.getContext('2d');
+var enCanvas = document.getElementById('energyChart');
+var enCtx = enCanvas.getContext('2d');
+var html = document.documentElement;
+
+var sliders = {
+  m1:document.getElementById('sliderM1'),
+  v1:document.getElementById('sliderV1'),
+  m2:document.getElementById('sliderM2'),
+  v2:document.getElementById('sliderV2'),
+  e:document.getElementById('sliderE'),
+};
+var vals = {
+  m1:document.getElementById('valM1'),
+  v1:document.getElementById('valV1'),
+  m2:document.getElementById('valM2'),
+  v2:document.getElementById('valV2'),
+  e:document.getElementById('valE'),
+};
+var outs = {
+  v1p:document.getElementById('outV1p'),
+  v2p:document.getElementById('outV2p'),
+  pbefore:document.getElementById('outPbefore'),
+  pafter:document.getElementById('outPafter'),
+  ebefore:document.getElementById('outEbefore'),
+  eafter:document.getElementById('outEafter'),
+  loss:document.getElementById('outLoss'),
+  check:document.getElementById('outCheck'),
+};
+var badgeFPS=document.getElementById('badgeFPS');
+var badgeTime=document.getElementById('badgeTime');
+var badgeCount=document.getElementById('badgeCount');
+var canvasHint=document.getElementById('canvasHint');
+
+/* ================================================================
+   THEME SYNC
+   ================================================================ */
+var themeObs = new MutationObserver(function(){ drawSim(); drawCharts(); });
+themeObs.observe(html,{attributes:true,attributeFilter:['data-theme']});
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+function getCSSVar(n){ return getComputedStyle(html).getPropertyValue(n).trim(); }
+function radiusFromMass(m){ return 0.5*Math.cbrt(m); }   // 米
+
+/* ================================================================
+   RESIZE
+   ================================================================ */
+function resizeAll(){
+  var sc=simCanvas.parentElement;
+  var dpr=window.devicePixelRatio||1;
+  simCanvas.width=sc.clientWidth*dpr;
+  simCanvas.height=sc.clientHeight*dpr;
+  simCanvas.style.width=sc.clientWidth+'px';
+  simCanvas.style.height=sc.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  scale = sc.clientWidth / WORLD_W;
+  groundY = sc.clientHeight*0.62;
+  var pc=momCanvas.parentElement;
+  momCanvas.width=pc.clientWidth*dpr; momCanvas.height=150*dpr;
+  momCanvas.style.width=pc.clientWidth+'px'; momCanvas.style.height='150px';
+  momCtx.setTransform(dpr,0,0,dpr,0,0);
+  var ec=enCanvas.parentElement;
+  enCanvas.width=ec.clientWidth*dpr; enCanvas.height=150*dpr;
+  enCanvas.style.width=ec.clientWidth+'px'; enCanvas.style.height='150px';
+  enCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize',resizeAll);
+
+/* ================================================================
+   PHYSICS - 碰撞后速度
+   ================================================================ */
+function postCollision(m1,v1,m2,v2,e){
+  var sum=m1+m2;
+  var v1p=((m1-e*m2)*v1+(1+e)*m2*v2)/sum;
+  var v2p=((1+e)*m1*v1+(m2-e*m1)*v2)/sum;
+  return {v1p:v1p,v2p:v2p};
+}
+
+/* ================================================================
+   OUTPUT UPDATE
+   ================================================================ */
+function updateOutputs(){
+  var r=postCollision(state.m1,state.v1,state.m2,state.v2,state.e);
+  var pBefore=state.m1*state.v1+state.m2*state.v2;
+  var pAfter=state.m1*r.v1p+state.m2*r.v2p;
+  var eBefore=0.5*state.m1*state.v1*state.v1+0.5*state.m2*state.v2*state.v2;
+  var eAfter=0.5*state.m1*r.v1p*r.v1p+0.5*state.m2*r.v2p*r.v2p;
+  var loss = eBefore>1e-9 ? (eBefore-eAfter)/eBefore*100 : 0;
+  outs.v1p.textContent=r.v1p.toFixed(2);
+  outs.v2p.textContent=r.v2p.toFixed(2);
+  outs.pbefore.textContent=pBefore.toFixed(2);
+  outs.pafter.textContent=pAfter.toFixed(2);
+  outs.ebefore.textContent=eBefore.toFixed(2);
+  outs.eafter.textContent=eAfter.toFixed(2);
+  outs.loss.textContent=loss.toFixed(1)+'%';
+  var diff=Math.abs(pBefore-pAfter);
+  outs.check.textContent = diff<1e-6 ? '✓' : '✗';
+  outs.check.style.color = diff<1e-6 ? getCSSVar('--ec-accent3') : getCSSVar('--ec-accent');
+  drawCharts();
+}
+
+/* ================================================================
+   SLIDER SYNC
+   ================================================================ */
+function syncSliders(){
+  state.m1=+sliders.m1.value;
+  state.v1=+sliders.v1.value;
+  state.m2=+sliders.m2.value;
+  state.v2=+sliders.v2.value;
+  state.e=+sliders.e.value;
+  state.r1=radiusFromMass(state.m1);
+  state.r2=radiusFromMass(state.m2);
+  // 防止重叠
+  if(state.x2-state.x1 < state.r1+state.r2+0.05){
+    state.x2=state.x1+state.r1+state.r2+0.05;
+    if(state.x2+state.r2>WORLD_W) state.x1=state.x2-state.r1-state.r2-0.05;
+  }
+  vals.m1.textContent=state.m1.toFixed(1)+' kg';
+  vals.v1.textContent=state.v1.toFixed(1)+' m/s';
+  vals.m2.textContent=state.m2.toFixed(1)+' kg';
+  vals.v2.textContent=state.v2.toFixed(1)+' m/s';
+  vals.e.textContent=state.e.toFixed(2);
+  updateOutputs();
+}
+// 质量 / 恢复系数：仅更新参数，不打断当前运动速度
+sliders.m1.addEventListener('input',syncSliders);
+sliders.m2.addEventListener('input',syncSliders);
+sliders.e.addEventListener('input',syncSliders);
+// 速度滑块：实时驱动当前速度（交互式）
+sliders.v1.addEventListener('input',function(){ syncSliders(); state.vx1=state.v1; });
+sliders.v2.addEventListener('input',function(){ syncSliders(); state.vx2=state.v2; });
+
+/* ================================================================
+   PRESETS
+   ================================================================ */
+document.querySelectorAll('.preset-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var p=btn.dataset.preset;
+    if(p==='equal'){sliders.m1.value=1;sliders.v1.value=6;sliders.m2.value=1;sliders.v2.value=0;sliders.e.value=1;}
+    if(p==='bigsmall'){sliders.m1.value=3;sliders.v1.value=6;sliders.m2.value=1;sliders.v2.value=0;sliders.e.value=1;}
+    if(p==='inelastic'){sliders.m1.value=2;sliders.v1.value=8;sliders.m2.value=1;sliders.v2.value=0;sliders.e.value=0;}
+    if(p==='super'){sliders.m1.value=1;sliders.v1.value=10;sliders.m2.value=1;sliders.v2.value=-6;sliders.e.value=1;}
+    resetSim();
+  });
+});
+
+/* ================================================================
+   RESET
+   ================================================================ */
+function resetSim(){
+  syncSliders();
+  state.x1=X1_INIT; state.x2=X2_INIT;
+  state.vx1=state.v1; state.vx2=state.v2;
+  state.time=0; state.collisions=0; state.running=false;
+  state.trail1=[]; state.trail2=[];
+  badgeTime.textContent='t = 0.00 s';
+  badgeCount.textContent='碰撞 0 次';
+  canvasHint.style.display='block';
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+document.getElementById('btnPlay').addEventListener('click',function(){ state.running=true; canvasHint.style.display='none'; });
+document.getElementById('btnPause').addEventListener('click',function(){ state.running=false; });
+document.getElementById('btnReset').addEventListener('click',function(){ resetSim(); });
+
+/* ================================================================
+   STEP PHYSICS
+   ================================================================ */
+function step(dt){
+  state.x1+=state.vx1*dt;
+  state.x2+=state.vx2*dt;
+
+  // 轨迹记录
+  state.trail1.push({x:state.x1}); state.trail2.push({x:state.x2});
+  if(state.trail1.length>40) state.trail1.shift();
+  if(state.trail2.length>40) state.trail2.shift();
+
+  // 墙壁（完全弹性反弹）
+  if(state.x1-state.r1<0){ state.x1=state.r1; state.vx1=-state.vx1; }
+  if(state.x1+state.r1>WORLD_W){ state.x1=WORLD_W-state.r1; state.vx1=-state.vx1; }
+  if(state.x2-state.r2<0){ state.x2=state.r2; state.vx2=-state.vx2; }
+  if(state.x2+state.r2>WORLD_W){ state.x2=WORLD_W-state.r2; state.vx2=-state.vx2; }
+
+  // 球-球碰撞
+  var dx=state.x2-state.x1;
+  var dist=Math.abs(dx);
+  var rs=state.r1+state.r2;
+  if(dist<=rs){
+    var rel=state.vx1-state.vx2; // 接近速度（球1相对球2）
+    // 仅当相向运动时碰撞
+    if((dx>0 && rel>0) || (dx<0 && rel<0)){
+      var r=postCollision(state.m1,state.vx1,state.m2,state.vx2,state.e);
+      state.vx1=r.v1p; state.vx2=r.v2p;
+      // 分离避免穿透
+      var overlap=rs-dist+0.01;
+      if(dx>0){ state.x2+=overlap/2; state.x1-=overlap/2; }
+      else { state.x2-=overlap/2; state.x1+=overlap/2; }
+      // 修正越界
+      if(state.x1-state.r1<0) state.x1=state.r1;
+      if(state.x2+state.r2>WORLD_W) state.x2=WORLD_W-state.r2;
+      state.collisions++;
+      badgeCount.textContent='碰撞 '+state.collisions+' 次';
+    }
+  }
+}
+
+/* ================================================================
+   DRAW
+   ================================================================ */
+function drawArrow(cx,cy,ex,ey,color,lw){
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw||2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(ex,ey); ctx.stroke();
+  var ang=Math.atan2(ey-cy,ex-cx);
+  var ah=7;
+  ctx.beginPath();
+  ctx.moveTo(ex,ey);
+  ctx.lineTo(ex-ah*Math.cos(ang-0.4),ey-ah*Math.sin(ang-0.4));
+  ctx.lineTo(ex-ah*Math.cos(ang+0.4),ey-ah*Math.sin(ang+0.4));
+  ctx.closePath(); ctx.fill();
+}
+
+function drawSim(){
+  var w=simCanvas.clientWidth, h=simCanvas.clientHeight;
+  ctx.fillStyle=getCSSVar('--ec-canvas-bg');
+  ctx.fillRect(0,0,w,h);
+
+  var ground=getCSSVar('--ec-ground');
+  var wall=getCSSVar('--ec-wall');
+  var accent=getCSSVar('--ec-accent');
+  var muted=getCSSVar('--ec-muted');
+
+  // 地面
+  ctx.strokeStyle=ground; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(w,groundY); ctx.stroke();
+  // 地面斜线
+  ctx.strokeStyle=ground; ctx.globalAlpha=0.5; ctx.lineWidth=1;
+  for(var gx=0;gx<w;gx+=14){
+    ctx.beginPath(); ctx.moveTo(gx,groundY); ctx.lineTo(gx-10,groundY+12); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  // 墙壁
+  ctx.strokeStyle=wall; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(2,0); ctx.lineTo(2,groundY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(w-2,0); ctx.lineTo(w-2,groundY); ctx.stroke();
+
+  // 刻度
+  ctx.fillStyle=muted; ctx.font='9px monospace'; ctx.textAlign='center';
+  for(var m=0;m<=WORLD_W;m+=4){
+    var sx=m*scale;
+    ctx.fillRect(sx,groundY-4,1,4);
+    ctx.fillText(m+'m',sx,groundY+24);
+  }
+
+  // 轨迹
+  function drawTrail(trail,color,y){
+    for(var i=0;i<trail.length-1;i++){
+      var a=i/trail.length;
+      ctx.globalAlpha=a*0.5;
+      ctx.strokeStyle=color; ctx.lineWidth=a*5+1;
+      ctx.beginPath();
+      ctx.moveTo(trail[i].x*scale,y);
+      ctx.lineTo(trail[i+1].x*scale,y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+  var b1y=groundY-state.r1*scale;
+  var b2y=groundY-state.r2*scale;
+  drawTrail(state.trail1,getCSSVar('--ec-ball1'),b1y);
+  drawTrail(state.trail2,getCSSVar('--ec-ball2'),b2y);
+
+  // 球1
+  var c1=getCSSVar('--ec-ball1');
+  var x1s=state.x1*scale;
+  ctx.beginPath(); ctx.arc(x1s,b1y,state.r1*scale,0,Math.PI*2);
+  ctx.fillStyle=c1; ctx.globalAlpha=0.85; ctx.fill();
+  ctx.globalAlpha=1; ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+  ctx.fillText('m₁',x1s,b1y+4);
+  ctx.fillStyle=muted; ctx.font='9px monospace';
+  ctx.fillText(state.m1.toFixed(1)+'kg',x1s,b1y-state.r1*scale-8);
+  // 速度箭头1
+  if(Math.abs(state.vx1)>0.05){
+    drawArrow(x1s,b1y,x1s+state.vx1*4,b1y,c1,2.5);
+  }
+
+  // 球2
+  var c2=getCSSVar('--ec-ball2');
+  var x2s=state.x2*scale;
+  ctx.beginPath(); ctx.arc(x2s,b2y,state.r2*scale,0,Math.PI*2);
+  ctx.fillStyle=c2; ctx.globalAlpha=0.85; ctx.fill();
+  ctx.globalAlpha=1; ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+  ctx.fillText('m₂',x2s,b2y+4);
+  ctx.fillStyle=muted; ctx.font='9px monospace';
+  ctx.fillText(state.m2.toFixed(1)+'kg',x2s,b2y-state.r2*scale-8);
+  // 速度箭头2
+  if(Math.abs(state.vx2)>0.05){
+    drawArrow(x2s,b2y,x2s+state.vx2*4,b2y,c2,2.5);
+  }
+
+  // 速度文本
+  ctx.fillStyle=accent; ctx.font='10px monospace'; ctx.textAlign='left';
+  ctx.fillText('v₁='+state.vx1.toFixed(2),8,18);
+  ctx.fillText('v₂='+state.vx2.toFixed(2),8,34);
+}
+
+/* ================================================================
+   CHARTS
+   ================================================================ */
+function drawBarChart(c,cc,w,h,before,after,signed,unit){
+  cc.fillStyle=getCSSVar('--ec-output-bg');
+  cc.fillRect(0,0,w,h);
+  var accent=getCSSVar('--ec-accent');
+  var accent3=getCSSVar('--ec-accent3');
+  var muted=getCSSVar('--ec-muted');
+  var rule=getCSSVar('--ec-rule');
+
+  if(signed){
+    var maxAbs=Math.max(Math.abs(before),Math.abs(after),0.001);
+    var baseY=h/2+10;
+    var maxH=h/2-22;
+    // 基线
+    cc.strokeStyle=rule; cc.lineWidth=1;
+    cc.beginPath(); cc.moveTo(20,baseY); cc.lineTo(w-10,baseY); cc.stroke();
+    var bw=w*0.22;
+    function sbar(cx,val,color,label,valTxt){
+      var bh=val/maxAbs*maxH;
+      var by=baseY;
+      cc.fillStyle=color; cc.globalAlpha=0.85;
+      cc.fillRect(cx-bw/2, by-Math.max(0,bh), bw, Math.abs(bh));
+      cc.globalAlpha=1;
+      cc.strokeStyle=color; cc.lineWidth=1.5;
+      cc.strokeRect(cx-bw/2, by-Math.max(0,bh), bw, Math.abs(bh));
+      cc.fillStyle=muted; cc.font='9px monospace'; cc.textAlign='center';
+      cc.fillText(label,cx,h-4);
+      cc.fillStyle=color; cc.font='bold 10px monospace';
+      cc.fillText(valTxt,cx, by-bh + (bh>=0?-6:12));
+    }
+    sbar(w*0.32,before,accent,'碰撞前',before.toFixed(2));
+    sbar(w*0.68,after,accent3,'碰撞后',after.toFixed(2));
+  } else {
+    var maxV=Math.max(before,after,0.001);
+    var baseY=h-18;
+    var maxH=h-34;
+    cc.strokeStyle=rule; cc.lineWidth=1;
+    cc.beginPath(); cc.moveTo(20,baseY); cc.lineTo(w-10,baseY); cc.stroke();
+    var bw=w*0.22;
+    function ubar(cx,val,color,label,valTxt){
+      var bh=val/maxV*maxH;
+      cc.fillStyle=color; cc.globalAlpha=0.85;
+      cc.fillRect(cx-bw/2, baseY-bh, bw, bh);
+      cc.globalAlpha=1;
+      cc.strokeStyle=color; cc.lineWidth=1.5;
+      cc.strokeRect(cx-bw/2, baseY-bh, bw, bh);
+      cc.fillStyle=muted; cc.font='9px monospace'; cc.textAlign='center';
+      cc.fillText(label,cx,h-4);
+      cc.fillStyle=color; cc.font='bold 10px monospace';
+      cc.fillText(valTxt,cx,baseY-bh-5);
+    }
+    ubar(w*0.32,before,accent,'碰撞前',before.toFixed(2));
+    ubar(w*0.68,after,accent3,'碰撞后',after.toFixed(2));
+  }
+}
+
+function drawCharts(){
+  var r=postCollision(state.m1,state.v1,state.m2,state.v2,state.e);
+  var pBefore=state.m1*state.v1+state.m2*state.v2;
+  var pAfter=state.m1*r.v1p+state.m2*r.v2p;
+  var eBefore=0.5*state.m1*state.v1*state.v1+0.5*state.m2*state.v2*state.v2;
+  var eAfter=0.5*state.m1*r.v1p*r.v1p+0.5*state.m2*r.v2p*r.v2p;
+  drawBarChart(momCanvas,momCtx,momCanvas.clientWidth,150,pBefore,pAfter,true,'kg·m/s');
+  drawBarChart(enCanvas,enCtx,enCanvas.clientWidth,150,eBefore,eAfter,false,'J');
+}
+
+/* ================================================================
+   MAIN LOOP
+   ================================================================ */
+var last=performance.now(), frameCount=0, lastFps=performance.now(), fps=60;
+function mainLoop(now){
+  var dt=(now-last)/1000; last=now;
+  if(dt>0.05) dt=0.05;
+  if(state.running){
+    // 子步长保证稳定
+    var steps=2;
+    for(var i=0;i<steps;i++) step(dt/steps);
+    state.time+=dt;
+    badgeTime.textContent='t = '+state.time.toFixed(2)+' s';
+  }
+  drawSim();
+  frameCount++;
+  if(now-lastFps>=1000){ fps=frameCount; frameCount=0; lastFps=now; badgeFPS.textContent=fps+' FPS'; }
+  requestAnimationFrame(mainLoop);
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+PSUTheme.createSwitcher();
+PSUTheme.createBackButton('index.html');
+
+resizeAll();
+syncSliders();
+resetSim();
+requestAnimationFrame(mainLoop);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电场偏转实验 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 五种主题适配 (前缀 --ed-)
+   ================================================================ */
+[data-theme="glass"]{
+  --ed-bg:#080812;--ed-bg2:#0e0e1c;--ed-surface:rgba(255,255,255,0.04);--ed-surface-hover:rgba(255,255,255,0.08);
+  --ed-ink:#f1f5f9;--ed-ink2:#cbd5e1;--ed-muted:#64748b;--ed-rule:rgba(255,255,255,0.07);
+  --ed-accent:#74b9ff;--ed-accent2:#a29bfe;--ed-accent3:#34d399;--ed-accent4:#fbbf24;
+  --ed-card-bg:rgba(255,255,255,0.03);--ed-card-border:rgba(255,255,255,0.06);
+  --ed-card-shadow:0 6px 24px rgba(0,0,0,0.4);--ed-glow:none;
+  --ed-canvas-bg:#040410;--ed-param-bg:rgba(255,255,255,0.03);--ed-param-border:rgba(255,255,255,0.06);
+  --ed-output-bg:rgba(0,0,0,0.3);--ed-output-border:rgba(255,255,255,0.06);
+  --ed-formula-bg:rgba(116,185,255,0.05);--ed-formula-border:rgba(116,185,255,0.12);
+  --ed-scrollbar-thumb:rgba(116,185,255,0.3);
+  --ed-plate-pos:#ef4444;--ed-plate-neg:#3b82f6;--ed-field-arrow:rgba(251,191,36,0.45);
+  --ed-particle:#fbbf24;--ed-force-vec:#ef4444;--ed-vel-vec:#60a5fa;--ed-trail:rgba(251,191,36,0.5);
+}
+[data-theme="cyber"]{
+  --ed-bg:#040410;--ed-bg2:#08081a;--ed-surface:rgba(0,243,255,0.03);--ed-surface-hover:rgba(0,243,255,0.06);
+  --ed-ink:#e0f7fa;--ed-ink2:#b2ebf2;--ed-muted:#4dd0e1;--ed-rule:rgba(0,243,255,0.1);
+  --ed-accent:#00f3ff;--ed-accent2:#ff00ea;--ed-accent3:#39ff14;--ed-accent4:#ffb800;
+  --ed-card-bg:rgba(0,243,255,0.02);--ed-card-border:rgba(0,243,255,0.12);
+  --ed-card-shadow:0 0 16px rgba(0,243,255,0.05);--ed-glow:0 0 8px rgba(0,243,255,0.25);
+  --ed-canvas-bg:#020208;--ed-param-bg:rgba(0,243,255,0.02);--ed-param-border:rgba(0,243,255,0.1);
+  --ed-output-bg:rgba(0,0,0,0.4);--ed-output-border:rgba(0,243,255,0.08);
+  --ed-formula-bg:rgba(0,243,255,0.04);--ed-formula-border:rgba(0,243,255,0.15);
+  --ed-scrollbar-thumb:rgba(0,243,255,0.4);
+  --ed-plate-pos:#ff00ea;--ed-plate-neg:#00f3ff;--ed-field-arrow:rgba(57,255,20,0.4);
+  --ed-particle:#ffb800;--ed-force-vec:#ff00ea;--ed-vel-vec:#00f3ff;--ed-trail:rgba(255,184,0,0.5);
+}
+[data-theme="soviet"]{
+  --ed-bg:#f0ebe4;--ed-bg2:#e8e0d6;--ed-surface:#fffaf2;--ed-surface-hover:#f4f0ea;
+  --ed-ink:#1a1a1a;--ed-ink2:#3d3d3d;--ed-muted:#6a5a4a;--ed-rule:#d4c4a8;
+  --ed-accent:#c41e1e;--ed-accent2:#8b4513;--ed-accent3:#a0522d;--ed-accent4:#cd853f;
+  --ed-card-bg:#fffaf2;--ed-card-border:#c41e1e;
+  --ed-card-shadow:none;--ed-glow:none;
+  --ed-canvas-bg:#e8e0d6;--ed-param-bg:#f4f0ea;--ed-param-border:#d4c4a8;
+  --ed-output-bg:#f4f0ea;--ed-output-border:#d4c4a8;
+  --ed-formula-bg:rgba(196,30,30,0.04);--ed-formula-border:rgba(196,30,30,0.2);
+  --ed-scrollbar-thumb:#c41e1e;
+  --ed-plate-pos:#c41e1e;--ed-plate-neg:#1a3a5c;--ed-field-arrow:rgba(196,30,30,0.35);
+  --ed-particle:#c41e1e;--ed-force-vec:#c41e1e;--ed-vel-vec:#1a3a5c;--ed-trail:rgba(196,30,30,0.4);
+}
+[data-theme="cartoon"]{
+  --ed-bg:#fef6e4;--ed-bg2:#fff8f0;--ed-surface:rgba(255,255,255,0.7);--ed-surface-hover:rgba(255,255,255,0.9);
+  --ed-ink:#2d3436;--ed-ink2:#4a4a4a;--ed-muted:#7a7a7a;--ed-rule:rgba(0,0,0,0.08);
+  --ed-accent:#ff6b6b;--ed-accent2:#4ecdc4;--ed-accent3:#ffe66d;--ed-accent4:#a29bfe;
+  --ed-card-bg:rgba(255,255,255,0.8);--ed-card-border:rgba(0,0,0,0.1);
+  --ed-card-shadow:0 6px 24px rgba(0,0,0,0.08);--ed-glow:none;
+  --ed-canvas-bg:#1a1a2e;--ed-param-bg:rgba(255,255,255,0.5);--ed-param-border:rgba(0,0,0,0.1);
+  --ed-output-bg:rgba(255,255,255,0.6);--ed-output-border:rgba(0,0,0,0.08);
+  --ed-formula-bg:rgba(255,107,107,0.05);--ed-formula-border:rgba(255,107,107,0.15);
+  --ed-scrollbar-thumb:rgba(0,0,0,0.15);
+  --ed-plate-pos:#ff6b6b;--ed-plate-neg:#4ecdc4;--ed-field-arrow:rgba(255,230,109,0.4);
+  --ed-particle:#ffe66d;--ed-force-vec:#ff6b6b;--ed-vel-vec:#4ecdc4;--ed-trail:rgba(255,230,109,0.5);
+}
+[data-theme="academic"]{
+  --ed-bg:#f8f9fa;--ed-bg2:#f1f3f5;--ed-surface:rgba(255,255,255,0.9);--ed-surface-hover:#f0f0f0;
+  --ed-ink:#1a1a2e;--ed-ink2:#3d3d5c;--ed-muted:#7a7a8a;--ed-rule:#e0e0e0;
+  --ed-accent:#6b8cae;--ed-accent2:#8a7ca8;--ed-accent3:#c4956a;--ed-accent4:#6a9e8a;
+  --ed-card-bg:#ffffff;--ed-card-border:#e0e0e0;
+  --ed-card-shadow:none;--ed-glow:none;
+  --ed-canvas-bg:#ffffff;--ed-param-bg:#f8f9fa;--ed-param-border:#e0e0e0;
+  --ed-output-bg:#f4f5f7;--ed-output-border:#e0e0e0;
+  --ed-formula-bg:rgba(107,140,174,0.04);--ed-formula-border:rgba(107,140,174,0.2);
+  --ed-scrollbar-thumb:#d0d0d0;
+  --ed-plate-pos:#c0392b;--ed-plate-neg:#2980b9;--ed-field-arrow:rgba(107,140,174,0.3);
+  --ed-particle:#e67e22;--ed-force-vec:#c0392b;--ed-vel-vec:#2980b9;--ed-trail:rgba(230,126,34,0.4);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--ed-bg);color:var(--ed-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--ed-bg)}
+::-webkit-scrollbar-thumb{background:var(--ed-scrollbar-thumb);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--ed-rule);background:var(--ed-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--ed-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--ed-formula-bg);border:1px solid var(--ed-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--ed-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--ed-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--ed-accent);text-shadow:var(--ed-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--ed-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--ed-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--ed-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--ed-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;font-size:0.82rem;color:var(--ed-muted);opacity:0.5;text-align:center;font-family:monospace;letter-spacing:1px}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--ed-rule);background:var(--ed-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--ed-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--ed-formula-bg);border:1px solid var(--ed-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--ed-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--ed-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--ed-accent);text-shadow:var(--ed-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--ed-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--ed-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--ed-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--ed-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--ed-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:16px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--ed-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--ed-accent);font-weight:400;min-width:70px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--ed-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ed-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--ed-param-border);background:var(--ed-param-bg);color:var(--ed-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--ed-accent);color:var(--ed-accent);background:var(--ed-formula-bg)}
+
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 模式按钮 ===== */
+.mode-indicator{display:flex;gap:6px}
+.mode-btn{flex:1;padding:7px 4px;border:1px solid var(--ed-param-border);background:var(--ed-param-bg);color:var(--ed-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--ed-accent);color:var(--ed-accent);background:var(--ed-formula-bg)}
+
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 控制按钮 ===== */
+.sim-btn{padding:8px 20px;border:1px solid var(--ed-rule);background:rgba(0,0,0,0.4);color:var(--ed-ink);border-radius:10px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--ed-accent)}
+.sim-btn.primary{background:var(--ed-accent);color:#0a0a1a;border-color:var(--ed-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:16px;height:16px}
+
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+
+/* ===== 输出卡片 ===== */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--ed-output-bg);border:1px solid var(--ed-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.1rem;font-weight:700;color:var(--ed-accent);line-height:1.2;transition:color .4s ease}
+.output-num.b{color:var(--ed-accent2)}.output-num.c{color:var(--ed-accent3)}.output-num.d{color:var(--ed-accent4)}
+.output-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--ed-muted);margin-top:2px}
+
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--ed-output-bg);border:1px solid var(--ed-output-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.76rem;color:var(--ed-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--ed-ink)}
+.info-card .muted{color:var(--ed-muted);font-size:0.72rem}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .info-card h3{color:var(--ed-accent)}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card h3{color:var(--ed-accent)}
+[data-theme="cartoon"] .info-card h3{color:var(--ed-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--ed-accent);text-shadow:var(--ed-glow)}
+
+/* ===== 公式块 ===== */
+.formula-block{background:var(--ed-formula-bg);border:1px solid var(--ed-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;overflow-x:auto;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.78rem;font-weight:700;color:var(--ed-ink);margin-bottom:6px;transition:color .4s ease}
+.formula-expr{font-family:monospace;font-size:0.76rem;color:var(--ed-accent2);line-height:1.8;white-space:pre-wrap;transition:color .4s ease}
+.formula-desc{font-size:0.76rem;color:var(--ed-muted);margin-top:6px;line-height:1.6}
+.formula-desc strong{color:var(--ed-ink2)}
+.formula-note{font-size:0.7rem;color:var(--ed-accent3);margin-top:6px;font-style:italic}
+
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* ===== 应用卡片 ===== */
+.app-card{background:var(--ed-output-bg);border:1px solid var(--ed-output-border);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;transition:background-color .5s ease,border-color .4s ease}
+.app-card:last-child{margin-bottom:0}
+.app-card .app-icon{font-size:1.4rem;flex-shrink:0;line-height:1}
+.app-card .app-body h4{font-size:0.78rem;font-weight:700;color:var(--ed-ink);margin-bottom:3px}
+.app-card .app-body p{font-size:0.72rem;color:var(--ed-muted);line-height:1.5}
+
+[data-theme="academic"] .app-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .app-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:18px}
+.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--ed-rule)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--ed-accent);border:2px solid var(--ed-bg2)}
+.tl-year{font-size:0.72rem;font-weight:700;color:var(--ed-accent);font-family:monospace;margin-bottom:2px}
+.tl-title{font-size:0.78rem;font-weight:600;color:var(--ed-ink);margin-bottom:2px}
+.tl-desc{font-size:0.72rem;color:var(--ed-muted);line-height:1.5}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--ed-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--ed-rule)}
+  .sim-panel{min-height:400px}
+}
+@media(max-width:600px){
+  .canvas-controls{flex-wrap:wrap;justify-content:center}
+  .sim-btn{padding:6px 14px;font-size:0.76rem}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">⚡</div>
+      <div>
+        <h1>电场偏转</h1>
+        <div class="lp-sub">参数设置 · 带电粒子偏转</div>
+      </div>
+    </div>
+
+    <!-- 实验参数 -->
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">电荷量 q</span><span class="param-value" id="valCharge">1.0 ×10⁻³ C</span></div>
+        <input type="range" id="sliderCharge" min="-50" max="50" value="10" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">质量 m</span><span class="param-value" id="valMass">1.0 ×10⁻⁴ kg</span></div>
+        <input type="range" id="sliderMass" min="5" max="50" value="10" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">初速度 v₀</span><span class="param-value" id="valV0">20 m/s</span></div>
+        <input type="range" id="sliderV0" min="5" max="50" value="20" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">电场强度 E</span><span class="param-value" id="valE">5.0 N/C</span></div>
+        <input type="range" id="sliderE" min="0" max="50" value="5" step="1">
+      </div>
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="standard">📐 标准偏转</button>
+        <button class="preset-btn" data-preset="strong">💪 强电场</button>
+        <button class="preset-btn" data-preset="negative">➖ 负电荷</button>
+        <button class="preset-btn" data-preset="balance">⚖ 力平衡</button>
+      </div>
+    </div>
+
+    <!-- 电场方向 -->
+    <div class="side-section">
+      <div class="section-label">电场方向</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-field="down">↓ 向下</button>
+        <button class="mode-btn" data-field="up">↑ 向上</button>
+      </div>
+    </div>
+
+    <!-- 重力开关 -->
+    <div class="side-section">
+      <div class="section-label">重力</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-gravity="off">✕ 关闭</button>
+        <button class="mode-btn" data-gravity="on">✓ 开启</button>
+      </div>
+    </div>
+
+    <!-- 操作指南 -->
+    <div class="side-section">
+      <div class="section-label">操作指南</div>
+      <div class="info-card">
+        <p><strong>⚡ 带电粒子</strong>：从左侧水平射入平行板电容器</p>
+        <p><strong>🔄 偏转</strong>：电场使粒子发生抛物线偏转</p>
+        <p><strong>▶ 播放/暂停</strong>：底部按钮控制动画</p>
+        <p><strong>🔄 重置</strong>：恢复粒子至初始位置</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeTime">t = 0.00 s</span>
+        <span class="overlay-badge" id="badgeMode">电场向下</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">带电粒子水平射入电场 · 观察偏转轨迹</div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+          播放
+        </button>
+        <button class="sim-btn" id="btnPause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+          暂停
+        </button>
+        <button class="sim-btn" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          重置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>输出与知识</h2>
+        <div class="rp-sub">实时数据 · 公式讲解 · 历史脉络</div>
+      </div>
+    </div>
+
+    <!-- 实时输出 -->
+    <div class="side-section">
+      <div class="section-label">实时输出</div>
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num" id="outY">0.00</div><div class="output-label">偏转量 y (m)</div></div>
+        <div class="output-card"><div class="output-num b" id="outA">0.0</div><div class="output-label">加速度 a (m/s²)</div></div>
+        <div class="output-card"><div class="output-num c" id="outVx">20.0</div><div class="output-label">速度 vx (m/s)</div></div>
+        <div class="output-card"><div class="output-num d" id="outVy">0.0</div><div class="output-label">速度 vy (m/s)</div></div>
+        <div class="output-card"><div class="output-num" id="outF">0.00</div><div class="output-label">电场力 F (mN)</div></div>
+        <div class="output-card"><div class="output-num b" id="outTheta">0.0°</div><div class="output-label">偏转角 θ</div></div>
+      </div>
+    </div>
+
+    <!-- 轨迹方程 -->
+    <div class="side-section">
+      <div class="section-label">轨迹方程</div>
+      <div class="formula-block">
+        <div class="formula-title">当前参数下的轨迹方程</div>
+        <div class="formula-expr" id="trajEq">y = ½ · (qE/m) · (x/v₀)²
+
+代入数值:
+y = ½ × 50.0 × (x/20)²
+y = 0.0625 · x²</div>
+        <div class="formula-desc">其中 x 为粒子进入电场后的水平位移，qE/m 为荷质比决定的加速度。轨迹为<strong>抛物线</strong>。</div>
+      </div>
+    </div>
+
+    <!-- 知识点讲解 -->
+    <div class="side-section">
+      <div class="section-label">知识点讲解</div>
+
+      <div class="formula-block">
+        <div class="formula-title">偏转量公式</div>
+        <div class="formula-expr">y = ½ · (qE/m) · (x/v₀)²
+
+推导:
+  a = qE/m  (电场加速度)
+  t = x / v₀  (水平方向匀速)
+  y = ½ a t²</div>
+        <div class="formula-desc">粒子在电场中做<strong>类平抛运动</strong>：水平方向匀速，竖直方向匀加速。偏转量与 x² 成正比，轨迹为抛物线。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">偏转角公式</div>
+        <div class="formula-expr">tan θ = qEL / (m v₀²)
+
+θ = arctan(vy / vx)
+vy = (qE/m) · (L/v₀)
+vx = v₀</div>
+        <div class="formula-desc">粒子离开电场（板长 L）时的偏转角。tanθ 与 <strong>v₀² 成反比</strong>——速度越快，偏转越小。</div>
+      </div>
+
+      <div class="formula-block">
+        <div class="formula-title">电场力与加速度</div>
+        <div class="formula-expr">F = qE
+a = F/m = qE/m
+
+方向: 正电荷沿 E 方向
+      负电荷逆 E 方向</div>
+        <div class="formula-desc"><strong>F = qE</strong> 是电场力的基本公式。加速度 a = qE/m 由<strong>荷质比 q/m</strong>决定——相同电场下，荷质比越大的粒子偏转越剧烈。</div>
+      </div>
+    </div>
+
+    <!-- 应用实例 -->
+    <div class="side-section">
+      <div class="section-label">应用实例</div>
+      <div class="app-card">
+        <div class="app-icon">📺</div>
+        <div class="app-body">
+          <h4>阴极射线管 (CRT)</h4>
+          <p>电子枪发射电子束，通过偏转板上的电压控制电子束方向，在荧光屏上扫描出图像。老式电视和示波器的核心。</p>
+        </div>
+      </div>
+      <div class="app-card">
+        <div class="app-icon">🖨️</div>
+        <div class="app-body">
+          <h4>喷墨打印机</h4>
+          <p>带电墨滴通过偏转电场，不同电荷量的墨滴偏转不同角度，精确落在纸面指定位置，实现高速打印。</p>
+        </div>
+      </div>
+      <div class="app-card">
+        <div class="app-icon">🔬</div>
+        <div class="app-body">
+          <h4>质谱仪</h4>
+          <p>带电粒子经电场加速后进入磁场，按荷质比分离。用于同位素分析、物质成分鉴定等精密测量。</p>
+        </div>
+      </div>
+      <div class="app-card">
+        <div class="app-icon">🏭</div>
+        <div class="app-body">
+          <h4>静电除尘</h4>
+          <p>烟气通过高压电场，粉尘颗粒带电后被集尘极吸引，实现工业废气净化，效率可达 99% 以上。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史脉络 -->
+    <div class="side-section">
+      <div class="section-label">电磁学历史</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-year">1785</div>
+          <div class="tl-title">库仑定律</div>
+          <div class="tl-desc">库仑通过扭秤实验精确测定电荷间作用力，提出 F = kq₁q₂/r²，奠定定量电学基础。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1837</div>
+          <div class="tl-title">电场概念（法拉第）</div>
+          <div class="tl-desc">法拉第提出"场"的概念，认为电荷通过电场传递作用力，用力线直观描绘电场分布，革新了物理学思维。</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-year">1909</div>
+          <div class="tl-title">密立根油滴实验</div>
+          <div class="tl-desc">密立根通过带电油滴在电场中的平衡测量了基本电荷 e ≈ 1.6×10⁻¹⁹ C，证明电荷量子化。</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   STATE
+   ================================================================ */
+var state = {
+  q: 1.0,       // 电荷量 (×10⁻³ C)  — 滑块值
+  m: 1.0,       // 质量 (×10⁻⁴ kg)   — 滑块值
+  v0: 20,       // 初速度 (m/s)
+  E: 5.0,       // 电场强度 (N/C)
+  fieldDir: 1,  // 1=向下, -1=向上
+  gravity: false,
+  time: 0,
+  running: false,
+  particle: { x:0, y:0, vx:0, vy:0 },
+  trail: [],
+  exited: false,
+};
+
+/* 物理常数与比例 */
+var SCALE = 50;       // px/m
+var TIME_SCALE = 0.3; // 动画慢放系数
+var PLATE_START = 2;  // 板起点 (m)
+var PLATE_END = 10;   // 板终点 (m)
+var G_REAL = 10;      // 重力加速度 (m/s²，取10便于力平衡整除)
+
+/* ================================================================
+   DOM
+   ================================================================ */
+var simCanvas = document.getElementById('simCanvas');
+var ctx = simCanvas.getContext('2d');
+var html = document.documentElement;
+
+var sliders = {
+  q: document.getElementById('sliderCharge'),
+  m: document.getElementById('sliderMass'),
+  v0: document.getElementById('sliderV0'),
+  E: document.getElementById('sliderE'),
+};
+var vals = {
+  q: document.getElementById('valCharge'),
+  m: document.getElementById('valMass'),
+  v0: document.getElementById('valV0'),
+  E: document.getElementById('valE'),
+};
+var outs = {
+  y: document.getElementById('outY'),
+  a: document.getElementById('outA'),
+  vx: document.getElementById('outVx'),
+  vy: document.getElementById('outVy'),
+  F: document.getElementById('outF'),
+  theta: document.getElementById('outTheta'),
+  trajEq: document.getElementById('trajEq'),
+};
+var badgeFPS = document.getElementById('badgeFPS');
+var badgeTime = document.getElementById('badgeTime');
+var badgeMode = document.getElementById('badgeMode');
+var canvasHint = document.getElementById('canvasHint');
+
+/* ================================================================
+   THEME SYNC
+   ================================================================ */
+var themeObs = new MutationObserver(function(){ drawSim(); });
+themeObs.observe(html, { attributes:true, attributeFilter:['data-theme'] });
+
+/* ================================================================
+   RESIZE
+   ================================================================ */
+function resizeAll(){
+  var sc = simCanvas.parentElement;
+  var dpr = window.devicePixelRatio || 1;
+  simCanvas.width = sc.clientWidth * dpr;
+  simCanvas.height = sc.clientHeight * dpr;
+  simCanvas.style.width = sc.clientWidth+'px';
+  simCanvas.style.height = sc.clientHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  drawSim();
+}
+window.addEventListener('resize', resizeAll);
+
+/* ================================================================
+   PHYSICS HELPERS
+   ================================================================ */
+/* 真实加速度 a = q_real * E / m_real = (q*1e-3)*E / (m*1e-4) = 10*q*E/m */
+function realAccel(){
+  return 10 * state.q * state.E / state.m;
+}
+/* 真实电场力 F = q_real * E = q*1e-3 * E (N) */
+function realForce(){
+  return state.q * 1e-3 * state.E;
+}
+
+function inField(x){
+  return x >= PLATE_START && x <= PLATE_END;
+}
+
+function resetParticle(){
+  state.particle.x = 0;
+  state.particle.y = 0;
+  state.particle.vx = state.v0;
+  state.particle.vy = 0;
+  state.time = 0;
+  state.trail = [];
+  state.exited = false;
+}
+
+/* ================================================================
+   SLIDER SYNC
+   ================================================================ */
+function syncSliders(){
+  state.q = +sliders.q.value / 10;
+  state.m = +sliders.m.value / 10;
+  state.v0 = +sliders.v0.value;
+  state.E = +sliders.E.value;
+  vals.q.textContent = state.q.toFixed(1) + ' ×10⁻³ C';
+  vals.m.textContent = state.m.toFixed(1) + ' ×10⁻⁴ kg';
+  vals.v0.textContent = state.v0 + ' m/s';
+  vals.E.textContent = state.E.toFixed(1) + ' N/C';
+  updateTrajEq();
+}
+Object.keys(sliders).forEach(function(k){
+  sliders[k].addEventListener('input', function(){
+    syncSliders();
+    if(!state.running) drawSim();
+  });
+});
+
+function updateTrajEq(){
+  var a = realAccel();
+  var v0 = state.v0;
+  var halfA = (a/2);
+  var coeff = halfA / (v0*v0);
+  outs.trajEq.textContent =
+    'y = ½ · (qE/m) · (x/v₀)²\n\n' +
+    '代入数值:\n' +
+    'y = ½ × ' + a.toFixed(1) + ' × (x/' + v0 + ')²\n' +
+    'y = ' + coeff.toFixed(4) + ' · x²';
+}
+
+/* ================================================================
+   FIELD DIRECTION & GRAVITY
+   ================================================================ */
+document.querySelectorAll('.mode-btn[data-field]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.mode-btn[data-field]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    state.fieldDir = btn.dataset.field === 'down' ? 1 : -1;
+    badgeMode.textContent = '电场' + (state.fieldDir > 0 ? '向下' : '向上');
+    if(!state.running) drawSim();
+  });
+});
+document.querySelectorAll('.mode-btn[data-gravity]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.mode-btn[data-gravity]').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    state.gravity = btn.dataset.gravity === 'on';
+    if(!state.running) drawSim();
+  });
+});
+
+/* ================================================================
+   PRESETS
+   ================================================================ */
+document.querySelectorAll('.preset-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var p = btn.dataset.preset;
+    if(p==='standard'){
+      sliders.q.value=10; sliders.m.value=10; sliders.v0.value=20; sliders.E.value=5;
+      setField('down'); setGravity('off');
+    }
+    if(p==='strong'){
+      sliders.q.value=10; sliders.m.value=10; sliders.v0.value=20; sliders.E.value=20;
+      setField('down'); setGravity('off');
+    }
+    if(p==='negative'){
+      sliders.q.value=-10; sliders.m.value=10; sliders.v0.value=20; sliders.E.value=5;
+      setField('down'); setGravity('off');
+    }
+    if(p==='balance'){
+      sliders.q.value=10; sliders.m.value=10; sliders.v0.value=20; sliders.E.value=1;
+      setField('up'); setGravity('on');
+    }
+    syncSliders();
+    resetParticle();
+    state.running = false;
+    badgeTime.textContent = 't = 0.00 s';
+    drawSim();
+  });
+});
+function setField(dir){
+  document.querySelectorAll('.mode-btn[data-field]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.field === dir);
+  });
+  state.fieldDir = dir === 'down' ? 1 : -1;
+  badgeMode.textContent = '电场' + (state.fieldDir > 0 ? '向下' : '向上');
+}
+function setGravity(g){
+  document.querySelectorAll('.mode-btn[data-gravity]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.gravity === g);
+  });
+  state.gravity = g === 'on';
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+document.getElementById('btnPlay').addEventListener('click', function(){
+  if(state.exited) resetParticle();
+  state.running = true;
+  canvasHint.style.display = 'none';
+});
+document.getElementById('btnPause').addEventListener('click', function(){ state.running = false; });
+document.getElementById('btnReset').addEventListener('click', function(){
+  resetParticle();
+  state.running = false;
+  badgeTime.textContent = 't = 0.00 s';
+  drawSim();
+});
+
+/* ================================================================
+   PHYSICS UPDATE
+   ================================================================ */
+function physicsStep(dt){
+  var p = state.particle;
+  var ay = 0;
+  if(inField(p.x)){
+    /* 电场加速度: a_y = 10*q*E*fieldDir / m  (正=向下) */
+    ay += 10 * state.q * state.E * state.fieldDir / state.m;
+  }
+  if(state.gravity){
+    ay += G_REAL;
+  }
+  p.vy += ay * dt;
+  p.x  += p.vx * dt;
+  p.y  += p.vy * dt;
+  state.time += dt;
+
+  /* 记录轨迹 (像素坐标) */
+  var w = simCanvas.clientWidth, h = simCanvas.clientHeight;
+  var px = p.x * SCALE;
+  var py = h/2 + p.y * SCALE;
+  state.trail.push({x:px, y:py});
+  if(state.trail.length > 800) state.trail.shift();
+
+  /* 检查是否离开画布 */
+  if(px > w + 50 || py < -100 || py > h + 100){
+    state.exited = true;
+    state.running = false;
+  }
+}
+
+/* ================================================================
+   RENDER
+   ================================================================ */
+function getCSSVar(name){
+  return getComputedStyle(html).getPropertyValue(name).trim();
+}
+
+function drawSim(){
+  var w = simCanvas.clientWidth, h = simCanvas.clientHeight;
+  var bg = getCSSVar('--ed-canvas-bg');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  var accent = getCSSVar('--ed-accent');
+  var rule = getCSSVar('--ed-rule');
+  var platePos = getCSSVar('--ed-plate-pos');
+  var plateNeg = getCSSVar('--ed-plate-neg');
+  var fieldArrow = getCSSVar('--ed-field-arrow');
+  var particleColor = getCSSVar('--ed-particle');
+  var forceVec = getCSSVar('--ed-force-vec');
+  var velVec = getCSSVar('--ed-vel-vec');
+  var trailColor = getCSSVar('--ed-trail');
+
+  var cy = h / 2;
+  var plateX1 = PLATE_START * SCALE;
+  var plateX2 = PLATE_END * SCALE;
+  var plateGap = h * 0.5;
+  var topY = cy - plateGap/2;
+  var botY = cy + plateGap/2;
+
+  /* 电场区域背景 */
+  if(state.E > 0){
+    ctx.fillStyle = fieldArrow;
+    ctx.globalAlpha = 0.12;
+    ctx.fillRect(plateX1, topY, plateX2 - plateX1, plateGap);
+    ctx.globalAlpha = 1;
+  }
+
+  /* 电场方向箭头 */
+  if(state.E > 0){
+    ctx.strokeStyle = fieldArrow;
+    ctx.fillStyle = fieldArrow;
+    ctx.lineWidth = 1.5;
+    var arrowCount = 6;
+    for(var i = 0; i < arrowCount; i++){
+      var ax = plateX1 + (plateX2 - plateX1) * (i + 0.5) / arrowCount;
+      if(state.fieldDir > 0){
+        /* 向下箭头 */
+        ctx.beginPath();
+        ctx.moveTo(ax, topY + 15);
+        ctx.lineTo(ax, botY - 15);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(ax, botY - 15);
+        ctx.lineTo(ax - 4, botY - 22);
+        ctx.lineTo(ax + 4, botY - 22);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        /* 向上箭头 */
+        ctx.beginPath();
+        ctx.moveTo(ax, botY - 15);
+        ctx.lineTo(ax, topY + 15);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(ax, topY + 15);
+        ctx.lineTo(ax - 4, topY + 22);
+        ctx.lineTo(ax + 4, topY + 22);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+
+  /* 平行板（电容器极板） */
+  var topPlateColor = state.fieldDir > 0 ? platePos : plateNeg;
+  var botPlateColor = state.fieldDir > 0 ? plateNeg : platePos;
+  var topSign = state.fieldDir > 0 ? '+' : '−';
+  var botSign = state.fieldDir > 0 ? '−' : '+';
+
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = topPlateColor;
+  ctx.beginPath();
+  ctx.moveTo(plateX1, topY);
+  ctx.lineTo(plateX2, topY);
+  ctx.stroke();
+
+  ctx.strokeStyle = botPlateColor;
+  ctx.beginPath();
+  ctx.moveTo(plateX1, botY);
+  ctx.lineTo(plateX2, botY);
+  ctx.stroke();
+
+  /* 极板标记 */
+  ctx.font = 'bold 14px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = topPlateColor;
+  for(var s = 0; s < 5; s++){
+    var sx = plateX1 + (plateX2-plateX1) * (s+0.5)/5;
+    ctx.fillText(topSign, sx, topY - 6);
+  }
+  ctx.fillStyle = botPlateColor;
+  for(var s2 = 0; s2 < 5; s2++){
+    var sx2 = plateX1 + (plateX2-plateX1) * (s2+0.5)/5;
+    ctx.fillText(botSign, sx2, botY + 18);
+  }
+
+  /* 入射方向标记 */
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(0, cy);
+  ctx.lineTo(w, cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* 入射口标签 */
+  ctx.fillStyle = getCSSVar('--ed-muted');
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('粒子入射 →', 10, cy - 8);
+
+  /* 轨迹 */
+  if(state.trail.length > 1){
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    for(var t = 1; t < state.trail.length; t++){
+      var alpha = t / state.trail.length;
+      ctx.strokeStyle = trailColor;
+      ctx.globalAlpha = alpha * 0.8;
+      ctx.beginPath();
+      ctx.moveTo(state.trail[t-1].x, state.trail[t-1].y);
+      ctx.lineTo(state.trail[t].x, state.trail[t].y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* 粒子 */
+  var p = state.particle;
+  var ppx = p.x * SCALE;
+  var ppy = cy + p.y * SCALE;
+
+  if(ppx >= -20 && ppx <= w + 20){
+    /* 粒子光晕 */
+    ctx.beginPath();
+    ctx.arc(ppx, ppy, 16, 0, Math.PI*2);
+    ctx.fillStyle = particleColor;
+    ctx.globalAlpha = 0.15;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    /* 粒子本体 */
+    ctx.beginPath();
+    ctx.arc(ppx, ppy, 8, 0, Math.PI*2);
+    ctx.fillStyle = particleColor;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    /* 电荷符号 */
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.q > 0 ? '+' : '−', ppx, ppy);
+    ctx.textBaseline = 'alphabetic';
+
+    /* 电场力向量 (红色) */
+    if(inField(p.x) && state.E > 0){
+      var fMag = 10 * state.q * state.E * state.fieldDir / state.m;
+      if(state.gravity) fMag += G_REAL;
+      var fLen = Math.max(-80, Math.min(80, fMag * 1.2));
+      drawArrow(ppx, ppy, ppx, ppy + fLen, forceVec, 2.5);
+      ctx.fillStyle = forceVec;
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('F', ppx + 6, ppy + fLen + (fLen > 0 ? 12 : -4));
+    }
+
+    /* 速度向量 (蓝色) */
+    var vx = p.vx, vy = p.vy;
+    var vMag = Math.sqrt(vx*vx + vy*vy);
+    if(vMag > 0.1){
+      var vScale = 2.5;
+      drawArrow(ppx, ppy, ppx + vx * vScale, ppy + vy * vScale, velVec, 2.5);
+      ctx.fillStyle = velVec;
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText('v', ppx + vx * vScale + 4, ppy + vy * vScale - 4);
+    }
+  }
+
+  /* 退出提示 */
+  if(state.exited){
+    ctx.fillStyle = getCSSVar('--ed-muted');
+    ctx.font = '14px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('粒子已飞出 · 点击重置', w/2, 30);
+  }
+}
+
+function drawArrow(x1, y1, x2, y2, color, width){
+  var dx = x2 - x1, dy = y2 - y1;
+  var len = Math.sqrt(dx*dx + dy*dy);
+  if(len < 2) return;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  var ang = Math.atan2(dy, dx);
+  var headLen = 8;
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - headLen * Math.cos(ang - 0.4), y2 - headLen * Math.sin(ang - 0.4));
+  ctx.lineTo(x2 - headLen * Math.cos(ang + 0.4), y2 - headLen * Math.sin(ang + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+/* ================================================================
+   OUTPUT UPDATE
+   ================================================================ */
+function updateOutputs(){
+  var p = state.particle;
+  var a = 0;
+  if(inField(p.x)){
+    a = 10 * state.q * state.E * state.fieldDir / state.m;
+  }
+  if(state.gravity) a += G_REAL;
+
+  outs.y.textContent = p.y.toFixed(2);
+  outs.a.textContent = a.toFixed(1);
+  outs.vx.textContent = p.vx.toFixed(1);
+  outs.vy.textContent = p.vy.toFixed(1);
+  outs.F.textContent = (realForce() * 1000).toFixed(2); /* mN */
+
+  var theta = 0;
+  if(Math.abs(p.vx) > 0.01){
+    theta = Math.atan2(p.vy, p.vx) * 180 / Math.PI;
+  }
+  outs.theta.textContent = theta.toFixed(1) + '°';
+}
+
+/* ================================================================
+   MAIN LOOP
+   ================================================================ */
+var frameCount=0, lastFpsTime=performance.now(), fps=60;
+var lastTime = performance.now();
+
+function mainLoop(){
+  var now = performance.now();
+  var dtReal = (now - lastTime) / 1000;
+  lastTime = now;
+  if(dtReal > 0.1) dtReal = 0.1; /* 防止跳帧 */
+
+  if(state.running && !state.exited){
+    var dtSim = dtReal * TIME_SCALE;
+    /* 子步长积分提高精度 */
+    var subSteps = 4;
+    var subDt = dtSim / subSteps;
+    for(var i = 0; i < subSteps; i++){
+      physicsStep(subDt);
+      if(state.exited) break;
+    }
+    badgeTime.textContent = 't = ' + state.time.toFixed(2) + ' s';
+    updateOutputs();
+  }
+
+  drawSim();
+
+  frameCount++;
+  if(now - lastFpsTime >= 1000){
+    fps = frameCount; frameCount = 0; lastFpsTime = now;
+    badgeFPS.textContent = fps + ' FPS';
+  }
+
+  requestAnimationFrame(mainLoop);
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+PSUTheme.createSwitcher();
+PSUTheme.createBackButton('index.html');
+
+syncSliders();
+resetParticle();
+resizeAll();
+requestAnimationFrame(mainLoop);
+
+})();
+</script>
+</body>
+</html>

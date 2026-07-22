@@ -307,7 +307,9 @@
       '电磁学': '#8a6b5b',
       '波动光学': '#5b8a8a',
       '波动声学': '#5b8a8a',
-      '经典力学': '#8a8a5b'
+      '经典力学': '#8a8a5b',
+      '动量守恒': '#8a5b5b',
+      '综合实验': '#5b6b8a'
     };
 
     // Minimalist single-letter icons for academic mode
@@ -346,7 +348,13 @@
       'newton-cradle': 'Nc',
       'engine': 'En',
       'solar-system': 'Ss',
-      'doppler': 'Dp'
+      'doppler': 'Dp',
+      'projectile': 'Pj',
+      'incline': 'In',
+      'elastic-collision': 'EC',
+      'magnetic-circle': 'MC',
+      'electric-deflection': 'ED',
+      'physics-canvas': 'PC'
     };
 
     const graphNodes = [
@@ -386,7 +394,13 @@
       { id: 'newton-cradle', title: '牛顿摆', subtitle: '动量守恒', color: '#c0c0c0', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🔘' },
       { id: 'engine', title: '多缸内燃机', subtitle: '热力学循环', color: '#ff6b35', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '⚙️' },
       { id: 'solar-system', title: '太阳系沙盘', subtitle: '行星轨道', color: '#f0c060', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🪐' },
-      { id: 'doppler',   title: '多普勒效应',     subtitle: '波动声学',       color: '#00d4ff', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🚑' }
+      { id: 'doppler',   title: '多普勒效应',     subtitle: '波动声学',       color: '#00d4ff', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🚑' },
+      { id: 'projectile', title: '抛体运动',     subtitle: '经典力学',       color: '#ff6347', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '⚾' },
+      { id: 'incline',   title: '斜面滑块',     subtitle: '经典力学',       color: '#daa520', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🛷' },
+      { id: 'elastic-collision', title: '弹性碰撞', subtitle: '动量守恒',   color: '#e74c3c', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🎱' },
+      { id: 'magnetic-circle', title: '磁场圆周', subtitle: '电磁学',       color: '#9b59b6', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🧲' },
+      { id: 'electric-deflection', title: '电场偏转', subtitle: '电磁学',   color: '#1abc9c', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '⚡' },
+      { id: 'physics-canvas', title: '自由物理画布', subtitle: '综合实验',   color: '#3498db', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🎨' }
     ];
 
     function resize() {
