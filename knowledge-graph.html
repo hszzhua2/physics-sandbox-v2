@@ -693,6 +693,7 @@
       { id: "relativity", name: "相对论与宇宙学", group: 1, level: 3, icon: "\uD83C\uDF20", color: "#ff9f43", description: "爱因斯坦的相对论与宇宙学" },
       { id: "chaos", name: "统计与混沌", group: 1, level: 3, icon: "\uD83E\uDD8B", color: "#ff6b6b", description: "混沌理论、统计物理与概率模型" },
       { id: "computational", name: "计算物理", group: 1, level: 3, icon: "\uD83D\uDCBB", color: "#55efc4", description: "计算机模拟与数值方法" },
+      { id: "geophysics_cat", name: "地球科学", group: 1, level: 3, icon: "\uD83C\uDF0D", color: "#e67e22", description: "地球物理与地球内部结构" },
 
       // Intermediate Categories (group:6, level:2)
       { id: "fluid", name: "流体力学", group: 6, level: 2, icon: "\uD83C\uDF0A", color: "#4ecdc4", description: "流体运动规律与现象", parent: "classical" },
@@ -756,6 +757,7 @@
       { id: "magnetic-circle", name: "磁场圆周运动", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "洛伦兹力与回旋运动 · 回旋半径与周期", target: "exp-magnetic-circle.html", parent: "electromag" },
       { id: "electric-deflection", name: "电场偏转", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "带电粒子在匀强电场中的类平抛运动", target: "exp-electric-deflection.html", parent: "electromag" },
       { id: "physics-canvas", name: "自由物理画布", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "自由创建物理场景 · 碰撞与重力沙盒", target: "exp-physics-canvas.html", parent: "mechanics" },
+      { id: "geophysics", name: "地球物理", group: 7, level: 1, icon: "🧪", color: "#2ecc71", description: "地球内部结构 · 地震波 · 地磁场 · 板块构造", target: "exp-geophysics.html", parent: "geophysics_cat" },
       // --- Scientists (group 8) ---
       { id: "sci-newton", name: "牛顿", group: 8, level: 1, icon: "🍎", color: "#e17055", description: "经典力学奠基人 · 万有引力定律", experiments: ["spring", "gravity_exp", "matter", "solar", "newton-cradle", "projectile", "elastic-collision", "physics-canvas"] },
       { id: "sci-einstein", name: "爱因斯坦", group: 8, level: 1, icon: "🧠", color: "#fdcb6e", description: "相对论创立者 · 质能方程", experiments: ["blackhole", "blackhole_adv", "wormhole", "gravitational-wave"] },
@@ -786,7 +788,11 @@
       { id: "sci-doppler", name: "多普勒", group: 8, level: 1, icon: "🚑", color: "#00d4ff", description: "多普勒效应提出者 · 波源运动与频率变化", experiments: ["doppler"] },
       { id: "sci-lorentz", name: "洛伦兹", group: 8, level: 1, icon: "🧲", color: "#9b59b6", description: "洛伦兹力提出者 · 电磁理论与电子论", experiments: ["magnetic-circle"] },
       { id: "sci-coulomb", name: "库仑", group: 8, level: 1, icon: "⚡", color: "#1abc9c", description: "库仑定律提出者 · 电荷间相互作用", experiments: ["electric-deflection"] },
-      { id: "sci-huygens", name: "惠更斯", group: 8, level: 1, icon: "🎱", color: "#e74c3c", description: "碰撞定律与摆钟 · 光的波动说", experiments: ["elastic-collision"] }
+      { id: "sci-huygens", name: "惠更斯", group: 8, level: 1, icon: "🎱", color: "#e74c3c", description: "碰撞定律与摆钟 · 光的波动说", experiments: ["elastic-collision"] },
+      { id: "sci-mohorovicic", name: "莫霍洛维奇", group: 8, level: 1, icon: "🌍", color: "#e67e22", description: "地壳-地幔界面(莫霍面)发现者 · 地震学先驱", experiments: ["geophysics"] },
+      { id: "sci-gutenberg", name: "古登堡", group: 8, level: 1, icon: "📊", color: "#e67e22", description: "地核-地幔界面(古登堡面)发现者 · 地震学家", experiments: ["geophysics"] },
+      { id: "sci-lehmann", name: "莱曼", group: 8, level: 1, icon: "🔬", color: "#e67e22", description: "地球固体内核发现者 · 女性地震学先驱", experiments: ["geophysics"] },
+      { id: "sci-wegener", name: "魏格纳", group: 8, level: 1, icon: "🧩", color: "#e67e22", description: "大陆漂移学说提出者 · 板块构造理论奠基人", experiments: ["geophysics"] }
     ];
 
     // Build links from parent relationships

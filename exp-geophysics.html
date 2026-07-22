@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>地球物理 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================ THEME VARS */
+[data-theme="glass"]{
+  --g-bg:#080812;--g-bg2:#0e0e1c;--g-surface:rgba(255,255,255,0.04);--g-surface-hover:rgba(255,255,255,0.08);
+  --g-ink:#f1f5f9;--g-ink2:#cbd5e1;--g-muted:#64748b;--g-rule:rgba(255,255,255,0.07);
+  --g-accent:#74b9ff;--g-accent2:#a29bfe;--g-accent3:#34d399;--g-accent4:#fbbf24;
+  --g-card-bg:rgba(255,255,255,0.03);--g-card-border:rgba(255,255,255,0.06);
+  --g-canvas-bg:#040410;--g-param-bg:rgba(255,255,255,0.03);--g-param-border:rgba(255,255,255,0.06);
+  --g-output-bg:rgba(0,0,0,0.3);--g-output-border:rgba(255,255,255,0.06);
+  --g-formula-bg:rgba(116,185,255,0.05);--g-formula-border:rgba(116,185,255,0.12);
+  --g-scrollbar:rgba(116,185,255,0.3);--g-glow:none;
+  --g-crust:#8b6914;--g-mantle:#c0392b;--g-outercore:#e67e22;--g-innercore:#f1c40f;
+  --g-pwave:#74b9ff;--g-swave:#e74c3c;--g-magfield:#a29bfe;--g-plate:#2ecc71;
+}
+[data-theme="cyber"]{
+  --g-bg:#040410;--g-bg2:#08081a;--g-surface:rgba(0,243,255,0.03);--g-surface-hover:rgba(0,243,255,0.06);
+  --g-ink:#e0f7fa;--g-ink2:#b2ebf2;--g-muted:#4dd0e1;--g-rule:rgba(0,243,255,0.1);
+  --g-accent:#00f3ff;--g-accent2:#ff00ea;--g-accent3:#39ff14;--g-accent4:#ffb800;
+  --g-card-bg:rgba(0,243,255,0.02);--g-card-border:rgba(0,243,255,0.12);
+  --g-canvas-bg:#020208;--g-param-bg:rgba(0,243,255,0.02);--g-param-border:rgba(0,243,255,0.1);
+  --g-output-bg:rgba(0,0,0,0.4);--g-output-border:rgba(0,243,255,0.08);
+  --g-formula-bg:rgba(0,243,255,0.04);--g-formula-border:rgba(0,243,255,0.15);
+  --g-scrollbar:rgba(0,243,255,0.4);--g-glow:0 0 8px rgba(0,243,255,0.25);
+  --g-crust:#ffb800;--g-mantle:#ff00ea;--g-outercore:#00f3ff;--g-innercore:#39ff14;
+  --g-pwave:#00f3ff;--g-swave:#ff00ea;--g-magfield:#bd00ff;--g-plate:#39ff14;
+}
+[data-theme="soviet"]{
+  --g-bg:#f0ebe4;--g-bg2:#e8e0d6;--g-surface:#fffaf2;--g-surface-hover:#f4f0ea;
+  --g-ink:#1a1a1a;--g-ink2:#3d3d3d;--g-muted:#6a5a4a;--g-rule:#d4c4a8;
+  --g-accent:#c41e1e;--g-accent2:#8b4513;--g-accent3:#a0522d;--g-accent4:#cd853f;
+  --g-card-bg:#fffaf2;--g-card-border:#c41e1e;
+  --g-canvas-bg:#e8e0d6;--g-param-bg:#f4f0ea;--g-param-border:#d4c4a8;
+  --g-output-bg:#f4f0ea;--g-output-border:#d4c4a8;
+  --g-formula-bg:rgba(196,30,30,0.04);--g-formula-border:rgba(196,30,30,0.2);
+  --g-scrollbar:#c41e1e;--g-glow:none;
+  --g-crust:#8b6914;--g-mantle:#c41e1e;--g-outercore:#cd853f;--g-innercore:#daa520;
+  --g-pwave:#c41e1e;--g-swave:#556b2f;--g-magfield:#8b4513;--g-plate:#556b2f;
+}
+[data-theme="cartoon"]{
+  --g-bg:#fef6e4;--g-bg2:#fff8f0;--g-surface:rgba(255,255,255,0.7);--g-surface-hover:rgba(255,255,255,0.9);
+  --g-ink:#2d3436;--g-ink2:#4a4a4a;--g-muted:#7a7a7a;--g-rule:rgba(0,0,0,0.08);
+  --g-accent:#ff6b6b;--g-accent2:#4ecdc4;--g-accent3:#ffe66d;--g-accent4:#a29bfe;
+  --g-card-bg:rgba(255,255,255,0.8);--g-card-border:rgba(0,0,0,0.1);
+  --g-canvas-bg:#1a1a2e;--g-param-bg:rgba(255,255,255,0.5);--g-param-border:rgba(0,0,0,0.1);
+  --g-output-bg:rgba(255,255,255,0.6);--g-output-border:rgba(0,0,0,0.08);
+  --g-formula-bg:rgba(255,107,107,0.05);--g-formula-border:rgba(255,107,107,0.15);
+  --g-scrollbar:rgba(0,0,0,0.15);--g-glow:none;
+  --g-crust:#d4a017;--g-mantle:#ff6b6b;--g-outercore:#ffa502;--g-innercore:#ffe66d;
+  --g-pwave:#4ecdc4;--g-swave:#ff6b6b;--g-magfield:#a29bfe;--g-plate:#26de81;
+}
+[data-theme="academic"]{
+  --g-bg:#f8f9fa;--g-bg2:#f1f3f5;--g-surface:rgba(255,255,255,0.9);--g-surface-hover:#f0f0f0;
+  --g-ink:#1a1a2e;--g-ink2:#3d3d5c;--g-muted:#7a7a8a;--g-rule:#e0e0e0;
+  --g-accent:#6b8cae;--g-accent2:#8a7ca8;--g-accent3:#c4956a;--g-accent4:#6a9e8a;
+  --g-card-bg:#ffffff;--g-card-border:#e0e0e0;
+  --g-canvas-bg:#ffffff;--g-param-bg:#f8f9fa;--g-param-border:#e0e0e0;
+  --g-output-bg:#f4f5f7;--g-output-border:#e0e0e0;
+  --g-formula-bg:rgba(107,140,174,0.04);--g-formula-border:rgba(107,140,174,0.2);
+  --g-scrollbar:#d0d0d0;--g-glow:none;
+  --g-crust:#b8860b;--g-mantle:#cd5c5c;--g-outercore:#daa520;--g-innercore:#ffd700;
+  --g-pwave:#6b8cae;--g-swave:#cd5c5c;--g-magfield:#8a7ca8;--g-plate:#6a9e8a;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:var(--font-main);background:var(--g-bg);color:var(--g-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--g-bg)}
+::-webkit-scrollbar-thumb{background:var(--g-scrollbar);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== LEFT PANEL ===== */
+.left-panel{width:300px;min-width:280px;border-right:1px solid var(--g-rule);background:var(--g-bg2);overflow-y:auto;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--g-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--g-formula-bg);border:1px solid var(--g-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700}
+.lp-header .lp-sub{font-size:.68rem;color:var(--g-muted);margin-top:1px}
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--g-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--g-accent);text-shadow:var(--g-glow)}
+[data-theme="soviet"] .lp-header h1{color:var(--g-accent)}
+
+.side-section{padding:18px 20px;border-bottom:1px solid var(--g-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:2.5px;color:var(--g-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--g-accent);border-radius:2px;transition:background .4s ease}
+
+/* Mode buttons */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mode-btn{padding:8px 4px;border:1px solid var(--g-param-border);background:var(--g-param-bg);color:var(--g-muted);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--g-accent);color:var(--g-accent);background:var(--g-formula-bg)}
+.mode-btn:hover{border-color:var(--g-accent)}
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* Params */
+.param-group{margin-bottom:14px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:.82rem;font-weight:600;color:var(--g-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:.78rem;color:var(--g-accent);min-width:60px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--g-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--g-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+.param-presets{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--g-param-border);background:var(--g-param-bg);color:var(--g-muted);border-radius:6px;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .3s ease}
+.preset-btn:hover{border-color:var(--g-accent);color:var(--g-accent);background:var(--g-formula-bg)}
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+
+/* Info card */
+.info-card{background:var(--g-output-bg);border:1px solid var(--g-output-border);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:.8rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.info-card p{font-size:.76rem;color:var(--g-ink2);line-height:1.7;margin:4px 0}
+.info-card p strong{color:var(--g-ink)}
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="cartoon"] .info-card h3{color:var(--g-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--g-accent);text-shadow:var(--g-glow)}
+
+/* ===== CENTER CANVAS ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--g-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--g-rule);border-radius:8px;font-family:monospace;font-size:.7rem;color:var(--g-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
+.sim-btn{padding:8px 20px;border:1px solid var(--g-rule);background:rgba(0,0,0,0.4);color:var(--g-ink);border-radius:10px;font-family:var(--font-main);font-size:.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--g-accent)}
+.sim-btn.primary{background:var(--g-accent);color:#0a0a1a;border-color:var(--g-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== RIGHT PANEL ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--g-rule);background:var(--g-bg2);overflow-y:auto;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--g-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--g-formula-bg);border:1px solid var(--g-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700}
+.rp-header .rp-sub{font-size:.68rem;color:var(--g-muted);margin-top:1px}
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--g-accent2)}
+[data-theme="cyber"] .rp-header h2{color:var(--g-accent);text-shadow:var(--g-glow)}
+[data-theme="soviet"] .rp-header h2{color:var(--g-accent)}
+
+/* Output cards */
+.output-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.output-card{background:var(--g-output-bg);border:1px solid var(--g-output-border);border-radius:10px;padding:10px 12px;text-align:center;transition:background-color .5s ease,border-color .4s ease}
+.output-num{font-family:monospace;font-size:1.05rem;font-weight:700;color:var(--g-accent);line-height:1.2}
+.output-num.b{color:var(--g-accent2)}.output-num.c{color:var(--g-accent3)}.output-num.d{color:var(--g-accent4)}
+.output-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--g-muted);margin-top:2px}
+[data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* Layer table */
+.layer-table{width:100%;border-collapse:collapse;font-size:.74rem}
+.layer-table th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--g-rule);color:var(--g-muted);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:1px}
+.layer-table td{padding:6px 8px;border-bottom:1px solid var(--g-rule);color:var(--g-ink2)}
+.layer-table tr:last-child td{border-bottom:none}
+.layer-table .layer-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+/* Formula block */
+.formula-block{background:var(--g-formula-bg);border:1px solid var(--g-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:.78rem;font-weight:700;color:var(--g-ink);margin-bottom:6px}
+.formula-expr{font-family:monospace;font-size:.76rem;color:var(--g-accent2);line-height:1.8;white-space:pre-wrap}
+.formula-desc{font-size:.76rem;color:var(--g-muted);margin-top:6px;line-height:1.6}
+.formula-desc strong{color:var(--g-ink2)}
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+
+/* Timeline */
+.timeline{position:relative;padding-left:18px}
+.timeline::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--g-rule)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:'';position:absolute;left:-17px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--g-accent);border:2px solid var(--g-bg2)}
+.tl-year{font-size:.72rem;font-weight:700;color:var(--g-accent);font-family:monospace;margin-bottom:2px}
+.tl-title{font-size:.78rem;font-weight:600;color:var(--g-ink);margin-bottom:2px}
+.tl-desc{font-size:.72rem;color:var(--g-muted);line-height:1.5}
+
+/* Quiz */
+.quiz-box{background:var(--g-output-bg);border:1px solid var(--g-output-border);border-radius:10px;padding:14px;transition:background-color .5s ease,border-color .4s ease}
+.quiz-q{font-size:.8rem;font-weight:600;color:var(--g-ink);margin-bottom:10px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:6px}
+.quiz-opt{padding:8px 12px;border:1px solid var(--g-param-border);background:var(--g-param-bg);border-radius:8px;font-size:.76rem;color:var(--g-ink2);cursor:pointer;transition:all .2s ease}
+.quiz-opt:hover{border-color:var(--g-accent);color:var(--g-accent)}
+.quiz-opt.correct{border-color:var(--g-accent3);background:rgba(52,211,153,0.1);color:var(--g-accent3)}
+.quiz-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,0.1);color:#ef4444}
+.quiz-feedback{margin-top:8px;font-size:.74rem;color:var(--g-muted);line-height:1.5;display:none}
+.quiz-feedback.show{display:block}
+.quiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.quiz-score{font-family:monospace;font-size:.76rem;color:var(--g-accent)}
+.quiz-btn{padding:4px 12px;border:1px solid var(--g-param-border);background:var(--g-param-bg);border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;color:var(--g-ink2);transition:all .3s ease}
+.quiz-btn:hover{border-color:var(--g-accent);color:var(--g-accent)}
+[data-theme="academic"] .quiz-box{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .quiz-box{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* Responsive */
+@media(max-width:1100px){.left-panel{width:260px;min-width:240px}.right-panel{width:340px;min-width:300px}}
+@media(max-width:900px){.app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}.left-panel{width:100%;min-width:unset;border-right:none;border-bottom:1px solid var(--g-rule)}.right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--g-rule)}.sim-panel{min-height:400px}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== LEFT PANEL ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">🌍</div>
+      <div>
+        <h1>地球物理</h1>
+        <div class="lp-sub">内部结构 · 地震波 · 地磁场</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">可视化模式</div>
+      <div class="mode-grid">
+        <button class="mode-btn active" data-mode="structure">🔍 内部结构</button>
+        <button class="mode-btn" data-mode="seismic">📡 地震波</button>
+        <button class="mode-btn" data-mode="magnetic">🧲 地磁场</button>
+        <button class="mode-btn" data-mode="tectonic">🌋 板块构造</button>
+      </div>
+    </div>
+
+    <div class="side-section" id="param-section">
+      <div class="section-label">实验参数</div>
+      <div id="param-container"></div>
+      <div class="param-presets" id="preset-container"></div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">操作指南</div>
+      <div class="info-card">
+        <p><strong>🔍 内部结构</strong>：查看地球分层剖面，了解各层密度与温度</p>
+        <p><strong>📡 地震波</strong>：点击地球表面发射地震，观察P波S波传播</p>
+        <p><strong>🧲 地磁场</strong>：调节地磁参数，观察磁力线分布</p>
+        <p><strong>🌋 板块构造</strong>：观察板块边界类型与地幔对流</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== CENTER CANVAS ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeMode">内部结构</span>
+        <span class="overlay-badge" id="badgeInfo">R = 6371 km</span>
+      </div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">▶ 播放</button>
+        <button class="sim-btn" id="btnPause">⏸ 暂停</button>
+        <button class="sim-btn" id="btnReset">🔄 重置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RIGHT PANEL ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>实时数据</h2>
+        <div class="rp-sub">物理参数与知识</div>
+      </div>
+    </div>
+
+    <div class="side-section" id="output-section">
+      <div class="section-label">观测输出</div>
+      <div id="output-container"></div>
+    </div>
+
+    <div class="side-section" id="formula-section">
+      <div class="section-label">物理公式</div>
+      <div id="formula-container"></div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">应用领域</div>
+      <div class="info-card"><h3>🔭 地震勘探</h3><p>利用人工震源产生的地震波在地下传播特性，探测油气藏和矿产分布。</p></div>
+      <div class="info-card"><h3>🧭 地磁导航</h3><p>地磁场为航海、航空提供方向参考，地磁异常可辅助寻找铁矿床。</p></div>
+      <div class="info-card"><h3>🌋 地震预警</h3><p>P波速度快于破坏性S波，利用时差可提前数秒至数十秒预警。</p></div>
+      <div class="info-card"><h3>🛰 空间天气</h3><p>太阳风与地磁场相互作用产生极光，地磁暴可影响卫星和电网。</p></div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">历史时间线</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-year">1906</div><div class="tl-title">旧金山大地震</div><div class="tl-desc">里德提出弹性回跳理论，解释地震成因与断层运动</div></div>
+        <div class="tl-item"><div class="tl-year">1909</div><div class="tl-title">莫霍洛维奇不连续面</div><div class="tl-desc">莫霍洛维奇通过地震波速突变发现地壳-地幔边界</div></div>
+        <div class="tl-item"><div class="tl-year">1914</div><div class="tl-title">古登堡发现核幔边界</div><div class="tl-desc">古登堡通过S波阴影区确定地核深度约2900km</div></div>
+        <div class="tl-item"><div class="tl-year">1936</div><div class="tl-title">莱曼发现内核</div><div class="tl-desc">英厄·莱曼通过P波微弱反射发现固态内核</div></div>
+        <div class="tl-item"><div class="tl-year">1960s</div><div class="tl-title">板块构造理论</div><div class="tl-desc">海底扩张与板块俯冲统一了大陆漂移与地震带分布</div></div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">知识测验</div>
+      <div class="quiz-box" id="quizBox">
+        <div class="quiz-q" id="quizQ"></div>
+        <div class="quiz-opts" id="quizOpts"></div>
+        <div class="quiz-feedback" id="quizFeedback"></div>
+        <div class="quiz-nav">
+          <span class="quiz-score" id="quizScore">0 / 0</span>
+          <button class="quiz-btn" id="quizNext">下一题 →</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+// ========================================== STATE
+const state = {
+  running: true, time: 0, lastFrame: 0, fps: 60, fpsCounter: 0, fpsTimer: 0,
+  mode: 'structure',
+  // structure mode
+  rotation: 0,
+  cutaway: 0.35,
+  // seismic mode
+  quakes: [], pWaves: [], sWaves: [],
+  quakePower: 1.0,
+  // magnetic mode
+  magTilt: 11.5, magStrength: 1.0, showSolar: true,
+  magParticles: [],
+  // tectonic mode
+  plateSpeed: 1.0, showConvection: true,
+  mantleCells: [],
+};
+
+// Earth layer data (radius in km, density g/cm³, temp °C)
+const layers = [
+  { name:'地壳',     r0:0,      r1:35,     density:2.8,  temp:15,    color:'crust',      vp:6.0, vs:3.5 },
+  { name:'上地幔',   r0:35,     r1:660,    density:3.3,  temp:1400,  color:'mantle',     vp:8.0, vs:4.5 },
+  { name:'下地幔',   r0:660,    r1:2890,   density:5.0,  temp:3500,  color:'mantle',     vp:13.0,vs:7.0 },
+  { name:'外核',     r0:2890,   r1:5150,   density:11.0, temp:5000,  color:'outercore',  vp:10.0,vs:0   },
+  { name:'内核',     r0:5150,   r1:6371,   density:13.0, temp:5700,  color:'innercore',  vp:11.0,vs:3.6 },
+];
+const earthR = 6371; // km
+
+// ========================================== CANVAS
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+let cw=0, ch=0, cx=0, cy=0, earthPx=0;
+
+function resizeCanvas(){
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  cw = rect.width; ch = rect.height;
+  cx = cw / 2; cy = ch / 2;
+  earthPx = Math.min(cw, ch) * 0.36;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ========================================== THEME COLORS
+function getColors(){
+  const theme = document.documentElement.getAttribute('data-theme') || 'academic';
+  // Detect dark vs light themes
+  const isDark = ['glass','cyber','cartoon','dark','midnight','night'].includes(theme);
+  const colorMap = {
+    'glass':    { bg:'#040410', accent:'#74b9ff', accent2:'#a29bfe', accent3:'#34d399', accent4:'#fbbf24', ink:'#f1f5f9', ink2:'#cbd5e1', muted:'#64748b', rule:'rgba(255,255,255,0.07)', crust:'#8b6914', mantle:'#c0392b', outercore:'#e67e22', innercore:'#f1c40f', pwave:'#74b9ff', swave:'#e74c3c', magfield:'#a29bfe', plate:'#2ecc71' },
+    'cyber':    { bg:'#020208', accent:'#00f3ff', accent2:'#ff00ea', accent3:'#39ff14', accent4:'#ffb800', ink:'#e0f7fa', ink2:'#b2ebf2', muted:'#4dd0e1', rule:'rgba(0,243,255,0.1)', crust:'#ffb800', mantle:'#ff00ea', outercore:'#00f3ff', innercore:'#39ff14', pwave:'#00f3ff', swave:'#ff00ea', magfield:'#bd00ff', plate:'#39ff14' },
+    'soviet':   { bg:'#e8e0d6', accent:'#c41e1e', accent2:'#8b4513', accent3:'#a0522d', accent4:'#cd853f', ink:'#1a1a1a', ink2:'#3d3d3d', muted:'#6a5a4a', rule:'#d4c4a8', crust:'#8b6914', mantle:'#c41e1e', outercore:'#cd853f', innercore:'#daa520', pwave:'#c41e1e', swave:'#556b2f', magfield:'#8b4513', plate:'#556b2f' },
+    'cartoon':  { bg:'#1a1a2e', accent:'#ff6b6b', accent2:'#4ecdc4', accent3:'#ffe66d', accent4:'#a29bfe', ink:'#2d3436', ink2:'#4a4a4a', muted:'#7a7a7a', rule:'rgba(0,0,0,0.08)', crust:'#d4a017', mantle:'#ff6b6b', outercore:'#ffa502', innercore:'#ffe66d', pwave:'#4ecdc4', swave:'#ff6b6b', magfield:'#a29bfe', plate:'#26de81' },
+    'academic': { bg:'#ffffff', accent:'#6b8cae', accent2:'#8a7ca8', accent3:'#c4956a', accent4:'#6a9e8a', ink:'#1a1a2e', ink2:'#3d3d5c', muted:'#7a7a8a', rule:'#e0e0e0', crust:'#b8860b', mantle:'#cd5c5c', outercore:'#daa520', innercore:'#ffd700', pwave:'#6b8cae', swave:'#cd5c5c', magfield:'#8a7ca8', plate:'#6a9e8a' },
+    'dark':     { bg:'#0a0a1a', accent:'#74b9ff', accent2:'#a29bfe', accent3:'#34d399', accent4:'#fbbf24', ink:'#f1f5f9', ink2:'#cbd5e1', muted:'#64748b', rule:'rgba(255,255,255,0.07)', crust:'#8b6914', mantle:'#c0392b', outercore:'#e67e22', innercore:'#f1c40f', pwave:'#74b9ff', swave:'#e74c3c', magfield:'#a29bfe', plate:'#2ecc71' },
+  };
+  // Fallback for any unknown theme: use dark or academic based on brightness
+  if(colorMap[theme]) return colorMap[theme];
+  return isDark ? colorMap['dark'] : colorMap['academic'];
+}
+
+// ========================================== PHYSICS UPDATE
+function update(dt){
+  if(!state.running) return;
+  state.time += dt;
+
+  if(state.mode === 'structure'){
+    state.rotation += dt * 0.1;
+  }
+  else if(state.mode === 'seismic'){
+    // propagate P waves (compressional, faster)
+    state.pWaves = state.pWaves.filter(w => {
+      w.r += w.speed * dt * 60;
+      return w.r < earthPx * 2.5;
+    });
+    // propagate S waves (shear, slower, cannot pass through liquid outer core)
+    state.sWaves = state.sWaves.filter(w => {
+      w.r += w.speed * dt * 60;
+      return w.r < earthPx * 2.5;
+    });
+  }
+  else if(state.mode === 'magnetic'){
+    // solar wind particles
+    if(state.showSolar){
+      for(let i = 0; i < 2; i++){
+        const angle = (Math.random() - 0.5) * 0.6;
+        const side = Math.random() > 0.5 ? 1 : -1;
+        state.magParticles.push({
+          x: cx + side * cw * 0.6,
+          y: cy + (Math.random() - 0.5) * ch * 0.8,
+          vx: -side * (2 + Math.random() * 2),
+          vy: (Math.random() - 0.5) * 0.5,
+          life: 1.0,
+        });
+      }
+    }
+    state.magParticles = state.magParticles.filter(p => {
+      p.x += p.vx; p.y += p.vy;
+      // deflect near earth
+      const dx = p.x - cx, dy = p.y - cy;
+      const d = Math.hypot(dx, dy);
+      if(d < earthPx * 2){
+        const force = state.magStrength * 50 / (d * d + 100);
+        p.vx += dx / d * force;
+        p.vy += dy / d * force * 0.5;
+      }
+      p.life -= 0.003;
+      return p.life > 0 && p.x > -50 && p.x < cw + 50;
+    });
+  }
+  else if(state.mode === 'tectonic'){
+    // animate mantle convection
+    for(const cell of state.mantleCells){
+      cell.phase += dt * cell.speed * state.plateSpeed;
+    }
+  }
+}
+
+// ========================================== RENDER
+function render(){
+  const c = getColors();
+  ctx.fillStyle = c.bg;
+  ctx.fillRect(0, 0, cw, ch);
+
+  if(state.mode === 'structure') renderStructure(c);
+  else if(state.mode === 'seismic') renderSeismic(c);
+  else if(state.mode === 'magnetic') renderMagnetic(c);
+  else if(state.mode === 'tectonic') renderTectonic(c);
+}
+
+// ===== STRUCTURE MODE =====
+function renderStructure(c){
+  const r = earthPx;
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Full circle on right (3D-ish)
+  // Cutaway on left showing layers
+  const cutAngle = state.cutaway * Math.PI;
+
+  // Draw layers from outside in
+  for(let i = layers.length - 1; i >= 0; i--){
+    const layer = layers[i];
+    const rOut = r * (layer.r1 / earthR);
+    const rIn = r * (layer.r0 / earthR);
+
+    // Right hemisphere: full
+    ctx.beginPath();
+    ctx.arc(0, 0, rOut, -cutAngle, 0);
+    ctx.arc(0, 0, rIn, 0, -cutAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = c[layer.color];
+    ctx.globalAlpha = 0.85;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Left hemisphere: cutaway wedge
+    ctx.beginPath();
+    ctx.arc(0, 0, rOut, Math.PI - cutAngle, Math.PI + cutAngle);
+    ctx.arc(0, 0, rIn, Math.PI + cutAngle, Math.PI - cutAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = c[layer.color];
+    ctx.globalAlpha = 0.7;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Border
+    ctx.beginPath();
+    ctx.arc(0, 0, rOut, 0, Math.PI * 2);
+    ctx.strokeStyle = c.rule;
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.3;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // Labels on left cutaway
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 11px monospace';
+  for(let i = 0; i < layers.length; i++){
+    const layer = layers[i];
+    const rMid = r * ((layer.r0 + layer.r1) / 2 / earthR);
+    const labelAngle = Math.PI;
+    const lx = Math.cos(labelAngle) * rMid - 8;
+    const ly = Math.sin(labelAngle) * rMid;
+    ctx.fillStyle = c.ink;
+    ctx.fillText(layer.name, lx, ly + 4);
+    // depth
+    ctx.fillStyle = c.muted;
+    ctx.font = '9px monospace';
+    ctx.fillText(layer.r0 + 'km', lx, ly + 16);
+    ctx.font = 'bold 11px monospace';
+  }
+
+  // Surface features on right (continents)
+  ctx.save();
+  ctx.rotate(state.rotation);
+  ctx.fillStyle = c.plate;
+  ctx.globalAlpha = 0.3;
+  for(let i = 0; i < 8; i++){
+    const a = (i / 8) * Math.PI * 2;
+    const sz = 15 + Math.sin(i * 2.3) * 8;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * r * 0.7, Math.sin(a) * r * 0.7, sz, sz * 0.6, a, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // Temperature gradient bar (right side)
+  const barX = r + 30, barY = -r * 0.8, barH = r * 1.6;
+  const grad = ctx.createLinearGradient(0, barY, 0, barY + barH);
+  grad.addColorStop(0, c.innercore || '#ffd700');
+  grad.addColorStop(0.2, c.outercore || '#daa520');
+  grad.addColorStop(0.6, c.mantle || '#cd5c5c');
+  grad.addColorStop(1, c.crust || '#b8860b');
+  ctx.fillStyle = grad;
+  ctx.fillRect(barX, barY, 14, barH);
+  ctx.strokeStyle = c.rule;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(barX, barY, 14, barH);
+  ctx.fillStyle = c.muted;
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('5700°C', barX + 20, barY + 8);
+  ctx.fillText('3500°C', barX + 20, barY + barH * 0.3);
+  ctx.fillText('1400°C', barX + 20, barY + barH * 0.6);
+  ctx.fillText('15°C', barX + 20, barY + barH - 4);
+  ctx.fillText('温度', barX, barY - 8);
+
+  ctx.restore();
+}
+
+// ===== SEISMIC MODE =====
+function renderSeismic(c){
+  const r = earthPx;
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Earth interior (simplified)
+  const layerRs = [
+    { r: r * (5150/earthR), color: c.innercore, a: 0.8 },
+    { r: r * (2890/earthR), color: c.outercore, a: 0.6 },
+    { r: r * (660/earthR),  color: c.mantle,    a: 0.5 },
+    { r: r,                  color: c.crust,     a: 0.7 },
+  ];
+  for(const lr of layerRs){
+    ctx.beginPath();
+    ctx.arc(0, 0, lr.r, 0, Math.PI * 2);
+    ctx.fillStyle = lr.color;
+    ctx.globalAlpha = lr.a;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+  // layer boundaries
+  ctx.strokeStyle = c.rule;
+  ctx.globalAlpha = 0.3;
+  for(const lr of layerRs){
+    ctx.beginPath();
+    ctx.arc(0, 0, lr.r, 0, Math.PI * 2);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // P waves (blue, fast, pass through everything)
+  for(const w of state.pWaves){
+    const alpha = Math.max(0, 1 - w.r / (earthPx * 2.5));
+    ctx.strokeStyle = c.pwave;
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, Math.max(1, w.r), 0, Math.PI * 2);
+    ctx.stroke();
+
+    // inner ring
+    ctx.globalAlpha = alpha * 0.3;
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, Math.max(1, w.r * 0.85), 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // S waves (red, slower, stop at outer core)
+  for(const w of state.sWaves){
+    const alpha = Math.max(0, 1 - w.r / (earthPx * 2.5));
+    ctx.strokeStyle = c.swave;
+    ctx.globalAlpha = alpha * 0.7;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.arc(w.x, w.y, Math.max(1, w.r), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.globalAlpha = 1;
+
+  // S-wave shadow zone indicator (103°-142°)
+  ctx.strokeStyle = c.swave;
+  ctx.globalAlpha = 0.15;
+  ctx.fillStyle = c.swave;
+  ctx.globalAlpha = 0.08;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, r * 1.15, -Math.PI * (142/180), -Math.PI * (103/180));
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, r * 1.15, Math.PI * (103/180), Math.PI * (142/180));
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Quake markers
+  for(const q of state.quakes){
+    ctx.fillStyle = c.accent4;
+    ctx.beginPath();
+    ctx.arc(q.x, q.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    const pulse = (Math.sin(state.time * 6) + 1) * 0.5;
+    ctx.strokeStyle = c.accent4;
+    ctx.globalAlpha = 1 - pulse;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(q.x, q.y, 4 + pulse * 12, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // Legend
+  ctx.fillStyle = c.ink2;
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('━ P波 (纵波, ~10 km/s)', -r - 10, -r - 20);
+  ctx.fillStyle = c.pwave;
+  ctx.fillRect(-r - 20, -r - 24, 8, 2);
+  ctx.fillStyle = c.ink2;
+  ctx.fillText('┄ S波 (横波, ~6 km/s, 不穿液态外核)', -r - 10, -r - 6);
+  ctx.fillStyle = c.swave;
+  ctx.fillRect(-r - 20, -r - 10, 8, 2);
+
+  ctx.restore();
+}
+
+// ===== MAGNETIC MODE =====
+function renderMagnetic(c){
+  const r = earthPx;
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Solar wind particles
+  for(const p of state.magParticles){
+    ctx.fillStyle = c.accent4;
+    ctx.globalAlpha = p.life * 0.5;
+    ctx.beginPath();
+    ctx.arc(p.x - cx, p.y - cy, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Earth
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fillStyle = c.crust;
+  ctx.globalAlpha = 0.8;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Magnetic dipole field lines
+  const tilt = state.magTilt * Math.PI / 180;
+  ctx.save();
+  ctx.rotate(tilt);
+
+  for(let L = 1.2; L <= 4; L += 0.4){
+    const strength = state.magStrength;
+    ctx.strokeStyle = c.magfield;
+    ctx.globalAlpha = Math.max(0.1, 0.5 - (L - 1.2) * 0.1);
+    ctx.lineWidth = 1.2;
+
+    // Northern hemisphere
+    ctx.beginPath();
+    for(let theta = 0.01; theta < Math.PI; theta += 0.02){
+      const rDip = L * r * Math.sin(theta) * Math.sin(theta);
+      if(rDip < r) continue;
+      const x = rDip * Math.sin(theta);
+      const y = -rDip * Math.cos(theta);
+      if(theta === 0.01) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Southern hemisphere
+    ctx.beginPath();
+    for(let theta = 0.01; theta < Math.PI; theta += 0.02){
+      const rDip = L * r * Math.sin(theta) * Math.sin(theta);
+      if(rDip < r) continue;
+      const x = -rDip * Math.sin(theta);
+      const y = -rDip * Math.cos(theta);
+      if(theta === 0.01) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // Magnetic poles
+  const poleR = r * 1.05;
+  ctx.fillStyle = c.accent;
+  ctx.beginPath();
+  ctx.arc(0, -poleR, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = c.accent3;
+  ctx.beginPath();
+  ctx.arc(0, poleR, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pole labels
+  ctx.fillStyle = c.ink;
+  ctx.font = 'bold 10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('N', 0, -poleR - 8);
+  ctx.fillText('S', 0, poleR + 16);
+
+  ctx.restore();
+
+  // Magnetosphere boundary (bow shock)
+  ctx.strokeStyle = c.magfield;
+  ctx.globalAlpha = 0.2;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  const sunSide = -1; // sun on left
+  for(let a = -Math.PI/2.2; a <= Math.PI/2.2; a += 0.05){
+    const dist = r * 3 * state.magStrength * (1 + 0.3 * Math.cos(a));
+    const x = sunSide * dist * Math.cos(a);
+    const y = dist * Math.sin(a);
+    if(a === -Math.PI/2.2) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  // Sun direction indicator
+  ctx.fillStyle = c.accent4;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.arc(-cw * 0.45, 0, 20, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = c.ink2;
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('太阳风', -cw * 0.45, 30);
+
+  ctx.restore();
+}
+
+// ===== TECTONIC MODE =====
+function renderTectonic(c){
+  const r = earthPx;
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Mantle (background)
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fillStyle = c.mantle;
+  ctx.globalAlpha = 0.3;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Mantle convection cells
+  if(state.showConvection){
+    for(const cell of state.mantleCells){
+      const px = cell.x, py = cell.y;
+      const phase = cell.phase;
+      ctx.strokeStyle = c.outercore;
+      ctx.globalAlpha = 0.3;
+      ctx.lineWidth = 1.5;
+      // convection loop
+      const w = cell.w, h = cell.h;
+      ctx.beginPath();
+      for(let t = 0; t <= 1; t += 0.05){
+        const ang = t * Math.PI * 2 + phase;
+        const x = px + Math.cos(ang) * w;
+        const y = py + Math.sin(ang) * h * 0.7;
+        if(t === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // arrows at top (moving sideways)
+      const topX = px + Math.cos(phase) * w;
+      const dir = Math.sin(phase) > 0 ? 1 : -1;
+      ctx.globalAlpha = 0.5;
+      ctx.strokeStyle = c.accent4;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(topX - dir * 8, py - h * 0.7);
+      ctx.lineTo(topX + dir * 8, py - h * 0.7);
+      ctx.lineTo(topX + dir * 4, py - h * 0.7 - 3);
+      ctx.moveTo(topX + dir * 8, py - h * 0.7);
+      ctx.lineTo(topX + dir * 4, py - h * 0.7 + 3);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Plate boundaries (on surface)
+  const plateCount = 7;
+  for(let i = 0; i < plateCount; i++){
+    const a1 = (i / plateCount) * Math.PI * 2;
+    const a2 = ((i + 1) / plateCount) * Math.PI * 2;
+    const am = (a1 + a2) / 2;
+
+    // Plate fill
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a1) * r, Math.sin(a1) * r);
+    ctx.arc(0, 0, r, a1, a2);
+    ctx.closePath();
+    ctx.fillStyle = c.plate;
+    ctx.globalAlpha = 0.15 + (i % 2) * 0.1;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Boundary type
+    const type = i % 3; // 0=divergent, 1=convergent, 2=transform
+    const bx = Math.cos(am) * r;
+    const by = Math.sin(am) * r;
+
+    if(type === 0){
+      // Divergent: arrows apart
+      ctx.strokeStyle = c.accent3;
+      ctx.lineWidth = 2;
+      const dx = Math.cos(am), dy = Math.sin(am);
+      const px = Math.cos(am + 0.03) * r, py = Math.sin(am + 0.03) * r;
+      const nx = Math.cos(am - 0.03) * r, ny = Math.sin(am - 0.03) * r;
+      drawArrow(px, py, px + dx * 12, py + dy * 12, c.accent3);
+      drawArrow(nx, ny, nx - dx * 12, ny - dy * 12, c.accent3);
+    } else if(type === 1){
+      // Convergent: arrows together
+      const dx = Math.cos(am), dy = Math.sin(am);
+      const px = Math.cos(am + 0.03) * r, py = Math.sin(am + 0.03) * r;
+      const nx = Math.cos(am - 0.03) * r, ny = Math.sin(am - 0.03) * r;
+      drawArrow(px + dx * 12, py + dy * 12, px, py, c.swave);
+      drawArrow(nx - dx * 12, ny - dy * 12, nx, ny, c.swave);
+    } else {
+      // Transform: arrows parallel
+      const tx = -Math.sin(am), ty = Math.cos(am);
+      const px = Math.cos(am + 0.03) * r, py = Math.sin(am + 0.03) * r;
+      const nx = Math.cos(am - 0.03) * r, ny = Math.sin(am - 0.03) * r;
+      drawArrow(px - tx * 10, py - ty * 10, px + tx * 10, py + ty * 10, c.accent4);
+      drawArrow(nx + tx * 10, ny + ty * 10, nx - tx * 10, ny - ty * 10, c.accent4);
+    }
+  }
+
+  // Legend
+  ctx.fillStyle = c.ink2;
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'left';
+  const ly = -r - 15;
+  ctx.fillStyle = c.accent3; ctx.fillRect(-r, ly, 10, 3);
+  ctx.fillStyle = c.ink2; ctx.fillText('离散型', -r + 14, ly + 4);
+  ctx.fillStyle = c.swave; ctx.fillRect(-r + 70, ly, 10, 3);
+  ctx.fillStyle = c.ink2; ctx.fillText('汇聚型', -r + 84, ly + 4);
+  ctx.fillStyle = c.accent4; ctx.fillRect(-r + 140, ly, 10, 3);
+  ctx.fillStyle = c.ink2; ctx.fillText('转换型', -r + 154, ly + 4);
+
+  ctx.restore();
+}
+
+function drawArrow(x1, y1, x2, y2, color){
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  const ah = 5;
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - ah * Math.cos(ang - 0.4), y2 - ah * Math.sin(ang - 0.4));
+  ctx.lineTo(x2 - ah * Math.cos(ang + 0.4), y2 - ah * Math.sin(ang + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+// ========================================== UI UPDATE
+function updateUI(){
+  const modeNames = {'structure':'内部结构','seismic':'地震波','magnetic':'地磁场','tectonic':'板块构造'};
+  document.getElementById('badgeMode').textContent = modeNames[state.mode];
+  document.getElementById('badgeFPS').textContent = state.fps + ' FPS';
+
+  const container = document.getElementById('output-container');
+  const formulaContainer = document.getElementById('formula-container');
+  const paramContainer = document.getElementById('param-container');
+  const presetContainer = document.getElementById('preset-container');
+
+  if(state.mode === 'structure'){
+    document.getElementById('badgeInfo').textContent = 'R = 6371 km';
+    paramContainer.innerHTML = `
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">剖面深度</span><span class="param-value" id="valCut">${(state.cutaway * 180 / Math.PI).toFixed(0)}°</span></div>
+        <input type="range" id="sliderCut" min="10" max="90" value="${state.cutaway * 180 / Math.PI}" step="1">
+      </div>`;
+    document.getElementById('sliderCut').addEventListener('input', e => {
+      state.cutaway = parseInt(e.target.value) * Math.PI / 180;
+      document.getElementById('valCut').textContent = e.target.value + '°';
+    });
+    presetContainer.innerHTML = '';
+
+    // Output: layer table
+    let tableHtml = '<table class="layer-table"><tr><th>层级</th><th>深度</th><th>密度</th><th>温度</th></tr>';
+    for(const l of layers){
+      tableHtml += `<tr><td><span class="layer-dot" style="background:var(--g-${l.color})"></span>${l.name}</td><td>${l.r0}-${l.r1}km</td><td>${l.density}</td><td>${l.temp}°C</td></tr>`;
+    }
+    tableHtml += '</table>';
+    container.innerHTML = tableHtml + `
+      <div class="output-grid" style="margin-top:10px">
+        <div class="output-card"><div class="output-num">6371</div><div class="output-label">半径 (km)</div></div>
+        <div class="output-card"><div class="output-num b">5.51</div><div class="output-label">平均密度</div></div>
+        <div class="output-card"><div class="output-num c">5700</div><div class="output-label">核心温度 (°C)</div></div>
+        <div class="output-card"><div class="output-num d">11.5°</div><div class="output-label">磁极偏角</div></div>
+      </div>`;
+
+    formulaContainer.innerHTML = `
+      <div class="formula-block">
+        <div class="formula-title">地球内部密度</div>
+        <div class="formula-expr">ρ(r) = ρ₀(1 - αr²)</div>
+        <div class="formula-desc">密度随深度增加，地壳约2.8 g/cm³，内核约13.0 g/cm³</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">压力梯度</div>
+        <div class="formula-expr">dP/dr = -ρ(r) · g(r)</div>
+        <div class="formula-desc">地心压力约360 GPa，由上覆物质重力产生</div>
+      </div>`;
+  }
+  else if(state.mode === 'seismic'){
+    document.getElementById('badgeInfo').textContent = `${state.pWaves.length} P波 / ${state.sWaves.length} S波`;
+    paramContainer.innerHTML = `
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">震源强度</span><span class="param-value" id="valPower">${state.quakePower.toFixed(1)}</span></div>
+        <input type="range" id="sliderPower" min="5" max="30" value="${state.quakePower * 10}" step="1">
+      </div>
+      <p style="font-size:.72rem;color:var(--g-muted);margin-top:8px">点击地球表面发射地震波</p>`;
+    document.getElementById('sliderPower').addEventListener('input', e => {
+      state.quakePower = parseInt(e.target.value) / 10;
+      document.getElementById('valPower').textContent = state.quakePower.toFixed(1);
+    });
+    presetContainer.innerHTML = `
+      <button class="preset-btn" data-preset="surface">📍 浅源地震</button>
+      <button class="preset-btn" data-preset="deep">🔺 深源地震</button>
+      <button class="preset-btn" data-preset="multi">💥 多源</button>`;
+
+    document.querySelectorAll('[data-preset]').forEach(b => {
+      b.addEventListener('click', () => {
+        if(b.dataset.preset === 'surface') triggerQuake(0, -earthPx, 1.0);
+        else if(b.dataset.preset === 'deep') triggerQuake(0, -earthPx * 0.3, 1.5);
+        else if(b.dataset.preset === 'multi'){
+          triggerQuake(earthPx * 0.7, -earthPx * 0.3, 1.0);
+          setTimeout(() => triggerQuake(-earthPx * 0.7, earthPx * 0.3, 1.0), 500);
+        }
+      });
+    });
+
+    const totalE = state.pWaves.length + state.sWaves.length;
+    container.innerHTML = `
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num" id="numP">${state.pWaves.length}</div><div class="output-label">P波数量</div></div>
+        <div class="output-card"><div class="output-num b" id="numS">${state.sWaves.length}</div><div class="output-label">S波数量</div></div>
+        <div class="output-card"><div class="output-num c">10.0</div><div class="output-label">P波速度 (km/s)</div></div>
+        <div class="output-card"><div class="output-num d">6.0</div><div class="output-label">S波速度 (km/s)</div></div>
+      </div>
+      <div class="info-card" style="margin-top:10px">
+        <h3>📡 S波阴影区</h3>
+        <p>S波无法穿透液态外核，在103°-142°形成<strong>阴影区</strong>。这是推断外核为液态的关键证据。</p>
+      </div>`;
+
+    formulaContainer.innerHTML = `
+      <div class="formula-block">
+        <div class="formula-title">P波（纵波）</div>
+        <div class="formula-expr">vP = √((K + 4μ/3) / ρ)</div>
+        <div class="formula-desc">压缩波，可在固体和液体中传播，速度最快</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">S波（横波）</div>
+        <div class="formula-expr">vS = √(μ / ρ)</div>
+        <div class="formula-desc">剪切波，仅在固体中传播，无法穿过液态外核</div>
+      </div>`;
+  }
+  else if(state.mode === 'magnetic'){
+    document.getElementById('badgeInfo').textContent = `倾角 ${state.magTilt}° / 强度 ${state.magStrength.toFixed(1)}`;
+    paramContainer.innerHTML = `
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">磁极倾角</span><span class="param-value" id="valTilt">${state.magTilt}°</span></div>
+        <input type="range" id="sliderTilt" min="0" max="30" value="${state.magTilt}" step="0.5">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">磁场强度</span><span class="param-value" id="valMag">${state.magStrength.toFixed(1)}×</span></div>
+        <input type="range" id="sliderMag" min="3" max="20" value="${state.magStrength * 10}" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">太阳风</span></div>
+        <div class="mode-grid"><button class="mode-btn ${state.showSolar?'active':''}" id="solarOn">开启</button><button class="mode-btn ${!state.showSolar?'active':''}" id="solarOff">关闭</button></div>
+      </div>`;
+    document.getElementById('sliderTilt').addEventListener('input', e => {
+      state.magTilt = parseFloat(e.target.value);
+      document.getElementById('valTilt').textContent = state.magTilt + '°';
+    });
+    document.getElementById('sliderMag').addEventListener('input', e => {
+      state.magStrength = parseInt(e.target.value) / 10;
+      document.getElementById('valMag').textContent = state.magStrength.toFixed(1) + '×';
+    });
+    document.getElementById('solarOn').addEventListener('click', () => { state.showSolar = true; updateUI(); });
+    document.getElementById('solarOff').addEventListener('click', () => { state.showSolar = false; state.magParticles = []; updateUI(); });
+    presetContainer.innerHTML = `
+      <button class="preset-btn" data-preset="normal">🌐 标准</button>
+      <button class="preset-btn" data-preset="storm">⚡ 磁暴</button>
+      <button class="preset-btn" data-preset="quiet">🌙 平静</button>`;
+    document.querySelectorAll('[data-preset]').forEach(b => {
+      b.addEventListener('click', () => {
+        if(b.dataset.preset === 'normal'){ state.magTilt = 11.5; state.magStrength = 1.0; state.showSolar = true; }
+        else if(b.dataset.preset === 'storm'){ state.magTilt = 20; state.magStrength = 2.0; state.showSolar = true; }
+        else if(b.dataset.preset === 'quiet'){ state.magTilt = 5; state.magStrength = 0.5; state.showSolar = false; state.magParticles = []; }
+        updateUI();
+      });
+    });
+
+    container.innerHTML = `
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num">11.5°</div><div class="output-label">磁极偏角</div></div>
+        <div class="output-card"><div class="output-num b">25-65</div><div class="output-label">μT 磁场强度</div></div>
+        <div class="output-card"><div class="output-num c">780k</div><div class="output-label">核心温度 (°C)</div></div>
+        <div class="output-card"><div class="output-num d">~11°</div><div class="output-label">极光纬度</div></div>
+      </div>
+      <div class="info-card" style="margin-top:10px">
+        <h3>🧲 地磁偶极子</h3>
+        <p>地磁场近似<strong>磁偶极子</strong>，由外核液态铁的对流运动（<strong>发电机效应</strong>）产生。磁极与地理极有约11.5°偏角。</p>
+      </div>`;
+
+    formulaContainer.innerHTML = `
+      <div class="formula-block">
+        <div class="formula-title">磁偶极子场</div>
+        <div class="formula-expr">B = (μ₀/4π) · m / r³ · √(1+3cos²θ)</div>
+        <div class="formula-desc">磁场强度随距离立方衰减，赤道处最弱，磁极处最强</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">洛伦兹力（带电粒子）</div>
+        <div class="formula-expr">F = qv × B</div>
+        <div class="formula-desc">太阳风带电粒子受洛伦兹力偏转，形成磁层和极光</div>
+      </div>`;
+  }
+  else if(state.mode === 'tectonic'){
+    document.getElementById('badgeInfo').textContent = `速度 ×${state.plateSpeed.toFixed(1)}`;
+    paramContainer.innerHTML = `
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">板块运动速度</span><span class="param-value" id="valPlate">${state.plateSpeed.toFixed(1)}×</span></div>
+        <input type="range" id="sliderPlate" min="0" max="30" value="${state.plateSpeed * 10}" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">地幔对流</span></div>
+        <div class="mode-grid"><button class="mode-btn ${state.showConvection?'active':''}" id="convOn">显示</button><button class="mode-btn ${!state.showConvection?'active':''}" id="convOff">隐藏</button></div>
+      </div>`;
+    document.getElementById('sliderPlate').addEventListener('input', e => {
+      state.plateSpeed = parseInt(e.target.value) / 10;
+      document.getElementById('valPlate').textContent = state.plateSpeed.toFixed(1) + '×';
+    });
+    document.getElementById('convOn').addEventListener('click', () => { state.showConvection = true; initMantleCells(); updateUI(); });
+    document.getElementById('convOff').addEventListener('click', () => { state.showConvection = false; updateUI(); });
+    presetContainer.innerHTML = `
+      <button class="preset-btn" data-preset="ring">🌋 火山环</button>
+      <button class="preset-btn" data-preset="rift">🌊 洋中脊</button>
+      <button class="preset-btn" data-preset="collision">🏔️ 造山带</button>`;
+    document.querySelectorAll('[data-preset]').forEach(b => {
+      b.addEventListener('click', () => {
+        if(b.dataset.preset === 'ring'){ state.plateSpeed = 2.0; state.showConvection = true; }
+        else if(b.dataset.preset === 'rift'){ state.plateSpeed = 1.0; state.showConvection = true; }
+        else if(b.dataset.preset === 'collision'){ state.plateSpeed = 0.5; state.showConvection = true; }
+        updateUI();
+      });
+    });
+
+    container.innerHTML = `
+      <div class="output-grid">
+        <div class="output-card"><div class="output-num">7</div><div class="output-label">主要板块</div></div>
+        <div class="output-card"><div class="output-num b">2-10</div><div class="output-label">cm/年 运动速度</div></div>
+        <div class="output-card"><div class="output-num c">3</div><div class="output-label">边界类型</div></div>
+        <div class="output-card"><div class="output-num d">~1200</div><div class="output-label">°C 地幔温度</div></div>
+      </div>
+      <div class="info-card" style="margin-top:10px">
+        <h3>🌋 三种板块边界</h3>
+        <p><strong>离散型</strong>：板块分离，形成洋中脊</p>
+        <p><strong>汇聚型</strong>：板块碰撞，形成俯冲带和山脉</p>
+        <p><strong>转换型</strong>：板块滑动，引发走滑断层</p>
+      </div>`;
+
+    formulaContainer.innerHTML = `
+      <div class="formula-block">
+        <div class="formula-title">地幔对流驱动力</div>
+        <div class="formula-expr">Ra = αgΔTd³/(κν)</div>
+        <div class="formula-desc">瑞利数Ra超过临界值时地幔发生对流，驱动板块运动</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">弹性回跳理论</div>
+        <div class="formula-expr">σ = E · ε  →  断层突然释放</div>
+        <div class="formula-desc">应力积累超过岩石强度时，断层突然滑动释放弹性能量</div>
+      </div>`;
+  }
+}
+
+// ========================================== INTERACTIONS
+// Mode switching
+document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn[data-mode]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    state.quakes = []; state.pWaves = []; state.sWaves = [];
+    state.magParticles = [];
+    if(state.mode === 'tectonic') initMantleCells();
+    updateUI();
+  });
+});
+
+// Canvas click for seismic mode
+canvas.addEventListener('click', (e) => {
+  if(state.mode !== 'seismic') return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left - cx;
+  const my = e.clientY - rect.top - cy;
+  triggerQuake(mx, my, state.quakePower);
+});
+canvas.addEventListener('touchstart', (e) => {
+  if(state.mode !== 'seismic') return;
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  const mx = t.clientX - rect.left - cx;
+  const my = t.clientY - rect.top - cy;
+  triggerQuake(mx, my, state.quakePower);
+});
+
+function triggerQuake(x, y, power){
+  // Only on/near earth surface
+  const d = Math.hypot(x, y);
+  if(d > earthPx * 1.15) return;
+  // Snap to surface
+  if(d > earthPx * 0.9){
+    x = x / d * earthPx;
+    y = y / d * earthPx;
+  }
+  state.quakes.push({ x, y, power });
+  state.pWaves.push({ x, y, r: 0, speed: 1.8 * power });
+  state.sWaves.push({ x, y, r: 0, speed: 1.0 * power });
+  if(state.quakes.length > 5) state.quakes.shift();
+}
+
+// Controls
+document.getElementById('btnPlay').addEventListener('click', () => { state.running = true; });
+document.getElementById('btnPause').addEventListener('click', () => { state.running = false; });
+document.getElementById('btnReset').addEventListener('click', () => {
+  state.time = 0;
+  state.quakes = []; state.pWaves = []; state.sWaves = [];
+  state.magParticles = [];
+  state.rotation = 0;
+  if(state.mode === 'tectonic') initMantleCells();
+});
+
+// ========================================== MANTLE CELLS
+function initMantleCells(){
+  state.mantleCells = [];
+  for(let i = 0; i < 4; i++){
+    const angle = (i / 4) * Math.PI * 2 + 0.3;
+    const dist = earthPx * 0.55;
+    state.mantleCells.push({
+      x: Math.cos(angle) * dist,
+      y: Math.sin(angle) * dist,
+      w: earthPx * 0.25,
+      h: earthPx * 0.18,
+      speed: 0.3 + Math.random() * 0.3,
+      phase: i * Math.PI / 2,
+    });
+  }
+}
+initMantleCells();
+
+// ========================================== QUIZ
+const quizBank = [
+  { q:'地球内部最厚的圈层是？', opts:['地壳','地幔','外核','内核'], a:1, exp:'地幔厚约2855km，是地球内部最厚的圈层。' },
+  { q:'S波（横波）不能穿过地球的哪个圈层？', opts:['地壳','地幔','外核','内核'], a:2, exp:'S波只能在固体中传播，外核为液态故S波无法穿过。' },
+  { q:'地球磁场主要由什么产生？', opts:['地壳岩石','内核铁镍','外核液态金属对流','太阳风'], a:2, exp:'外核液态铁镍的对流运动产生发电机效应，形成地磁场。' },
+  { q:'板块构造的主要驱动力是？', opts:['风力','地幔对流','潮汐力','重力'], a:1, exp:'地幔对流带动岩石圈板块运动，是板块构造的主要驱动力。' },
+  { q:'地震波中传播速度最快的是？', opts:['S波','P波','面波','声波'], a:1, exp:'P波（纵波）速度最快，约6-13 km/s，最先到达观测站。' },
+  { q:'地球的平均密度约为？', opts:['2.8','5.5','11.0','13.0'], a:1, exp:'地球平均密度约5.51 g/cm³，比地壳密度(2.8)大得多。' },
+  { q:'莫霍洛维奇不连续面是哪两个圈层的分界？', opts:['地壳-地幔','地幔-外核','外核-内核','岩石圈-软流圈'], a:0, exp:'莫霍面是地壳与地幔的分界面，平均深度约35km。' },
+  { q:'地磁极与地理极的夹角约为？', opts:['0°','11.5°','23.5°','45°'], a:1, exp:'地磁极与地理极有约11.5°偏角，且随时间缓慢漂移。' },
+];
+let quizIdx = 0, quizScore = 0, quizTotal = 0;
+
+function renderQuiz(){
+  const q = quizBank[quizIdx];
+  document.getElementById('quizQ').textContent = `Q${quizIdx+1}. ${q.q}`;
+  const optsDiv = document.getElementById('quizOpts');
+  optsDiv.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-opt';
+    btn.textContent = String.fromCharCode(65+i) + '. ' + opt;
+    btn.addEventListener('click', () => answerQuiz(i, q));
+    optsDiv.appendChild(btn);
+  });
+  document.getElementById('quizFeedback').classList.remove('show');
+  document.getElementById('quizScore').textContent = `${quizScore} / ${quizTotal}`;
+}
+function answerQuiz(idx, q){
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  if(idx === q.a){
+    opts[idx].classList.add('correct');
+    quizScore++;
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[q.a].classList.add('correct');
+  }
+  quizTotal++;
+  const fb = document.getElementById('quizFeedback');
+  fb.textContent = q.exp;
+  fb.classList.add('show');
+  document.getElementById('quizScore').textContent = `${quizScore} / ${quizTotal}`;
+}
+document.getElementById('quizNext').addEventListener('click', () => {
+  quizIdx = (quizIdx + 1) % quizBank.length;
+  renderQuiz();
+});
+renderQuiz();
+
+// ========================================== MAIN LOOP
+function loop(timestamp){
+  if(!state.lastFrame) state.lastFrame = timestamp;
+  const dt = Math.min(0.05, (timestamp - state.lastFrame) / 1000);
+  state.lastFrame = timestamp;
+  state.fpsCounter++;
+  state.fpsTimer += dt;
+  if(state.fpsTimer >= 1){
+    state.fps = state.fpsCounter;
+    state.fpsCounter = 0;
+    state.fpsTimer = 0;
+  }
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+updateUI();
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
