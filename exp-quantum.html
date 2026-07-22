@@ -12,6 +12,19 @@
     body { overflow-x: hidden; font-family: 'Inter', system-ui, sans-serif; }
 
     /* Theme overrides for quantum experiment */
+    [data-theme="academic"] body { background: var(--bg-color); color: var(--text-color); }
+    [data-theme="academic"] .q-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; }
+    [data-theme="academic"] .q-text { color: #1a1a2e; }
+    [data-theme="academic"] .q-muted { color: #7a7a8a; }
+    [data-theme="academic"] .q-accent { color: #6b8cae; }
+    [data-theme="academic"] .q-btn-primary { background: #6b8cae; color: white; border: none; border-radius: 4px; }
+    [data-theme="academic"] .q-btn-secondary { background: #f1f3f5; color: #1a1a2e; border: 1px solid #e0e0e0; border-radius: 4px; }
+    [data-theme="academic"] .q-canvas-bg { background: #ffffff; border: 1px solid #e0e0e0; }
+    [data-theme="academic"] .q-switch-bg { background: rgba(0,0,0,0.1); }
+    [data-theme="academic"] .q-switch-thumb { background: #6b8cae; }
+    [data-theme="academic"] input[type="range"] { background: rgba(0,0,0,0.1); }
+    [data-theme="academic"] input[type="range"]::-webkit-slider-thumb { background: #6b8cae; }
+
     [data-theme="cartoon"] body { background: var(--bg-color); color: var(--text-color); }
     [data-theme="cartoon"] .q-panel { background: rgba(255,255,255,0.85); border: 3px solid rgba(255,180,100,0.3); border-radius: 24px; }
     [data-theme="cartoon"] .q-text { color: #2d3436; }
@@ -79,6 +92,9 @@
     .grid-bg {
       background-image: linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
       background-size: 20px 20px;
+    }
+    [data-theme="academic"] .grid-bg {
+      background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
     }
     [data-theme="cartoon"] .grid-bg {
       background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);

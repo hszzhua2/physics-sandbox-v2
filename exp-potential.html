@@ -12,6 +12,7 @@
   <style>
     .exp-bg { z-index: -1; }
     /* Theme overrides for potential well */
+    [data-theme="academic"] #root { --pw-bg: #f8f9fa; --pw-panel: #ffffff; --pw-border: #e0e0e0; --pw-text: #1a1a2e; --pw-muted: #7a7a8a; --pw-cyan: #6b8cae; --pw-fuchsia: #8a7ca8; }
     [data-theme="cartoon"] #root { --pw-bg: #fef6e4; --pw-panel: rgba(255,255,255,0.9); --pw-border: rgba(255,180,100,0.4); --pw-text: #2d3436; --pw-muted: #636e72; --pw-cyan: #4ecdc4; --pw-fuchsia: #ff6b6b; }
     [data-theme="glass"] #root { --pw-bg: #0f1117; --pw-panel: rgba(255,255,255,0.06); --pw-border: rgba(255,255,255,0.15); --pw-text: #e0e6ed; --pw-muted: #8b92a8; --pw-cyan: #74b9ff; --pw-fuchsia: #fd79a8; }
     [data-theme="cyber"] #root { --pw-bg: #0a0014; --pw-panel: rgba(20,0,40,0.7); --pw-border: rgba(189,0,255,0.4); --pw-text: #f0e6ff; --pw-muted: #a080c0; --pw-cyan: #00f3ff; --pw-fuchsia: #ff00ea; }
@@ -30,6 +31,7 @@
       border-radius: var(--radius);
       transition: all 0.4s ease;
     }
+    [data-theme="academic"] .pw-panel { border-width: 1px; border-radius: 4px; }
     [data-theme="cartoon"] .pw-panel { border-width: 3px; border-radius: 24px; }
     [data-theme="glass"] .pw-panel { backdrop-filter: blur(16px); }
     [data-theme="cyber"] .pw-panel { box-shadow: 0 0 20px rgba(189,0,255,0.1); }

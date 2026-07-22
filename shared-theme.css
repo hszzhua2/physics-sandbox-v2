@@ -30,6 +30,28 @@
   --neon-orange: #ff9f43;
 }
 
+/* ---------- CARTOON (explicit, same as default :root) ---------- */
+:root[data-theme="cartoon"] {
+  --bg-color: #fef6e4;
+  --bg-gradient-1: #fef6e4;
+  --bg-gradient-2: #e8f4f8;
+  --panel-bg: rgba(255, 255, 255, 0.85);
+  --panel-border: rgba(255, 180, 100, 0.4);
+  --text-color: #2d3436;
+  --text-muted: #636e72;
+  --accent-1: #ff6b6b;
+  --accent-2: #4ecdc4;
+  --accent-3: #ffe66d;
+  --accent-4: #a29bfe;
+  --glow-color: rgba(255, 180, 100, 0.3);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --radius: 24px;
+  --border-width: 3px;
+  --neon-cyan: #4ecdc4;
+  --neon-pink: #ff6b6b;
+  --neon-orange: #ff9f43;
+}
+
 /* ---------- GLASS (Liquid Glass) ---------- */
 :root[data-theme="glass"] {
   --bg-color: #0f1117;
