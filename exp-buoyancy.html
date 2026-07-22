@@ -1135,6 +1135,13 @@ function getObjectSizeY() {
 function setupDragEvents() {
   dom = renderer.domElement;
 
+  // Patch setPointerCapture to suppress NotFoundError when OrbitControls
+  // tries to capture a pointer that was already released
+  const origSPC = dom.setPointerCapture.bind(dom);
+  dom.setPointerCapture = function(pid) {
+    try { origSPC(pid); } catch(e) { /* pointer already released */ }
+  };
+
   dom.addEventListener('pointerdown', onPointerDown);
   dom.addEventListener('pointermove', onPointerMove);
   dom.addEventListener('pointerup', onPointerUp);

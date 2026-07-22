@@ -1088,6 +1088,16 @@ function init(){
     document.documentElement.setAttribute('data-theme','glass');
   }
 
+  // Verify container has valid dimensions before creating Cesium Viewer
+  var container = document.getElementById('cesiumContainer');
+  var w = container.clientWidth;
+  var h = container.clientHeight;
+  if (w < 2 || h < 2) {
+    // Container not ready yet, retry after next layout
+    requestAnimationFrame(function(){ requestAnimationFrame(init); });
+    return;
+  }
+
   try {
     Cesium.Ion.defaultAccessToken = undefined;
   } catch(e){}
@@ -1373,7 +1383,14 @@ function setupThemeObserver(){
 }
 
 /* ===== BOOT ===== */
-window.addEventListener('load', init);
+window.addEventListener('load', function(){
+  // Wait for layout to settle before initializing Cesium
+  // This prevents the RangeError: Invalid array length crash
+  // when the container has 0 dimensions during flex layout calculation
+  requestAnimationFrame(function(){
+    requestAnimationFrame(init);
+  });
+});
 </script>
 </body>
 </html>
