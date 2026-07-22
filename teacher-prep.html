@@ -366,6 +366,7 @@
     { id:'mechanics', name:'经典力学', parent:'classical', icon:'🏗️', color:'#4ecdc4', desc:'牛顿力学与刚体运动' },
     { id:'electromag', name:'电磁学', parent:'classical', icon:'⚡', color:'#4ecdc4', desc:'电场、磁场与电磁波' },
     { id:'optics', name:'波动光学', parent:'classical', icon:'🔦', color:'#4ecdc4', desc:'光的波动性质与干涉衍射' },
+    { id:'geo_optics', name:'几何光学', parent:'classical', icon:'🔍', color:'#9b59b6', desc:'光的反射 · 平面镜成像 · 凸透镜成像' },
     { id:'harmonic', name:'简谐共振', parent:'classical', icon:'〰️', color:'#4ecdc4', desc:'简谐振动与共振现象' },
     { id:'acoustic', name:'声学驻波', parent:'classical', icon:'🔊', color:'#4ecdc4', desc:'声波传播与驻波现象' },
     { id:'wave_particle', name:'波粒二象性', parent:'quantum', icon:'✨', color:'#a29bfe', desc:'微观粒子的波粒二象性' },
@@ -424,7 +425,8 @@
     { id:'magnetic-circle', name:'磁场圆周运动', parent:'electromag', target:'exp-magnetic-circle.html', desc:'洛伦兹力与回旋运动 · 回旋半径与周期', year:1892, history:'1892年洛伦兹提出带电粒子在磁场中受力的公式F=qvB。1932年劳伦斯据此原理发明回旋加速器。' },
     { id:'electric-deflection', name:'电场偏转', parent:'electromag', target:'exp-electric-deflection.html', desc:'带电粒子在匀强电场中的类平抛运动', year:1785, history:'1785年库仑建立了电荷间相互作用的定律。电场偏转原理被广泛应用于阴极射线管、质谱仪和喷墨打印机等设备。' },
     { id:'physics-canvas', name:'自由物理画布', parent:'mechanics', target:'exp-physics-canvas.html', desc:'自由创建物理场景 · 碰撞与重力沙盒', year:1687, history:'基于牛顿运动定律的交互式物理沙盒，用户可自由添加物体、设置初速度，观察碰撞、重力与空气阻力的效果。' },
-    { id:'geophysics', name:'地球物理', parent:'geophysics_cat', target:'exp-geophysics.html', desc:'地球内部结构 · 地震波 · 地磁场 · 板块构造', year:1909, history:'1909年莫霍洛维奇通过地震波速度突变发现地壳-地幔界面(莫霍面)。1914年古登堡确定地核-地幔界面。1936年莱曼通过地震波分析发现地球固体内核。1912年魏格纳提出大陆漂移学说，后发展为板块构造理论。本实验可视化地球内部分层结构、P/S地震波传播与阴影区、地磁偶极场与太阳风相互作用、以及板块构造与地幔对流。' }
+    { id:'geophysics', name:'地球物理', parent:'geophysics_cat', target:'exp-geophysics.html', desc:'地球内部结构 · 地震波 · 地磁场 · 板块构造', year:1909, history:'1909年莫霍洛维奇通过地震波速度突变发现地壳-地幔界面(莫霍面)。1914年古登堡确定地核-地幔界面。1936年莱曼通过地震波分析发现地球固体内核。1912年魏格纳提出大陆漂移学说，后发展为板块构造理论。本实验可视化地球内部分层结构、P/S地震波传播与阴影区、地磁偶极场与太阳风相互作用、以及板块构造与地幔对流。' },
+    { id:'optics_exp', name:'初中光学', parent:'geo_optics', target:'exp-optics.html', desc:'光的反射定律 · 平面镜成像 · 凸透镜成像', year:1621, history:'光的反射定律由古希腊希隆最早提出，后经牛顿等人完善。平面镜成像特点（等大、等距、正立、虚像、左右颠倒）是初中光学核心实验。凸透镜成像规律（1/u+1/v=1/f）由斯涅尔(1621)和笛卡尔系统化。本实验包含三个子实验：光的反射定律验证（测量入射角与反射角）、平面镜成像特点探究（等效替代法）、凸透镜成像规律探究（五 种成像情况与应用场景）。' }
   ];
 
   const SCIENTISTS = [
@@ -461,7 +463,8 @@
     { id:'sci-mohorovicic', name:'莫霍洛维奇', icon:'🌍', color:'#e67e22', desc:'莫霍面发现者 · 地震学先驱', experiments:['geophysics'], years:'1857-1936' },
     { id:'sci-gutenberg', name:'古登堡', icon:'📊', color:'#e67e22', desc:'古登堡面发现者 · 地震学家', experiments:['geophysics'], years:'1889-1960' },
     { id:'sci-lehmann', name:'莱曼', icon:'🔬', color:'#e67e22', desc:'地球固体内核发现者 · 女性地震学先驱', experiments:['geophysics'], years:'1888-1993' },
-    { id:'sci-wegener', name:'魏格纳', icon:'🧩', color:'#e67e22', desc:'大陆漂移学说提出者 · 板块构造奠基人', experiments:['geophysics'], years:'1880-1930' }
+    { id:'sci-wegener', name:'魏格纳', icon:'🧩', color:'#e67e22', desc:'大陆漂移学说提出者 · 板块构造奠基人', experiments:['geophysics'], years:'1880-1930' },
+    { id:'sci-snell', name:'斯涅尔', icon:'📐', color:'#9b59b6', desc:'光的折射定律提出者 · 几何光学奠基人', experiments:['optics_exp'], years:'1580-1626' }
   ];
 
   // 辅助查找

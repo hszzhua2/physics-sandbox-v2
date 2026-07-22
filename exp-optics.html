@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>初中光学 — 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES - 五种主题适配 (前缀 --o-)
+   ================================================================ */
+[data-theme="glass"]{
+  --o-bg:#080812;--o-bg2:#0e0e1c;--o-ink:#f1f5f9;--o-ink2:#cbd5e1;--o-muted:#64748b;
+  --o-rule:rgba(255,255,255,0.07);--o-accent:#74b9ff;--o-accent2:#a29bfe;
+  --o-canvas-bg:#040410;--o-param-bg:rgba(255,255,255,0.03);--o-param-border:rgba(255,255,255,0.06);
+  --o-output-bg:rgba(0,0,0,0.3);--o-output-border:rgba(255,255,255,0.06);
+  --o-formula-bg:rgba(116,185,255,0.05);--o-formula-border:rgba(116,185,255,0.12);
+  --o-scrollbar:rgba(116,185,255,0.3);--o-glow:none;
+  --o-modal-bg:#0e0e1c;--o-modal-border:rgba(255,255,255,0.1);
+  --o-pass:#4ade80;--o-fail:#f87171;
+}
+[data-theme="cyber"]{
+  --o-bg:#040410;--o-bg2:#08081a;--o-ink:#e0f7fa;--o-ink2:#b2ebf2;--o-muted:#4dd0e1;
+  --o-rule:rgba(0,243,255,0.1);--o-accent:#00f3ff;--o-accent2:#ff00ea;
+  --o-canvas-bg:#020208;--o-param-bg:rgba(0,243,255,0.02);--o-param-border:rgba(0,243,255,0.1);
+  --o-output-bg:rgba(0,0,0,0.4);--o-output-border:rgba(0,243,255,0.08);
+  --o-formula-bg:rgba(0,243,255,0.04);--o-formula-border:rgba(0,243,255,0.15);
+  --o-scrollbar:rgba(0,243,255,0.4);--o-glow:0 0 8px rgba(0,243,255,0.25);
+  --o-modal-bg:#08081a;--o-modal-border:rgba(0,243,255,0.2);
+  --o-pass:#39ff14;--o-fail:#ff00ea;
+}
+[data-theme="soviet"]{
+  --o-bg:#f0ebe4;--o-bg2:#e8e0d6;--o-ink:#1a1a1a;--o-ink2:#3d3d3d;--o-muted:#6a5a4a;
+  --o-rule:#d4c4a8;--o-accent:#c41e1e;--o-accent2:#8b4513;
+  --o-canvas-bg:#e8e0d6;--o-param-bg:#f4f0ea;--o-param-border:#d4c4a8;
+  --o-output-bg:#f4f0ea;--o-output-border:#d4c4a8;
+  --o-formula-bg:rgba(196,30,30,0.04);--o-formula-border:rgba(196,30,30,0.2);
+  --o-scrollbar:#c41e1e;--o-glow:none;
+  --o-modal-bg:#fffaf2;--o-modal-border:#c41e1e;
+  --o-pass:#556b2f;--o-fail:#c41e1e;
+}
+[data-theme="cartoon"]{
+  --o-bg:#fef6e4;--o-bg2:#fff8f0;--o-ink:#2d3436;--o-ink2:#4a4a4a;--o-muted:#7a7a7a;
+  --o-rule:rgba(0,0,0,0.08);--o-accent:#ff6b6b;--o-accent2:#4ecdc4;
+  --o-canvas-bg:#1a1a2e;--o-param-bg:rgba(255,255,255,0.5);--o-param-border:rgba(0,0,0,0.1);
+  --o-output-bg:rgba(255,255,255,0.6);--o-output-border:rgba(0,0,0,0.08);
+  --o-formula-bg:rgba(255,107,107,0.05);--o-formula-border:rgba(255,107,107,0.15);
+  --o-scrollbar:rgba(0,0,0,0.15);--o-glow:none;
+  --o-modal-bg:#fff8f0;--o-modal-border:rgba(255,107,107,0.3);
+  --o-pass:#4ecdc4;--o-fail:#ff6b6b;
+}
+[data-theme="academic"]{
+  --o-bg:#f8f9fa;--o-bg2:#f1f3f5;--o-ink:#1a1a2e;--o-ink2:#3d3d5c;--o-muted:#7a7a8a;
+  --o-rule:#e0e0e0;--o-accent:#6b8cae;--o-accent2:#8a7ca8;
+  --o-canvas-bg:#ffffff;--o-param-bg:#f8f9fa;--o-param-border:#e0e0e0;
+  --o-output-bg:#f4f5f7;--o-output-border:#e0e0e0;
+  --o-formula-bg:rgba(107,140,174,0.04);--o-formula-border:rgba(107,140,174,0.2);
+  --o-scrollbar:#d0d0d0;--o-glow:none;
+  --o-modal-bg:#ffffff;--o-modal-border:#e0e0e0;
+  --o-pass:#2d7a46;--o-fail:#c0392b;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-main);background:var(--o-bg);color:var(--o-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--o-bg)}
+::-webkit-scrollbar-thumb{background:var(--o-scrollbar);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+[data-theme="academic"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--o-rule);background:var(--o-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--o-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--o-formula-bg);border:1px solid var(--o-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--o-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--o-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(0,243,255,0.08);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--o-accent);text-shadow:var(--o-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--o-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--o-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#opticsCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--o-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--o-ink2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.overlay-badge.accent{color:var(--o-accent)}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);color:#fff}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--o-rule);background:var(--o-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--o-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--o-formula-bg);border:1px solid var(--o-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--o-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--o-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(0,243,255,0.08);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--o-accent);text-shadow:var(--o-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--o-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--o-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:16px 18px;border-bottom:1px solid var(--o-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--o-accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--o-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 实验选择器 ===== */
+.exp-selector{display:flex;flex-direction:column;gap:8px}
+.exp-btn{padding:10px 14px;border:1px solid var(--o-param-border);background:var(--o-param-bg);color:var(--o-ink2);border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;text-align:left;transition:all .3s ease;font-family:var(--font-main);display:flex;align-items:center;gap:8px}
+.exp-btn:hover{border-color:var(--o-accent);color:var(--o-accent)}
+.exp-btn.active{border-color:var(--o-accent);background:var(--o-formula-bg);color:var(--o-accent)}
+.exp-btn .exp-num{font-family:monospace;font-size:0.7rem;opacity:0.7}
+
+[data-theme="academic"] .exp-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .exp-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="academic"] .exp-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .exp-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .exp-btn:hover{border-color:#c41e1e;color:#c41e1e}
+[data-theme="soviet"] .exp-btn.active{border-color:#c41e1e;color:#c41e1e;background:rgba(196,30,30,0.06)}
+
+/* ===== 步骤导航 ===== */
+.step-pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.step-pills::-webkit-scrollbar{height:4px}
+.step-pills::-webkit-scrollbar-thumb{background:var(--o-scrollbar);border-radius:2px}
+.step-pill{flex-shrink:0;padding:6px 12px;border:1px solid var(--o-param-border);background:var(--o-param-bg);color:var(--o-muted);border-radius:20px;font-size:0.7rem;font-weight:600;white-space:nowrap;transition:all .3s ease;display:flex;align-items:center;gap:4px}
+.step-pill.active{border-color:var(--o-accent);color:var(--o-accent);background:var(--o-formula-bg)}
+.step-pill.done{border-color:var(--o-pass);color:var(--o-pass);opacity:0.7}
+
+[data-theme="academic"] .step-pill{background:#f4f5f7;border-color:#e0e0e0;color:#999;border-radius:12px}
+[data-theme="academic"] .step-pill.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .step-pill{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:1px}
+[data-theme="soviet"] .step-pill.active{border-color:#c41e1e;color:#c41e1e}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:14px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--o-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--o-accent);font-weight:400;min-width:70px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--o-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--o-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+/* ===== 操作按钮 ===== */
+.action-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.action-buttons .sim-btn{flex:1;min-width:calc(50% - 4px);padding:9px 12px;font-size:0.78rem}
+.sim-btn{padding:8px 16px;border:1px solid var(--o-rule);background:var(--o-output-bg);color:var(--o-ink);border-radius:8px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .3s ease}
+.sim-btn:hover{border-color:var(--o-accent);color:var(--o-accent)}
+.sim-btn.primary{background:var(--o-accent);color:#0a0a1a;border-color:var(--o-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn:disabled{opacity:0.4;cursor:not-allowed}
+.sim-btn:disabled:hover{border-color:var(--o-rule);color:var(--o-ink)}
+
+[data-theme="academic"] .sim-btn{background:#f4f5f7;border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="academic"] .sim-btn:hover{border-color:#6b8cae;color:#1a1a2e}
+[data-theme="soviet"] .sim-btn{background:#f4f0ea;border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+[data-theme="cartoon"] .sim-btn:hover{border-color:#ff6b6b;color:#ff6b6b}
+[data-theme="cartoon"] .sim-btn.primary:hover{color:#fff}
+
+/* ===== 信息卡片 ===== */
+.info-card{background:var(--o-output-bg);border:1px solid var(--o-output-border);border-radius:10px;padding:12px 14px;transition:background-color .5s ease,border-color .4s ease}
+.info-card p{font-size:0.76rem;color:var(--o-ink2);line-height:1.7;margin:3px 0}
+.info-card p strong{color:var(--o-ink)}
+.info-card .muted{color:var(--o-muted);font-size:0.72rem}
+
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 数据表格 ===== */
+.data-table-wrap{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-size:0.72rem;font-family:monospace}
+.data-table th{padding:7px 4px;text-align:center;border:1px solid var(--o-rule);background:var(--o-output-bg);font-weight:600;color:var(--o-ink2);font-family:var(--font-main);font-size:0.7rem;white-space:nowrap}
+.data-table td{padding:6px 4px;text-align:center;border:1px solid var(--o-rule);color:var(--o-ink2)}
+.data-table td.empty{color:var(--o-muted);opacity:0.4}
+.data-table .status-pass{color:var(--o-pass);font-weight:700}
+.data-table .status-fail{color:var(--o-fail);font-weight:700}
+.data-table .status-pending{color:var(--o-muted)}
+
+[data-theme="academic"] .data-table th{background:#f4f5f7;border-color:#e0e0e0}
+[data-theme="academic"] .data-table td{border-color:#e0e0e0}
+[data-theme="soviet"] .data-table th{background:#f4f0ea;border-color:#d4c4a8}
+[data-theme="soviet"] .data-table td{border-color:#d4c4a8}
+
+/* ===== 知识卡片 ===== */
+.knowledge-card{background:var(--o-formula-bg);border:1px solid var(--o-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:background-color .5s ease,border-color .4s ease}
+.knowledge-card:last-child{margin-bottom:0}
+.knowledge-card h3{font-size:0.78rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.knowledge-card p{font-size:0.74rem;color:var(--o-ink2);line-height:1.7;margin:3px 0}
+.knowledge-card p strong{color:var(--o-ink)}
+.knowledge-card .formula{font-family:monospace;font-size:0.76rem;color:var(--o-accent2);background:var(--o-output-bg);padding:2px 6px;border-radius:4px;display:inline-block;margin:3px 0}
+
+[data-theme="academic"] .knowledge-card{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .knowledge-card h3{color:var(--o-accent)}
+[data-theme="soviet"] .knowledge-card{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .knowledge-card h3{color:var(--o-accent)}
+[data-theme="cartoon"] .knowledge-card h3{color:var(--o-accent)}
+[data-theme="cyber"] .knowledge-card h3{color:var(--o-accent);text-shadow:var(--o-glow)}
+
+/* ===== 透镜案例卡片 ===== */
+.case-card{background:var(--o-output-bg);border:1px solid var(--o-output-border);border-left:3px solid var(--o-accent);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;transition:all .3s ease}
+.case-card:last-child{margin-bottom:0}
+.case-card.active{border-left-color:var(--o-accent2);background:var(--o-formula-bg)}
+.case-card .case-icon{font-size:1.2rem;flex-shrink:0;line-height:1}
+.case-card .case-body h4{font-size:0.76rem;font-weight:700;color:var(--o-ink);margin-bottom:2px}
+.case-card .case-body p{font-size:0.7rem;color:var(--o-muted);line-height:1.5}
+
+[data-theme="academic"] .case-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .case-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 提示框 ===== */
+.hint-box{background:var(--o-formula-bg);border:1px solid var(--o-formula-border);border-radius:8px;padding:10px 14px;font-size:0.74rem;color:var(--o-ink2);line-height:1.7;transition:background-color .5s ease,border-color .4s ease}
+.hint-box strong{color:var(--o-accent)}
+
+[data-theme="academic"] .hint-box{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .hint-box{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 模态框 ===== */
+.modal{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center}
+.modal.hidden{display:none}
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.modal-content{position:relative;background:var(--o-modal-bg);border:1px solid var(--o-modal-border);border-radius:16px;padding:28px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;z-index:1;box-shadow:0 24px 60px rgba(0,0,0,0.4)}
+[data-theme="soviet"] .modal-content{border-radius:2px;border-width:2px}
+[data-theme="academic"] .modal-content{border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
+[data-theme="cyber"] .modal-content{box-shadow:0 0 40px rgba(0,243,255,0.15)}
+
+.modal-header{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--o-rule)}
+.modal-header .modal-icon{font-size:1.5rem}
+.modal-header h2{font-size:1.05rem;font-weight:700}
+.modal-score-big{font-family:monospace;font-size:2.6rem;font-weight:700;color:var(--o-accent);line-height:1}
+.modal-grade{font-size:1.2rem;font-weight:700;padding:4px 14px;border-radius:8px;display:inline-block;margin-left:10px}
+.modal-grade.a{background:rgba(74,222,128,0.15);color:var(--o-pass)}
+.modal-grade.b{background:rgba(116,185,255,0.15);color:var(--o-accent)}
+.modal-grade.c{background:rgba(251,191,36,0.15);color:#fbbf24}
+.modal-grade.d{background:rgba(248,113,113,0.15);color:var(--o-fail)}
+
+.modal-item{background:var(--o-output-bg);border:1px solid var(--o-output-border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:background-color .5s ease,border-color .4s ease}
+[data-theme="soviet"] .modal-item{border-radius:2px}
+[data-theme="academic"] .modal-item{border-radius:4px}
+.modal-item-score{font-family:monospace;font-size:1.3rem;font-weight:700;min-width:60px;text-align:center}
+.modal-item-score.pass{color:var(--o-pass)}
+.modal-item-score.fail{color:var(--o-fail)}
+.modal-item-body{flex:1}
+.modal-item-body h4{font-size:0.85rem;font-weight:700;margin-bottom:3px}
+.modal-item-body p{font-size:0.72rem;color:var(--o-muted)}
+.modal-item-icon{font-size:1.4rem}
+
+.modal-footer{margin-top:18px;display:flex;justify-content:flex-end;gap:10px}
+
+[data-theme="academic"] .modal-content .modal-item{background:#f4f5f7;border-color:#e0e0e0}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--o-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--o-rule)}
+  .sim-panel{min-height:400px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon" id="lpIcon">🔬</div>
+      <div>
+        <h1 id="lpTitle">初中光学实验</h1>
+        <div class="lp-sub">三实验一体化 · 参数控制</div>
+      </div>
+    </div>
+
+    <!-- 实验选择 -->
+    <div class="side-section">
+      <div class="section-label">实验选择</div>
+      <div class="exp-selector">
+        <button class="exp-btn active" data-exp="reflection"><span class="exp-num">①</span> 光的反射定律</button>
+        <button class="exp-btn" data-exp="mirror"><span class="exp-num">②</span> 平面镜成像特点</button>
+        <button class="exp-btn" data-exp="lens"><span class="exp-num">③</span> 凸透镜成像规律</button>
+      </div>
+    </div>
+
+    <!-- 操作步骤 -->
+    <div class="side-section">
+      <div class="section-label">操作步骤</div>
+      <div class="step-pills" id="stepPills"></div>
+    </div>
+
+    <!-- 实验参数 -->
+    <div class="side-section" id="paramSection">
+      <div class="section-label">实验参数</div>
+      <div id="paramContent"></div>
+    </div>
+
+    <!-- 操作控制 -->
+    <div class="side-section">
+      <div class="section-label">操作控制</div>
+      <div class="action-buttons">
+        <button class="sim-btn primary" id="btnNextStep">下一步</button>
+        <button class="sim-btn" id="btnRecord">记录数据</button>
+        <button class="sim-btn" id="btnReset">重置实验</button>
+        <button class="sim-btn primary" id="btnJudge">实验评价</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="opticsCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge accent" id="badgeExp">光的反射定律</span>
+        <span class="overlay-badge" id="badgeStep">步骤 1/6</span>
+        <span class="overlay-badge" id="badgeInfo">入射角 45°</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon" id="rpIcon">📊</div>
+      <div>
+        <h2>实验信息与数据</h2>
+        <div class="rp-sub">原理 · 记录 · 知识卡片</div>
+      </div>
+    </div>
+
+    <!-- 实验信息 -->
+    <div class="side-section">
+      <div class="section-label">实验信息</div>
+      <div class="info-card" id="expInfo"></div>
+    </div>
+
+    <!-- 数据记录 -->
+    <div class="side-section">
+      <div class="section-label">数据记录</div>
+      <div class="data-table-wrap" id="dataTableWrap"></div>
+    </div>
+
+    <!-- 透镜成像案例 (仅透镜实验显示) -->
+    <div class="side-section" id="lensCasesSection" style="display:none">
+      <div class="section-label">成像案例</div>
+      <div id="lensCases"></div>
+    </div>
+
+    <!-- 知识卡片 -->
+    <div class="side-section">
+      <div class="section-label">知识卡片</div>
+      <div id="knowledgeCards"></div>
+    </div>
+
+    <!-- 提示 -->
+    <div class="side-section">
+      <div class="section-label">实验提示</div>
+      <div class="hint-box" id="hintBox"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- ===== 结果模态框 ===== -->
+<div id="result-modal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="modal-icon">📋</span>
+      <h2>实验评价结果</h2>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="sim-btn" id="btnCloseModal">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   工具函数
+   ================================================================ */
+function getCSS(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function getThemeColors(){
+  return {
+    bg:      getCSS('--o-canvas-bg') || '#ffffff',
+    ink:     getCSS('--o-ink')       || '#000000',
+    ink2:    getCSS('--o-ink2')      || '#333333',
+    muted:   getCSS('--o-muted')     || '#666666',
+    accent:  getCSS('--o-accent')    || '#6b8cae',
+    accent2: getCSS('--o-accent2')   || '#8a7ca8',
+    rule:    getCSS('--o-rule')      || '#cccccc',
+  };
+}
+
+function drawArrow(ctx,x,y,dx,dy,color){
+  var angle=Math.atan2(dy,dx);
+  var headLen=10;
+  ctx.save();
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.lineTo(x-headLen*Math.cos(angle-0.4),y-headLen*Math.sin(angle-0.4));
+  ctx.lineTo(x-headLen*Math.cos(angle+0.4),y-headLen*Math.sin(angle+0.4));
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function setupCanvas(){
+  var canvas=document.getElementById('opticsCanvas');
+  var rect=canvas.parentElement.getBoundingClientRect();
+  var dpr=window.devicePixelRatio||1;
+  canvas.width=rect.width*dpr;
+  canvas.height=rect.height*dpr;
+  canvas.style.width=rect.width+'px';
+  canvas.style.height=rect.height+'px';
+  var ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx:ctx,w:rect.width,h:rect.height};
+}
+
+function drawCandle(ctx,x,baseY,height,bodyColor,flameColor,opacity){
+  ctx.save();
+  ctx.globalAlpha=opacity!==undefined?opacity:1;
+  /* 蜡烛体 */
+  ctx.fillStyle=bodyColor;
+  ctx.fillRect(x-5,baseY-height,10,height);
+  /* 蜡烛体高光 */
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.fillRect(x-5,baseY-height,3,height);
+  /* 烛芯 */
+  ctx.strokeStyle='#555';
+  ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(x,baseY-height);
+  ctx.lineTo(x,baseY-height-5);
+  ctx.stroke();
+  /* 火焰外层 */
+  ctx.fillStyle=flameColor;
+  ctx.beginPath();
+  ctx.ellipse(x,baseY-height-9,4,7,0,0,Math.PI*2);
+  ctx.fill();
+  /* 火焰内层 */
+  ctx.fillStyle='#ffeb3b';
+  ctx.beginPath();
+  ctx.ellipse(x,baseY-height-7,2,4,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ================================================================
+   实验定义
+   ================================================================ */
+
+/* ---------- 实验1: 光的反射定律 ---------- */
+var reflection={
+  name:'光的反射定律',
+  icon:'🔄',
+  state:{angle:45,step:0,measuredAngle:null,records:[]},
+  steps:['放置平面镜','调整入射角','测量反射角','记录数据','重复实验','得出结论'],
+  maxRecords:3,
+
+  getInfo:function(){
+    return{
+      purpose:'验证光的反射定律，探究入射角与反射角的关系',
+      equipment:'平面镜、激光笔、量角器、白纸、刻度尺'
+    };
+  },
+  getHint:function(){
+    return '<strong>操作要点：</strong>调节入射角滑块，观察反射角变化。到达"测量反射角"步骤后，量角器自动显示测量值（含微小误差）。点击"记录数据"保存当前测量，至少记录3组数据后可进行实验评价。';
+  },
+  getKnowledgeCards:function(){
+    return[
+      {title:'🔄 反射三定律',body:'<p><strong>①</strong> 入射光线、反射光线、法线在同一平面内</p><p><strong>②</strong> 反射光线与入射光线分居法线两侧</p><p><strong>③</strong> 反射角等于入射角</p><p class="formula">θ<sub>i</sub> = θ<sub>r</sub></p>'},
+      {title:'🔍 镜面反射 vs 漫反射',body:'<p><strong>镜面反射：</strong>平滑表面，平行入射光反射后仍平行</p><p><strong>漫反射：</strong>粗糙表面，平行入射光反射后向各方向散射</p><p>两者均遵循反射定律</p>'},
+      {title:'👁 虚像与实像',body:'<p><strong>实像：</strong>实际光线会聚形成，可呈现在光屏上</p><p><strong>虚像：</strong>光线反向延长线交点，不能呈现在光屏上</p>'}
+    ];
+  },
+  getTableHeaders:function(){return['序号','入射角 i°','反射角 r°','|i-r|°','状态'];},
+  getTableRows:function(){
+    return this.state.records.map(function(r,i){
+      var pass=Math.abs(r.i-r.r)<=2;
+      return [i+1,r.i.toFixed(1),r.r.toFixed(1),Math.abs(r.i-r.r).toFixed(1),pass?'<span class="status-pass">✓</span>':'<span class="status-fail">✗</span>'];
+    });
+  },
+
+  init:function(){
+    this.state={angle:45,step:0,measuredAngle:null,records:[]};
+  },
+  getParamHTML:function(){
+    return '<div class="param-group">'+
+      '<div class="param-header"><span class="param-label">入射角 i</span><span class="param-value" id="valAngle">45°</span></div>'+
+      '<input type="range" id="sliderAngle" min="10" max="80" value="45" step="1">'+
+      '</div>';
+  },
+  bindParams:function(){
+    var self=this;
+    var sl=document.getElementById('sliderAngle');
+    if(sl){
+      sl.addEventListener('input',function(){
+        self.state.angle=parseInt(this.value);
+        document.getElementById('valAngle').textContent=this.value+'°';
+        self.state.measuredAngle=null;
+        updateBadges();
+        redraw();
+      });
+    }
+  },
+  onStepEnter:function(step){
+    if(step===2&&this.state.measuredAngle===null){
+      /* 测量反射角，加入微小误差 */
+      var err=(Math.random()-0.5)*1.6;
+      this.state.measuredAngle=Math.round((this.state.angle+err)*10)/10;
+    }
+  },
+  record:function(){
+    var s=this.state;
+    if(s.records.length>=this.maxRecords)return;
+    if(s.measuredAngle===null){
+      var err=(Math.random()-0.5)*1.6;
+      s.measuredAngle=Math.round((s.angle+err)*10)/10;
+    }
+    s.records.push({i:s.angle,r:s.measuredAngle});
+    s.measuredAngle=null;
+    renderTable();
+    redraw();
+  },
+  judge:function(){
+    var s=this.state;
+    var passCount=0;
+    s.records.forEach(function(r){
+      if(Math.abs(r.i-r.r)<=2)passCount++;
+    });
+    var opScore=Math.round((s.step/(this.steps.length-1))*30);
+    var dataScore=Math.round((s.records.length/this.maxRecords)*30);
+    var conScore=s.records.length>0?Math.round((passCount/s.records.length)*40):0;
+    return{
+      total:opScore+dataScore+conScore,
+      items:[
+        {name:'操作规范',icon:'🔧',score:opScore,max:30,pass:opScore>=20,details:'完成步骤 '+s.step+'/'+(this.steps.length-1)+'，操作流程'+(s.step>=4?'规范':'尚不完整')},
+        {name:'数据记录',icon:'📝',score:dataScore,max:30,pass:dataScore>=20,details:'已记录 '+s.records.length+'/'+this.maxRecords+' 组数据'},
+        {name:'结论验证',icon:'✅',score:conScore,max:40,pass:conScore>=30,details:passCount+'/'+s.records.length+' 组满足 |i−r|≤2°，反射角等于入射角'+(passCount===s.records.length&&s.records.length>0?' ✓':'')}
+      ]
+    };
+  },
+
+  draw:function(ctx,w,h){
+    var c=getThemeColors();
+    var s=this.state;
+    var angle=s.angle;
+    var cx=w/2, cy=h*0.66;
+    var rayLen=Math.min(w*0.32,h*0.4);
+    var showRays=s.step>=1;
+    var showProtractor=s.step>=2;
+
+    /* ---- 平面镜 ---- */
+    var mirrorW=Math.min(w*0.5,360);
+    ctx.fillStyle=c.muted;
+    ctx.fillRect(cx-mirrorW/2,cy,mirrorW,6);
+    /* 斜线（背面） */
+    ctx.strokeStyle=c.muted;
+    ctx.lineWidth=1;
+    for(var i=-mirrorW/2;i<=mirrorW/2;i+=10){
+      ctx.beginPath();
+      ctx.moveTo(cx+i,cy+6);
+      ctx.lineTo(cx+i-7,cy+14);
+      ctx.stroke();
+    }
+    ctx.fillStyle=c.ink2;
+    ctx.font='12px monospace';
+    ctx.fillText('M (平面镜)',cx+mirrorW/2+8,cy+12);
+
+    /* ---- 法线 ---- */
+    ctx.strokeStyle=c.muted;
+    ctx.lineWidth=1.5;
+    ctx.setLineDash([6,4]);
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx,cy-rayLen-30);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=c.ink2;
+    ctx.fillText('N',cx+6,cy-rayLen-18);
+
+    /* ---- 入射点 O ---- */
+    ctx.fillStyle=c.ink;
+    ctx.beginPath();
+    ctx.arc(cx,cy,4,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle=c.ink2;
+    ctx.fillText('O',cx-16,cy+18);
+
+    if(showRays){
+      var radI=angle*Math.PI/180;
+      /* 入射光线 (红) */
+      var ix=cx-rayLen*Math.sin(radI);
+      var iy=cy-rayLen*Math.cos(radI);
+      ctx.strokeStyle='#ef4444';
+      ctx.lineWidth=2.5;
+      ctx.beginPath();
+      ctx.moveTo(ix,iy);
+      ctx.lineTo(cx,cy);
+      ctx.stroke();
+      drawArrow(ctx,cx,cy,cx-ix,cy-iy,'#ef4444');
+      ctx.fillStyle='#ef4444';
+      ctx.font='bold 13px monospace';
+      ctx.fillText('入射光线',ix-70,iy-6);
+
+      /* 反射光线 (蓝) */
+      var rx=cx+rayLen*Math.sin(radI);
+      var ry=cy-rayLen*Math.cos(radI);
+      ctx.strokeStyle='#3b82f6';
+      ctx.lineWidth=2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.lineTo(rx,ry);
+      ctx.stroke();
+      drawArrow(ctx,rx,ry,rx-cx,ry-cy,'#3b82f6');
+      ctx.fillStyle='#3b82f6';
+      ctx.fillText('反射光线',rx+10,ry-6);
+
+      /* 角度弧 */
+      var arcR=42;
+      /* 入射角弧 */
+      ctx.strokeStyle='#ef4444';
+      ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.arc(cx,cy,arcR,-Math.PI/2-radI,-Math.PI/2,false);
+      ctx.stroke();
+      var laI=-Math.PI/2-radI/2;
+      ctx.fillStyle='#ef4444';
+      ctx.font='bold 13px monospace';
+      ctx.fillText('i='+angle+'°',cx+(arcR+14)*Math.cos(laI)-14,cy+(arcR+14)*Math.sin(laI)+4);
+
+      /* 反射角弧 */
+      var rDisplay=s.measuredAngle!==null?s.measuredAngle:angle;
+      var radR=rDisplay*Math.PI/180;
+      ctx.strokeStyle='#3b82f6';
+      ctx.beginPath();
+      ctx.arc(cx,cy,arcR,-Math.PI/2,-Math.PI/2+radR,false);
+      ctx.stroke();
+      var laR=-Math.PI/2+radR/2;
+      ctx.fillStyle='#3b82f6';
+      ctx.fillText('r='+rDisplay.toFixed(1)+'°',cx+(arcR+14)*Math.cos(laR)-2,cy+(arcR+14)*Math.sin(laR)+4);
+    }
+
+    /* ---- 量角器 ---- */
+    if(showProtractor){
+      var pR=Math.min(rayLen*0.7,100);
+      ctx.save();
+      ctx.globalAlpha=0.35;
+      ctx.strokeStyle=c.muted;
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.arc(cx,cy,pR,Math.PI,2*Math.PI,false);
+      ctx.stroke();
+      ctx.globalAlpha=0.5;
+      for(var d=0;d<=180;d+=10){
+        var ca=-d*Math.PI/180;
+        var x1=cx+pR*Math.cos(ca);
+        var y1=cy+pR*Math.sin(ca);
+        var tl=(d%30===0)?8:4;
+        var x2=cx+(pR-tl)*Math.cos(ca);
+        var y2=cy+(pR-tl)*Math.sin(ca);
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha=0.6;
+      ctx.fillStyle=c.ink2;
+      ctx.font='9px monospace';
+      for(var d2=0;d2<=180;d2+=30){
+        var ca2=-d2*Math.PI/180;
+        ctx.fillText(d2+'°',cx+(pR+10)*Math.cos(ca2)-8,cy+(pR+10)*Math.sin(ca2)+3);
+      }
+      ctx.restore();
+    }
+
+    /* ---- 步骤提示文字 ---- */
+    ctx.fillStyle=c.muted;
+    ctx.font='12px monospace';
+    if(s.step===0){
+      ctx.fillText('步骤1: 平面镜已放置，点击"下一步"继续',20,h-24);
+    }else if(s.step===1){
+      ctx.fillText('步骤2: 拖动滑块调整入射角，观察反射光线',20,h-24);
+    }else if(s.step===2){
+      ctx.fillText('步骤3: 量角器已显示，反射角 r = '+ (s.measuredAngle!==null?s.measuredAngle.toFixed(1):angle.toFixed(1)) +'°',20,h-24);
+    }else if(s.step===3){
+      ctx.fillText('步骤4: 点击"记录数据"保存当前测量 ('+s.records.length+'/'+this.maxRecords+')',20,h-24);
+    }else if(s.step===4){
+      ctx.fillText('步骤5: 调整入射角重复实验 ('+s.records.length+'/'+this.maxRecords+' 已记录)',20,h-24);
+    }else{
+      ctx.fillText('步骤6: 点击"实验评价"检验反射定律',20,h-24);
+    }
+  }
+};
+
+/* ---------- 实验2: 平面镜成像特点 ---------- */
+var mirror={
+  name:'平面镜成像特点',
+  icon:'🪞',
+  state:{posA:3,step:0,measuredV:null,records:[]},
+  steps:['放置玻璃板','放置蜡烛A','观察虚像','放置蜡烛B','测量距离','重复实验','得出结论'],
+  maxRecords:3,
+
+  getInfo:function(){
+    return{
+      purpose:'探究平面镜成像的特点：正立、等大、虚像、物像等距',
+      equipment:'薄玻璃板、两支相同蜡烛、刻度尺、白纸、支架'
+    };
+  },
+  getHint:function(){
+    return '<strong>操作要点：</strong>移动蜡烛A位置滑块改变物距。虚像（半透明）出现在镜后对称位置。用蜡烛B（绿色）去"接住"虚像以确定像距。至少记录3组数据，验证像距是否等于物距。';
+  },
+  getKnowledgeCards:function(){
+    return[
+      {title:'🪞 平面镜成像五特点',body:'<p><strong>①</strong> 正立虚像</p><p><strong>②</strong> 像与物大小相等</p><p><strong>③</strong> 像与物到镜面距离相等</p><p><strong>④</strong> 像与物关于镜面对称</p><p><strong>⑤</strong> 左右颠倒（左右对称）</p>'},
+      {title:'📏 物距与像距',body:'<p>平面镜成像中，像距等于物距：</p><p class="formula">v = u</p><p>利用此特点可用"等效替代法"确定虚像位置</p>'},
+      {title:'🔄 等效替代法',body:'<p>用蜡烛B在镜后移动，直到与蜡烛A的虚像完全重合，此时B的位置即为虚像位置，B的大小即为像的大小</p>'}
+    ];
+  },
+  getTableHeaders:function(){return['序号','物距u(cm)','像距v(cm)','大小比较','状态'];},
+  getTableRows:function(){
+    return this.state.records.map(function(r,i){
+      var pass=Math.abs(r.u-r.v)<=0.5;
+      return [i+1,r.u.toFixed(1),r.v.toFixed(1),'等大',pass?'<span class="status-pass">✓</span>':'<span class="status-fail">✗</span>'];
+    });
+  },
+
+  init:function(){
+    this.state={posA:3,step:0,measuredV:null,records:[]};
+  },
+  getParamHTML:function(){
+    return '<div class="param-group">'+
+      '<div class="param-header"><span class="param-label">蜡烛A位置 (物距u)</span><span class="param-value" id="valPosA">3.0 cm</span></div>'+
+      '<input type="range" id="sliderPosA" min="1" max="6" value="3" step="0.5">'+
+      '</div>';
+  },
+  bindParams:function(){
+    var self=this;
+    var sl=document.getElementById('sliderPosA');
+    if(sl){
+      sl.addEventListener('input',function(){
+        self.state.posA=parseFloat(this.value);
+        document.getElementById('valPosA').textContent=parseFloat(this.value).toFixed(1)+' cm';
+        self.state.measuredV=null;
+        updateBadges();
+        redraw();
+      });
+    }
+  },
+  onStepEnter:function(step){
+    if(step===4&&this.state.measuredV===null){
+      var err=(Math.random()-0.5)*0.3;
+      this.state.measuredV=Math.round((this.state.posA+err)*10)/10;
+    }
+  },
+  record:function(){
+    var s=this.state;
+    if(s.records.length>=this.maxRecords)return;
+    if(s.measuredV===null){
+      var err=(Math.random()-0.5)*0.3;
+      s.measuredV=Math.round((s.posA+err)*10)/10;
+    }
+    s.records.push({u:s.posA,v:s.measuredV});
+    s.measuredV=null;
+    renderTable();
+    redraw();
+  },
+  judge:function(){
+    var s=this.state;
+    var passCount=0;
+    s.records.forEach(function(r){
+      if(Math.abs(r.u-r.v)<=0.5)passCount++;
+    });
+    var opScore=Math.round((s.step/(this.steps.length-1))*30);
+    var dataScore=Math.round((s.records.length/this.maxRecords)*30);
+    var conScore=s.records.length>0?Math.round((passCount/s.records.length)*40):0;
+    return{
+      total:opScore+dataScore+conScore,
+      items:[
+        {name:'操作规范',icon:'🔧',score:opScore,max:30,pass:opScore>=20,details:'完成步骤 '+s.step+'/'+(this.steps.length-1)+'，等效替代法'+(s.step>=4?'操作正确':'尚未完成')},
+        {name:'数据记录',icon:'📝',score:dataScore,max:30,pass:dataScore>=20,details:'已记录 '+s.records.length+'/'+this.maxRecords+' 组数据'},
+        {name:'结论验证',icon:'✅',score:conScore,max:40,pass:conScore>=30,details:passCount+'/'+s.records.length+' 组满足 |u−v|≤0.5cm，像距等于物距'+(passCount===s.records.length&&s.records.length>0?' ✓':'')}
+      ]
+    };
+  },
+
+  draw:function(ctx,w,h){
+    var c=getThemeColors();
+    var s=this.state;
+    var u=s.posA;
+    var scale=Math.min((w*0.32)/6,42);
+    var mirrorX=w/2;
+    var mirrorTop=h*0.14, mirrorBot=h*0.74;
+    var rulerY=h*0.80;
+    var candleBaseY=mirrorBot;
+    var candleH=50;
+
+    /* ---- 玻璃板（平面镜） ---- */
+    var grad=ctx.createLinearGradient(mirrorX-4,0,mirrorX+4,0);
+    grad.addColorStop(0,'rgba(120,180,220,0.15)');
+    grad.addColorStop(0.5,'rgba(180,220,255,0.4)');
+    grad.addColorStop(1,'rgba(120,180,220,0.15)');
+    ctx.fillStyle=grad;
+    ctx.fillRect(mirrorX-4,mirrorTop,8,mirrorBot-mirrorTop);
+    ctx.strokeStyle='rgba(100,160,200,0.6)';
+    ctx.lineWidth=1;
+    ctx.strokeRect(mirrorX-4,mirrorTop,8,mirrorBot-mirrorTop);
+    ctx.fillStyle=c.ink2;
+    ctx.font='11px monospace';
+    ctx.fillText('玻璃板',mirrorX-16,mirrorTop-6);
+
+    /* ---- 刻度尺 ---- */
+    ctx.strokeStyle=c.muted;
+    ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.moveTo(mirrorX-7*scale,rulerY);
+    ctx.lineTo(mirrorX+7*scale,rulerY);
+    ctx.stroke();
+    ctx.fillStyle=c.ink2;
+    ctx.font='10px monospace';
+    for(var cm=-6;cm<=6;cm++){
+      var tx=mirrorX+cm*scale;
+      var tl=(cm%2===0)?7:4;
+      ctx.beginPath();
+      ctx.moveTo(tx,rulerY);
+      ctx.lineTo(tx,rulerY+tl);
+      ctx.stroke();
+      if(cm%2===0){
+        ctx.fillText(Math.abs(cm)+'',tx-3,rulerY+18);
+      }
+    }
+    ctx.fillText('cm',mirrorX+7*scale+6,rulerY+4);
+
+    /* ---- 蜡烛A (实物，红色) ---- */
+    if(s.step>=1){
+      var aX=mirrorX-u*scale;
+      drawCandle(ctx,aX,candleBaseY,candleH,'#e74c3c','#f39c12',1);
+      ctx.fillStyle=c.ink2;
+      ctx.font='bold 11px monospace';
+      ctx.fillText('A',aX-4,candleBaseY+14);
+    }
+
+    /* ---- 虚像 (半透明) ---- */
+    if(s.step>=2){
+      var imgX=mirrorX+u*scale;
+      drawCandle(ctx,imgX,candleBaseY,candleH,'#e74c3c','#f39c12',0.35);
+      /* 虚线框 */
+      ctx.strokeStyle='rgba(231,76,60,0.3)';
+      ctx.lineWidth=1;
+      ctx.setLineDash([3,3]);
+      ctx.strokeRect(imgX-7,candleBaseY-candleH-14,14,candleH+16);
+      ctx.setLineDash([]);
+      ctx.fillStyle=c.muted;
+      ctx.font='10px monospace';
+      ctx.fillText('虚像',imgX-12,candleBaseY-candleH-18);
+    }
+
+    /* ---- 蜡烛B (等效替代，绿色) ---- */
+    if(s.step>=3){
+      var bX=mirrorX+u*scale;
+      drawCandle(ctx,bX,candleBaseY,candleH+2,'#27ae60','#f1c40f',1);
+      ctx.fillStyle=c.ink2;
+      ctx.font='bold 11px monospace';
+      ctx.fillText('B',bX-4,candleBaseY+14);
+    }
+
+    /* ---- 距离标注 ---- */
+    if(s.step>=4){
+      /* 物距 u */
+      ctx.strokeStyle='#e74c3c';
+      ctx.lineWidth=1.5;
+      ctx.setLineDash([4,3]);
+      var annY=candleBaseY-candleH-28;
+      ctx.beginPath();
+      ctx.moveTo(mirrorX-u*scale,annY);
+      ctx.lineTo(mirrorX,annY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#e74c3c';
+      ctx.font='bold 12px monospace';
+      ctx.fillText('u='+u.toFixed(1)+'cm',mirrorX-u*scale/2-22,annY-5);
+
+      /* 像距 v */
+      var vDisp=s.measuredV!==null?s.measuredV:u;
+      ctx.strokeStyle='#3b82f6';
+      ctx.setLineDash([4,3]);
+      ctx.beginPath();
+      ctx.moveTo(mirrorX,annY);
+      ctx.lineTo(mirrorX+vDisp*scale,annY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#3b82f6';
+      ctx.fillText('v='+vDisp.toFixed(1)+'cm',mirrorX+vDisp*scale/2-22,annY-5);
+    }
+
+    /* ---- 步骤提示 ---- */
+    ctx.fillStyle=c.muted;
+    ctx.font='12px monospace';
+    var stepTexts=[
+      '步骤1: 玻璃板已竖直放置',
+      '步骤2: 蜡烛A已放置，拖动滑块调整位置',
+      '步骤3: 观察镜后虚像（半透明）',
+      '步骤4: 蜡烛B移至虚像位置（等效替代法）',
+      '步骤5: 测量物距u和像距v ('+s.records.length+'/'+this.maxRecords+')',
+      '步骤6: 改变蜡烛A位置重复实验 ('+s.records.length+'/'+this.maxRecords+')',
+      '步骤7: 点击"实验评价"检验成像特点'
+    ];
+    ctx.fillText(stepTexts[s.step]||'',20,h-24);
+  }
+};
+
+/* ---------- 实验3: 凸透镜成像规律 ---------- */
+var lens={
+  name:'凸透镜成像规律',
+  icon:'🔭',
+  state:{u:30,f:10,step:0,records:[]},
+  steps:['放置凸透镜','放置蜡烛','放置光屏','调整物距','移动光屏','记录数据','得出结论'],
+  maxRecords:5,
+
+  getInfo:function(){
+    return{
+      purpose:'探究凸透镜成像规律，理解不同物距下的成像特点及应用',
+      equipment:'凸透镜(f=10cm)、蜡烛、光屏、光具座、刻度尺'
+    };
+  },
+  getHint:function(){
+    return '<strong>操作要点：</strong>调节物距u滑块（5-40cm），观察成像变化。u>2f为照相机，u=2f测焦距，f<u<2f为投影仪，u=f不成像，u<f为放大镜。记录5组不同物距的数据。';
+  },
+  getKnowledgeCards:function(){
+    return[
+      {title:'📐 透镜成像公式',body:'<p>薄透镜成像公式（高斯公式）：</p><p class="formula">1/u + 1/v = 1/f</p><p>其中 u=物距, v=像距, f=焦距</p><p>放大率 m = |v/u|</p>'},
+      {title:'📏 成像规律总结',body:'<p><strong>u &gt; 2f：</strong>倒立缩小实像 → 照相机</p><p><strong>u = 2f：</strong>倒立等大实像 → 测焦距</p><p><strong>f &lt; u &lt; 2f：</strong>倒立放大实像 → 投影仪</p><p><strong>u = f：</strong>不成像（平行光出射）</p><p><strong>u &lt; f：</strong>正立放大虚像 → 放大镜</p>'},
+      {title:'🔬 实像与虚像判据',body:'<p><strong>实像：</strong>u &gt; f，倒立，光屏可承接</p><p><strong>虚像：</strong>u &lt; f，正立，光屏不可承接</p><p><strong>分界点：</strong>u = f 处不成像</p>'}
+    ];
+  },
+  getTableHeaders:function(){return['u(cm)','v(cm)','大小','倒正','虚实','应用','状态'];},
+  getTableRows:function(){
+    var self=this;
+    return this.state.records.map(function(r){
+      var exp=self.getExpected(r.u);
+      var pass=r.size===exp.size&&r.orient===exp.orient&&r.type===exp.type;
+      return [r.u.toFixed(1),r.v===Infinity?'∞':r.v.toFixed(1),r.size,r.orient,r.type,r.app,pass?'<span class="status-pass">✓</span>':'<span class="status-fail">✗</span>'];
+    });
+  },
+  getExpected:function(u){
+    var f=10;
+    if(Math.abs(u-f)<0.3)return{size:'—',orient:'—',type:'不成像',app:'—'};
+    if(u>2*f+0.3)return{size:'缩小',orient:'倒立',type:'实像',app:'照相机'};
+    if(Math.abs(u-2*f)<0.3)return{size:'等大',orient:'倒立',type:'实像',app:'测焦距'};
+    if(u>f+0.3)return{size:'放大',orient:'倒立',type:'实像',app:'投影仪'};
+    return{size:'放大',orient:'正立',type:'虚像',app:'放大镜'};
+  },
+
+  init:function(){
+    this.state={u:30,f:10,step:0,records:[]};
+  },
+  getParamHTML:function(){
+    return '<div class="param-group">'+
+      '<div class="param-header"><span class="param-label">物距 u</span><span class="param-value" id="valU">30.0 cm</span></div>'+
+      '<input type="range" id="sliderU" min="5" max="40" value="30" step="0.5">'+
+      '</div>'+
+      '<div class="param-group">'+
+      '<div class="param-header"><span class="param-label">焦距 f</span><span class="param-value">10.0 cm (固定)</span></div>'+
+      '</div>';
+  },
+  bindParams:function(){
+    var self=this;
+    var sl=document.getElementById('sliderU');
+    if(sl){
+      sl.addEventListener('input',function(){
+        self.state.u=parseFloat(this.value);
+        document.getElementById('valU').textContent=parseFloat(this.value).toFixed(1)+' cm';
+        updateBadges();
+        updateLensCases();
+        redraw();
+      });
+    }
+  },
+  onStepEnter:function(){},
+  record:function(){
+    var s=this.state;
+    if(s.records.length>=this.maxRecords)return;
+    var u=s.u, f=s.f;
+    var exp=this.getExpected(u);
+    var v;
+    if(exp.type==='不成像'){
+      v=Infinity;
+    }else{
+      var vTheory=u*f/(u-f);
+      var err=(Math.random()-0.5)*0.4;
+      v=Math.round((vTheory+err)*10)/10;
+    }
+    s.records.push({u:u,v:v,size:exp.size,orient:exp.orient,type:exp.type,app:exp.app});
+    renderTable();
+    redraw();
+  },
+  judge:function(){
+    var s=this.state;
+    var passCount=0;
+    var self=this;
+    s.records.forEach(function(r){
+      var exp=self.getExpected(r.u);
+      if(r.size===exp.size&&r.orient===exp.orient&&r.type===exp.type)passCount++;
+    });
+    var opScore=Math.round((s.step/(this.steps.length-1))*30);
+    var dataScore=Math.round((s.records.length/this.maxRecords)*30);
+    var conScore=s.records.length>0?Math.round((passCount/s.records.length)*40):0;
+    return{
+      total:opScore+dataScore+conScore,
+      items:[
+        {name:'操作规范',icon:'🔧',score:opScore,max:30,pass:opScore>=20,details:'完成步骤 '+s.step+'/'+(this.steps.length-1)+'，光具座操作'+(s.step>=4?'规范':'尚不完整')},
+        {name:'数据记录',icon:'📝',score:dataScore,max:30,pass:dataScore>=20,details:'已记录 '+s.records.length+'/'+this.maxRecords+' 组数据'},
+        {name:'结论验证',icon:'✅',score:conScore,max:40,pass:conScore>=30,details:passCount+'/'+s.records.length+' 组成像特点与理论一致'+(passCount===s.records.length&&s.records.length>0?' ✓':'')}
+      ]
+    };
+  },
+
+  draw:function(ctx,w,h){
+    var c=getThemeColors();
+    var s=this.state;
+    var u=s.u, f=s.f;
+    var scale=Math.min(w/75,13);
+    var axisY=h*0.54;
+    var lensX=w/2;
+    var objH=32;
+    var candleX=lensX-u*scale;
+    var fX1=lensX-f*scale, fX2=lensX+f*scale;
+    var f2X1=lensX-2*f*scale, f2X2=lensX+2*f*scale;
+
+    /* ---- 光具座 ---- */
+    ctx.fillStyle=c.muted;
+    ctx.fillRect(lensX-w*0.42,axisY+50,w*0.84,6);
+    ctx.strokeStyle=c.muted;
+    ctx.lineWidth=1;
+    /* 三角架 */
+    for(var sx=-0.38;sx<=0.38;sx+=0.19){
+      var stx=lensX+sx*w;
+      ctx.beginPath();
+      ctx.moveTo(stx-6,axisY+56);
+      ctx.lineTo(stx+6,axisY+56);
+      ctx.lineTo(stx,axisY+66);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    /* ---- 主光轴 ---- */
+    ctx.strokeStyle=c.muted;
+    ctx.lineWidth=1;
+    ctx.setLineDash([8,4]);
+    ctx.beginPath();
+    ctx.moveTo(lensX-w*0.42,axisY);
+    ctx.lineTo(lensX+w*0.42,axisY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* ---- F, 2F 标记 ---- */
+    function drawMarker(x,label,color){
+      ctx.fillStyle=color;
+      ctx.beginPath();
+      ctx.arc(x,axisY,3,0,Math.PI*2);
+      ctx.fill();
+      ctx.font='bold 11px monospace';
+      ctx.fillText(label,x-5,axisY+18);
+    }
+    drawMarker(fX1,'F','#e67e22');
+    drawMarker(fX2,"F'",'#e67e22');
+    drawMarker(f2X1,'2F','#9b59b6');
+    drawMarker(f2X2,"2F'",'#9b59b6');
+
+    /* ---- 凸透镜 ---- */
+    ctx.save();
+    var lensH=70;
+    var lensGrad=ctx.createLinearGradient(lensX-8,0,lensX+8,0);
+    lensGrad.addColorStop(0,'rgba(59,130,246,0.15)');
+    lensGrad.addColorStop(0.5,'rgba(59,130,246,0.4)');
+    lensGrad.addColorStop(1,'rgba(59,130,246,0.15)');
+    ctx.fillStyle=lensGrad;
+    ctx.strokeStyle='#3b82f6';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.ellipse(lensX,axisY,8,lensH,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    /* 透镜箭头标记 */
+    ctx.fillStyle='#3b82f6';
+    ctx.beginPath();
+    ctx.moveTo(lensX,axisY-lensH+4);
+    ctx.lineTo(lensX-4,axisY-lensH+12);
+    ctx.lineTo(lensX+4,axisY-lensH+12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(lensX,axisY+lensH-4);
+    ctx.lineTo(lensX-4,axisY+lensH-12);
+    ctx.lineTo(lensX+4,axisY+lensH-12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    /* ---- 蜡烛 ---- */
+    if(s.step>=1){
+      drawCandle(ctx,candleX,axisY+50,objH,'#e74c3c','#f39c12',1);
+      ctx.fillStyle=c.ink2;
+      ctx.font='bold 10px monospace';
+      ctx.fillText('物',candleX-6,axisY+66);
+    }
+
+    /* ---- 计算成像 ---- */
+    var v, isVirtual, isNoImage, m;
+    if(Math.abs(u-f)<0.3){
+      isNoImage=true;
+      v=Infinity;
+    }else{
+      v=u*f/(u-f);
+      isVirtual=v<0;
+      m=-v/u;
+    }
+
+    /* ---- 三条特殊光线 ---- */
+    if(s.step>=1&&!isNoImage){
+      var objTopY=axisY-objH;
+      var imgX=lensX+v*scale;
+      var imgTopY=axisY+(v/u)*objH;
+
+      /* 光线1: 平行 → 过F' (红) */
+      ctx.strokeStyle='#ef4444';
+      ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.moveTo(candleX,objTopY);
+      ctx.lineTo(lensX,objTopY);
+      ctx.stroke();
+      /* 折射后 */
+      if(!isVirtual){
+        var endX1=Math.min(lensX+w*0.42,imgX+20);
+        var t1=(endX1-lensX)/(f*scale);
+        var endY1=objTopY+t1*objH;
+        ctx.beginPath();
+        ctx.moveTo(lensX,objTopY);
+        ctx.lineTo(endX1,endY1);
+        ctx.stroke();
+      }else{
+        /* 虚像 - 折射光线向右下方发散 */
+        var endX1v=lensX+w*0.42;
+        var t1v=(endX1v-lensX)/(f*scale);
+        var endY1v=objTopY+t1v*objH;
+        ctx.beginPath();
+        ctx.moveTo(lensX,objTopY);
+        ctx.lineTo(endX1v,endY1v);
+        ctx.stroke();
+        /* 反向延长线（虚线） */
+        ctx.setLineDash([4,3]);
+        ctx.strokeStyle='rgba(239,68,68,0.4)';
+        ctx.beginPath();
+        ctx.moveTo(lensX,objTopY);
+        ctx.lineTo(imgX,imgTopY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.strokeStyle='#ef4444';
+      }
+
+      /* 光线2: 过光心 (绿) */
+      ctx.strokeStyle='#22c55e';
+      ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.moveTo(candleX,objTopY);
+      ctx.lineTo(lensX,axisY);
+      ctx.stroke();
+      if(!isVirtual){
+        var endX2=Math.min(lensX+w*0.42,imgX+20);
+        var t2=(endX2-candleX)/(lensX-candleX);
+        var endY2=objTopY+t2*(axisY-objTopY);
+        ctx.beginPath();
+        ctx.moveTo(lensX,axisY);
+        ctx.lineTo(endX2,endY2);
+        ctx.stroke();
+      }else{
+        var endX2v=lensX+w*0.42;
+        var t2v=(endX2v-candleX)/(lensX-candleX);
+        var endY2v=objTopY+t2v*(axisY-objTopY);
+        ctx.beginPath();
+        ctx.moveTo(lensX,axisY);
+        ctx.lineTo(endX2v,endY2v);
+        ctx.stroke();
+        ctx.setLineDash([4,3]);
+        ctx.strokeStyle='rgba(34,197,94,0.4)';
+        ctx.beginPath();
+        ctx.moveTo(candleX,objTopY);
+        ctx.lineTo(imgX,imgTopY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.strokeStyle='#22c55e';
+      }
+
+      /* 光线3: 过F → 平行 (橙) */
+      if(u>f+0.3){
+        /* 物在F外: 从物顶过F到透镜，折射后平行 */
+        ctx.strokeStyle='#f97316';
+        ctx.lineWidth=2;
+        /* F到物顶的方向延伸到透镜 */
+        var dx3=lensX-fX1;
+        var dy3=axisY-objTopY; /* 注意: F在轴上, 物顶在轴上方 */
+        var t3=dx3/(candleX-fX1);
+        /* 透镜处y */
+        var lensY3=axisY-(axisY-objTopY)*((lensX-fX1)/(candleX-fX1));
+        lensY3=objTopY+(axisY-objTopY)*((lensX-candleX)/(fX1-candleX));
+        /* 重新计算: 线从 (candleX, objTopY) 到 (fX1, axisY), 延长到 lensX */
+        var slope3=(axisY-objTopY)/(fX1-candleX);
+        var yAtLens=objTopY+slope3*(lensX-candleX);
+        ctx.beginPath();
+        ctx.moveTo(candleX,objTopY);
+        ctx.lineTo(lensX,yAtLens);
+        ctx.stroke();
+        /* 折射后平行 */
+        ctx.beginPath();
+        ctx.moveTo(lensX,yAtLens);
+        ctx.lineTo(lensX+w*0.42,yAtLens);
+        ctx.stroke();
+        if(isVirtual){
+          ctx.setLineDash([4,3]);
+          ctx.strokeStyle='rgba(249,115,22,0.4)';
+          ctx.beginPath();
+          ctx.moveTo(lensX,yAtLens);
+          ctx.lineTo(imgX,imgTopY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }else if(u<f-0.3){
+        /* 物在F内: 光线方向使其反向延长过F */
+        ctx.strokeStyle='#f97316';
+        ctx.lineWidth=2;
+        /* 从物顶射向透镜, 反向延长线过F */
+        var slope3b=(axisY-objTopY)/(fX1-candleX);
+        var yAtLens3b=objTopY+slope3b*(lensX-candleX);
+        ctx.beginPath();
+        ctx.moveTo(candleX,objTopY);
+        ctx.lineTo(lensX,yAtLens3b);
+        ctx.stroke();
+        /* 折射后平行 */
+        ctx.beginPath();
+        ctx.moveTo(lensX,yAtLens3b);
+        ctx.lineTo(lensX+w*0.42,yAtLens3b);
+        ctx.stroke();
+        /* 反向延长线过F (虚线) */
+        ctx.setLineDash([4,3]);
+        ctx.strokeStyle='rgba(249,115,22,0.4)';
+        ctx.beginPath();
+        ctx.moveTo(candleX,objTopY);
+        ctx.lineTo(fX1,axisY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    /* ---- 像 ---- */
+    if(s.step>=2&&!isNoImage){
+      var imgX2=lensX+v*scale;
+      var imgTopY2=axisY+(v/u)*objH;
+      var imgH=Math.abs(imgTopY2-axisY);
+
+      if(!isVirtual){
+        /* 实像 (蓝色实线箭头) */
+        ctx.strokeStyle='#3b82f6';
+        ctx.lineWidth=2.5;
+        ctx.beginPath();
+        ctx.moveTo(imgX2,axisY);
+        ctx.lineTo(imgX2,imgTopY2);
+        ctx.stroke();
+        /* 箭头 */
+        var arrDir=imgTopY2>axisY?1:-1;
+        ctx.fillStyle='#3b82f6';
+        ctx.beginPath();
+        ctx.moveTo(imgX2,imgTopY2);
+        ctx.lineTo(imgX2-5,imgTopY2-8*arrDir);
+        ctx.lineTo(imgX2+5,imgTopY2-8*arrDir);
+        ctx.closePath();
+        ctx.fill();
+        ctx.font='bold 11px monospace';
+        ctx.fillText('实像',imgX2+8,imgTopY2);
+
+        /* 光屏 */
+        if(s.step>=2){
+          ctx.fillStyle='#8b6914';
+          ctx.fillRect(imgX2-3,imgTopY2>axisY?axisY-45:imgTopY2-5,6,50);
+          ctx.fillStyle='#a67c3a';
+          ctx.fillRect(imgX2-3,imgTopY2>axisY?axisY-45:imgTopY2-5,2,50);
+          ctx.fillStyle=c.ink2;
+          ctx.font='10px monospace';
+          ctx.fillText('光屏',imgX2-10,(imgTopY2>axisY?axisY-50:imgTopY2-10));
+        }
+      }else{
+        /* 虚像 (蓝色虚线箭头) */
+        ctx.strokeStyle='#3b82f6';
+        ctx.lineWidth=2;
+        ctx.setLineDash([5,3]);
+        ctx.beginPath();
+        ctx.moveTo(imgX2,axisY);
+        ctx.lineTo(imgX2,imgTopY2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        var arrDir2=imgTopY2<axisY?-1:1;
+        ctx.fillStyle='#3b82f6';
+        ctx.beginPath();
+        ctx.moveTo(imgX2,imgTopY2);
+        ctx.lineTo(imgX2-5,imgTopY2-8*arrDir2);
+        ctx.lineTo(imgX2+5,imgTopY2-8*arrDir2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.font='bold 11px monospace';
+        ctx.fillText('虚像',imgX2-12,imgTopY2-6);
+      }
+    }
+
+    /* ---- u 标注 ---- */
+    if(s.step>=1){
+      ctx.strokeStyle='#e74c3c';
+      ctx.lineWidth=1.5;
+      ctx.setLineDash([4,3]);
+      ctx.beginPath();
+      ctx.moveTo(candleX,axisY-objH-20);
+      ctx.lineTo(lensX,axisY-objH-20);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#e74c3c';
+      ctx.font='bold 11px monospace';
+      ctx.fillText('u='+u.toFixed(1)+'cm',(candleX+lensX)/2-25,axisY-objH-24);
+    }
+
+    /* ---- v 标注 ---- */
+    if(s.step>=2&&!isNoImage&&!isVirtual){
+      ctx.strokeStyle='#3b82f6';
+      ctx.setLineDash([4,3]);
+      ctx.beginPath();
+      ctx.moveTo(lensX,axisY-objH-20);
+      ctx.lineTo(lensX+v*scale,axisY-objH-20);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='#3b82f6';
+      ctx.fillText('v='+v.toFixed(1)+'cm',(lensX+lensX+v*scale)/2-25,axisY-objH-24);
+    }
+
+    /* ---- 成像描述 ---- */
+    if(s.step>=2){
+      ctx.fillStyle=c.ink;
+      ctx.font='bold 13px monospace';
+      var desc='';
+      if(isNoImage){
+        desc='u = f → 不成像 (折射光线平行射出)';
+      }else{
+        var sz= Math.abs(v/u)>1?'放大':(Math.abs(Math.abs(v/u)-1)<0.05?'等大':'缩小');
+        var ori=isVirtual?'正立':'倒立';
+        var typ=isVirtual?'虚像':'实像';
+        desc='u='+u.toFixed(1)+' → '+ori+sz+typ+' (v='+v.toFixed(1)+'cm)';
+      }
+      ctx.fillText(desc,20,h-40);
+
+      /* 应用提示 */
+      ctx.fillStyle=c.accent;
+      ctx.font='11px monospace';
+      var app='';
+      if(u>2*f+0.3)app='应用：照相机';
+      else if(Math.abs(u-2*f)<0.3)app='应用：等大实像，可测焦距';
+      else if(u>f+0.3)app='应用：投影仪 / 幻灯机';
+      else if(Math.abs(u-f)<0.3)app='应用：平行光源';
+      else app='应用：放大镜';
+      ctx.fillText(app,20,h-22);
+    }
+
+    /* ---- 步骤提示 ---- */
+    if(s.step<2){
+      ctx.fillStyle=c.muted;
+      ctx.font='12px monospace';
+      var texts=[
+        '步骤1: 凸透镜已放置 (f=10cm)',
+        '步骤2: 蜡烛已放置，拖动滑块调整物距u',
+        '步骤3: 放置光屏承接像'
+      ];
+      ctx.fillText(texts[s.step]||'',20,h-24);
+    }
+  }
+};
+
+/* ================================================================
+   全局状态
+   ================================================================ */
+var currentExp='reflection';
+var experiments={reflection:reflection,mirror:mirror,lens:lens};
+
+/* ================================================================
+   UI 渲染函数
+   ================================================================ */
+function renderParams(){
+  var exp=experiments[currentExp];
+  document.getElementById('paramContent').innerHTML=exp.getParamHTML();
+  exp.bindParams();
+}
+
+function renderSteps(){
+  var exp=experiments[currentExp];
+  var html='';
+  exp.steps.forEach(function(s,i){
+    var cls='step-pill';
+    if(i<exp.state.step)cls+=' done';
+    if(i===exp.state.step)cls+=' active';
+    var prefix=i<exp.state.step?'✓ ':((i===exp.state.step?'→ ':'')+ (i+1)+'. ');
+    html+='<div class="'+cls+'">'+prefix+s+'</div>';
+  });
+  document.getElementById('stepPills').innerHTML=html;
+}
+
+function renderTable(){
+  var exp=experiments[currentExp];
+  var headers=exp.getTableHeaders();
+  var rows=exp.getTableRows();
+  var html='<table class="data-table"><thead><tr>';
+  headers.forEach(function(h){html+='<th>'+h+'</th>';});
+  html+='</tr></thead><tbody>';
+  for(var i=0;i<exp.maxRecords;i++){
+    html+='<tr>';
+    if(rows[i]){
+      rows[i].forEach(function(cell){html+='<td>'+cell+'</td>';});
+    }else{
+      headers.forEach(function(){html+='<td class="empty">—</td>';});
+    }
+    html+='</tr>';
+  }
+  html+='</tbody></table>';
+  document.getElementById('dataTableWrap').innerHTML=html;
+}
+
+function renderInfo(){
+  var exp=experiments[currentExp];
+  var info=exp.getInfo();
+  document.getElementById('expInfo').innerHTML=
+    '<p><strong>实验目的：</strong>'+info.purpose+'</p>'+
+    '<p><strong>实验器材：</strong>'+info.equipment+'</p>';
+}
+
+function renderKnowledgeCards(){
+  var exp=experiments[currentExp];
+  var cards=exp.getKnowledgeCards();
+  var html='';
+  cards.forEach(function(c){
+    html+='<div class="knowledge-card"><h3>'+c.title+'</h3>'+c.body+'</div>';
+  });
+  document.getElementById('knowledgeCards').innerHTML=html;
+}
+
+function renderHint(){
+  document.getElementById('hintBox').innerHTML=experiments[currentExp].getHint();
+}
+
+function updateLensCases(){
+  var section=document.getElementById('lensCasesSection');
+  if(currentExp!=='lens'){
+    section.style.display='none';
+    return;
+  }
+  section.style.display='block';
+  var u=lens.state.u, f=10;
+  var cases=[
+    {range:'u > 2f',icon:'📷',title:'照相机',desc:'倒立缩小实像',match:u>2*f+0.3},
+    {range:'u = 2f',icon:'⚖️',title:'测焦距',desc:'倒立等大实像',match:Math.abs(u-2*f)<0.3},
+    {range:'f < u < 2f',icon:'📽️',title:'投影仪',desc:'倒立放大实像',match:u>f+0.3&&u<2*f-0.3},
+    {range:'u = f',icon:'平行',title:'不成像',desc:'折射光平行射出',match:Math.abs(u-f)<0.3},
+    {range:'u < f',icon:'🔍',title:'放大镜',desc:'正立放大虚像',match:u<f-0.3}
+  ];
+  var html='';
+  cases.forEach(function(c){
+    html+='<div class="case-card'+(c.match?' active':'')+'">'+
+      '<div class="case-icon">'+c.icon+'</div>'+
+      '<div class="case-body"><h4>'+c.range+'</h4><p>'+c.title+' · '+c.desc+'</p></div>'+
+      '</div>';
+  });
+  document.getElementById('lensCases').innerHTML=html;
+}
+
+function updateBadges(){
+  var exp=experiments[currentExp];
+  document.getElementById('badgeExp').textContent=exp.name;
+  document.getElementById('badgeStep').textContent='步骤 '+(exp.state.step+1)+'/'+exp.steps.length;
+  var info='';
+  if(currentExp==='reflection'){
+    info='入射角 '+exp.state.angle+'°';
+    if(exp.state.measuredAngle!==null)info+=' | 反射角 '+exp.state.measuredAngle.toFixed(1)+'°';
+  }else if(currentExp==='mirror'){
+    info='物距 u='+exp.state.posA.toFixed(1)+'cm';
+    if(exp.state.measuredV!==null)info+=' | 像距 v='+exp.state.measuredV.toFixed(1)+'cm';
+  }else if(currentExp==='lens'){
+    info='u='+exp.state.u.toFixed(1)+'cm | f='+exp.state.f+'cm';
+  }
+  document.getElementById('badgeInfo').textContent=info;
+}
+
+function updateHeader(){
+  var exp=experiments[currentExp];
+  document.getElementById('lpIcon').textContent=exp.icon;
+  document.getElementById('lpTitle').textContent=exp.name;
+}
+
+/* ================================================================
+   绘制
+   ================================================================ */
+function redraw(){
+  var r=setupCanvas();
+  var ctx=r.ctx, w=r.w, h=r.h;
+  var colors=getThemeColors();
+  /* 背景 */
+  ctx.fillStyle=colors.bg;
+  ctx.fillRect(0,0,w,h);
+  /* 绘制当前实验 */
+  experiments[currentExp].draw(ctx,w,h);
+}
+
+/* ================================================================
+   操作函数
+   ================================================================ */
+function switchExp(name){
+  if(!experiments[name])return;
+  currentExp=name;
+  var exp=experiments[name];
+  exp.init();
+  /* 更新选择器 */
+  document.querySelectorAll('.exp-btn').forEach(function(b){
+    b.classList.toggle('active',b.dataset.exp===name);
+  });
+  updateHeader();
+  renderParams();
+  renderSteps();
+  renderTable();
+  renderInfo();
+  renderKnowledgeCards();
+  renderHint();
+  updateLensCases();
+  updateBadges();
+  redraw();
+}
+
+function nextStep(){
+  var exp=experiments[currentExp];
+  if(exp.state.step<exp.steps.length-1){
+    exp.state.step++;
+    exp.onStepEnter(exp.state.step);
+    renderSteps();
+    updateBadges();
+    redraw();
+  }
+}
+
+function recordData(){
+  var exp=experiments[currentExp];
+  exp.record();
+  renderTable();
+  updateBadges();
+}
+
+function resetExp(){
+  var exp=experiments[currentExp];
+  exp.init();
+  renderParams();
+  renderSteps();
+  renderTable();
+  updateBadges();
+  updateLensCases();
+  redraw();
+}
+
+function judgeExp(){
+  var exp=experiments[currentExp];
+  var result=exp.judge();
+  showResult(result);
+}
+
+/* ================================================================
+   模态框
+   ================================================================ */
+function showResult(data){
+  var total=data.total;
+  var grade, gradeCls;
+  if(total>=90){grade='A';gradeCls='a';}
+  else if(total>=80){grade='B';gradeCls='b';}
+  else if(total>=70){grade='C';gradeCls='c';}
+  else{grade='D';gradeCls='d';}
+
+  var html='<div style="display:flex;align-items:center;justify-content:center;margin-bottom:20px">'+
+    '<div><div class="modal-score-big">'+total+'</div>'+
+    '<div style="font-size:0.7rem;color:var(--o-muted);text-align:center;margin-top:2px">总分 / 100</div></div>'+
+    '<span class="modal-grade '+gradeCls+'">'+grade+'</span></div>';
+
+  data.items.forEach(function(item){
+    var pct=Math.round(item.score/item.max*100);
+    html+='<div class="modal-item">'+
+      '<div class="modal-item-icon">'+item.icon+'</div>'+
+      '<div class="modal-item-body">'+
+      '<h4>'+item.name+' ('+item.score+'/'+item.max+')</h4>'+
+      '<p>'+item.details+'</p>'+
+      '</div>'+
+      '<div class="modal-item-score '+(item.pass?'pass':'fail')+'">'+pct+'%</div>'+
+      '</div>';
+  });
+
+  html+='<div style="text-align:center;margin-top:14px;font-size:0.78rem;color:var(--o-muted)">'+
+    (total>=80?'实验完成！掌握良好':'请继续练习，完善实验操作')+'</div>';
+
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('result-modal').classList.remove('hidden');
+}
+
+function hideResult(){
+  document.getElementById('result-modal').classList.add('hidden');
+}
+
+/* ================================================================
+   事件绑定与初始化
+   ================================================================ */
+function init(){
+  /* 实验选择按钮 */
+  document.querySelectorAll('.exp-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      switchExp(this.dataset.exp);
+    });
+  });
+
+  /* 操作按钮 */
+  document.getElementById('btnNextStep').addEventListener('click',nextStep);
+  document.getElementById('btnRecord').addEventListener('click',recordData);
+  document.getElementById('btnReset').addEventListener('click',resetExp);
+  document.getElementById('btnJudge').addEventListener('click',judgeExp);
+  document.getElementById('btnCloseModal').addEventListener('click',hideResult);
+  document.getElementById('result-modal').querySelector('.modal-overlay').addEventListener('click',hideResult);
+
+  /* 窗口缩放 */
+  var resizeTimer;
+  window.addEventListener('resize',function(){
+    clearTimeout(resizeTimer);
+    resizeTimer=setTimeout(redraw,100);
+  });
+
+  /* 主题变化监听 */
+  var themeObserver=new MutationObserver(function(){
+    redraw();
+  });
+  themeObserver.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+  /* 初始化实验 */
+  var exp=experiments[currentExp];
+  exp.init();
+  updateHeader();
+  renderParams();
+  renderSteps();
+  renderTable();
+  renderInfo();
+  renderKnowledgeCards();
+  renderHint();
+  updateLensCases();
+  updateBadges();
+  redraw();
+
+  /* 创建主题切换器 */
+  if(window.PSUTheme&&PSUTheme.createSwitcher){
+    PSUTheme.createSwitcher();
+  }
+}
+
+/* DOM 就绪后启动 */
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',init);
+}else{
+  init();
+}
+
+})();
+</script>
+</body>
+</html>
