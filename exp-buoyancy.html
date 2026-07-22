@@ -112,6 +112,9 @@ body{font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;background:va
 .overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--bu-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--bu-muted);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .3s ease}
 .overlay-badge.state{font-weight:700;font-size:0.78rem}
 .canvas-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;pointer-events:none;font-size:0.78rem;color:var(--bu-muted);opacity:0.6;text-align:center;font-family:monospace;letter-spacing:1px;transition:opacity .3s ease}
+.dive-btn{position:absolute;top:16px;right:16px;padding:8px 16px;background:var(--bu-accent);color:#fff;border:none;border-radius:10px;font-size:0.8rem;font-weight:600;cursor:pointer;z-index:5;transition:all .3s ease;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.dive-btn:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+.dive-btn:active{transform:translateY(0)}
 
 [data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
 [data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
@@ -323,6 +326,7 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
       <span class="overlay-badge state" id="badgeState">漂浮中</span>
       <span class="overlay-badge" id="badgeLiquid">纯水 · 1000 kg/m³</span>
     </div>
+    <button class="dive-btn" id="diveBtn">🤿 潜入水下</button>
     <div class="canvas-hint">拖拽物体上下移动 · 右键旋转视角 · 滚轮缩放</div>
   </div>
 
@@ -429,9 +433,9 @@ import { Sky } from 'three/addons/objects/Sky.js';
 // CONFIGURATION
 // ================================================================
 const LIQUIDS = {
-  water:     { name: '纯水',   density: 1000, color: 0x001a33 },
-  seawater:  { name: '海水',   density: 1030, color: 0x001528 },
-  alcohol:   { name: '酒精',   density: 800,  color: 0x1a1a00 }
+  water:     { name: '纯水',   density: 1000, color: 0x004466, deepColor: 0x002233, fogDensity: 0.045 },
+  seawater:  { name: '海水',   density: 1030, color: 0x003d5c, deepColor: 0x001a2e, fogDensity: 0.055 },
+  alcohol:   { name: '酒精',   density: 800,  color: 0x4d4d00, deepColor: 0x2a2a00, fogDensity: 0.035 }
 };
 
 const WATER_LEVEL = 0;       // y = 0 is the water surface
@@ -470,6 +474,8 @@ let floatingObject, objectMesh, objectEdges, objectWireframe;
 let raycaster, mouse;
 let gridHelper1, gridHelper2;
 let dom; // renderer DOM element reference for drag events
+// Underwater scene objects
+let seabed, causticMesh, particleSystem, bubbleSystem, godRays, underwaterRocks;
 
 const container = document.getElementById('webgl-container');
 
@@ -498,7 +504,7 @@ function init() {
   controls.dampingFactor = 0.05;
   controls.minDistance = 5;
   controls.maxDistance = 40;
-  controls.maxPolarAngle = Math.PI * 0.85; // allow underwater viewing
+  controls.maxPolarAngle = Math.PI * 0.95; // allow full underwater viewing
   controls.target.set(0, 0, 0);
   // Use right mouse button for rotate, so left can be used for drag
   controls.mouseButtons = {
@@ -576,18 +582,15 @@ function init() {
   water.rotation.x = -Math.PI / 2;
   scene.add(water);
 
-  // --- Grid Helpers ---
+  // --- Grid Helpers (subtle, for reference) ---
   gridHelper1 = new THREE.GridHelper(20, 20, 0x4488ff, 0x224466);
   gridHelper1.position.y = -2;
-  gridHelper1.material.opacity = 0.3;
+  gridHelper1.material.opacity = 0.15;
   gridHelper1.material.transparent = true;
   scene.add(gridHelper1);
 
-  gridHelper2 = new THREE.GridHelper(20, 20, 0x4488ff, 0x224466);
-  gridHelper2.position.y = SEABED_Y;
-  gridHelper2.material.opacity = 0.5;
-  gridHelper2.material.transparent = true;
-  scene.add(gridHelper2);
+  // --- Underwater Environment ---
+  createUnderwaterEnvironment();
 
   // --- Floating Object ---
   createObject();
@@ -622,6 +625,284 @@ function updateSun() {
   if (pmremGenerator && scene) {
     const renderTarget = pmremGenerator.fromScene(sky);
     scene.environment = renderTarget.texture;
+  }
+}
+
+// ================================================================
+// UNDERWATER ENVIRONMENT
+// ================================================================
+function createUnderwaterEnvironment() {
+
+  // --- 1. Sandy seabed with terrain variation ---
+  const seabedGeo = new THREE.PlaneGeometry(60, 60, 80, 80);
+  seabedGeo.rotateX(-Math.PI / 2);
+  // Displace vertices for natural terrain
+  const posAttr = seabedGeo.attributes.position;
+  for (let i = 0; i < posAttr.count; i++) {
+    const x = posAttr.getX(i);
+    const z = posAttr.getZ(i);
+    const dist = Math.sqrt(x * x + z * z);
+    // Gentle dunes + some noise
+    const h = Math.sin(x * 0.3) * Math.cos(z * 0.25) * 0.4
+            + Math.sin(x * 0.8 + 1.5) * Math.cos(z * 0.6) * 0.2
+            + (Math.random() - 0.5) * 0.1;
+    posAttr.setY(i, SEABED_Y + h - 0.15);
+  }
+  seabedGeo.computeVertexNormals();
+  const seabedMat = new THREE.MeshStandardMaterial({
+    color: 0xc2a878,
+    roughness: 0.95,
+    metalness: 0.0,
+    flatShading: false
+  });
+  seabed = new THREE.Mesh(seabedGeo, seabedMat);
+  seabed.receiveShadow = true;
+  scene.add(seabed);
+
+  // --- 2. Rocks on seabed ---
+  underwaterRocks = new THREE.Group();
+  const rockColors = [0x6b5b4e, 0x7a6856, 0x5a4d42];
+  for (let i = 0; i < 12; i++) {
+    const r = 0.3 + Math.random() * 0.6;
+    const rockGeo = new THREE.DodecahedronGeometry(r, 0);
+    // Flatten slightly
+    const rp = rockGeo.attributes.position;
+    for (let j = 0; j < rp.count; j++) {
+      rp.setY(j, rp.getY(j) * 0.6);
+    }
+    rockGeo.computeVertexNormals();
+    const rockMat = new THREE.MeshStandardMaterial({
+      color: rockColors[i % 3],
+      roughness: 0.9,
+      metalness: 0.05,
+      flatShading: true
+    });
+    const rock = new THREE.Mesh(rockGeo, rockMat);
+    const angle = (i / 12) * Math.PI * 2 + Math.random();
+    const dist = 3 + Math.random() * 10;
+    rock.position.set(
+      Math.cos(angle) * dist,
+      SEABED_Y + r * 0.3,
+      Math.sin(angle) * dist
+    );
+    rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    rock.castShadow = true;
+    underwaterRocks.add(rock);
+  }
+  scene.add(underwaterRocks);
+
+  // --- 3. Caustic light pattern on seabed ---
+  // Create a procedural caustic texture using canvas
+  const causticCanvas = document.createElement('canvas');
+  causticCanvas.width = 512;
+  causticCanvas.height = 512;
+  const cctx = causticCanvas.getContext('2d');
+  cctx.fillStyle = '#001020';
+  cctx.fillRect(0, 0, 512, 512);
+  function drawCausticFrame(t) {
+    cctx.fillStyle = 'rgba(0, 20, 40, 0.3)';
+    cctx.fillRect(0, 0, 512, 512);
+    cctx.save();
+    cctx.globalCompositeOperation = 'screen';
+    for (let i = 0; i < 6; i++) {
+      const cx = 256 + Math.sin(t * 0.5 + i * 1.2) * 180;
+      const cy = 256 + Math.cos(t * 0.4 + i * 0.9) * 180;
+      const r = 40 + Math.sin(t * 0.8 + i) * 20;
+      const grad = cctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      grad.addColorStop(0, 'rgba(80, 160, 200, 0.5)');
+      grad.addColorStop(0.5, 'rgba(40, 100, 140, 0.2)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      cctx.fillStyle = grad;
+      cctx.beginPath();
+      cctx.arc(cx, cy, r, 0, Math.PI * 2);
+      cctx.fill();
+    }
+    // Wavy light lines
+    cctx.strokeStyle = 'rgba(100, 180, 220, 0.15)';
+    cctx.lineWidth = 2;
+    for (let i = 0; i < 8; i++) {
+      cctx.beginPath();
+      for (let x = 0; x <= 512; x += 8) {
+        const y = 256 + Math.sin(x * 0.02 + t + i * 0.8) * 60 + (i - 4) * 30;
+        if (x === 0) cctx.moveTo(x, y);
+        else cctx.lineTo(x, y);
+      }
+      cctx.stroke();
+    }
+    cctx.restore();
+  }
+  drawCausticFrame(0);
+  const causticTexture = new THREE.CanvasTexture(causticCanvas);
+  causticTexture.wrapS = causticTexture.wrapT = THREE.RepeatWrapping;
+  causticTexture.repeat.set(3, 3);
+
+  const causticGeo = new THREE.PlaneGeometry(60, 60);
+  causticGeo.rotateX(-Math.PI / 2);
+  const causticMat = new THREE.MeshBasicMaterial({
+    map: causticTexture,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  causticMesh = new THREE.Mesh(causticGeo, causticMat);
+  causticMesh.position.y = SEABED_Y + 0.02;
+  causticMesh.userData = { canvas: causticCanvas, ctx: cctx, drawFn: drawCausticFrame, texture: causticTexture };
+  scene.add(causticMesh);
+
+  // --- 4. Floating particles (marine snow) ---
+  const particleCount = 800;
+  const particleGeo = new THREE.BufferGeometry();
+  const particlePositions = new Float32Array(particleCount * 3);
+  const particleSpeeds = new Float32Array(particleCount);
+  for (let i = 0; i < particleCount; i++) {
+    particlePositions[i * 3]     = (Math.random() - 0.5) * 40;
+    particlePositions[i * 3 + 1] = WATER_LEVEL - Math.random() * (WATER_LEVEL - SEABED_Y);
+    particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+    particleSpeeds[i] = 0.02 + Math.random() * 0.05;
+  }
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+  const particleMat = new THREE.PointsMaterial({
+    color: 0x88ccdd,
+    size: 0.06,
+    transparent: true,
+    opacity: 0.5,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    sizeAttenuation: true
+  });
+  particleSystem = new THREE.Points(particleGeo, particleMat);
+  particleSystem.userData = { speeds: particleSpeeds };
+  scene.add(particleSystem);
+
+  // --- 5. Rising bubbles ---
+  const bubbleCount = 40;
+  const bubbleGeo = new THREE.BufferGeometry();
+  const bubblePositions = new Float32Array(bubbleCount * 3);
+  const bubbleData = [];
+  for (let i = 0; i < bubbleCount; i++) {
+    const x = (Math.random() - 0.5) * 30;
+    const z = (Math.random() - 0.5) * 30;
+    const y = SEABED_Y + Math.random() * (WATER_LEVEL - SEABED_Y);
+    bubblePositions[i * 3] = x;
+    bubblePositions[i * 3 + 1] = y;
+    bubblePositions[i * 3 + 2] = z;
+    bubbleData.push({
+      x: x, z: z,
+      speed: 0.3 + Math.random() * 0.5,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.5 + Math.random() * 1.0,
+      size: 0.04 + Math.random() * 0.06
+    });
+  }
+  bubbleGeo.setAttribute('position', new THREE.BufferAttribute(bubblePositions, 3));
+  const bubbleMat = new THREE.PointsMaterial({
+    color: 0xaaddff,
+    size: 0.12,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    sizeAttenuation: true
+  });
+  bubbleSystem = new THREE.Points(bubbleGeo, bubbleMat);
+  bubbleSystem.userData = { data: bubbleData };
+  scene.add(bubbleSystem);
+
+  // --- 6. God rays (light shafts from surface) ---
+  godRays = new THREE.Group();
+  const rayCount = 5;
+  for (let i = 0; i < rayCount; i++) {
+    const rayGeo = new THREE.ConeGeometry(1.5, 8, 8, 1, true);
+    const rayMat = new THREE.MeshBasicMaterial({
+      color: 0x66aacc,
+      transparent: true,
+      opacity: 0.06,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const ray = new THREE.Mesh(rayGeo, rayMat);
+    const angle = (i / rayCount) * Math.PI * 2 + 0.3;
+    const dist = 2 + Math.random() * 5;
+    ray.position.set(
+      Math.cos(angle) * dist,
+      (WATER_LEVEL + SEABED_Y) / 2,
+      Math.sin(angle) * dist
+    );
+    ray.rotation.z = 0.15 + Math.random() * 0.1;
+    ray.rotation.x = Math.random() * 0.1;
+    godRays.add(ray);
+  }
+  scene.add(godRays);
+}
+
+// ================================================================
+// UPDATE UNDERWATER ENVIRONMENT
+// ================================================================
+function updateUnderwaterEnvironment(dt, elapsed) {
+  if (!seabed) return;
+
+  const isUnderwater = camera.position.y < WATER_LEVEL - 0.1;
+
+  // --- Update caustics ---
+  if (causticMesh && causticMesh.userData.drawFn) {
+    const t = elapsed * 0.5;
+    causticMesh.userData.drawFn(t);
+    causticMesh.userData.texture.needsUpdate = true;
+    causticMesh.visible = isUnderwater || camera.position.y < 3;
+  }
+
+  // --- Update particles (marine snow drift) ---
+  if (particleSystem) {
+    const positions = particleSystem.geometry.attributes.position.array;
+    const speeds = particleSystem.userData.speeds;
+    for (let i = 0; i < speeds.length; i++) {
+      positions[i * 3 + 1] -= speeds[i] * dt * 0.3; // slow sink
+      positions[i * 3]     += Math.sin(elapsed * 0.3 + i) * dt * 0.15; // gentle drift
+      // Reset if below seabed
+      if (positions[i * 3 + 1] < SEABED_Y + 0.1) {
+        positions[i * 3 + 1] = WATER_LEVEL - 0.1;
+        positions[i * 3]     = (Math.random() - 0.5) * 40;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+      }
+    }
+    particleSystem.geometry.attributes.position.needsUpdate = true;
+    particleSystem.visible = isUnderwater;
+  }
+
+  // --- Update bubbles (rise to surface) ---
+  if (bubbleSystem) {
+    const positions = bubbleSystem.geometry.attributes.position.array;
+    const data = bubbleSystem.userData.data;
+    for (let i = 0; i < data.length; i++) {
+      positions[i * 3 + 1] += data[i].speed * dt;
+      positions[i * 3]     = data[i].x + Math.sin(elapsed * data[i].wobbleSpeed + data[i].wobble) * 0.3;
+      // Reset at surface
+      if (positions[i * 3 + 1] > WATER_LEVEL - 0.05) {
+        positions[i * 3 + 1] = SEABED_Y + 0.1;
+        data[i].x = (Math.random() - 0.5) * 30;
+        data[i].z = (Math.random() - 0.5) * 30;
+        positions[i * 3]     = data[i].x;
+        positions[i * 3 + 2] = data[i].z;
+      }
+    }
+    bubbleSystem.geometry.attributes.position.needsUpdate = true;
+    bubbleSystem.visible = isUnderwater;
+  }
+
+  // --- Update god rays ---
+  if (godRays) {
+    godRays.visible = isUnderwater;
+    godRays.children.forEach((ray, i) => {
+      ray.material.opacity = 0.04 + Math.sin(elapsed * 0.5 + i) * 0.02;
+      ray.rotation.y += dt * 0.05;
+    });
+  }
+
+  // --- Update rocks visibility (always visible, they're part of scene) ---
+  if (underwaterRocks) {
+    underwaterRocks.visible = true;
   }
 }
 
@@ -1034,24 +1315,46 @@ function animate() {
     water.material.uniforms['time'].value += dt * 0.6;
   }
 
+  // Update camera animation (dive/surface transition)
+  if (window.__cameraAnim) window.__cameraAnim();
+
   // Update controls
   controls.update();
 
-  // Update underwater fog
+  // Update underwater environment
+  const elapsed = (now - 0) / 1000;
+  updateUnderwaterEnvironment(dt, elapsed);
+
+  // Update underwater fog — depth-dependent gradient
   const cameraY = camera.position.y;
   if (cameraY < WATER_LEVEL - 0.1) {
-    // Underwater
+    // Underwater — fog gets denser with depth
+    const depthBelowSurface = Math.abs(cameraY);
+    const maxDepth = Math.abs(SEABED_Y);
+    const depthFactor = Math.min(depthBelowSurface / maxDepth, 1.0);
+    const liquid = LIQUIDS[sim.liquidType];
+    // Blend between surface color (lighter) and deep color (darker)
+    const surfaceColor = new THREE.Color(liquid.color);
+    const deepColor = new THREE.Color(liquid.deepColor);
+    const fogColor = surfaceColor.lerp(deepColor, depthFactor);
+    // Density increases with depth
+    const fogDensity = liquid.fogDensity * (1.0 + depthFactor * 0.8);
+
     if (!scene.fog) {
-      scene.fog = new THREE.FogExp2(LIQUIDS[sim.liquidType].color, 0.08);
+      scene.fog = new THREE.FogExp2(fogColor.getHex(), fogDensity);
     } else {
-      scene.fog.color.setHex(LIQUIDS[sim.liquidType].color);
-      scene.fog.density = 0.08;
+      scene.fog.color.copy(fogColor);
+      scene.fog.density = fogDensity;
     }
+
+    // Adjust tone mapping exposure for underwater (darker)
+    renderer.toneMappingExposure = 0.35 - depthFactor * 0.1;
   } else {
-    // Above water — remove fog
+    // Above water — remove fog, restore exposure
     if (scene.fog) {
       scene.fog = null;
     }
+    renderer.toneMappingExposure = 0.5;
   }
 
   // Render
@@ -1066,6 +1369,33 @@ function animate() {
 // CONTROL EVENT HANDLERS
 // ================================================================
 function setupControls() {
+  // Dive / Surface camera toggle
+  let isDiving = false;
+  let cameraAnim = null; // { fromY, toY, fromTargetY, toTargetY, startTime, duration }
+  const diveBtn = document.getElementById('diveBtn');
+  diveBtn.addEventListener('click', () => {
+    isDiving = !isDiving;
+    diveBtn.textContent = isDiving ? '🌊 浮出水面' : '🤿 潜入水下';
+    const fromY = camera.position.y;
+    const fromTargetY = controls.target.y;
+    const toY = isDiving ? -2.5 : 4;
+    const toTargetY = isDiving ? -1 : 0;
+    cameraAnim = { fromY, toY, fromTargetY, toTargetY, startTime: performance.now(), duration: 1200 };
+  });
+
+  // Expose cameraAnim for animate loop
+  window.__cameraAnim = () => {
+    if (cameraAnim) {
+      const elapsed = performance.now() - cameraAnim.startTime;
+      const t = Math.min(elapsed / cameraAnim.duration, 1);
+      // Ease in-out
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      camera.position.y = cameraAnim.fromY + (cameraAnim.toY - cameraAnim.fromY) * e;
+      controls.target.y = cameraAnim.fromTargetY + (cameraAnim.toTargetY - cameraAnim.fromTargetY) * e;
+      if (t >= 1) cameraAnim = null;
+    }
+  };
+
   // Liquid type buttons
   document.querySelectorAll('#liquidGroup .btn-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
