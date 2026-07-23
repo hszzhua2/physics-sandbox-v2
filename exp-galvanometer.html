@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>检流计 — 双镜光束控制 | 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES — 检流计实验 (前缀 --gv-)
+   ================================================================ */
+[data-theme="glass"]{
+  --gv-bg:#080812;--gv-bg2:#0e0e1c;--gv-ink:#f1f5f9;--gv-ink2:#cbd5e1;--gv-muted:#64748b;
+  --gv-rule:rgba(255,255,255,0.07);--gv-accent:#00d4ff;--gv-accent2:#a855f7;
+  --gv-canvas-bg:#0a0e1a;--gv-param-bg:rgba(255,255,255,0.03);--gv-param-border:rgba(255,255,255,0.06);
+  --gv-data-bg:rgba(255,255,255,0.05);--gv-data-border:rgba(255,255,255,0.06);
+  --gv-formula-bg:rgba(0,212,255,0.05);--gv-formula-border:rgba(0,212,255,0.15);
+  --gv-highlight:#34d399;--gv-warn:#fbbf24;--gv-danger:#f87171;
+  --gv-glow:0 0 8px rgba(0,212,255,0.25);--gv-scrollbar:rgba(0,212,255,0.3);
+  --gv-beam:#00d4ff;--gv-beam2:#7dd3fc;--gv-mirror:#e2e8f0;--gv-grid:rgba(0,212,255,0.06);
+}
+[data-theme="cyber"]{
+  --gv-bg:#040410;--gv-bg2:#08081a;--gv-ink:#e0f7fa;--gv-ink2:#b2ebf2;--gv-muted:#4dd0e1;
+  --gv-rule:rgba(0,243,255,0.1);--gv-accent:#00f3ff;--gv-accent2:#ff00ea;
+  --gv-canvas-bg:#020208;--gv-param-bg:rgba(0,243,255,0.02);--gv-param-border:rgba(0,243,255,0.1);
+  --gv-data-bg:rgba(0,0,0,0.4);--gv-data-border:rgba(0,243,255,0.08);
+  --gv-formula-bg:rgba(0,243,255,0.04);--gv-formula-border:rgba(0,243,255,0.15);
+  --gv-highlight:#39ff14;--gv-warn:#ff9d00;--gv-danger:#ff00ea;
+  --gv-glow:0 0 10px rgba(0,243,255,0.3);--gv-scrollbar:rgba(0,243,255,0.4);
+  --gv-beam:#00f3ff;--gv-beam2:#80deea;--gv-mirror:#e0f7fa;--gv-grid:rgba(0,243,255,0.08);
+}
+[data-theme="cartoon"]{
+  --gv-bg:#fef6e4;--gv-bg2:#fff8f0;--gv-ink:#2d3436;--gv-ink2:#4a4a4a;--gv-muted:#7a7a7a;
+  --gv-rule:rgba(0,0,0,0.08);--gv-accent:#ff6b6b;--gv-accent2:#4ecdc4;
+  --gv-canvas-bg:#1a1a2e;--gv-param-bg:rgba(255,255,255,0.5);--gv-param-border:rgba(0,0,0,0.1);
+  --gv-data-bg:rgba(255,255,255,0.6);--gv-data-border:rgba(0,0,0,0.08);
+  --gv-formula-bg:rgba(255,107,107,0.05);--gv-formula-border:rgba(255,107,107,0.15);
+  --gv-highlight:#4ecdc4;--gv-warn:#ffe66d;--gv-danger:#ff6b6b;
+  --gv-glow:none;--gv-scrollbar:rgba(0,0,0,0.15);
+  --gv-beam:#ff6b6b;--gv-beam2:#ffa8a8;--gv-mirror:#f0f0f0;--gv-grid:rgba(255,255,255,0.06);
+}
+[data-theme="soviet"]{
+  --gv-bg:#f0ebe4;--gv-bg2:#e8e0d6;--gv-ink:#1a1a1a;--gv-ink2:#3d3d3d;--gv-muted:#6a5a4a;
+  --gv-rule:#d4c4a8;--gv-accent:#c41e1e;--gv-accent2:#8b4513;
+  --gv-canvas-bg:#e8e0d6;--gv-param-bg:#f4f0ea;--gv-param-border:#d4c4a8;
+  --gv-data-bg:#f4f0ea;--gv-data-border:#d4c4a8;
+  --gv-formula-bg:rgba(196,30,30,0.04);--gv-formula-border:rgba(196,30,30,0.2);
+  --gv-highlight:#556b2f;--gv-warn:#b8860b;--gv-danger:#c41e1e;
+  --gv-glow:none;--gv-scrollbar:#c41e1e;
+  --gv-beam:#c41e1e;--gv-beam2:#e85d5d;--gv-mirror:#888;--gv-grid:rgba(0,0,0,0.06);
+}
+[data-theme="academic"]{
+  --gv-bg:#f8f9fa;--gv-bg2:#f1f3f5;--gv-ink:#1a1a2e;--gv-ink2:#3d3d5c;--gv-muted:#7a7a8a;
+  --gv-rule:#e0e0e0;--gv-accent:#6b8cae;--gv-accent2:#8a7ca8;
+  --gv-canvas-bg:#ffffff;--gv-param-bg:#f8f9fa;--gv-param-border:#e0e0e0;
+  --gv-data-bg:#f4f5f7;--gv-data-border:#e0e0e0;
+  --gv-formula-bg:rgba(107,140,174,0.04);--gv-formula-border:rgba(107,140,174,0.2);
+  --gv-highlight:#2d7a46;--gv-warn:#c4956a;--gv-danger:#c0392b;
+  --gv-glow:none;--gv-scrollbar:#d0d0d0;
+  --gv-beam:#6b8cae;--gv-beam2:#9bb8d4;--gv-mirror:#ccc;--gv-grid:rgba(0,0,0,0.04);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:var(--font-main);background:var(--gv-bg);color:var(--gv-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--gv-bg)}
+::-webkit-scrollbar-thumb{background:var(--gv-scrollbar);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+[data-theme="academic"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--gv-rule);background:var(--gv-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--gv-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--gv-formula-bg);border:1px solid var(--gv-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--gv-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--gv-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(0,243,255,0.08);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--gv-accent);text-shadow:var(--gv-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--gv-accent)}
+[data-theme="glass"] .lp-header h1{color:var(--gv-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--gv-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#mainCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--gv-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--gv-ink2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.overlay-badge.accent{color:var(--gv-accent)}
+.overlay-badge.locked{color:var(--gv-highlight);border-color:var(--gv-highlight)}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);color:#fff}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--gv-rule);background:var(--gv-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--gv-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--gv-formula-bg);border:1px solid var(--gv-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--gv-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--gv-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(0,243,255,0.08);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--gv-accent);text-shadow:var(--gv-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--gv-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--gv-accent)}
+[data-theme="glass"] .rp-header h2{color:var(--gv-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:16px 18px;border-bottom:1px solid var(--gv-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--gv-accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--gv-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:14px}
+.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--gv-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--gv-accent);font-weight:400;min-width:70px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--gv-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gv-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+input[type="range"]:disabled{opacity:0.35;cursor:not-allowed}
+input[type="range"]:disabled::-webkit-slider-thumb{cursor:not-allowed}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+[data-theme="cyber"] input[type="range"]::-webkit-slider-thumb{background:#00f3ff;box-shadow:0 0 10px rgba(0,243,255,0.6)}
+[data-theme="glass"] input[type="range"]::-webkit-slider-thumb{background:#00d4ff;box-shadow:0 0 8px rgba(0,212,255,0.5)}
+
+/* ===== 操作按钮 ===== */
+.action-buttons{display:flex;flex-wrap:wrap;gap:8px}
+.action-buttons .sim-btn{flex:1;min-width:calc(50% - 4px);padding:9px 12px;font-size:0.78rem}
+.sim-btn{padding:8px 16px;border:1px solid var(--gv-rule);background:var(--gv-data-bg);color:var(--gv-ink);border-radius:8px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .3s ease}
+.sim-btn:hover{border-color:var(--gv-accent);color:var(--gv-accent)}
+.sim-btn.primary{background:var(--gv-accent);color:#0a0a1a;border-color:var(--gv-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn:disabled{opacity:0.4;cursor:not-allowed}
+.sim-btn:disabled:hover{border-color:var(--gv-rule);color:var(--gv-ink)}
+.sim-btn.toggle-on{background:var(--gv-highlight);color:#fff;border-color:var(--gv-highlight)}
+
+[data-theme="academic"] .sim-btn{background:#f4f5f7;border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="academic"] .sim-btn:hover{border-color:#6b8cae;color:#1a1a2e}
+[data-theme="soviet"] .sim-btn{background:#f4f0ea;border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.7);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+[data-theme="cartoon"] .sim-btn:hover{border-color:#ff6b6b;color:#ff6b6b}
+[data-theme="cartoon"] .sim-btn.primary:hover{color:#fff}
+[data-theme="cyber"] .sim-btn{background:rgba(0,243,255,0.08);border:1px solid rgba(0,243,255,0.2);color:var(--gv-accent)}
+[data-theme="cyber"] .sim-btn.primary{background:#00f3ff;border-color:#00f3ff;color:#020208}
+[data-theme="glass"] .sim-btn{background:rgba(255,255,255,0.05);border:1px solid var(--gv-rule)}
+
+/* ===== 数据卡片 ===== */
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.data-cell{background:var(--gv-data-bg);border:1px solid var(--gv-data-border);border-radius:8px;padding:10px 12px;transition:background-color .5s ease,border-color .4s ease}
+.data-cell.full{grid-column:1/-1}
+.data-cell .k{font-size:0.68rem;color:var(--gv-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+.data-cell .v{font-family:monospace;font-size:0.88rem;font-weight:600;color:var(--gv-ink)}
+.data-cell .v.accent{color:var(--gv-accent)}
+.data-cell .v.highlight{color:var(--gv-highlight)}
+.data-cell .v.warn{color:var(--gv-warn)}
+.data-cell .v.danger{color:var(--gv-danger)}
+.data-cell .v small{font-size:0.65rem;color:var(--gv-muted);font-weight:400}
+
+[data-theme="academic"] .data-cell{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .data-cell{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="cyber"] .data-cell{background:rgba(0,0,0,0.3);border-color:rgba(0,243,255,0.1)}
+
+/* ===== 公式框 ===== */
+.formula-box{background:var(--gv-formula-bg);border:1px solid var(--gv-formula-border);border-radius:10px;padding:14px;transition:background-color .5s ease,border-color .4s ease}
+.formula-box .formula-item{margin-bottom:10px}
+.formula-box .formula-item:last-child{margin-bottom:0}
+.formula-box .formula-name{font-size:0.72rem;color:var(--gv-muted);margin-bottom:4px}
+.formula-box .formula-eq{font-family:'Cambria Math','STIX Two Math',Georgia,serif;font-size:0.88rem;color:var(--gv-accent2);background:var(--gv-data-bg);padding:6px 10px;border-radius:6px;text-align:center;letter-spacing:0.5px}
+.formula-box .formula-desc{font-size:0.7rem;color:var(--gv-ink2);margin-top:3px;line-height:1.5}
+
+[data-theme="academic"] .formula-box{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .formula-box{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="cyber"] .formula-box .formula-eq{text-shadow:0 0 6px rgba(0,243,255,0.3)}
+
+/* ===== 误差曲线 ===== */
+.error-chart-wrap{background:var(--gv-data-bg);border:1px solid var(--gv-data-border);border-radius:8px;padding:10px;transition:background-color .5s ease,border-color .4s ease}
+.error-chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.error-chart-header .label{font-size:0.7rem;color:var(--gv-muted)}
+.error-chart-header .val{font-family:monospace;font-size:0.82rem;color:var(--gv-accent);font-weight:600}
+#errorChart{display:block;width:100%;height:60px}
+
+[data-theme="academic"] .error-chart-wrap{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .error-chart-wrap{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 知识卡片 ===== */
+.knowledge-card{background:var(--gv-formula-bg);border:1px solid var(--gv-formula-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;transition:background-color .5s ease,border-color .4s ease}
+.knowledge-card:last-child{margin-bottom:0}
+.knowledge-card h3{font-size:0.78rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.knowledge-card p{font-size:0.74rem;color:var(--gv-ink2);line-height:1.7;margin:3px 0}
+.knowledge-card p strong{color:var(--gv-ink)}
+.knowledge-card .formula{font-family:monospace;font-size:0.74rem;color:var(--gv-accent2);background:var(--gv-data-bg);padding:2px 6px;border-radius:4px;display:inline-block;margin:3px 0}
+
+[data-theme="academic"] .knowledge-card{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .knowledge-card h3{color:var(--gv-accent)}
+[data-theme="soviet"] .knowledge-card{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .knowledge-card h3{color:var(--gv-accent)}
+[data-theme="cartoon"] .knowledge-card h3{color:var(--gv-accent)}
+[data-theme="cyber"] .knowledge-card h3{color:var(--gv-accent);text-shadow:var(--gv-glow)}
+[data-theme="glass"] .knowledge-card h3{color:var(--gv-accent)}
+
+/* ===== 提示框 ===== */
+.hint-box{background:var(--gv-formula-bg);border:1px solid var(--gv-formula-border);border-radius:8px;padding:10px 14px;font-size:0.74rem;color:var(--gv-ink2);line-height:1.7;transition:background-color .5s ease,border-color .4s ease}
+.hint-box strong{color:var(--gv-accent)}
+
+[data-theme="academic"] .hint-box{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .hint-box{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== PID 参数容器（折叠动画） ===== */
+.pid-section{overflow:hidden;transition:max-height 0.4s ease,opacity 0.3s ease}
+.pid-section.collapsed{max-height:0;opacity:0;overflow:hidden}
+.pid-section.expanded{max-height:400px;opacity:1}
+
+/* ===== 响应式 ===== */
+@media(max-width:1100px){
+  .left-panel{width:260px;min-width:240px}
+  .right-panel{width:340px;min-width:300px}
+}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--gv-rule);max-height:none}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--gv-rule)}
+  .sim-panel{min-height:400px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">🔬</div>
+      <div>
+        <h1>检流计实验</h1>
+        <div class="lp-sub">双镜光束控制 · PID锁定</div>
+      </div>
+    </div>
+
+    <!-- 镜面参数 -->
+    <div class="side-section">
+      <div class="section-label">镜面角度</div>
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">X 镜角度 θ<sub>x</sub></span>
+          <span class="param-value" id="vMirrorX">0.0°</span>
+        </div>
+        <input type="range" id="mirrorX" min="-15" max="15" step="0.1" value="0">
+      </div>
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">Y 镜角度 θ<sub>y</sub></span>
+          <span class="param-value" id="vMirrorY">0.0°</span>
+        </div>
+        <input type="range" id="mirrorY" min="-15" max="15" step="0.1" value="0">
+      </div>
+    </div>
+
+    <!-- 目标位置 -->
+    <div class="side-section">
+      <div class="section-label">目标位置</div>
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">目标 X</span>
+          <span class="param-value" id="vTargetX">30 mm</span>
+        </div>
+        <input type="range" id="targetX" min="-100" max="100" step="1" value="30">
+      </div>
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">目标 Y</span>
+          <span class="param-value" id="vTargetY">-20 mm</span>
+        </div>
+        <input type="range" id="targetY" min="-100" max="100" step="1" value="-20">
+      </div>
+    </div>
+
+    <!-- 自动追踪 PID -->
+    <div class="side-section">
+      <div class="section-label">自动追踪 (PID)</div>
+      <div class="action-buttons" style="margin-bottom:10px">
+        <button class="sim-btn" id="btnAutoTrack" style="width:100%">开启自动追踪</button>
+      </div>
+      <div class="pid-section collapsed" id="pidSection">
+        <div class="param-group">
+          <div class="param-header">
+            <span class="param-label">比例增益 K<sub>p</sub></span>
+            <span class="param-value" id="vKp">0.20</span>
+          </div>
+          <input type="range" id="kp" min="0" max="1" step="0.01" value="0.20">
+        </div>
+        <div class="param-group">
+          <div class="param-header">
+            <span class="param-label">积分增益 K<sub>i</sub></span>
+            <span class="param-value" id="vKi">0.005</span>
+          </div>
+          <input type="range" id="ki" min="0" max="0.05" step="0.001" value="0.005">
+        </div>
+        <div class="param-group">
+          <div class="param-header">
+            <span class="param-label">微分增益 K<sub>d</sub></span>
+            <span class="param-value" id="vKd">0.10</span>
+          </div>
+          <input type="range" id="kd" min="0" max="0.5" step="0.01" value="0.10">
+        </div>
+      </div>
+    </div>
+
+    <!-- 激光参数 -->
+    <div class="side-section">
+      <div class="section-label">激光参数</div>
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">激光功率</span>
+          <span class="param-value" id="vPower">80%</span>
+        </div>
+        <input type="range" id="power" min="10" max="100" step="1" value="80">
+      </div>
+    </div>
+
+    <!-- 操作控制 -->
+    <div class="side-section">
+      <div class="section-label">操作控制</div>
+      <div class="action-buttons">
+        <button class="sim-btn primary" id="btnReset">重置全部</button>
+        <button class="sim-btn" id="btnRandom">随机目标</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="mainCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge accent" id="badgeMode">手动模式</span>
+        <span class="overlay-badge" id="badgeAngle">θx=0.0° θy=0.0°</span>
+        <span class="overlay-badge" id="badgeSpot">光斑 (0.0, 0.0)mm</span>
+        <span class="overlay-badge" id="badgeError">误差 0.0mm</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>实时数据与原理</h2>
+        <div class="rp-sub">光斑位置 · 误差 · 公式 · 知识卡片</div>
+      </div>
+    </div>
+
+    <!-- 实时数据 -->
+    <div class="side-section">
+      <div class="section-label">实时数据</div>
+      <div class="data-grid">
+        <div class="data-cell">
+          <div class="k">目标 X</div>
+          <div class="v highlight" id="dTargetX">30.0 <small>mm</small></div>
+        </div>
+        <div class="data-cell">
+          <div class="k">目标 Y</div>
+          <div class="v highlight" id="dTargetY">-20.0 <small>mm</small></div>
+        </div>
+        <div class="data-cell">
+          <div class="k">光斑 X</div>
+          <div class="v accent" id="dSpotX">0.0 <small>mm</small></div>
+        </div>
+        <div class="data-cell">
+          <div class="k">光斑 Y</div>
+          <div class="v accent" id="dSpotY">0.0 <small>mm</small></div>
+        </div>
+        <div class="data-cell">
+          <div class="k">误差 ΔX</div>
+          <div class="v danger" id="dErrX">30.0 <small>mm</small></div>
+        </div>
+        <div class="data-cell">
+          <div class="k">误差 ΔY</div>
+          <div class="v danger" id="dErrY">-20.0 <small>mm</small></div>
+        </div>
+        <div class="data-cell full">
+          <div class="k">总误差 (RMS) · 锁定状态</div>
+          <div class="v" id="dTotalErr">36.1 <small>mm</small> · <span id="dLockStatus" style="color:var(--gv-danger)">未锁定</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 公式 -->
+    <div class="side-section">
+      <div class="section-label">物理公式</div>
+      <div class="formula-box">
+        <div class="formula-item">
+          <div class="formula-name">反射定律</div>
+          <div class="formula-eq">θ<sub>入射</sub> = θ<sub>反射</sub></div>
+          <div class="formula-desc">入射角等于反射角，镜面法线为角平分线</div>
+        </div>
+        <div class="formula-item">
+          <div class="formula-name">检流计偏转 (双镜)</div>
+          <div class="formula-eq">Δx = D · tan(2θ<sub>x</sub>) &nbsp; Δy = D · tan(2θ<sub>y</sub>)</div>
+          <div class="formula-desc">镜面偏转 θ，反射光束偏转 2θ；D 为镜到靶面距离</div>
+        </div>
+        <div class="formula-item">
+          <div class="formula-name">PID 控制律</div>
+          <div class="formula-eq">u = K<sub>p</sub>·e + K<sub>i</sub>·∫e dt + K<sub>d</sub>·de/dt</div>
+          <div class="formula-desc">e = 目标位置 − 光斑位置；u 转换为镜面角度修正</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 误差曲线 -->
+    <div class="side-section">
+      <div class="section-label">误差曲线</div>
+      <div class="error-chart-wrap">
+        <div class="error-chart-header">
+          <span class="label">RMS 误差 (mm)</span>
+          <span class="val" id="chartNow">0.00</span>
+        </div>
+        <canvas id="errorChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 知识卡片 -->
+    <div class="side-section">
+      <div class="section-label">知识卡片</div>
+      <div class="knowledge-card">
+        <h3>📐 检流计原理</h3>
+        <p>电流通过线圈在磁场中产生<strong>电磁力矩</strong>，驱动附着在转轴上的镜面偏转。偏转角度与电流成正比：</p>
+        <p><span class="formula">θ = k · I</span></p>
+        <p>其中 k 为检流计灵敏度常数。改变电流方向即可改变偏转方向，实现光束的快速扫描定位。</p>
+      </div>
+      <div class="knowledge-card">
+        <h3>💡 光束偏转</h3>
+        <p><strong>双镜系统</strong>（X镜 + Y镜）实现二维光束扫描。X镜控制水平偏转，Y镜控制垂直偏转，两镜串联可将光束指向任意位置。</p>
+        <p>广泛应用于：<strong>激光投影</strong>、<strong>医学成像 (OCT)</strong>、<strong>3D 扫描</strong>、<strong>激光雷达</strong>等领域。</p>
+      </div>
+      <div class="knowledge-card">
+        <h3>⚙️ PID 控制</h3>
+        <p><strong>比例 (P)</strong>：快速响应误差，但存在稳态偏差</p>
+        <p><strong>积分 (I)</strong>：消除稳态偏差，提升精度</p>
+        <p><strong>微分 (D)</strong>：抑制超调，改善动态品质</p>
+        <p>三者协同实现光束对目标的精确锁定，即使存在外部扰动也能保持稳定。</p>
+      </div>
+    </div>
+
+    <!-- 提示 -->
+    <div class="side-section">
+      <div class="section-label">实验提示</div>
+      <div class="hint-box">
+        <strong>手动模式</strong>：拖动镜面角度滑块，观察光斑在靶面上的移动。<br>
+        <strong>自动模式</strong>：点击"开启自动追踪"，PID 将自动调整镜面角度锁定目标。系统会注入周期性扰动，观察 PID 的补偿效果。<br>
+        <strong>探索</strong>：调整 K<sub>p</sub>/K<sub>i</sub>/K<sub>d</sub> 参数，观察收敛速度与稳定性变化。
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   常量与工具
+   ================================================================ */
+var DEG = Math.PI / 180;
+var D_TARGET = 300;          // 镜面到靶面距离
+var TARGET_RANGE = 100;       // 靶面半幅
+var MAX_ANGLE = 15;           // 最大镜面角度
+var LOCK_THRESHOLD = 2.5;     // 锁定阈值
+var JITTER_AMP = 6;           // 扰动幅度
+
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+function getCSS(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function getThemeColors(){
+  return {
+    bg:        getCSS('--gv-canvas-bg') || '#0a0e1a',
+    ink:       getCSS('--gv-ink')       || '#f1f5f9',
+    ink2:      getCSS('--gv-ink2')      || '#cbd5e1',
+    muted:     getCSS('--gv-muted')     || '#64748b',
+    accent:    getCSS('--gv-accent')    || '#00d4ff',
+    accent2:   getCSS('--gv-accent2')   || '#a855f7',
+    rule:      getCSS('--gv-rule')      || 'rgba(255,255,255,0.07)',
+    highlight: getCSS('--gv-highlight') || '#34d399',
+    warn:      getCSS('--gv-warn')      || '#fbbf24',
+    danger:    getCSS('--gv-danger')    || '#f87171',
+    beam:      getCSS('--gv-beam')      || '#00d4ff',
+    beam2:     getCSS('--gv-beam2')     || '#7dd3fc',
+    mirror:    getCSS('--gv-mirror')    || '#e2e8f0',
+    grid:      getCSS('--gv-grid')      || 'rgba(0,212,255,0.06)',
+    glow:      getCSS('--gv-glow')      || 'none',
+  };
+}
+
+/* ================================================================
+   系统状态
+   ================================================================ */
+var state = {
+  mirrorXAngle: 0,    // X镜角度
+  mirrorYAngle: 0,    // Y镜角度
+  targetX: 30,        // 目标X (mm)
+  targetY: -20,       // 目标Y (mm)
+  autoTrack: false,   // 自动追踪开关
+  Kp: 0.20,
+  Ki: 0.005,
+  Kd: 0.10,
+  laserPower: 80,     // 激光功率 (%)
+  // PID 内部状态
+  integralX: 0,
+  integralY: 0,
+  prevErrorX: 0,
+  prevErrorY: 0,
+  // 扰动
+  jitterX: 0,
+  jitterY: 0,
+  // 锁定
+  lockTimer: 0,
+};
+
+/* ================================================================
+   物理计算
+   ================================================================ */
+// 计算光斑位置 (mm)
+function computeSpot(){
+  var radX = state.mirrorXAngle * DEG;
+  var radY = state.mirrorYAngle * DEG;
+  var baseX = D_TARGET * Math.tan(2 * radX);
+  var baseY = D_TARGET * Math.tan(2 * radY);
+  return { x: baseX + state.jitterX, y: baseY + state.jitterY };
+}
+
+// 计算误差
+function computeError(){
+  var spot = computeSpot();
+  return {
+    x: state.targetX - spot.x,
+    y: state.targetY - spot.y,
+    rms: Math.sqrt((state.targetX - spot.x)*(state.targetX - spot.x) + (state.targetY - spot.y)*(state.targetY - spot.y))
+  };
+}
+
+/* ================================================================
+   PID 控制
+   ================================================================ */
+function pidStep(dt){
+  if(!state.autoTrack) return;
+  var spot = computeSpot();
+  var errX = state.targetX - spot.x;
+  var errY = state.targetY - spot.y;
+
+  // 积分项 (含抗饱和)
+  state.integralX += errX * dt;
+  state.integralY += errY * dt;
+  state.integralX = clamp(state.integralX, -300, 300);
+  state.integralY = clamp(state.integralY, -300, 300);
+
+  // 微分项
+  var derX = dt > 0 ? (errX - state.prevErrorX) / dt : 0;
+  var derY = dt > 0 ? (errY - state.prevErrorY) / dt : 0;
+
+  // PID 输出
+  var outX = state.Kp * errX + state.Ki * state.integralX + state.Kd * derX;
+  var outY = state.Kp * errY + state.Ki * state.integralY + state.Kd * derY;
+
+  // 转换为角度修正: theta_deg = spot_mm / (2 * D * DEG)
+  var conv = 1 / (2 * D_TARGET * DEG);
+  var rate = 12;
+  state.mirrorXAngle += outX * conv * dt * rate;
+  state.mirrorYAngle += outY * conv * dt * rate;
+
+  state.mirrorXAngle = clamp(state.mirrorXAngle, -MAX_ANGLE, MAX_ANGLE);
+  state.mirrorYAngle = clamp(state.mirrorYAngle, -MAX_ANGLE, MAX_ANGLE);
+
+  state.prevErrorX = errX;
+  state.prevErrorY = errY;
+
+  // 同步滑块
+  syncMirrorSliders();
+}
+
+/* ================================================================
+   周期扰动 (自动追踪时注入)
+   ================================================================ */
+function applyJitter(){
+  if(!state.autoTrack){
+    state.jitterX = 0;
+    state.jitterY = 0;
+    return;
+  }
+  var t = performance.now() / 1000;
+  var w = 2 * Math.PI / 2.5;
+  state.jitterX = JITTER_AMP * Math.sin(w * t) + (Math.random() - 0.5) * JITTER_AMP * 0.4;
+  state.jitterY = JITTER_AMP * 0.7 * Math.sin(w * t * 1.3 + 0.5) + (Math.random() - 0.5) * JITTER_AMP * 0.4;
+}
+
+/* ================================================================
+   Canvas 设置与绘制
+   ================================================================ */
+var canvas = document.getElementById('mainCanvas');
+var ctx = canvas.getContext('2d');
+var W = 0, H = 0, DPR = 1;
+var colors = {};
+
+function resize(){
+  DPR = window.devicePixelRatio || 1;
+  var rect = canvas.parentElement.getBoundingClientRect();
+  W = rect.width;
+  H = rect.height;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+/* ---- 布局参数 ---- */
+function getLayout(){
+  var cy = H * 0.48;
+  var laserX = W * 0.05;
+  var mirrorX_pos = W * 0.16;
+  var mirrorY_pos = W * 0.27;
+  var tsSize = Math.min(W * 0.28, H * 0.62);
+  var tsCx = W * 0.68;
+  var tsCy = cy;
+  var tsX = tsCx - tsSize / 2;
+  var tsY = tsCy - tsSize / 2;
+  var pxPerMm = tsSize / (2 * TARGET_RANGE);
+  return {
+    cy: cy,
+    laserX: laserX,
+    mirrorX_pos: mirrorX_pos,
+    mirrorY_pos: mirrorY_pos,
+    tsSize: tsSize, tsCx: tsCx, tsCy: tsCy, tsX: tsX, tsY: tsY,
+    pxPerMm: pxPerMm
+  };
+}
+
+/* ---- 网格背景 ---- */
+function drawBackground(){
+  var L = getLayout();
+  ctx.save();
+  // 主网格
+  ctx.strokeStyle = colors.grid;
+  ctx.lineWidth = 0.6;
+  var step = 40;
+  for(var x = 0; x < W; x += step){
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for(var y = 0; y < H; y += step){
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  // 光轴参考线
+  ctx.strokeStyle = colors.rule;
+  ctx.lineWidth = 0.8;
+  ctx.setLineDash([4, 6]);
+  ctx.beginPath();
+  ctx.moveTo(L.laserX, L.cy);
+  ctx.lineTo(L.tsX, L.cy);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+/* ---- 发光线段 ---- */
+function glowLine(p1, p2, color, width, alpha, glow){
+  ctx.save();
+  ctx.lineCap = 'round';
+  if(glow && glow !== 'none'){
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 12;
+  }
+  ctx.strokeStyle = color;
+  ctx.globalAlpha = alpha || 0.9;
+  ctx.lineWidth = width || 2.2;
+  ctx.beginPath();
+  ctx.moveTo(p1[0], p1[1]);
+  ctx.lineTo(p2[0], p2[1]);
+  ctx.stroke();
+  // 内芯
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = (width || 2.2) * 0.35;
+  ctx.beginPath();
+  ctx.moveTo(p1[0], p1[1]);
+  ctx.lineTo(p2[0], p2[1]);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/* ---- 流动光点 ---- */
+function flowDots(p1, p2, color, count, phase, glow){
+  var dx = p2[0] - p1[0], dy = p2[1] - p1[1];
+  ctx.save();
+  if(glow && glow !== 'none'){
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+  }
+  ctx.fillStyle = color;
+  for(var i = 0; i < count; i++){
+    var f = ((i / count) + phase) % 1;
+    var x = p1[0] + dx * f;
+    var y = p1[1] + dy * f;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ---- 圆角矩形 ---- */
+function roundRect(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* ---- 文本标签 ---- */
+function label(text, x, y, color, font){
+  ctx.save();
+  ctx.fillStyle = color || colors.muted;
+  ctx.font = font || '11px ' + getCSS('--font-main');
+  ctx.textAlign = 'center';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+/* ---- 绘制激光器 ---- */
+function drawLaser(L){
+  var x = L.laserX, y = L.cy;
+  ctx.save();
+  // 外壳
+  ctx.fillStyle = colors.ink2;
+  ctx.globalAlpha = 0.15;
+  roundRect(x - 30, y - 12, 30, 24, 4);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = colors.accent;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // 出射口
+  ctx.fillStyle = colors.accent;
+  if(colors.glow !== 'none'){ ctx.shadowColor = colors.accent; ctx.shadowBlur = 10; }
+  ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
+  // 标签
+  label('激光器', x - 15, y + 22, colors.ink2);
+  ctx.restore();
+}
+
+/* ---- 绘制检流计反射镜 ---- */
+function drawMirror(cx, cy, angleDeg, name, isX){
+  var DEG2 = Math.PI / 180;
+  // 镜面法线方向 (默认竖直, 即镜面水平)
+  // X镜: 绕Z轴旋转 (改变水平偏转)
+  // Y镜: 绕Z轴旋转 (改变垂直偏转)
+  var angleRad = angleDeg * DEG2;
+  // 镜面是一个短线段, 旋转表示偏转
+  var mirrorLen = 22;
+  // 镜面方向: 默认45度 (将水平光束反射为垂直方向等)
+  // 这里简化: 镜面法线水平, 镜面竖直, 光束水平入射被反射
+  // 角度偏转使镜面法线倾斜
+  var nx = Math.cos(angleRad); // 法线x分量
+  var ny = Math.sin(angleRad); // 法线y分量
+  // 镜面方向 (垂直于法线)
+  var mx = -ny;
+  var my = nx;
+  var m1x = cx + mx * mirrorLen;
+  var m1y = cy + my * mirrorLen;
+  var m2x = cx - mx * mirrorLen;
+  var m2y = cy - my * mirrorLen;
+
+  ctx.save();
+  // 镜面背板
+  ctx.strokeStyle = colors.muted;
+  ctx.globalAlpha = 0.3;
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(m1x, m1y); ctx.lineTo(m2x, m2y); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // 银白反射面
+  var grd = ctx.createLinearGradient(m1x, m1y, m2x, m2y);
+  grd.addColorStop(0, colors.mirror);
+  grd.addColorStop(0.5, '#ffffff');
+  grd.addColorStop(1, colors.mirror);
+  ctx.strokeStyle = grd;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(m1x, m1y); ctx.lineTo(m2x, m2y); ctx.stroke();
+  // 中心枢轴
+  ctx.fillStyle = colors.warn;
+  if(colors.glow !== 'none'){ ctx.shadowColor = colors.warn; ctx.shadowBlur = 6; }
+  ctx.beginPath(); ctx.arc(cx, cy, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // 角度指示弧
+  ctx.strokeStyle = colors.accent2;
+  ctx.globalAlpha = 0.5;
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([3, 3]);
+  var arcR = 16;
+  var startAng = 0;
+  var endAng = angleRad;
+  if(angleDeg < 0){
+    startAng = angleRad;
+    endAng = 0;
+  }
+  ctx.beginPath();
+  ctx.arc(cx, cy, arcR, startAng, endAng, false);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  // 标签
+  label(name, cx, cy - 26, colors.ink2, '600 11px ' + getCSS('--font-main'));
+  label(angleDeg.toFixed(1) + '°', cx, cy + 30, colors.accent, '600 10px monospace');
+  ctx.restore();
+}
+
+/* ---- 绘制靶面 (传感器屏幕) ---- */
+function drawTargetScreen(L, spot, err){
+  var tsX = L.tsX, tsY = L.tsY, tsSize = L.tsSize, pxPerMm = L.pxPerMm;
+  var cx = L.tsCx, cy = L.tsCy;
+
+  ctx.save();
+  // 外框
+  ctx.fillStyle = colors.bg;
+  ctx.strokeStyle = colors.accent;
+  ctx.globalAlpha = 0.9;
+  ctx.lineWidth = 1.5;
+  roundRect(tsX, tsY, tsSize, tsSize, 8);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.stroke();
+
+  // 网格
+  ctx.strokeStyle = colors.rule;
+  ctx.lineWidth = 0.5;
+  var cells = 5;
+  for(var i = 1; i < cells; i++){
+    var gx = tsX + (tsSize / cells) * i;
+    var gy = tsY + (tsSize / cells) * i;
+    ctx.beginPath(); ctx.moveTo(gx, tsY); ctx.lineTo(gx, tsY + tsSize); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tsX, gy); ctx.lineTo(tsX + tsSize, gy); ctx.stroke();
+  }
+
+  // 中心十字 (原点)
+  ctx.strokeStyle = colors.ink2;
+  ctx.globalAlpha = 0.3;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx, tsY + 4); ctx.lineTo(cx, tsY + tsSize - 4);
+  ctx.moveTo(tsX + 4, cy); ctx.lineTo(tsX + tsSize - 4, cy);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // 坐标轴标签
+  label('+X', tsX + tsSize - 12, cy + 14, colors.muted, '9px monospace');
+  label('+Y', cx + 12, tsY + 10, colors.muted, '9px monospace');
+  label('0', cx - 6, cy + 12, colors.muted, '9px monospace');
+
+  // 目标位置标记 (十字+圆圈)
+  var tgtPx = cx + state.targetX * pxPerMm;
+  var tgtPy = cy - state.targetY * pxPerMm; // Y轴翻转 (上为正)
+  tgtPx = clamp(tgtPx, tsX + 4, tsX + tsSize - 4);
+  tgtPy = clamp(tgtPy, tsY + 4, tsY + tsSize - 4);
+
+  ctx.strokeStyle = colors.highlight;
+  ctx.lineWidth = 1.5;
+  // 十字
+  ctx.beginPath();
+  ctx.moveTo(tgtPx - 8, tgtPy); ctx.lineTo(tgtPx + 8, tgtPy);
+  ctx.moveTo(tgtPx, tgtPy - 8); ctx.lineTo(tgtPx, tgtPy + 8);
+  ctx.stroke();
+  // 圆圈
+  ctx.beginPath();
+  ctx.arc(tgtPx, tgtPy, 6, 0, Math.PI * 2);
+  ctx.stroke();
+  label('目标', tgtPx, tgtPy - 14, colors.highlight, '9px ' + getCSS('--font-main'));
+
+  // 光斑位置
+  var spotPx = cx + spot.x * pxPerMm;
+  var spotPy = cy - spot.y * pxPerMm;
+  var spotClampedX = clamp(spotPx, tsX + 3, tsX + tsSize - 3);
+  var spotClampedY = clamp(spotPy, tsY + 3, tsY + tsSize - 3);
+
+  // 误差线 (光斑 -> 目标)
+  if(err.rms > 0.5){
+    ctx.strokeStyle = colors.danger;
+    ctx.globalAlpha = 0.6;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(spotClampedX, spotClampedY);
+    ctx.lineTo(tgtPx, tgtPy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  }
+
+  // 光斑 (带发光)
+  var beamAlpha = state.laserPower / 100;
+  var spotR = 4 + (1 - beamAlpha) * 2;
+  var glowR = spotR * 3.5;
+  var grd = ctx.createRadialGradient(spotClampedX, spotClampedY, 0, spotClampedX, spotClampedY, glowR);
+  grd.addColorStop(0, '#ffffff');
+  grd.addColorStop(0.25, colors.beam);
+  grd.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grd;
+  ctx.globalAlpha = beamAlpha * 0.9;
+  ctx.beginPath(); ctx.arc(spotClampedX, spotClampedY, glowR, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#ffffff';
+  if(colors.glow !== 'none'){ ctx.shadowColor = colors.beam; ctx.shadowBlur = 8; }
+  ctx.beginPath(); ctx.arc(spotClampedX, spotClampedY, spotR, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // 光斑坐标标签
+  label('(' + spot.x.toFixed(1) + ', ' + spot.y.toFixed(1) + ')mm',
+    cx, tsY + tsSize + 14, colors.accent, '10px monospace');
+
+  // 靶面标题
+  label('靶面 (传感器)', cx, tsY - 8, colors.ink2, '600 11px ' + getCSS('--font-main'));
+  ctx.restore();
+}
+
+/* ---- 主绘制 ---- */
+var t0 = performance.now();
+function draw(){
+  ctx.clearRect(0, 0, W, H);
+  var L = getLayout();
+  drawBackground();
+
+  var spot = computeSpot();
+  var err = computeError();
+
+  // ===== 光束段 =====
+  var pLaser = [L.laserX, L.cy];
+  var pMx = [L.mirrorX_pos, L.cy];
+  var pMy = [L.mirrorY_pos, L.cy];
+
+  // 靶面上光斑的画布坐标
+  var spotPx = L.tsCx + spot.x * L.pxPerMm;
+  var spotPy = L.tsCy - spot.y * L.pxPerMm;
+  // clamp 到靶面内
+  var spotDrawX = clamp(spotPx, L.tsX + 3, L.tsX + L.tsSize - 3);
+  var spotDrawY = clamp(spotPy, L.tsY + 3, L.tsY + L.tsSize - 3);
+  var pSpot = [spotDrawX, spotDrawY];
+
+  var t = (performance.now() - t0) / 1000;
+  var phase = (t * 0.3) % 1;
+  var beamAlpha = 0.5 + (state.laserPower / 100) * 0.5;
+  var hasGlow = colors.glow !== 'none';
+
+  // 激光器 -> X镜
+  glowLine(pLaser, pMx, colors.beam, 2.4 * (state.laserPower/80), beamAlpha, hasGlow);
+  flowDots(pLaser, pMx, colors.beam2, 3, phase, hasGlow);
+  // X镜 -> Y镜
+  glowLine(pMx, pMy, colors.beam, 2.4 * (state.laserPower/80), beamAlpha, hasGlow);
+  flowDots(pMx, pMy, colors.beam2, 3, (phase + 0.25) % 1, hasGlow);
+  // Y镜 -> 靶面光斑
+  glowLine(pMy, pSpot, colors.beam, 2.2 * (state.laserPower/80), beamAlpha, hasGlow);
+  flowDots(pMy, pSpot, colors.beam2, 3, (phase + 0.5) % 1, hasGlow);
+
+  // ===== 元件 =====
+  drawLaser(L);
+  drawMirror(L.mirrorX_pos, L.cy, state.mirrorXAngle, 'X 检流计', true);
+  drawMirror(L.mirrorY_pos, L.cy, state.mirrorYAngle, 'Y 检流计', false);
+
+  // ===== 靶面 =====
+  drawTargetScreen(L, spot, err);
+
+  // ===== 锁定状态指示 =====
+  if(state.autoTrack && err.rms < LOCK_THRESHOLD){
+    ctx.save();
+    ctx.strokeStyle = colors.highlight;
+    ctx.lineWidth = 2;
+    if(hasGlow){ ctx.shadowColor = colors.highlight; ctx.shadowBlur = 10; }
+    roundRect(L.tsX - 2, L.tsY - 2, L.tsSize + 4, L.tsSize + 4, 10);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* ================================================================
+   误差曲线
+   ================================================================ */
+var chartCanvas = document.getElementById('errorChart');
+var chartCtx = chartCanvas.getContext('2d');
+var errData = [];
+var ERR_MAX_POINTS = 300;
+var chartW = 0, chartH = 0;
+
+function resizeChart(){
+  var rect = chartCanvas.getBoundingClientRect();
+  chartW = rect.width;
+  chartH = rect.height;
+  chartCanvas.width = chartW * DPR;
+  chartCanvas.height = chartH * DPR;
+  chartCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+function pushErr(val){
+  errData.push(val);
+  if(errData.length > ERR_MAX_POINTS) errData.shift();
+}
+
+function drawChart(){
+  if(chartW === 0) return;
+  chartCtx.clearRect(0, 0, chartW, chartH);
+  // 背景网格
+  chartCtx.strokeStyle = colors.rule;
+  chartCtx.lineWidth = 0.5;
+  for(var i = 1; i < 4; i++){
+    var y = (i / 4) * chartH;
+    chartCtx.beginPath(); chartCtx.moveTo(0, y); chartCtx.lineTo(chartW, y); chartCtx.stroke();
+  }
+  if(errData.length < 2) return;
+  var maxV = Math.max(2, Math.max.apply(null, errData));
+  var stepX = chartW / (ERR_MAX_POINTS - 1);
+  // 填充
+  chartCtx.beginPath();
+  chartCtx.moveTo(0, chartH);
+  for(var j = 0; j < errData.length; j++){
+    var x = j * stepX;
+    var y = chartH - (errData[j] / maxV) * (chartH - 4) - 2;
+    chartCtx.lineTo(x, y);
+  }
+  chartCtx.lineTo((errData.length - 1) * stepX, chartH);
+  chartCtx.closePath();
+  var fg = chartCtx.createLinearGradient(0, 0, 0, chartH);
+  fg.addColorStop(0, hexToRgba(colors.accent, 0.25));
+  fg.addColorStop(1, hexToRgba(colors.accent, 0));
+  chartCtx.fillStyle = fg;
+  chartCtx.fill();
+  // 曲线
+  chartCtx.beginPath();
+  for(var k = 0; k < errData.length; k++){
+    var xk = k * stepX;
+    var yk = chartH - (errData[k] / maxV) * (chartH - 4) - 2;
+    if(k === 0) chartCtx.moveTo(xk, yk);
+    else chartCtx.lineTo(xk, yk);
+  }
+  chartCtx.strokeStyle = colors.accent;
+  chartCtx.lineWidth = 1.2;
+  if(colors.glow !== 'none'){ chartCtx.shadowBlur = 4; chartCtx.shadowColor = colors.accent; }
+  chartCtx.stroke();
+  chartCtx.shadowBlur = 0;
+  // 当前值点
+  var lastV = errData[errData.length - 1];
+  var lastX = (errData.length - 1) * stepX;
+  var lastY = chartH - (lastV / maxV) * (chartH - 4) - 2;
+  chartCtx.fillStyle = lastV < LOCK_THRESHOLD ? colors.highlight : (lastV < 20 ? colors.warn : colors.danger);
+  chartCtx.beginPath();
+  chartCtx.arc(lastX, lastY, 2.5, 0, Math.PI * 2);
+  chartCtx.fill();
+  document.getElementById('chartNow').textContent = lastV.toFixed(2);
+}
+
+function hexToRgba(hex, alpha){
+  if(!hex || hex.indexOf('rgba') === 0) return hex;
+  if(hex.indexOf('rgb(') === 0){
+    return hex.replace('rgb(', 'rgba(').replace(')', ',' + alpha + ')');
+  }
+  var h = hex.replace('#', '');
+  if(h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var r = parseInt(h.substr(0,2), 16);
+  var g = parseInt(h.substr(2,2), 16);
+  var b = parseInt(h.substr(4,2), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+/* ================================================================
+   UI 更新
+   ================================================================ */
+var els = {
+  vMirrorX: document.getElementById('vMirrorX'),
+  vMirrorY: document.getElementById('vMirrorY'),
+  vTargetX: document.getElementById('vTargetX'),
+  vTargetY: document.getElementById('vTargetY'),
+  vKp: document.getElementById('vKp'),
+  vKi: document.getElementById('vKi'),
+  vKd: document.getElementById('vKd'),
+  vPower: document.getElementById('vPower'),
+  mirrorX: document.getElementById('mirrorX'),
+  mirrorY: document.getElementById('mirrorY'),
+  targetX: document.getElementById('targetX'),
+  targetY: document.getElementById('targetY'),
+  kp: document.getElementById('kp'),
+  ki: document.getElementById('ki'),
+  kd: document.getElementById('kd'),
+  power: document.getElementById('power'),
+  btnAutoTrack: document.getElementById('btnAutoTrack'),
+  btnReset: document.getElementById('btnReset'),
+  btnRandom: document.getElementById('btnRandom'),
+  pidSection: document.getElementById('pidSection'),
+  badgeMode: document.getElementById('badgeMode'),
+  badgeAngle: document.getElementById('badgeAngle'),
+  badgeSpot: document.getElementById('badgeSpot'),
+  badgeError: document.getElementById('badgeError'),
+  dTargetX: document.getElementById('dTargetX'),
+  dTargetY: document.getElementById('dTargetY'),
+  dSpotX: document.getElementById('dSpotX'),
+  dSpotY: document.getElementById('dSpotY'),
+  dErrX: document.getElementById('dErrX'),
+  dErrY: document.getElementById('dErrY'),
+  dTotalErr: document.getElementById('dTotalErr'),
+  dLockStatus: document.getElementById('dLockStatus'),
+};
+
+function updateSliderDisplay(){
+  els.vMirrorX.textContent = state.mirrorXAngle.toFixed(1) + '\u00B0';
+  els.vMirrorY.textContent = state.mirrorYAngle.toFixed(1) + '\u00B0';
+  els.vTargetX.textContent = state.targetX.toFixed(0) + ' mm';
+  els.vTargetY.textContent = state.targetY.toFixed(0) + ' mm';
+  els.vKp.textContent = state.Kp.toFixed(2);
+  els.vKi.textContent = state.Ki.toFixed(3);
+  els.vKd.textContent = state.Kd.toFixed(2);
+  els.vPower.textContent = state.laserPower + '%';
+}
+
+function syncMirrorSliders(){
+  els.mirrorX.value = state.mirrorXAngle;
+  els.mirrorY.value = state.mirrorYAngle;
+  els.vMirrorX.textContent = state.mirrorXAngle.toFixed(1) + '\u00B0';
+  els.vMirrorY.textContent = state.mirrorYAngle.toFixed(1) + '\u00B0';
+}
+
+function updateDataPanel(){
+  var spot = computeSpot();
+  var err = computeError();
+  // 右侧数据
+  els.dTargetX.innerHTML = state.targetX.toFixed(1) + ' <small>mm</small>';
+  els.dTargetY.innerHTML = state.targetY.toFixed(1) + ' <small>mm</small>';
+  els.dSpotX.innerHTML = spot.x.toFixed(1) + ' <small>mm</small>';
+  els.dSpotY.innerHTML = spot.y.toFixed(1) + ' <small>mm</small>';
+  els.dErrX.innerHTML = err.x.toFixed(1) + ' <small>mm</small>';
+  els.dErrY.innerHTML = err.y.toFixed(1) + ' <small>mm</small>';
+
+  // 锁定状态
+  var locked = state.autoTrack && err.rms < LOCK_THRESHOLD;
+  if(state.autoTrack){
+    if(locked){
+      els.dLockStatus.textContent = '已锁定';
+      els.dLockStatus.style.color = 'var(--gv-highlight)';
+      els.dTotalErr.innerHTML = err.rms.toFixed(1) + ' <small>mm</small> \u00B7 <span id="dLockStatus" style="color:var(--gv-highlight)">已锁定</span>';
+    } else {
+      els.dLockStatus.textContent = '锁定中\u2026';
+      els.dLockStatus.style.color = 'var(--gv-warn)';
+      els.dTotalErr.innerHTML = err.rms.toFixed(1) + ' <small>mm</small> \u00B7 <span id="dLockStatus" style="color:var(--gv-warn)">锁定中\u2026</span>';
+    }
+  } else {
+    els.dLockStatus.textContent = '未锁定';
+    els.dLockStatus.style.color = 'var(--gv-danger)';
+    els.dTotalErr.innerHTML = err.rms.toFixed(1) + ' <small>mm</small> \u00B7 <span id="dLockStatus" style="color:var(--gv-danger)">未锁定</span>';
+  }
+
+  // 画布覆盖层
+  els.badgeAngle.textContent = '\u03B8x=' + state.mirrorXAngle.toFixed(1) + '\u00B0 \u03B8y=' + state.mirrorYAngle.toFixed(1) + '\u00B0';
+  els.badgeSpot.textContent = '光斑 (' + spot.x.toFixed(1) + ', ' + spot.y.toFixed(1) + ')mm';
+  els.badgeError.textContent = '误差 ' + err.rms.toFixed(1) + 'mm';
+
+  if(state.autoTrack){
+    els.badgeMode.textContent = '自动追踪 (PID)';
+    els.badgeMode.className = 'overlay-badge accent';
+    if(locked){
+      els.badgeMode.textContent = '已锁定 (PID)';
+      els.badgeMode.className = 'overlay-badge locked';
+    }
+  } else {
+    els.badgeMode.textContent = '手动模式';
+    els.badgeMode.className = 'overlay-badge accent';
+  }
+}
+
+/* ================================================================
+   事件绑定
+   ================================================================ */
+els.mirrorX.addEventListener('input', function(){
+  if(state.autoTrack) return; // 锁定时禁止手动
+  state.mirrorXAngle = parseFloat(this.value);
+  updateSliderDisplay();
+});
+els.mirrorY.addEventListener('input', function(){
+  if(state.autoTrack) return;
+  state.mirrorYAngle = parseFloat(this.value);
+  updateSliderDisplay();
+});
+els.targetX.addEventListener('input', function(){
+  state.targetX = parseFloat(this.value);
+  // 切换目标时重置 PID 积分
+  state.integralX = 0;
+  state.prevErrorX = 0;
+  updateSliderDisplay();
+});
+els.targetY.addEventListener('input', function(){
+  state.targetY = parseFloat(this.value);
+  state.integralY = 0;
+  state.prevErrorY = 0;
+  updateSliderDisplay();
+});
+els.kp.addEventListener('input', function(){
+  state.Kp = parseFloat(this.value);
+  updateSliderDisplay();
+});
+els.ki.addEventListener('input', function(){
+  state.Ki = parseFloat(this.value);
+  updateSliderDisplay();
+});
+els.kd.addEventListener('input', function(){
+  state.Kd = parseFloat(this.value);
+  updateSliderDisplay();
+});
+els.power.addEventListener('input', function(){
+  state.laserPower = parseFloat(this.value);
+  updateSliderDisplay();
+});
+
+// 自动追踪按钮
+els.btnAutoTrack.addEventListener('click', function(){
+  state.autoTrack = !state.autoTrack;
+  if(state.autoTrack){
+    els.btnAutoTrack.textContent = '关闭自动追踪';
+    els.btnAutoTrack.classList.add('toggle-on');
+    els.pidSection.classList.remove('collapsed');
+    els.pidSection.classList.add('expanded');
+    els.mirrorX.disabled = true;
+    els.mirrorY.disabled = true;
+    // 重置 PID 状态
+    state.integralX = 0;
+    state.integralY = 0;
+    state.prevErrorX = 0;
+    state.prevErrorY = 0;
+  } else {
+    els.btnAutoTrack.textContent = '开启自动追踪';
+    els.btnAutoTrack.classList.remove('toggle-on');
+    els.pidSection.classList.add('collapsed');
+    els.pidSection.classList.remove('expanded');
+    els.mirrorX.disabled = false;
+    els.mirrorY.disabled = false;
+  }
+});
+
+// 重置按钮
+els.btnReset.addEventListener('click', function(){
+  state.mirrorXAngle = 0;
+  state.mirrorYAngle = 0;
+  state.targetX = 30;
+  state.targetY = -20;
+  state.Kp = 0.20;
+  state.Ki = 0.005;
+  state.Kd = 0.10;
+  state.laserPower = 80;
+  state.integralX = 0;
+  state.integralY = 0;
+  state.prevErrorX = 0;
+  state.prevErrorY = 0;
+  state.jitterX = 0;
+  state.jitterY = 0;
+  if(state.autoTrack){
+    state.autoTrack = false;
+    els.btnAutoTrack.textContent = '开启自动追踪';
+    els.btnAutoTrack.classList.remove('toggle-on');
+    els.pidSection.classList.add('collapsed');
+    els.pidSection.classList.remove('expanded');
+    els.mirrorX.disabled = false;
+    els.mirrorY.disabled = false;
+  }
+  els.mirrorX.value = 0;
+  els.mirrorY.value = 0;
+  els.targetX.value = 30;
+  els.targetY.value = -20;
+  els.kp.value = 0.20;
+  els.ki.value = 0.005;
+  els.kd.value = 0.10;
+  els.power.value = 80;
+  errData = [];
+  updateSliderDisplay();
+});
+
+// 随机目标按钮
+els.btnRandom.addEventListener('click', function(){
+  state.targetX = Math.round((Math.random() * 2 - 1) * 80);
+  state.targetY = Math.round((Math.random() * 2 - 1) * 80);
+  els.targetX.value = state.targetX;
+  els.targetY.value = state.targetY;
+  state.integralX = 0;
+  state.integralY = 0;
+  state.prevErrorX = 0;
+  state.prevErrorY = 0;
+  updateSliderDisplay();
+});
+
+/* ================================================================
+   主题变化监听 (MutationObserver)
+   ================================================================ */
+function refreshThemeColors(){
+  colors = getThemeColors();
+}
+
+var themeObserver = new MutationObserver(function(mutations){
+  mutations.forEach(function(m){
+    if(m.attributeName === 'data-theme'){
+      refreshThemeColors();
+    }
+  });
+});
+themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+// 也监听 storage 事件 (跨页面)
+window.addEventListener('storage', function(e){
+  if(e.key === 'psu-theme-v1'){
+    refreshThemeColors();
+  }
+});
+
+/* ================================================================
+   窗口大小变化
+   ================================================================ */
+window.addEventListener('resize', function(){
+  resize();
+  resizeChart();
+});
+
+/* ================================================================
+   主循环
+   ================================================================ */
+var lastTime = performance.now();
+function loop(){
+  var now = performance.now();
+  var dt = Math.min(0.05, (now - lastTime) / 1000);
+  lastTime = now;
+
+  applyJitter();
+  pidStep(dt);
+  draw();
+  updateDataPanel();
+
+  var err = computeError();
+  pushErr(err.rms);
+  drawChart();
+
+  requestAnimationFrame(loop);
+}
+
+/* ================================================================
+   初始化
+   ================================================================ */
+function init(){
+  refreshThemeColors();
+  resize();
+  resizeChart();
+  updateSliderDisplay();
+  loop();
+}
+
+// 等待 DOM 和 shared-theme.js 完成
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+})();
+</script>
+</body>
+</html>

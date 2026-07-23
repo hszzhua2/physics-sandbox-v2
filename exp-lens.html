@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>透镜成像 — 几何光学 | 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES — 五种主题 (--le- prefix)
+   ================================================================ */
+[data-theme="academic"]{
+  --le-bg:#f8f9fa;--le-bg2:#f1f3f5;--le-ink:#1a1a2e;--le-ink2:#3d3d5c;--le-muted:#7a7a8a;
+  --le-rule:#e0e0e0;--le-accent:#6b8cae;--le-accent2:#8a7ca8;
+  --le-canvas-bg:#ffffff;--le-param-bg:#f8f9fa;--le-param-border:#e0e0e0;
+  --le-data-bg:#f4f5f7;--le-data-border:#e0e0e0;
+  --le-formula-bg:rgba(107,140,174,0.04);--le-formula-border:rgba(107,140,174,0.2);
+  --le-highlight:#6a9e8a;--le-warn:#c4956a;--le-danger:#c41e1e;
+}
+[data-theme="glass"]{
+  --le-bg:#080812;--le-bg2:#0e0e1c;--le-ink:#f1f5f9;--le-ink2:#cbd5e1;--le-muted:#64748b;
+  --le-rule:rgba(255,255,255,0.07);--le-accent:#38bdf8;--le-accent2:#a29bfe;
+  --le-canvas-bg:#0a0e1a;--le-param-bg:rgba(255,255,255,0.03);--le-param-border:rgba(255,255,255,0.06);
+  --le-data-bg:rgba(255,255,255,0.05);--le-data-border:rgba(255,255,255,0.06);
+  --le-formula-bg:rgba(56,189,248,0.05);--le-formula-border:rgba(56,189,248,0.15);
+  --le-highlight:#10b981;--le-warn:#f59e0b;--le-danger:#ef4444;
+}
+[data-theme="cartoon"]{
+  --le-bg:#fef6e4;--le-bg2:#fff8f0;--le-ink:#2d3436;--le-ink2:#4a4a4a;--le-muted:#7a7a7a;
+  --le-rule:rgba(0,0,0,0.08);--le-accent:#ff6b6b;--le-accent2:#4ecdc4;
+  --le-canvas-bg:#1a1a2e;--le-param-bg:rgba(255,255,255,0.5);--le-param-border:rgba(0,0,0,0.1);
+  --le-data-bg:rgba(255,255,255,0.6);--le-data-border:rgba(0,0,0,0.08);
+  --le-formula-bg:rgba(255,107,107,0.05);--le-formula-border:rgba(255,107,107,0.15);
+  --le-highlight:#4ecdc4;--le-warn:#ffe66d;--le-danger:#ff6b6b;
+}
+[data-theme="cyber"]{
+  --le-bg:#040410;--le-bg2:#08081a;--le-ink:#e0f7fa;--le-ink2:#b2ebf2;--le-muted:#4dd0e1;
+  --le-rule:rgba(0,243,255,0.1);--le-accent:#00f3ff;--le-accent2:#ff00ea;
+  --le-canvas-bg:#020208;--le-param-bg:rgba(0,243,255,0.02);--le-param-border:rgba(0,243,255,0.1);
+  --le-data-bg:rgba(0,0,0,0.4);--le-data-border:rgba(0,243,255,0.08);
+  --le-formula-bg:rgba(0,243,255,0.04);--le-formula-border:rgba(0,243,255,0.15);
+  --le-highlight:#39ff14;--le-warn:#ffb800;--le-danger:#ff0040;
+}
+[data-theme="soviet"]{
+  --le-bg:#f0ebe4;--le-bg2:#e8e0d6;--le-ink:#1a1a1a;--le-ink2:#3d3d3d;--le-muted:#6a5a4a;
+  --le-rule:#d4c4a8;--le-accent:#c41e1e;--le-accent2:#8b4513;
+  --le-canvas-bg:#e8e0d6;--le-param-bg:#f4f0ea;--le-param-border:#d4c4a8;
+  --le-data-bg:#f4f0ea;--le-data-border:#d4c4a8;
+  --le-formula-bg:rgba(196,30,30,0.04);--le-formula-border:rgba(196,30,30,0.2);
+  --le-highlight:#556b2f;--le-warn:#b8860b;--le-danger:#c41e1e;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:var(--font-main);background:var(--le-bg);color:var(--le-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--le-bg)}
+::-webkit-scrollbar-thumb{background:var(--le-accent);border-radius:999px;opacity:.4}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--le-rule);background:var(--le-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--le-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--le-formula-bg);border:1px solid var(--le-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--le-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--le-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(0,243,255,0.1);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--le-accent);text-shadow:0 0 8px rgba(0,243,255,0.25)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--le-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--le-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%;cursor:default}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--le-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--le-ink2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.overlay-badge.real{background:rgba(59,130,246,0.2);border-color:rgba(59,130,246,0.5);color:#93c5fd}
+.overlay-badge.virtual{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5);color:#fca5a5}
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--le-rule);background:var(--le-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--le-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--le-formula-bg);border:1px solid var(--le-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--le-muted);margin-top:1px}
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--le-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(0,243,255,0.1);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--le-accent);text-shadow:0 0 8px rgba(0,243,255,0.25)}
+[data-theme="academic"] .rp-header h2{color:var(--le-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--le-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--le-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--le-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--le-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:16px}
+.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--le-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--le-accent);font-weight:400;min-width:55px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--le-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--le-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+.mode-indicator{display:flex;gap:6px}
+.mode-btn{flex:1;padding:7px 4px;border:1px solid var(--le-param-border);background:var(--le-param-bg);color:var(--le-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--le-accent);color:var(--le-accent);background:var(--le-formula-bg)}
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--le-param-border);background:var(--le-param-bg);color:var(--le-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--le-accent);color:var(--le-accent);background:var(--le-formula-bg)}
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+
+/* ===== 数据网格 ===== */
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.data-cell{background:var(--le-data-bg);border:1px solid var(--le-data-border);border-radius:8px;padding:8px 10px;transition:all .3s ease}
+.data-cell .dc-label{font-size:0.65rem;color:var(--le-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.data-cell .dc-value{font-family:monospace;font-size:0.95rem;font-weight:700;color:var(--le-ink)}
+.data-cell.accent .dc-value{color:var(--le-accent)}
+.data-cell.accent2 .dc-value{color:var(--le-accent2)}
+.data-cell.warn .dc-value{color:var(--le-warn)}
+.data-cell.danger .dc-value{color:var(--le-danger)}
+
+/* ===== 像性质标签 ===== */
+.nature-box{margin-top:10px;padding:10px 12px;background:var(--le-data-bg);border:1px solid var(--le-data-border);border-radius:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;transition:all .3s ease}
+.nature-tag{display:inline-block;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:600}
+.nature-tag.real{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)}
+.nature-tag.virtual{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.nature-tag.none{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2)}
+.nature-desc{width:100%;font-size:0.7rem;color:var(--le-muted);margin-top:4px}
+
+/* ===== 公式区块 ===== */
+.formula-block{background:var(--le-formula-bg);border:1px solid var(--le-formula-border);border-radius:10px;padding:14px 16px;margin-top:4px;transition:all .3s ease}
+.formula-block .fb-title{font-size:0.7rem;color:var(--le-accent);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px}
+.formula-block .fb-main{font-family:'Cambria Math','Times New Roman',serif;font-size:1.15rem;font-weight:700;text-align:center;color:var(--le-ink);padding:6px 0}
+.formula-block .fb-desc{font-size:0.72rem;color:var(--le-muted);line-height:1.7;margin-top:6px}
+.formula-block .fb-desc .var{color:var(--le-accent);font-family:'Cambria Math',serif;font-style:italic}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--le-data-bg);border:1px solid var(--le-data-border);border-radius:10px;padding:14px 16px;margin-bottom:12px;transition:all .3s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card .ic-title{font-size:0.78rem;font-weight:700;color:var(--le-accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.info-card .ic-title::before{content:'';width:3px;height:14px;background:var(--le-accent);border-radius:2px}
+.info-card .ic-body{font-size:0.75rem;color:var(--le-ink2);line-height:1.8}
+.info-card .ic-body table{width:100%;border-collapse:collapse;margin-top:6px}
+.info-card .ic-body th,.info-card .ic-body td{padding:4px 8px;text-align:left;font-size:0.72rem;border-bottom:1px solid var(--le-data-border)}
+.info-card .ic-body th{color:var(--le-muted);font-weight:600}
+.info-card .ic-body td:last-child{text-align:right;font-family:monospace;color:var(--le-accent)}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ========== 左侧参数面板 ========== -->
+  <div class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">◉</div>
+      <div>
+        <h1>透镜成像</h1>
+        <div class="lp-sub">Thin Lens · 几何光学</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">参数控制</div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">透镜类型</span>
+        </div>
+        <div class="mode-indicator">
+          <button class="mode-btn active" id="lensConvex">凸透镜</button>
+          <button class="mode-btn" id="lensConcave">凹透镜</button>
+        </div>
+      </div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">焦距 f</span>
+          <span class="param-value" id="valF">100px</span>
+        </div>
+        <input type="range" id="fSlider" min="50" max="200" value="100" step="1">
+      </div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">物距 u</span>
+          <span class="param-value" id="valU">200px</span>
+        </div>
+        <input type="range" id="uSlider" min="30" max="350" value="200" step="1">
+      </div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">物体高度 h</span>
+          <span class="param-value" id="valH">80px</span>
+        </div>
+        <input type="range" id="hSlider" min="20" max="120" value="80" step="1">
+      </div>
+
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="far">u>2f</button>
+        <button class="preset-btn" data-preset="2f">u=2f</button>
+        <button class="preset-btn" data-preset="between">f&lt;u&lt;2f</button>
+        <button class="preset-btn" data-preset="focal">u=f</button>
+        <button class="preset-btn" data-preset="inside">u&lt;f</button>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">操作提示</div>
+      <div style="font-size:0.72rem;color:var(--le-muted);line-height:1.8">
+        拖动画布中的物体箭头可直接移动物体位置与高度。蓝色箭头为物体，红色为虚像，实像用实线、虚像用虚线表示。
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 中间画布区域 ========== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <div class="overlay-badge" id="badgeType">凸透镜</div>
+        <div class="overlay-badge" id="badgeImage">实像</div>
+        <div class="overlay-badge" id="badgeM">M = -0.50</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 右侧数据+知识面板 ========== -->
+  <div class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">🔬</div>
+      <div>
+        <h2>实时数据与公式</h2>
+        <div class="rp-sub">Thin Lens Equation · Magnification</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">测量数据</div>
+      <div class="data-grid">
+        <div class="data-cell accent">
+          <div class="dc-label">u 物距</div>
+          <div class="dc-value" id="dataU">200px</div>
+        </div>
+        <div class="data-cell accent2">
+          <div class="dc-label">v 像距</div>
+          <div class="dc-value" id="dataV">200px</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">f 焦距</div>
+          <div class="dc-value" id="dataF">100px</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">M 放大率</div>
+          <div class="dc-value" id="dataM">-1.00</div>
+        </div>
+      </div>
+
+      <div class="nature-box" id="natureBox">
+        <span class="nature-tag real">实像</span>
+        <span class="nature-tag real">倒立</span>
+        <span class="nature-tag real">等大</span>
+        <div class="nature-desc">像与物在透镜异侧</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">薄透镜公式</div>
+      <div class="formula-block">
+        <div class="fb-title">Thin Lens Equation</div>
+        <div class="fb-main">1/u + 1/v = 1/f</div>
+        <div class="fb-desc">
+          由薄透镜公式推导：<span class="var">v</span> = u·f / (u − f)<br>
+          <span class="var">u</span> 为物距，<span class="var">v</span> 为像距，<span class="var">f</span> 为焦距<br>
+          凸透镜 f > 0，凹透镜 f < 0
+        </div>
+      </div>
+      <div style="height:8px"></div>
+      <div class="formula-block">
+        <div class="fb-title">Magnification</div>
+        <div class="fb-main">M = −v / u</div>
+        <div class="fb-desc">
+          <span class="var">M</span> 为横向放大率<br>
+          M > 0：正立像　M < 0：倒立像<br>
+          |M| > 1：放大　|M| < 1：缩小
+        </div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">知识卡片</div>
+
+      <div class="info-card">
+        <div class="ic-title">凸透镜成像规律表</div>
+        <div class="ic-body">
+          <table>
+            <tr><th>物距</th><th>像的性质</th></tr>
+            <tr><td>u > 2f</td><td>倒立缩小实像</td></tr>
+            <tr><td>u = 2f</td><td>倒立等大实像</td></tr>
+            <tr><td>f &lt; u &lt; 2f</td><td>倒立放大实像</td></tr>
+            <tr><td>u = f</td><td>不成像</td></tr>
+            <tr><td>u &lt; f</td><td>正立放大虚像</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-title">光心与主光轴</div>
+        <div class="ic-body">
+          透镜的中心称为光心（O），通过光心的光线方向不变。主光轴是通过光心且垂直于透镜的直线。焦点（F、F'）是平行于主光轴的光线经透镜后会聚（凸透镜）或发散反向延长线交于主光轴上的点。焦距 f 是光心到焦点的距离。
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-title">应用实例</div>
+        <div class="ic-body">
+          凸透镜广泛应用于放大镜（u&lt;f，正立放大虚像）、照相机镜头（u&gt;2f，倒立缩小实像）、投影仪（f&lt;u&lt;2f，倒立放大实像）和人眼晶状体。凹透镜用于近视眼镜，使远处物体的像落在视网膜上。伽利略望远镜由凸透镜（物镜）和凹透镜（目镜）组成。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  // ==========================================
+  // Canvas 初始化
+  // ==========================================
+  var canvas = document.getElementById('simCanvas');
+  var ctx = canvas.getContext('2d');
+
+  // ==========================================
+  // 状态
+  // ==========================================
+  var state = {
+    lensType: 'convex',   // 'convex' or 'concave'
+    f: 100,               // 焦距（像素，正值；凹透镜时内部取负）
+    u: 200,               // 物距（像素）
+    h: 80,                // 物体高度（像素）
+    W: 0, H: 0, cx: 0, cy: 0,
+    dpr: window.devicePixelRatio || 1,
+    dragging: false,
+    hoverObj: false,
+    animTime: 0
+  };
+
+  var ARROW_HEAD = 12;
+
+  // 便捷：获取带符号的焦距（凸透镜为正，凹透镜为负）
+  function getF(){
+    return state.lensType === 'concave' ? -state.f : state.f;
+  }
+
+  // ==========================================
+  // 尺寸调整
+  // ==========================================
+  function resize(){
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.floor(rect.width);
+    var h = Math.floor(rect.height);
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    state.W = w;
+    state.H = h;
+    state.cx = w / 2;
+    state.cy = h / 2;
+    // 限制 u 在合理范围
+    var maxU = Math.min(state.cx - 30, 350);
+    state.u = Math.max(30, Math.min(maxU, state.u));
+    state.h = Math.max(-120, Math.min(120, state.h));
+  }
+
+  // ==========================================
+  // 物理计算 — 薄透镜公式
+  // ==========================================
+  function computeImage(){
+    var f = getF();
+    var u = state.u;
+    var h = state.h;
+    var eps = 0.5;
+
+    if(Math.abs(u - f) < eps){
+      return { v: Infinity, m: Infinity, hPrime: Infinity, isReal: false, isVirtual: false, noImage: true };
+    }
+
+    var v = (u * f) / (u - f);
+    var m = -v / u;
+    var hPrime = m * h;
+    var isReal = v > 0;
+    var isVirtual = v < 0;
+    return { v: v, m: m, hPrime: hPrime, isReal: isReal, isVirtual: isVirtual, noImage: false };
+  }
+
+  // ==========================================
+  // 主题颜色获取
+  // ==========================================
+  function getThemeColors(){
+    var theme = document.documentElement.getAttribute('data-theme') || 'academic';
+    var palettes = {
+      academic: {
+        bg:'#ffffff', grid:'rgba(107,140,174,0.06)',
+        axis:'rgba(122,122,138,0.4)', lensStroke:'#6b8cae', lensFill1:'rgba(107,140,174,0.08)', lensFill2:'rgba(138,124,168,0.08)',
+        focal:'#8a7ca8', object:'#6b8cae',
+        imageReal:'#3b82f6', imageVirtual:'#ef4444',
+        incident:'#6b8cae', refracted:'#8a7ca8', virtualExt:'#c41e1e',
+        text:'#3d3d5c', muted:'#7a7a8a'
+      },
+      glass: {
+        bg:'#0a0e1a', grid:'rgba(56,189,248,0.04)',
+        axis:'rgba(148,163,184,0.3)', lensStroke:'#38bdf8', lensFill1:'rgba(56,189,248,0.1)', lensFill2:'rgba(162,155,254,0.1)',
+        focal:'#a29bfe', object:'#38bdf8',
+        imageReal:'#60a5fa', imageVirtual:'#f87171',
+        incident:'#38bdf8', refracted:'#a29bfe', virtualExt:'#ef4444',
+        text:'#cbd5e1', muted:'#64748b'
+      },
+      cartoon: {
+        bg:'#1a1a2e', grid:'rgba(255,255,255,0.03)',
+        axis:'rgba(255,255,255,0.2)', lensStroke:'#4ecdc4', lensFill1:'rgba(78,205,196,0.1)', lensFill2:'rgba(255,107,107,0.1)',
+        focal:'#ff6b6b', object:'#4ecdc4',
+        imageReal:'#4ecdc4', imageVirtual:'#ff6b6b',
+        incident:'#4ecdc4', refracted:'#a29bfe', virtualExt:'#ff6b6b',
+        text:'#e0e0e0', muted:'#7a7a7a'
+      },
+      cyber: {
+        bg:'#020208', grid:'rgba(0,243,255,0.04)',
+        axis:'rgba(0,243,255,0.2)', lensStroke:'#00f3ff', lensFill1:'rgba(0,243,255,0.08)', lensFill2:'rgba(255,0,234,0.08)',
+        focal:'#ff00ea', object:'#00f3ff',
+        imageReal:'#00f3ff', imageVirtual:'#ff0040',
+        incident:'#00f3ff', refracted:'#ff00ea', virtualExt:'#ff0040',
+        text:'#b2ebf2', muted:'#4dd0e1'
+      },
+      soviet: {
+        bg:'#e8e0d6', grid:'rgba(196,30,30,0.04)',
+        axis:'rgba(106,90,74,0.4)', lensStroke:'#c41e1e', lensFill1:'rgba(196,30,30,0.08)', lensFill2:'rgba(139,69,19,0.08)',
+        focal:'#8b4513', object:'#c41e1e',
+        imageReal:'#556b2f', imageVirtual:'#c41e1e',
+        incident:'#c41e1e', refracted:'#8b4513', virtualExt:'#c41e1e',
+        text:'#3d3d3d', muted:'#6a5a4a'
+      }
+    };
+    return palettes[theme] || palettes.academic;
+  }
+
+  // ==========================================
+  // 绘制函数
+  // ==========================================
+  function drawGrid(colors){
+    ctx.save();
+    ctx.strokeStyle = colors.grid;
+    ctx.lineWidth = 1;
+    var step = 40;
+    for(var x = state.cx % step; x < state.W; x += step){
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, state.H); ctx.stroke();
+    }
+    for(var y = state.cy % step; y < state.H; y += step){
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(state.W, y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawAxis(colors){
+    ctx.save();
+    ctx.strokeStyle = colors.axis;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(0, state.cy);
+    ctx.lineTo(state.W, state.cy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = colors.axis;
+    ctx.beginPath();
+    ctx.arc(state.cx, state.cy, 3, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawLens(colors){
+    var cx = state.cx, cy = state.cy;
+    var lensH = Math.min(state.H * 0.7, 320);
+    var halfH = lensH / 2;
+    var isConvex = state.lensType === 'convex';
+    var lensW = 16;
+
+    ctx.save();
+    ctx.beginPath();
+    if(isConvex){
+      // 双凸透镜
+      ctx.moveTo(cx, cy - halfH);
+      ctx.quadraticCurveTo(cx + lensW, cy - halfH * 0.5, cx + lensW * 0.5, cy);
+      ctx.quadraticCurveTo(cx + lensW, cy + halfH * 0.5, cx, cy + halfH);
+      ctx.quadraticCurveTo(cx - lensW, cy + halfH * 0.5, cx - lensW * 0.5, cy);
+      ctx.quadraticCurveTo(cx - lensW, cy - halfH * 0.5, cx, cy - halfH);
+    } else {
+      // 双凹透镜
+      ctx.moveTo(cx - lensW * 0.5, cy - halfH);
+      ctx.quadraticCurveTo(cx + lensW * 0.3, cy - halfH * 0.3, cx, cy);
+      ctx.quadraticCurveTo(cx + lensW * 0.3, cy + halfH * 0.3, cx - lensW * 0.5, cy + halfH);
+      ctx.lineTo(cx + lensW * 0.5, cy + halfH);
+      ctx.quadraticCurveTo(cx - lensW * 0.3, cy + halfH * 0.3, cx, cy);
+      ctx.quadraticCurveTo(cx - lensW * 0.3, cy - halfH * 0.3, cx + lensW * 0.5, cy - halfH);
+    }
+    ctx.closePath();
+
+    var grad = ctx.createLinearGradient(cx - lensW, 0, cx + lensW, 0);
+    grad.addColorStop(0, colors.lensFill1);
+    grad.addColorStop(0.5, colors.lensFill2);
+    grad.addColorStop(1, colors.lensFill1);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.strokeStyle = colors.lensStroke;
+    ctx.lineWidth = 2;
+    ctx.shadowColor = colors.lensStroke;
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 透镜端部箭头标记
+    ctx.strokeStyle = colors.lensStroke;
+    ctx.lineWidth = 2;
+    var ah = 8;
+    if(isConvex){
+      // 凸透镜：向外箭头
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, cy - halfH + 6);
+      ctx.lineTo(cx, cy - halfH);
+      ctx.lineTo(cx + 6, cy - halfH + 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, cy + halfH - 6);
+      ctx.lineTo(cx, cy + halfH);
+      ctx.lineTo(cx + 6, cy + halfH - 6);
+      ctx.stroke();
+    } else {
+      // 凹透镜：向内箭头
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, cy - halfH);
+      ctx.lineTo(cx, cy - halfH + 6);
+      ctx.lineTo(cx + 6, cy - halfH);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, cy + halfH);
+      ctx.lineTo(cx, cy + halfH - 6);
+      ctx.lineTo(cx + 6, cy + halfH);
+      ctx.stroke();
+    }
+
+    // 光心标签
+    ctx.fillStyle = colors.muted;
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('O', cx, cy + 18);
+    ctx.restore();
+  }
+
+  function drawFocalPoints(colors){
+    var f = getF();
+    var cx = state.cx, cy = state.cy;
+    var pts = [
+      { x: cx - Math.abs(f), y: cy, label: 'F',  color: colors.focal },
+      { x: cx + Math.abs(f), y: cy, label: "F'", color: colors.focal },
+      { x: cx - 2 * Math.abs(f), y: cy, label: '2F',  color: colors.muted },
+      { x: cx + 2 * Math.abs(f), y: cy, label: "2F'", color: colors.muted }
+    ];
+    ctx.save();
+    for(var i = 0; i < pts.length; i++){
+      var p = pts[i];
+      if(p.x < 10 || p.x > state.W - 10) continue;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = p.color;
+      ctx.font = '12px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.label, p.x, cy - 10);
+    }
+    ctx.restore();
+  }
+
+  function drawObject(colors){
+    var cx = state.cx, cy = state.cy;
+    var bx = cx - state.u;
+    var by = cy;
+    var tx = bx;
+    var ty = cy - state.h;
+
+    ctx.save();
+    ctx.shadowColor = colors.object;
+    ctx.shadowBlur = (state.hoverObj || state.dragging) ? 14 : 6;
+    ctx.strokeStyle = colors.object;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+
+    var dir = state.h >= 0 ? -1 : 1;
+    ctx.fillStyle = colors.object;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx - ARROW_HEAD * 0.6, ty + dir * ARROW_HEAD);
+    ctx.lineTo(tx + ARROW_HEAD * 0.6, ty + dir * ARROW_HEAD);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = colors.object;
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('物', bx, by + 20);
+    ctx.restore();
+  }
+
+  function drawImage_(info, colors){
+    if(info.noImage) return;
+    var cx = state.cx, cy = state.cy;
+    var v = info.v;
+    var hPrime = info.hPrime;
+    var bx = cx + v;
+    var by = cy;
+    var tx = bx;
+    var ty = cy - hPrime;
+
+    if(bx < -50 || bx > state.W + 50) return;
+
+    ctx.save();
+    if(info.isReal){
+      ctx.shadowColor = colors.imageReal;
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = colors.imageReal;
+      ctx.fillStyle = colors.imageReal;
+    } else {
+      ctx.shadowColor = colors.imageVirtual;
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = colors.imageVirtual;
+      ctx.fillStyle = colors.imageVirtual;
+      ctx.setLineDash([5, 4]);
+    }
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+
+    var dir = hPrime >= 0 ? -1 : 1;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx - ARROW_HEAD * 0.6, ty + dir * ARROW_HEAD);
+    ctx.lineTo(tx + ARROW_HEAD * 0.6, ty + dir * ARROW_HEAD);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(info.isReal ? '像' : '虚像', bx, by + 20);
+    ctx.restore();
+  }
+
+  function drawLine(x1, y1, x2, y2, color, width, shadow, dashed){
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width || 1.5;
+    if(shadow){
+      ctx.shadowColor = shadow;
+      ctx.shadowBlur = 4;
+    }
+    if(dashed) ctx.setLineDash(dashed);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
+  function extendToEdge(x0, y0, dx, dy){
+    if(dx === 0 && dy === 0) return { x: x0, y: y0 };
+    var tMin = Infinity;
+    if(dx !== 0){
+      var t1 = (0 - x0) / dx;
+      if(t1 > 0.001){ var yy = y0 + t1 * dy; if(yy >= 0 && yy <= state.H) tMin = Math.min(tMin, t1); }
+      var t2 = (state.W - x0) / dx;
+      if(t2 > 0.001){ yy = y0 + t2 * dy; if(yy >= 0 && yy <= state.H) tMin = Math.min(tMin, t2); }
+    }
+    if(dy !== 0){
+      var t3 = (0 - y0) / dy;
+      if(t3 > 0.001){ var xx = x0 + t3 * dx; if(xx >= 0 && xx <= state.W) tMin = Math.min(tMin, t3); }
+      var t4 = (state.H - y0) / dy;
+      if(t4 > 0.001){ xx = x0 + t4 * dx; if(xx >= 0 && xx <= state.W) tMin = Math.min(tMin, t4); }
+    }
+    if(!isFinite(tMin)) return { x: x0, y: y0 };
+    return { x: x0 + tMin * dx, y: y0 + tMin * dy };
+  }
+
+  // ==========================================
+  // 三条特殊光线
+  // ==========================================
+  function drawRays(info, colors){
+    var f = getF();
+    var cx = state.cx, cy = state.cy;
+    var u = state.u, h = state.h;
+    var ox = cx - u;
+    var oy = cy - h;
+    var absF = Math.abs(f);
+    var signF = f >= 0 ? 1 : -1;
+
+    var inColor = colors.incident;
+    var refColor = colors.refracted;
+    var virtColor = colors.virtualExt;
+    var inWidth = 1.8, refWidth = 1.8;
+
+    // ===== 光线1：平行入射 → 过焦点(凸) / 如从焦点发散(凹) =====
+    (function(){
+      var inEnd = { x: cx, y: oy };
+      drawLine(ox, oy, inEnd.x, inEnd.y, inColor, inWidth, inColor);
+
+      if(info.noImage){
+        // u=f: 折射后平行射出（凸透镜）
+        var outEnd = extendToEdge(inEnd.x, inEnd.y, absF, signF * h);
+        drawLine(inEnd.x, inEnd.y, outEnd.x, outEnd.y, refColor, refWidth, refColor);
+      } else {
+        // 折射方向：凸透镜向F'(cx+f,cy)，凹透镜如从F(cx+f,cy)发散
+        // dx = |f|, dy = signF * h
+        var dx1 = absF;
+        var dy1 = signF * h;
+        var len = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+        var ndx = dx1 / len, ndy = dy1 / len;
+
+        if(info.isReal){
+          // 实像：折射光线到像点后继续延伸
+          var imgPt = { x: cx + info.v, y: cy - info.hPrime };
+          drawLine(inEnd.x, inEnd.y, imgPt.x, imgPt.y, refColor, refWidth, refColor);
+          var ext = extendToEdge(imgPt.x, imgPt.y, ndx, ndy);
+          drawLine(imgPt.x, imgPt.y, ext.x, ext.y, refColor, 1.2);
+        } else {
+          // 虚像：折射光线发散到边缘
+          var outEnd2 = extendToEdge(inEnd.x, inEnd.y, ndx, ndy);
+          drawLine(inEnd.x, inEnd.y, outEnd2.x, outEnd2.y, refColor, refWidth, refColor);
+          // 反向延长线（虚线）到虚像点
+          drawLine(inEnd.x, inEnd.y, cx + info.v, cy - info.hPrime, virtColor, 1.2, null, [4, 4]);
+        }
+      }
+    })();
+
+    // ===== 光线2：过光心 → 方向不变 =====
+    (function(){
+      var dx = cx - ox;
+      var dy = cy - oy;
+      // 向左延伸
+      var leftEnd = extendToEdge(ox, oy, -dx, -dy);
+      drawLine(leftEnd.x, leftEnd.y, ox, oy, inColor, 1, null);
+      // 入射段
+      drawLine(ox, oy, cx, cy, inColor, inWidth, inColor);
+
+      if(info.noImage){
+        var rightEnd = extendToEdge(cx, cy, dx, dy);
+        drawLine(cx, cy, rightEnd.x, rightEnd.y, refColor, refWidth, refColor);
+      } else {
+        if(info.isReal){
+          var imgPt2 = { x: cx + info.v, y: cy - info.hPrime };
+          drawLine(cx, cy, imgPt2.x, imgPt2.y, refColor, refWidth, refColor);
+          var ext2 = extendToEdge(imgPt2.x, imgPt2.y, dx, dy);
+          drawLine(imgPt2.x, imgPt2.y, ext2.x, ext2.y, refColor, 1.2);
+        } else {
+          var rightEnd2 = extendToEdge(cx, cy, dx, dy);
+          drawLine(cx, cy, rightEnd2.x, rightEnd2.y, refColor, refWidth, refColor);
+          drawLine(cx, cy, cx + info.v, cy - info.hPrime, virtColor, 1.2, null, [4, 4]);
+        }
+      }
+    })();
+
+    // ===== 光线3：过焦点(凸) / 朝向焦点(凹) → 折射后平行 =====
+    (function(){
+      // 焦点位置：cx - f
+      // 凸透镜(f>0): F在左侧(cx-f)，光线过F后折射平行
+      // 凹透镜(f<0): F'在右侧(cx-f=cx+|f|)，光线朝向F'折射平行
+      var Fx = cx - f, Fy = cy;
+      var dx_f = Fx - ox;
+      var dy_f = Fy - oy;
+      var refractX = cx;
+      var refractY;
+      if(Math.abs(dx_f) < 0.001){
+        refractY = oy;
+      } else {
+        var t = (cx - ox) / dx_f;
+        refractY = oy + t * dy_f;
+      }
+
+      if(!info.noImage){
+        drawLine(ox, oy, refractX, refractY, inColor, inWidth, inColor);
+      }
+
+      // 凹透镜且物体在焦点内时画虚线延长
+      if(f < 0 && u < absF){
+        // 朝向F'的延长线（虚线）
+        drawLine(ox, oy, Fx, Fy, virtColor, 1.2, null, [4, 4]);
+      }
+
+      if(info.noImage){
+        // u=f (仅凸透镜): 折射后平行射出
+        var outEnd3 = extendToEdge(refractX, refractY, 1, 0);
+        drawLine(refractX, refractY, outEnd3.x, outEnd3.y, refColor, refWidth, refColor);
+      } else {
+        // 折射后平行于主光轴（水平向右）
+        if(info.isReal){
+          var imgPt3 = { x: cx + info.v, y: cy - info.hPrime };
+          drawLine(refractX, refractY, imgPt3.x, refractY, refColor, refWidth, refColor);
+          var ext3 = extendToEdge(imgPt3.x, refractY, 1, 0);
+          drawLine(imgPt3.x, refractY, ext3.x, ext3.y, refColor, 1.2);
+        } else {
+          var outEnd4 = extendToEdge(refractX, refractY, 1, 0);
+          drawLine(refractX, refractY, outEnd4.x, outEnd4.y, refColor, refWidth, refColor);
+          // 反向延长线（虚线）到虚像点
+          drawLine(refractX, refractY, cx + info.v, refractY, virtColor, 1.2, null, [4, 4]);
+        }
+      }
+    })();
+  }
+
+  // ==========================================
+  // 主绘制
+  // ==========================================
+  function draw(){
+    var W = state.W, H = state.H;
+    var colors = getThemeColors();
+    ctx.clearRect(0, 0, W, H);
+
+    drawGrid(colors);
+    drawAxis(colors);
+
+    var info = computeImage();
+    drawFocalPoints(colors);
+    drawRays(info, colors);
+    drawLens(colors);
+    drawObject(colors);
+    drawImage_(info, colors);
+    updatePanel(info, colors);
+  }
+
+  // ==========================================
+  // UI 更新
+  // ==========================================
+  function updatePanel(info, colors){
+    var f = getF();
+    document.getElementById('valF').textContent = state.f + 'px';
+    document.getElementById('valU').textContent = Math.round(state.u) + 'px';
+    document.getElementById('valH').textContent = Math.round(Math.abs(state.h)) + 'px';
+
+    document.getElementById('dataU').textContent = Math.round(state.u) + 'px';
+    document.getElementById('dataF').textContent = (f >= 0 ? '' : '-') + Math.abs(f) + 'px';
+
+    var badgeType = document.getElementById('badgeType');
+    badgeType.textContent = state.lensType === 'convex' ? '凸透镜' : '凹透镜';
+    var badgeImage = document.getElementById('badgeImage');
+    var badgeM = document.getElementById('badgeM');
+
+    if(info.noImage){
+      document.getElementById('dataV').textContent = '∞';
+      document.getElementById('dataM').textContent = '∞';
+      badgeImage.textContent = '不成像';
+      badgeImage.className = 'overlay-badge virtual';
+      badgeM.textContent = 'M = ∞';
+      document.getElementById('natureBox').innerHTML =
+        '<span class="nature-tag none">不成像</span>' +
+        '<div class="nature-desc">光线经透镜后平行射出，无法成像</div>';
+    } else {
+      document.getElementById('dataV').textContent = (info.v > 0 ? '' : '-') + Math.round(Math.abs(info.v)) + 'px';
+      document.getElementById('dataM').textContent = info.m.toFixed(2);
+      badgeM.textContent = 'M = ' + info.m.toFixed(2);
+
+      var tags = '';
+      if(info.isReal){
+        tags += '<span class="nature-tag real">实像</span>';
+        tags += '<span class="nature-tag real">倒立</span>';
+        badgeImage.textContent = '实像';
+        badgeImage.className = 'overlay-badge real';
+      } else {
+        tags += '<span class="nature-tag virtual">虚像</span>';
+        tags += '<span class="nature-tag virtual">正立</span>';
+        badgeImage.textContent = '虚像';
+        badgeImage.className = 'overlay-badge virtual';
+      }
+      var absM = Math.abs(info.m);
+      if(absM > 1.01){
+        tags += info.isReal ? '<span class="nature-tag real">放大</span>' : '<span class="nature-tag virtual">放大</span>';
+      } else if(absM < 0.99){
+        tags += '<span class="nature-tag real">缩小</span>';
+      } else {
+        tags += '<span class="nature-tag real">等大</span>';
+      }
+      var posStr = info.isReal ? '像与物在透镜异侧' : '像与物在透镜同侧';
+      tags += '<div class="nature-desc">' + posStr + '</div>';
+      document.getElementById('natureBox').innerHTML = tags;
+    }
+  }
+
+  // ==========================================
+  // 交互：拖动物体
+  // ==========================================
+  function getMousePos(e){
+    var rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  function hitObject(mx, my){
+    var bx = state.cx - state.u;
+    var by = state.cy;
+    var tx = bx;
+    var ty = state.cy - state.h;
+    var minY = Math.min(by, ty) - ARROW_HEAD;
+    var maxY = Math.max(by, ty) + ARROW_HEAD;
+    if(mx < bx - ARROW_HEAD - 5 || mx > bx + ARROW_HEAD + 5) return false;
+    if(my < minY - 5 || my > maxY + 5) return false;
+    var dx = Math.abs(mx - bx);
+    if(dx > ARROW_HEAD + 5) return false;
+    if(my >= Math.min(ty, by) - ARROW_HEAD && my <= Math.max(ty, by) + ARROW_HEAD) return true;
+    return false;
+  }
+
+  canvas.addEventListener('mousedown', function(e){
+    var pos = getMousePos(e);
+    if(hitObject(pos.x, pos.y)){
+      state.dragging = true;
+      canvas.style.cursor = 'grabbing';
+    }
+  });
+
+  canvas.addEventListener('mousemove', function(e){
+    var pos = getMousePos(e);
+    if(state.dragging){
+      var newU = state.cx - pos.x;
+      var maxU = Math.min(state.cx - 30, 350);
+      newU = Math.max(30, Math.min(maxU, newU));
+      state.u = newU;
+      var newH = state.cy - pos.y;
+      newH = Math.max(-120, Math.min(120, newH));
+      if(Math.abs(newH) < 20) newH = newH >= 0 ? 20 : -20;
+      state.h = newH;
+      document.getElementById('uSlider').value = Math.round(state.u);
+      document.getElementById('hSlider').value = Math.round(Math.abs(state.h));
+    } else {
+      var over = hitObject(pos.x, pos.y);
+      if(over !== state.hoverObj){
+        state.hoverObj = over;
+        canvas.style.cursor = over ? 'grab' : 'default';
+      }
+    }
+  });
+
+  window.addEventListener('mouseup', function(){
+    if(state.dragging){
+      state.dragging = false;
+      canvas.style.cursor = state.hoverObj ? 'grab' : 'default';
+    }
+  });
+
+  // 触摸支持
+  canvas.addEventListener('touchstart', function(e){
+    e.preventDefault();
+    var t = e.touches[0];
+    var rect = canvas.getBoundingClientRect();
+    var pos = { x: t.clientX - rect.left, y: t.clientY - rect.top };
+    if(hitObject(pos.x, pos.y)){
+      state.dragging = true;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function(e){
+    e.preventDefault();
+    if(!state.dragging) return;
+    var t = e.touches[0];
+    var rect = canvas.getBoundingClientRect();
+    var pos = { x: t.clientX - rect.left, y: t.clientY - rect.top };
+    var newU = state.cx - pos.x;
+    var maxU = Math.min(state.cx - 30, 350);
+    newU = Math.max(30, Math.min(maxU, newU));
+    state.u = newU;
+    var newH = state.cy - pos.y;
+    newH = Math.max(-120, Math.min(120, newH));
+    if(Math.abs(newH) < 20) newH = newH >= 0 ? 20 : -20;
+    state.h = newH;
+    document.getElementById('uSlider').value = Math.round(state.u);
+    document.getElementById('hSlider').value = Math.round(Math.abs(state.h));
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function(){
+    state.dragging = false;
+  });
+
+  // ==========================================
+  // 控件事件
+  // ==========================================
+  document.getElementById('fSlider').addEventListener('input', function(e){
+    state.f = parseInt(e.target.value, 10);
+    var maxU = Math.min(state.cx - 30, 350);
+    state.u = Math.max(30, Math.min(maxU, state.u));
+  });
+
+  document.getElementById('uSlider').addEventListener('input', function(e){
+    state.u = parseInt(e.target.value, 10);
+    var maxU = Math.min(state.cx - 30, 350);
+    state.u = Math.max(30, Math.min(maxU, state.u));
+    document.getElementById('uSlider').value = Math.round(state.u);
+  });
+
+  document.getElementById('hSlider').addEventListener('input', function(e){
+    var absH = parseInt(e.target.value, 10);
+    state.h = state.h >= 0 ? absH : -absH;
+  });
+
+  document.getElementById('lensConvex').addEventListener('click', function(){
+    state.lensType = 'convex';
+    document.getElementById('lensConvex').classList.add('active');
+    document.getElementById('lensConcave').classList.remove('active');
+  });
+
+  document.getElementById('lensConcave').addEventListener('click', function(){
+    state.lensType = 'concave';
+    document.getElementById('lensConcave').classList.add('active');
+    document.getElementById('lensConvex').classList.remove('active');
+  });
+
+  // 预设
+  document.querySelectorAll('.preset-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var preset = btn.dataset.preset;
+      var f = state.f;
+      var cx = state.cx;
+      var maxU = Math.min(cx - 30, 350);
+      if(preset === 'far'){
+        state.u = Math.min(maxU, f * 2.5);
+      } else if(preset === '2f'){
+        state.u = Math.min(maxU, f * 2);
+      } else if(preset === 'between'){
+        state.u = Math.min(maxU, f * 1.5);
+      } else if(preset === 'focal'){
+        state.u = Math.min(maxU, f);
+      } else if(preset === 'inside'){
+        state.u = Math.min(maxU, f * 0.5);
+      }
+      state.u = Math.max(30, Math.min(maxU, state.u));
+      document.getElementById('uSlider').value = Math.round(state.u);
+    });
+  });
+
+  // ==========================================
+  // MutationObserver — 主题变化
+  // ==========================================
+  var observer = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      if(m.attributeName === 'data-theme'){
+        requestAnimationFrame(draw);
+      }
+    });
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ==========================================
+  // 窗口调整
+  // ==========================================
+  window.addEventListener('resize', resize);
+
+  // ==========================================
+  // 动画循环
+  // ==========================================
+  function animate(t){
+    state.animTime = t;
+    draw();
+    requestAnimationFrame(animate);
+  }
+
+  // ==========================================
+  // 初始化
+  // ==========================================
+  resize();
+  requestAnimationFrame(animate);
+
+})();
+</script>
+</body>
+</html>

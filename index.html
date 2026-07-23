@@ -360,7 +360,11 @@
       'electric-deflection': 'ED',
       'physics-canvas': 'PC',
       'geophysics': 'GP',
-      'optics': 'OP'
+      'optics': 'OP',
+      'refraction': 'RF',
+      'lens': 'LE',
+      'interference': 'IN',
+      'galvanometer': 'GV'
     };
 
     const graphNodes = [
@@ -410,7 +414,11 @@
       { id: 'electric-deflection', title: '电场偏转', subtitle: '电磁学',   color: '#1abc9c', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '⚡' },
       { id: 'physics-canvas', title: '自由物理画布', subtitle: '综合实验',   color: '#3498db', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🎨' },
       { id: 'geophysics',  title: '地球物理',     subtitle: '地球科学',       color: '#e67e22', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🌍' },
-      { id: 'optics',      title: '初中光学',     subtitle: '初中光学',       color: '#9b59b6', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🔍' }
+      { id: 'optics',      title: '初中光学',     subtitle: '初中光学',       color: '#9b59b6', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🔍' },
+      { id: 'refraction',  title: '光的折射',     subtitle: '斯涅尔定律',     color: '#22d3ee', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '💠' },
+      { id: 'lens',        title: '透镜成像',     subtitle: '几何光学',       color: '#a78bfa', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🔬' },
+      { id: 'interference',title: '双缝干涉',     subtitle: '波粒二象性',     color: '#f59e0b', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🌊' },
+      { id: 'galvanometer',title: '检流计',       subtitle: '双镜光束控制',   color: '#00d4ff', x: 0, y: 0, vx: 0, vy: 0, rad: 58, icon: '🪞' }
     ];
 
     function resize() {

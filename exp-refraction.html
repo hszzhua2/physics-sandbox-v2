@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光的折射 — 斯涅尔定律 | 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES — 五种主题 (--rf- prefix)
+   ================================================================ */
+[data-theme="academic"]{
+  --rf-bg:#f8f9fa;--rf-bg2:#f1f3f5;--rf-ink:#1a1a2e;--rf-ink2:#3d3d5c;--rf-muted:#7a7a8a;
+  --rf-rule:#e0e0e0;--rf-accent:#6b8cae;--rf-accent2:#8a7ca8;
+  --rf-canvas-bg:#ffffff;--rf-param-bg:#f8f9fa;--rf-param-border:#e0e0e0;
+  --rf-data-bg:#f4f5f7;--rf-data-border:#e0e0e0;
+  --rf-formula-bg:rgba(107,140,174,0.04);--rf-formula-border:rgba(107,140,174,0.2);
+  --rf-highlight:#6a9e8a;--rf-warn:#c4956a;--rf-danger:#c41e1e;
+}
+[data-theme="glass"]{
+  --rf-bg:#080812;--rf-bg2:#0e0e1c;--rf-ink:#f1f5f9;--rf-ink2:#cbd5e1;--rf-muted:#64748b;
+  --rf-rule:rgba(255,255,255,0.07);--rf-accent:#38bdf8;--rf-accent2:#a29bfe;
+  --rf-canvas-bg:#0a0e1a;--rf-param-bg:rgba(255,255,255,0.03);--rf-param-border:rgba(255,255,255,0.06);
+  --rf-data-bg:rgba(255,255,255,0.05);--rf-data-border:rgba(255,255,255,0.06);
+  --rf-formula-bg:rgba(56,189,248,0.05);--rf-formula-border:rgba(56,189,248,0.15);
+  --rf-highlight:#10b981;--rf-warn:#f59e0b;--rf-danger:#ef4444;
+}
+[data-theme="cartoon"]{
+  --rf-bg:#fef6e4;--rf-bg2:#fff8f0;--rf-ink:#2d3436;--rf-ink2:#4a4a4a;--rf-muted:#7a7a7a;
+  --rf-rule:rgba(0,0,0,0.08);--rf-accent:#ff6b6b;--rf-accent2:#4ecdc4;
+  --rf-canvas-bg:#1a1a2e;--rf-param-bg:rgba(255,255,255,0.5);--rf-param-border:rgba(0,0,0,0.1);
+  --rf-data-bg:rgba(255,255,255,0.6);--rf-data-border:rgba(0,0,0,0.08);
+  --rf-formula-bg:rgba(255,107,107,0.05);--rf-formula-border:rgba(255,107,107,0.15);
+  --rf-highlight:#4ecdc4;--rf-warn:#ffe66d;--rf-danger:#ff6b6b;
+}
+[data-theme="cyber"]{
+  --rf-bg:#040410;--rf-bg2:#08081a;--rf-ink:#e0f7fa;--rf-ink2:#b2ebf2;--rf-muted:#4dd0e1;
+  --rf-rule:rgba(0,243,255,0.1);--rf-accent:#00f3ff;--rf-accent2:#ff00ea;
+  --rf-canvas-bg:#020208;--rf-param-bg:rgba(0,243,255,0.02);--rf-param-border:rgba(0,243,255,0.1);
+  --rf-data-bg:rgba(0,0,0,0.4);--rf-data-border:rgba(0,243,255,0.08);
+  --rf-formula-bg:rgba(0,243,255,0.04);--rf-formula-border:rgba(0,243,255,0.15);
+  --rf-highlight:#39ff14;--rf-warn:#ffb800;--rf-danger:#ff0040;
+}
+[data-theme="soviet"]{
+  --rf-bg:#f0ebe4;--rf-bg2:#e8e0d6;--rf-ink:#1a1a1a;--rf-ink2:#3d3d3d;--rf-muted:#6a5a4a;
+  --rf-rule:#d4c4a8;--rf-accent:#c41e1e;--rf-accent2:#8b4513;
+  --rf-canvas-bg:#e8e0d6;--rf-param-bg:#f4f0ea;--rf-param-border:#d4c4a8;
+  --rf-data-bg:#f4f0ea;--rf-data-border:#d4c4a8;
+  --rf-formula-bg:rgba(196,30,30,0.04);--rf-formula-border:rgba(196,30,30,0.2);
+  --rf-highlight:#556b2f;--rf-warn:#b8860b;--rf-danger:#c41e1e;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:var(--font-main);background:var(--rf-bg);color:var(--rf-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--rf-bg)}
+::-webkit-scrollbar-thumb{background:var(--rf-accent);border-radius:999px;opacity:.4}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:calc(100vh - 52px);padding-top:52px}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--rf-rule);background:var(--rf-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--rf-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--rf-formula-bg);border:1px solid var(--rf-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--rf-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--rf-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(0,243,255,0.1);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--rf-accent);text-shadow:0 0 8px rgba(0,243,255,0.25)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--rf-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--rf-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%;cursor:grab}
+#simCanvas.dragging{cursor:grabbing}
+.canvas-overlay{position:absolute;top:16px;left:16px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--rf-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--rf-ink2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.overlay-badge.tir{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5);color:#fca5a5}
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--rf-rule);background:var(--rf-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--rf-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--rf-formula-bg);border:1px solid var(--rf-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--rf-muted);margin-top:1px}
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--rf-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(0,243,255,0.1);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--rf-accent);text-shadow:0 0 8px rgba(0,243,255,0.25)}
+[data-theme="academic"] .rp-header h2{color:var(--rf-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--rf-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:18px 20px;border-bottom:1px solid var(--rf-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--rf-accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--rf-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:16px}
+.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.82rem;font-weight:600;color:var(--rf-ink2);transition:color .4s ease}
+.param-value{font-family:monospace;font-size:0.78rem;color:var(--rf-accent);font-weight:400;min-width:55px;text-align:right}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--rf-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--rf-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+select{width:100%;padding:7px 10px;background:var(--rf-param-bg);color:var(--rf-ink);border:1px solid var(--rf-param-border);border-radius:6px;font-size:0.82rem;font-family:var(--font-main);cursor:pointer;transition:all .3s ease;outline:none}
+select:hover,select:focus{border-color:var(--rf-accent)}
+[data-theme="academic"] select{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:4px}
+[data-theme="soviet"] select{background:#f4f0ea;border:1px solid #d4c4a8;border-radius:2px}
+
+.param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.preset-btn{padding:4px 10px;border:1px solid var(--rf-param-border);background:var(--rf-param-bg);color:var(--rf-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
+.preset-btn:hover{border-color:var(--rf-accent);color:var(--rf-accent);background:var(--rf-formula-bg)}
+.preset-btn.active{border-color:var(--rf-accent);color:var(--rf-accent);background:var(--rf-formula-bg)}
+[data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+
+.mode-indicator{display:flex;gap:6px}
+.mode-btn{flex:1;padding:7px 4px;border:1px solid var(--rf-param-border);background:var(--rf-param-bg);color:var(--rf-muted);border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease}
+.mode-btn.active{border-color:var(--rf-accent);color:var(--rf-accent);background:var(--rf-formula-bg)}
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 数据网格 ===== */
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.data-cell{background:var(--rf-data-bg);border:1px solid var(--rf-data-border);border-radius:8px;padding:8px 10px;transition:all .3s ease}
+.data-cell .dc-label{font-size:0.65rem;color:var(--rf-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.data-cell .dc-value{font-family:monospace;font-size:0.95rem;font-weight:700;color:var(--rf-ink)}
+.data-cell.accent .dc-value{color:var(--rf-accent)}
+.data-cell.accent2 .dc-value{color:var(--rf-accent2)}
+.data-cell.warn .dc-value{color:var(--rf-warn)}
+.data-cell.danger .dc-value{color:var(--rf-danger)}
+
+/* ===== TIR 状态条 ===== */
+.tir-status{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--rf-data-bg);border:1px solid var(--rf-data-border);transition:all .3s ease}
+.tir-dot{width:10px;height:10px;border-radius:50%;background:var(--rf-highlight);flex-shrink:0;transition:background .3s ease}
+.tir-dot.warning{background:var(--rf-warn)}
+.tir-dot.danger{background:var(--rf-danger);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tir-text{font-size:0.78rem;font-weight:600;color:var(--rf-ink2);flex:1}
+.tir-value{font-family:monospace;font-size:0.78rem;font-weight:700;color:var(--rf-accent)}
+
+/* ===== 公式区块 ===== */
+.formula-block{background:var(--rf-formula-bg);border:1px solid var(--rf-formula-border);border-radius:10px;padding:14px 16px;margin-top:4px;transition:all .3s ease}
+.formula-block .fb-title{font-size:0.7rem;color:var(--rf-accent);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px}
+.formula-block .fb-main{font-family:'Cambria Math','Times New Roman',serif;font-size:1.15rem;font-weight:700;text-align:center;color:var(--rf-ink);padding:6px 0}
+.formula-block .fb-desc{font-size:0.72rem;color:var(--rf-muted);line-height:1.7;margin-top:6px}
+.formula-block .fb-desc .var{color:var(--rf-accent);font-family:'Cambria Math',serif;font-style:italic}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--rf-data-bg);border:1px solid var(--rf-data-border);border-radius:10px;padding:14px 16px;margin-bottom:12px;transition:all .3s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card .ic-title{font-size:0.78rem;font-weight:700;color:var(--rf-accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.info-card .ic-title::before{content:'';width:3px;height:14px;background:var(--rf-accent);border-radius:2px}
+.info-card .ic-body{font-size:0.75rem;color:var(--rf-ink2);line-height:1.8}
+.info-card .ic-body table{width:100%;border-collapse:collapse;margin-top:6px}
+.info-card .ic-body th,.info-card .ic-body td{padding:4px 8px;text-align:left;font-size:0.72rem;border-bottom:1px solid var(--rf-data-border)}
+.info-card .ic-body th{color:var(--rf-muted);font-weight:600}
+.info-card .ic-body td:last-child{text-align:right;font-family:monospace;color:var(--rf-accent)}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ========== 左侧参数面板 ========== -->
+  <div class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">◈</div>
+      <div>
+        <h1>光的折射</h1>
+        <div class="lp-sub">Snell's Law · 几何光学</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">参数控制</div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">入射角 θ₁</span>
+          <span class="param-value" id="valAngle">30.0°</span>
+        </div>
+        <input type="range" id="angleSlider" min="0" max="89" value="30" step="0.5">
+      </div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">介质 1（入射侧）</span>
+          <span class="param-value" id="valN1">n=1.00</span>
+        </div>
+        <select id="medium1Select">
+          <option value="1.00">空气 (n=1.00)</option>
+          <option value="1.33">水 (n=1.33)</option>
+          <option value="1.50">玻璃 (n=1.50)</option>
+          <option value="2.42">钻石 (n=2.42)</option>
+        </select>
+      </div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">介质 2（折射侧）</span>
+          <span class="param-value" id="valN2">n=1.33</span>
+        </div>
+        <select id="medium2Select">
+          <option value="1.00">空气 (n=1.00)</option>
+          <option value="1.33" selected>水 (n=1.33)</option>
+          <option value="1.50">玻璃 (n=1.50)</option>
+          <option value="2.42">钻石 (n=2.42)</option>
+        </select>
+      </div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">光线波长</span>
+          <span class="param-value" id="valWL">白光</span>
+        </div>
+        <select id="wavelengthSelect">
+          <option value="white">白光</option>
+          <option value="red">红光 700nm</option>
+          <option value="green">绿光 530nm</option>
+          <option value="blue">蓝光 450nm</option>
+        </select>
+      </div>
+
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">入射方向</span>
+        </div>
+        <div class="mode-indicator">
+          <button class="mode-btn active" id="dirFromAbove">从上入射</button>
+          <button class="mode-btn" id="dirFromBelow">从下入射</button>
+        </div>
+      </div>
+
+      <div class="param-presets">
+        <button class="preset-btn" data-preset="air-water">空气→水</button>
+        <button class="preset-btn" data-preset="air-glass">空气→玻璃</button>
+        <button class="preset-btn" data-preset="air-diamond">空气→钻石</button>
+        <button class="preset-btn" data-preset="water-air">水→空气</button>
+        <button class="preset-btn" data-preset="glass-air">玻璃→空气</button>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">操作提示</div>
+      <div style="font-size:0.72rem;color:var(--rf-muted);line-height:1.8">
+        拖动画布中的光源点可直接调整入射角与方向。当光从光密介质射向光疏介质且入射角超过临界角时，发生全反射。
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 中间画布区域 ========== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <div class="overlay-badge" id="badgeAngle">θ₁ = 30.0°</div>
+        <div class="overlay-badge" id="badgeMedia">空气 → 水</div>
+        <div class="overlay-badge tir" id="badgeTIR" style="display:none">⚠ 全反射</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 右侧数据+知识面板 ========== -->
+  <div class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📐</div>
+      <div>
+        <h2>实时数据与公式</h2>
+        <div class="rp-sub">Snell's Law · Fresnel Reflectance</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">测量数据</div>
+      <div class="data-grid">
+        <div class="data-cell accent">
+          <div class="dc-label">θ₁ 入射角</div>
+          <div class="dc-value" id="dataTheta1">30.0°</div>
+        </div>
+        <div class="data-cell accent2">
+          <div class="dc-label">θ₂ 折射角</div>
+          <div class="dc-value" id="dataTheta2">22.1°</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">n₁ 折射率</div>
+          <div class="dc-value" id="dataN1">1.00</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">n₂ 折射率</div>
+          <div class="dc-value" id="dataN2">1.33</div>
+        </div>
+        <div class="data-cell warn">
+          <div class="dc-label">θc 临界角</div>
+          <div class="dc-value" id="dataCritical">—</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">R 反射率</div>
+          <div class="dc-value" id="dataReflect">5.2%</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="tir-status" id="tirStatus">
+        <div class="tir-dot" id="tirDot"></div>
+        <div class="tir-text" id="tirText">部分反射</div>
+        <div class="tir-value" id="tirValue">R = 5.2%</div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">斯涅尔定律</div>
+      <div class="formula-block">
+        <div class="fb-title">Snell's Law</div>
+        <div class="fb-main">n₁ sin θ₁ = n₂ sin θ₂</div>
+        <div class="fb-desc">
+          <span class="var">n₁</span>, <span class="var">n₂</span> 为两种介质的折射率<br>
+          <span class="var">θ₁</span> 为入射角，<span class="var">θ₂</span> 为折射角<br>
+          临界角：<span class="var">θc</span> = arcsin(n₂/n₁) (n₁ > n₂)
+        </div>
+      </div>
+      <div style="height:8px"></div>
+      <div class="formula-block">
+        <div class="fb-title">Fresnel Reflectance</div>
+        <div class="fb-main">R = (Rs + Rp) / 2</div>
+        <div class="fb-desc">
+          <span class="var">Rs</span> = |(n₁cosθ₁ − n₂cosθ₂) / (n₁cosθ₁ + n₂cosθ₂)|²<br>
+          <span class="var">Rp</span> = |(n₂cosθ₁ − n₁cosθ₂) / (n₂cosθ₁ + n₁cosθ₂)|²<br>
+          透射率 T = 1 − R
+        </div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="section-label">知识卡片</div>
+
+      <div class="info-card">
+        <div class="ic-title">常见介质折射率表</div>
+        <div class="ic-body">
+          <table>
+            <tr><th>介质</th><th>折射率 n</th></tr>
+            <tr><td>真空 / 空气</td><td>1.00</td></tr>
+            <tr><td>水</td><td>1.33</td></tr>
+            <tr><td>玻璃（冕牌）</td><td>1.50</td></tr>
+            <tr><td>钻石</td><td>2.42</td></tr>
+            <tr><td>蓝宝石</td><td>1.77</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-title">全反射</div>
+        <div class="ic-body">
+          当光从光密介质（高折射率）射向光疏介质（低折射率）时，若入射角大于临界角 θc，光线将完全反射回原介质，不发生折射。光纤通信正是利用全反射原理将光信号在光纤内传输。
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-title">光速与介质</div>
+        <div class="ic-body">
+          光在介质中的传播速度 v = c / n，其中 c ≈ 3×10⁸ m/s 为真空光速。折射率越大，光速越慢。由于不同波长光的折射率略有差异（色散），白光通过棱镜后会分散为七色光谱。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  // ==========================================
+  // 常量定义
+  // ==========================================
+  var MEDIA = {
+    '1.00': { name:'空气', tint:'rgba(100,180,255,0.03)' },
+    '1.33': { name:'水',   tint:'rgba(0,150,255,0.10)' },
+    '1.50': { name:'玻璃', tint:'rgba(200,220,255,0.08)' },
+    '2.42': { name:'钻石', tint:'rgba(255,255,255,0.12)' }
+  };
+  var WAVELENGTHS = {
+    white: { name:'白光', color:'#ffffff', glow:'255,255,255' },
+    red:   { name:'红光', color:'#ff4444', glow:'255,68,68' },
+    green: { name:'绿光', color:'#22c55e', glow:'34,197,94' },
+    blue:  { name:'蓝光', color:'#38bdf8', glow:'56,189,248' }
+  };
+
+  // ==========================================
+  // 状态
+  // ==========================================
+  var state = {
+    n1Value: 1.00,
+    n2Value: 1.33,
+    theta1: 30 * Math.PI / 180,
+    wavelength: 'white',
+    fromAbove: true,
+    lightSide: -1,
+    rayLength: 0,
+    isDragging: false,
+    width: 0, height: 0,
+    interfaceY: 0,
+    centerX: 0, centerY: 0,
+    sourceX: 0, sourceY: 0,
+    animTime: 0
+  };
+
+  // ==========================================
+  // Canvas 初始化
+  // ==========================================
+  var canvas = document.getElementById('simCanvas');
+  var ctx = canvas.getContext('2d');
+
+  function resize(){
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.floor(rect.width);
+    var h = Math.floor(rect.height);
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    state.width = w;
+    state.height = h;
+    state.interfaceY = Math.floor(h * 0.45);
+    state.centerX = Math.floor(w / 2);
+    state.centerY = state.interfaceY;
+    state.rayLength = Math.min(w, h) * 0.38;
+    updateSourcePosition();
+  }
+
+  function updateSourcePosition(){
+    var R = state.rayLength;
+    var t = state.theta1;
+    var h = state.lightSide;
+    if(state.fromAbove){
+      state.sourceX = state.centerX + h * Math.sin(t) * R;
+      state.sourceY = state.centerY - Math.cos(t) * R;
+    } else {
+      state.sourceX = state.centerX + h * Math.sin(t) * R;
+      state.sourceY = state.centerY + Math.cos(t) * R;
+    }
+  }
+
+  // ==========================================
+  // 物理计算 — Snell's Law + Fresnel
+  // ==========================================
+  function calcPhysics(){
+    var n1 = state.n1Value;
+    var n2 = state.n2Value;
+    var t1 = state.theta1;
+    var sinT1 = Math.sin(t1);
+    var sinT2 = (n1 / n2) * sinT1;
+    var t2 = null;
+    var isTIR = false;
+    var criticalAngle = null;
+    var reflectance = 0;
+
+    if(n1 > n2){
+      criticalAngle = Math.asin(n2 / n1);
+      if(t1 >= criticalAngle){
+        isTIR = true;
+      }
+    }
+
+    if(!isTIR){
+      t2 = Math.asin(Math.min(1, Math.max(-1, sinT2)));
+      // Fresnel reflectance
+      var cosT1 = Math.cos(t1);
+      var cosT2 = Math.cos(t2);
+      var rs = (n1*cosT1 - n2*cosT2) / (n1*cosT1 + n2*cosT2);
+      var rp = (n2*cosT1 - n1*cosT2) / (n2*cosT1 + n1*cosT2);
+      reflectance = (rs*rs + rp*rp) / 2;
+    } else {
+      reflectance = 1;
+    }
+
+    return {
+      theta1: t1, theta2: t2, reflectAngle: t1,
+      n1: n1, n2: n2, isTIR: isTIR,
+      criticalAngle: criticalAngle, reflectance: reflectance
+    };
+  }
+
+  // ==========================================
+  // 主题颜色获取
+  // ==========================================
+  function getThemeColors(){
+    var theme = document.documentElement.getAttribute('data-theme') || 'academic';
+    var palettes = {
+      academic: {
+        bgTop:'#ffffff', bgBottom:'#f0f0f0',
+        medium1Tint:'rgba(107,140,174,0.04)', medium2Tint:'rgba(107,140,174,0.08)',
+        interface:'rgba(107,140,174,0.6)', normal:'rgba(122,122,138,0.5)',
+        grid:'rgba(107,140,174,0.06)', text:'#3d3d5c', muted:'#7a7a8a',
+        incident:'#6b8cae', reflected:'#c4956a', refracted:'#8a7ca8',
+        tirGlow:'196,30,30', sourceGlow:'107,140,174', tir:'#c41e1e'
+      },
+      glass: {
+        bgTop:'#0a0e1a', bgBottom:'#080812',
+        medium1Tint:'rgba(56,189,248,0.03)', medium2Tint:'rgba(162,155,254,0.06)',
+        interface:'rgba(56,189,248,0.5)', normal:'rgba(148,163,184,0.4)',
+        grid:'rgba(56,189,248,0.04)', text:'#cbd5e1', muted:'#64748b',
+        incident:'#38bdf8', reflected:'#f59e0b', refracted:'#a29bfe',
+        tirGlow:'239,68,68', sourceGlow:'56,189,248', tir:'#ef4444'
+      },
+      cartoon: {
+        bgTop:'#1a1a2e', bgBottom:'#16213e',
+        medium1Tint:'rgba(78,205,196,0.04)', medium2Tint:'rgba(255,107,107,0.08)',
+        interface:'rgba(78,205,196,0.5)', normal:'rgba(255,255,255,0.3)',
+        grid:'rgba(255,255,255,0.03)', text:'#e0e0e0', muted:'#7a7a7a',
+        incident:'#4ecdc4', reflected:'#ffe66d', refracted:'#ff6b6b',
+        tirGlow:'255,107,107', sourceGlow:'78,205,196', tir:'#ff6b6b'
+      },
+      cyber: {
+        bgTop:'#020208', bgBottom:'#040410',
+        medium1Tint:'rgba(0,243,255,0.03)', medium2Tint:'rgba(255,0,234,0.06)',
+        interface:'rgba(0,243,255,0.6)', normal:'rgba(0,243,255,0.3)',
+        grid:'rgba(0,243,255,0.04)', text:'#b2ebf2', muted:'#4dd0e1',
+        incident:'#00f3ff', reflected:'#ffb800', refracted:'#ff00ea',
+        tirGlow:'255,0,64', sourceGlow:'0,243,255', tir:'#ff0040'
+      },
+      soviet: {
+        bgTop:'#e8e0d6', bgBottom:'#f0ebe4',
+        medium1Tint:'rgba(196,30,30,0.04)', medium2Tint:'rgba(139,69,19,0.06)',
+        interface:'rgba(196,30,30,0.6)', normal:'rgba(106,90,74,0.5)',
+        grid:'rgba(196,30,30,0.04)', text:'#3d3d3d', muted:'#6a5a4a',
+        incident:'#c41e1e', reflected:'#b8860b', refracted:'#8b4513',
+        tirGlow:'196,30,30', sourceGlow:'196,30,30', tir:'#c41e1e'
+      }
+    };
+    return palettes[theme] || palettes.academic;
+  }
+
+  // ==========================================
+  // 绘制函数
+  // ==========================================
+  function drawGlowRay(x1, y1, x2, y2, color, width, intensity){
+    intensity = intensity || 1;
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 18 * intensity;
+    ctx.globalAlpha = 0.3 * intensity;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width * 4;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8 * intensity;
+    ctx.globalAlpha = 0.7 * intensity;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width * 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = intensity;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = width * 0.6;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.9 * intensity;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawArrow(x, y, angle, color, size){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.moveTo(size, 0);
+    ctx.lineTo(-size*0.5, -size*0.5);
+    ctx.lineTo(-size*0.5, size*0.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawAngleArc(cx, cy, radius, startAngle, endAngle, ccw, color, label, labelOffset){
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 4;
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, startAngle, endAngle, ccw);
+    ctx.stroke();
+    ctx.restore();
+
+    if(label){
+      var midAngle = (startAngle + endAngle) / 2;
+      var lx = cx + Math.cos(midAngle) * labelOffset;
+      var ly = cy + Math.sin(midAngle) * labelOffset;
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.font = 'bold 11px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 4;
+      ctx.fillText(label, lx, ly);
+      ctx.restore();
+    }
+  }
+
+  function drawGrid(w, h, colors){
+    ctx.save();
+    ctx.strokeStyle = colors.grid;
+    ctx.lineWidth = 1;
+    var step = 40;
+    for(var x = 0; x < w; x += step){
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for(var y = 0; y < h; y += step){
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawLightSource(x, y, colors){
+    var wl = WAVELENGTHS[state.wavelength];
+    var glow = wl.glow;
+    var grd = ctx.createRadialGradient(x, y, 0, x, y, 30);
+    grd.addColorStop(0, 'rgba(' + glow + ',0.6)');
+    grd.addColorStop(0.3, 'rgba(' + glow + ',0.2)');
+    grd.addColorStop(1, 'rgba(' + glow + ',0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(x, y, 30, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.shadowColor = wl.color;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = wl.color;
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawInterfaceTexture(w, iy, colors){
+    ctx.save();
+    ctx.strokeStyle = colors.grid;
+    ctx.lineWidth = 1;
+    var t = state.animTime * 0.001;
+    for(var x = 0; x < w; x += 30){
+      var wave = Math.sin(x * 0.02 + t) * 2;
+      ctx.beginPath();
+      ctx.moveTo(x, iy + wave);
+      ctx.lineTo(x + 15, iy + wave + Math.sin((x+15)*0.02 + t) * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ==========================================
+  // 主绘制
+  // ==========================================
+  function draw(){
+    var w = state.width;
+    var h = state.height;
+    var iy = state.interfaceY;
+    var cx = state.centerX;
+    var cy = state.centerY;
+    var R = state.rayLength;
+    var colors = getThemeColors();
+    var wl = WAVELENGTHS[state.wavelength];
+    var phys = calcPhysics();
+    var t1 = phys.theta1;
+    var t2 = phys.theta2;
+    var isTIR = phys.isTIR;
+    var fromAbove = state.fromAbove;
+    var hSide = state.lightSide;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // 背景 — 上方介质
+    var bgGrad1 = ctx.createLinearGradient(0, 0, 0, iy);
+    bgGrad1.addColorStop(0, colors.bgTop);
+    bgGrad1.addColorStop(1, colors.bgBottom);
+    ctx.fillStyle = bgGrad1;
+    ctx.fillRect(0, 0, w, iy);
+
+    // 背景 — 下方介质
+    var m2Key = state.n2Value.toFixed(2);
+    var m1Key = state.n1Value.toFixed(2);
+    var m1Info = MEDIA[m1Key] || MEDIA['1.00'];
+    var m2Info = MEDIA[m2Key] || MEDIA['1.33'];
+    var upperTint = fromAbove ? m1Info.tint : m2Info.tint;
+    var lowerTint = fromAbove ? m2Info.tint : m1Info.tint;
+
+    var bgGrad2 = ctx.createLinearGradient(0, iy, 0, h);
+    bgGrad2.addColorStop(0, lowerTint);
+    bgGrad2.addColorStop(1, colors.bgBottom);
+    ctx.fillStyle = bgGrad2;
+    ctx.fillRect(0, iy, w, h - iy);
+
+    // 上方叠加tint
+    if(upperTint !== 'rgba(100,180,255,0.03)'){
+      ctx.fillStyle = upperTint;
+      ctx.fillRect(0, 0, w, iy);
+    }
+
+    drawGrid(w, h, colors);
+
+    // 分界面
+    ctx.save();
+    ctx.shadowColor = colors.interface;
+    ctx.shadowBlur = 10;
+    ctx.strokeStyle = colors.interface;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, iy);
+    ctx.lineTo(w, iy);
+    ctx.stroke();
+    ctx.restore();
+
+    drawInterfaceTexture(w, iy, colors);
+
+    // 法线（虚线）
+    ctx.save();
+    ctx.strokeStyle = colors.normal;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(cx, Math.max(10, iy - R - 40));
+    ctx.lineTo(cx, Math.min(h - 10, iy + R + 40));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // 介质标签
+    ctx.save();
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = colors.muted;
+    ctx.textBaseline = 'top';
+    var upperName = fromAbove ? m1Info.name : m2Info.name;
+    var upperN = fromAbove ? state.n1Value : state.n2Value;
+    ctx.fillText('▲ ' + upperName + ' n=' + upperN.toFixed(2), 16, 16);
+    ctx.textBaseline = 'bottom';
+    var lowerName = fromAbove ? m2Info.name : m1Info.name;
+    var lowerN = fromAbove ? state.n2Value : state.n1Value;
+    ctx.fillText('▼ ' + lowerName + ' n=' + lowerN.toFixed(2), 16, h - 16);
+    // 法线标签
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = colors.muted;
+    ctx.fillText('法线', cx, iy - R - 25);
+    ctx.restore();
+
+    // 计算光线端点
+    var sinT1 = Math.sin(t1);
+    var cosT1 = Math.cos(t1);
+    var incStart, refEnd, refrEnd;
+
+    if(fromAbove){
+      incStart = { x: cx + hSide*sinT1*R, y: cy - cosT1*R };
+      refEnd = { x: cx - hSide*sinT1*R, y: cy - cosT1*R };
+      if(!isTIR && t2 !== null){
+        var sinT2v = Math.sin(t2), cosT2v = Math.cos(t2);
+        refrEnd = { x: cx - hSide*sinT2v*R, y: cy + cosT2v*R };
+      }
+    } else {
+      incStart = { x: cx + hSide*sinT1*R, y: cy + cosT1*R };
+      refEnd = { x: cx - hSide*sinT1*R, y: cy + cosT1*R };
+      if(!isTIR && t2 !== null){
+        sinT2v = Math.sin(t2); cosT2v = Math.cos(t2);
+        refrEnd = { x: cx - hSide*sinT2v*R, y: cy - cosT2v*R };
+      }
+    }
+
+    // 入射光线
+    drawGlowRay(incStart.x, incStart.y, cx, cy, wl.color, 2.5, 1);
+
+    // 反射光线
+    var refColor = isTIR ? colors.tir : colors.reflected;
+    var refIntensity = isTIR ? 1.8 : Math.max(0.3, phys.reflectance * 3);
+    var refWidth = isTIR ? 3.5 : 2;
+    drawGlowRay(cx, cy, refEnd.x, refEnd.y, refColor, refWidth, refIntensity);
+
+    // 折射光线
+    if(!isTIR && refrEnd){
+      var transIntensity = Math.max(0.2, 1 - phys.reflectance);
+      drawGlowRay(cx, cy, refrEnd.x, refrEnd.y, colors.refracted, 2.5, transIntensity);
+    }
+
+    // 箭头
+    var arrowDist = R * 0.5;
+    if(fromAbove){
+      var ax = cx + hSide*sinT1*arrowDist;
+      var ay = cy - cosT1*arrowDist;
+      drawArrow(ax, ay, Math.atan2(cosT1, -hSide*sinT1), wl.color, 7);
+    } else {
+      ax = cx + hSide*sinT1*arrowDist;
+      ay = cy + cosT1*arrowDist;
+      drawArrow(ax, ay, Math.atan2(-cosT1, -hSide*sinT1), wl.color, 7);
+    }
+    if(fromAbove){
+      ax = cx - hSide*sinT1*arrowDist;
+      ay = cy - cosT1*arrowDist;
+      drawArrow(ax, ay, Math.atan2(-cosT1, -hSide*sinT1), refColor, isTIR?9:6);
+    } else {
+      ax = cx - hSide*sinT1*arrowDist;
+      ay = cy + cosT1*arrowDist;
+      drawArrow(ax, ay, Math.atan2(cosT1, -hSide*sinT1), refColor, isTIR?9:6);
+    }
+    if(!isTIR && refrEnd){
+      var sinT2a = Math.sin(t2), cosT2a = Math.cos(t2);
+      if(fromAbove){
+        ax = cx - hSide*sinT2a*arrowDist;
+        ay = cy + cosT2a*arrowDist;
+        drawArrow(ax, ay, Math.atan2(cosT2a, -hSide*sinT2a), colors.refracted, 7);
+      } else {
+        ax = cx - hSide*sinT2a*arrowDist;
+        ay = cy - cosT2a*arrowDist;
+        drawArrow(ax, ay, Math.atan2(-cosT2a, -hSide*sinT2a), colors.refracted, 7);
+      }
+    }
+
+    // 角度弧线
+    var arcR = 45, arcLabelR = 62;
+    var t1Deg = (t1 * 180 / Math.PI).toFixed(1);
+
+    if(fromAbove){
+      var incAng = Math.atan2(-cosT1, hSide*sinT1);
+      var normUpAng = -Math.PI/2;
+      var refAng = Math.atan2(-cosT1, -hSide*sinT1);
+      if(hSide < 0){
+        drawAngleArc(cx, cy, arcR, incAng, normUpAng, false, wl.color, 'θ₁='+t1Deg+'°', arcLabelR);
+        drawAngleArc(cx, cy, arcR+12, normUpAng, refAng, false, colors.reflected, null, 0);
+      } else {
+        drawAngleArc(cx, cy, arcR, normUpAng, incAng, false, wl.color, 'θ₁='+t1Deg+'°', arcLabelR);
+        drawAngleArc(cx, cy, arcR+12, refAng, normUpAng, false, colors.reflected, null, 0);
+      }
+      if(!isTIR && t2 !== null){
+        var t2Deg = (t2*180/Math.PI).toFixed(1);
+        var sinT2b = Math.sin(t2), cosT2b = Math.cos(t2);
+        var refrAng = Math.atan2(cosT2b, -hSide*sinT2b);
+        var normDownAng = Math.PI/2;
+        if(hSide < 0){
+          drawAngleArc(cx, cy, arcR, refrAng, normDownAng, false, colors.refracted, 'θ₂='+t2Deg+'°', arcLabelR);
+        } else {
+          drawAngleArc(cx, cy, arcR, normDownAng, refrAng, false, colors.refracted, 'θ₂='+t2Deg+'°', arcLabelR);
+        }
+      }
+    } else {
+      var incAng2 = Math.atan2(cosT1, hSide*sinT1);
+      var normDownAng2 = Math.PI/2;
+      var refAng2 = Math.atan2(cosT1, -hSide*sinT1);
+      if(hSide < 0){
+        drawAngleArc(cx, cy, arcR, normDownAng2, incAng2, false, wl.color, 'θ₁='+t1Deg+'°', arcLabelR);
+        drawAngleArc(cx, cy, arcR+12, refAng2, normDownAng2, false, colors.reflected, null, 0);
+      } else {
+        drawAngleArc(cx, cy, arcR, incAng2, normDownAng2, false, wl.color, 'θ₁='+t1Deg+'°', arcLabelR);
+        drawAngleArc(cx, cy, arcR+12, normDownAng2, refAng2, false, colors.reflected, null, 0);
+      }
+      if(!isTIR && t2 !== null){
+        var t2Deg2 = (t2*180/Math.PI).toFixed(1);
+        var sinT2c = Math.sin(t2), cosT2c = Math.cos(t2);
+        var refrAng2 = Math.atan2(-cosT2c, -hSide*sinT2c);
+        var normUpAng2 = -Math.PI/2;
+        if(hSide < 0){
+          drawAngleArc(cx, cy, arcR, normUpAng2, refrAng2, false, colors.refracted, 'θ₂='+t2Deg2+'°', arcLabelR);
+        } else {
+          drawAngleArc(cx, cy, arcR, refrAng2, normUpAng2, false, colors.refracted, 'θ₂='+t2Deg2+'°', arcLabelR);
+        }
+      }
+    }
+
+    // 入射点
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = wl.color;
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    // 光源
+    drawLightSource(state.sourceX, state.sourceY, colors);
+
+    // TIR 警告
+    if(isTIR){
+      ctx.save();
+      ctx.fillStyle = 'rgba(' + colors.tirGlow + ',0.08)';
+      ctx.fillRect(0, fromAbove ? 0 : iy, w, fromAbove ? iy : h-iy);
+      ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = colors.tir;
+      ctx.shadowColor = colors.tir;
+      ctx.shadowBlur = 10;
+      ctx.fillText('⚠ 全反射 Total Internal Reflection', cx, fromAbove ? 55 : iy + 55);
+      ctx.restore();
+    }
+  }
+
+  // ==========================================
+  // UI 更新
+  // ==========================================
+  function updateUI(){
+    var phys = calcPhysics();
+    var t1Deg = phys.theta1 * 180 / Math.PI;
+    var t2Deg = phys.theta2 !== null ? phys.theta2 * 180 / Math.PI : null;
+
+    document.getElementById('dataTheta1').textContent = t1Deg.toFixed(1) + '°';
+    document.getElementById('dataTheta2').textContent = t2Deg !== null ? t2Deg.toFixed(1) + '°' : '—';
+    document.getElementById('dataN1').textContent = phys.n1.toFixed(2);
+    document.getElementById('dataN2').textContent = phys.n2.toFixed(2);
+    document.getElementById('dataCritical').textContent = phys.criticalAngle !== null ? (phys.criticalAngle*180/Math.PI).toFixed(1)+'°' : '—';
+    document.getElementById('dataReflect').textContent = (phys.reflectance*100).toFixed(1) + '%';
+
+    var tirDot = document.getElementById('tirDot');
+    var tirText = document.getElementById('tirText');
+    var tirValue = document.getElementById('tirValue');
+    var tirBadge = document.getElementById('badgeTIR');
+
+    if(Math.abs(phys.n1 - phys.n2) < 0.001){
+      tirDot.className = 'tir-dot';
+      tirText.textContent = '同介质 · 无界面';
+      tirValue.textContent = 'R = 0%';
+      tirBadge.style.display = 'none';
+    } else if(phys.isTIR){
+      tirDot.className = 'tir-dot danger';
+      tirText.textContent = '全反射 · TIR';
+      tirValue.textContent = 'R = 100%';
+      tirBadge.style.display = '';
+    } else {
+      tirDot.className = phys.reflectance > 0.1 ? 'tir-dot warning' : 'tir-dot';
+      tirText.textContent = '部分反射';
+      tirValue.textContent = 'R = ' + (phys.reflectance*100).toFixed(1) + '%';
+      tirBadge.style.display = 'none';
+    }
+
+    document.getElementById('badgeAngle').textContent = 'θ₁ = ' + t1Deg.toFixed(1) + '°';
+    var m1Name = MEDIA[state.n1Value.toFixed(2)] ? MEDIA[state.n1Value.toFixed(2)].name : '介质1';
+    var m2Name = MEDIA[state.n2Value.toFixed(2)] ? MEDIA[state.n2Value.toFixed(2)].name : '介质2';
+    var incName = state.fromAbove ? m1Name : m2Name;
+    var refName = state.fromAbove ? m2Name : m1Name;
+    document.getElementById('badgeMedia').textContent = incName + ' → ' + refName;
+
+    document.getElementById('valAngle').textContent = t1Deg.toFixed(1) + '°';
+    document.getElementById('valN1').textContent = 'n=' + state.n1Value.toFixed(2);
+    document.getElementById('valN2').textContent = 'n=' + state.n2Value.toFixed(2);
+    document.getElementById('valWL').textContent = WAVELENGTHS[state.wavelength].name;
+
+    document.getElementById('angleSlider').value = t1Deg.toFixed(1);
+
+    var dirAbove = document.getElementById('dirFromAbove');
+    var dirBelow = document.getElementById('dirFromBelow');
+    dirAbove.classList.toggle('active', state.fromAbove);
+    dirBelow.classList.toggle('active', !state.fromAbove);
+  }
+
+  // ==========================================
+  // 交互：拖动光源
+  // ==========================================
+  function getCanvasPos(e){
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function hitLightSource(pos){
+    var dx = pos.x - state.sourceX;
+    var dy = pos.y - state.sourceY;
+    return dx*dx + dy*dy < 900;
+  }
+
+  function setAngleFromPosition(pos){
+    var dx = state.centerX - pos.x;
+    var dy = state.centerY - pos.y;
+    state.fromAbove = dy > 0;
+    state.lightSide = dx >= 0 ? -1 : 1;
+    var dist = Math.sqrt(dx*dx + dy*dy);
+    if(dist < 10) return;
+    var sinT1 = Math.abs(dx) / dist;
+    var theta1 = Math.asin(Math.min(1, sinT1));
+    theta1 = Math.max(0, Math.min(89*Math.PI/180, theta1));
+    state.theta1 = theta1;
+    updateSourcePosition();
+    updateUI();
+  }
+
+  canvas.addEventListener('mousedown', function(e){
+    var pos = getCanvasPos(e);
+    if(hitLightSource(pos)){
+      state.isDragging = true;
+      canvas.classList.add('dragging');
+      e.preventDefault();
+    }
+  });
+
+  canvas.addEventListener('mousemove', function(e){
+    var pos = getCanvasPos(e);
+    if(state.isDragging){
+      setAngleFromPosition(pos);
+      e.preventDefault();
+    } else {
+      canvas.style.cursor = hitLightSource(pos) ? 'grab' : 'default';
+    }
+  });
+
+  canvas.addEventListener('mouseup', function(){
+    state.isDragging = false;
+    canvas.classList.remove('dragging');
+  });
+
+  canvas.addEventListener('mouseleave', function(){
+    state.isDragging = false;
+    canvas.classList.remove('dragging');
+  });
+
+  canvas.addEventListener('touchstart', function(e){
+    var pos = getCanvasPos(e);
+    if(hitLightSource(pos)){
+      state.isDragging = true;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function(e){
+    if(state.isDragging){
+      var pos = getCanvasPos(e);
+      setAngleFromPosition(pos);
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function(){
+    state.isDragging = false;
+  });
+
+  canvas.addEventListener('dblclick', function(e){
+    var pos = getCanvasPos(e);
+    setAngleFromPosition(pos);
+  });
+
+  // ==========================================
+  // 控件事件
+  // ==========================================
+  document.getElementById('angleSlider').addEventListener('input', function(e){
+    var deg = parseFloat(e.target.value);
+    state.theta1 = deg * Math.PI / 180;
+    updateSourcePosition();
+    updateUI();
+  });
+
+  document.getElementById('medium1Select').addEventListener('change', function(e){
+    state.n1Value = parseFloat(e.target.value);
+    updateUI();
+  });
+
+  document.getElementById('medium2Select').addEventListener('change', function(e){
+    state.n2Value = parseFloat(e.target.value);
+    updateUI();
+  });
+
+  document.getElementById('wavelengthSelect').addEventListener('change', function(e){
+    state.wavelength = e.target.value;
+    updateUI();
+  });
+
+  document.getElementById('dirFromAbove').addEventListener('click', function(){
+    state.fromAbove = true;
+    updateSourcePosition();
+    updateUI();
+  });
+
+  document.getElementById('dirFromBelow').addEventListener('click', function(){
+    state.fromAbove = false;
+    updateSourcePosition();
+    updateUI();
+  });
+
+  // 预设
+  document.querySelectorAll('.preset-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var preset = btn.dataset.preset;
+      var presets = {
+        'air-water':   { n1:1.00, n2:1.33 },
+        'air-glass':   { n1:1.00, n2:1.50 },
+        'air-diamond': { n1:1.00, n2:2.42 },
+        'water-air':   { n1:1.33, n2:1.00 },
+        'glass-air':   { n1:1.50, n2:1.00 }
+      };
+      var p = presets[preset];
+      if(p){
+        state.n1Value = p.n1;
+        state.n2Value = p.n2;
+        document.getElementById('medium1Select').value = p.n1.toFixed(2);
+        document.getElementById('medium2Select').value = p.n2.toFixed(2);
+        updateUI();
+      }
+    });
+  });
+
+  // ==========================================
+  // MutationObserver — 主题变化
+  // ==========================================
+  var observer = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      if(m.attributeName === 'data-theme'){
+        // 主题切换后下一帧重绘
+        requestAnimationFrame(draw);
+      }
+    });
+  });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ==========================================
+  // 窗口调整
+  // ==========================================
+  window.addEventListener('resize', resize);
+
+  // ==========================================
+  // 动画循环
+  // ==========================================
+  function animate(t){
+    state.animTime = t;
+    draw();
+    requestAnimationFrame(animate);
+  }
+
+  // ==========================================
+  // 初始化
+  // ==========================================
+  resize();
+  updateUI();
+  requestAnimationFrame(animate);
+
+})();
+</script>
+</body>
+</html>

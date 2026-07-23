@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>双缝干涉 — 杨氏实验 | 物理沙盒宇宙</title>
+<link rel="stylesheet" href="shared-theme.css">
+<style>
+/* ================================================================
+   THEME VARIABLES — 双缝干涉 (--in- 前缀) · 五种主题
+   ================================================================ */
+[data-theme="glass"]{
+  --in-bg:#080812;--in-bg2:#0e0e1c;--in-ink:#f1f5f9;--in-ink2:#cbd5e1;--in-muted:#64748b;
+  --in-rule:rgba(255,255,255,0.07);--in-accent:#38bdf8;--in-accent2:#a29bfe;--in-accent3:#34d399;--in-accent4:#fbbf24;
+  --in-canvas-bg:#0a0e1a;--in-param-bg:rgba(255,255,255,0.03);--in-param-border:rgba(255,255,255,0.06);
+  --in-data-bg:rgba(255,255,255,0.05);--in-data-border:rgba(255,255,255,0.06);
+  --in-formula-bg:rgba(56,189,248,0.05);--in-formula-border:rgba(56,189,248,0.15);
+  --in-card-bg:rgba(255,255,255,0.03);--in-card-border:rgba(255,255,255,0.06);
+  --in-glow:none;--in-highlight:#10b981;--in-warn:#f59e0b;--in-danger:#ef4444;
+  --in-scrollbar-thumb:rgba(56,189,248,0.3);
+}
+[data-theme="academic"]{
+  --in-bg:#f8f9fa;--in-bg2:#f1f3f5;--in-ink:#1a1a2e;--in-ink2:#3d3d5c;--in-muted:#7a7a8a;--in-rule:#e0e0e0;
+  --in-accent:#6b8cae;--in-accent2:#8a7ca8;--in-accent3:#6a9e8a;--in-accent4:#c4956a;
+  --in-canvas-bg:#ffffff;--in-param-bg:#f8f9fa;--in-param-border:#e0e0e0;
+  --in-data-bg:#f4f5f7;--in-data-border:#e0e0e0;
+  --in-formula-bg:rgba(107,140,174,0.05);--in-formula-border:rgba(107,140,174,0.22);
+  --in-card-bg:#ffffff;--in-card-border:#e0e0e0;
+  --in-glow:none;--in-highlight:#2e7d32;--in-warn:#e65100;--in-danger:#c62828;
+  --in-scrollbar-thumb:#d0d0d0;
+}
+[data-theme="cartoon"]{
+  --in-bg:#fef6e4;--in-bg2:#fff8f0;--in-ink:#2d3436;--in-ink2:#4a4a4a;--in-muted:#7a7a7a;--in-rule:rgba(0,0,0,0.08);
+  --in-accent:#ff6b6b;--in-accent2:#4ecdc4;--in-accent3:#ffe66d;--in-accent4:#a29bfe;
+  --in-canvas-bg:#1a1a2e;--in-param-bg:rgba(255,255,255,0.5);--in-param-border:rgba(0,0,0,0.1);
+  --in-data-bg:rgba(255,255,255,0.6);--in-data-border:rgba(0,0,0,0.08);
+  --in-formula-bg:rgba(255,107,107,0.06);--in-formula-border:rgba(255,107,107,0.18);
+  --in-card-bg:rgba(255,255,255,0.8);--in-card-border:rgba(0,0,0,0.1);
+  --in-glow:none;--in-highlight:#2ecc71;--in-warn:#f39c12;--in-danger:#e74c3c;
+  --in-scrollbar-thumb:rgba(0,0,0,0.15);
+}
+[data-theme="cyber"]{
+  --in-bg:#040410;--in-bg2:#08081a;--in-ink:#e0f7fa;--in-ink2:#b2ebf2;--in-muted:#4dd0e1;--in-rule:rgba(0,243,255,0.1);
+  --in-accent:#00f3ff;--in-accent2:#ff00ea;--in-accent3:#39ff14;--in-accent4:#ffb800;
+  --in-canvas-bg:#020208;--in-param-bg:rgba(0,243,255,0.02);--in-param-border:rgba(0,243,255,0.1);
+  --in-data-bg:rgba(0,0,0,0.4);--in-data-border:rgba(0,243,255,0.08);
+  --in-formula-bg:rgba(0,243,255,0.04);--in-formula-border:rgba(0,243,255,0.18);
+  --in-card-bg:rgba(0,243,255,0.02);--in-card-border:rgba(0,243,255,0.12);
+  --in-glow:0 0 8px rgba(0,243,255,0.25);--in-highlight:#39ff14;--in-warn:#ffb800;--in-danger:#ff00ea;
+  --in-scrollbar-thumb:rgba(0,243,255,0.4);
+}
+[data-theme="soviet"]{
+  --in-bg:#f0ebe4;--in-bg2:#e8e0d6;--in-ink:#1a1a1a;--in-ink2:#3d3d3d;--in-muted:#6a5a4a;--in-rule:#d4c4a8;
+  --in-accent:#c41e1e;--in-accent2:#8b4513;--in-accent3:#a0522d;--in-accent4:#b8860b;
+  --in-canvas-bg:#e8e0d6;--in-param-bg:#f4f0ea;--in-param-border:#d4c4a8;
+  --in-data-bg:#f4f0ea;--in-data-border:#d4c4a8;
+  --in-formula-bg:rgba(196,30,30,0.04);--in-formula-border:rgba(196,30,30,0.22);
+  --in-card-bg:#fffaf2;--in-card-border:#d4c4a8;
+  --in-glow:none;--in-highlight:#556b2f;--in-warn:#b8860b;--in-danger:#c41e1e;
+  --in-scrollbar-thumb:#c41e1e;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:var(--font-main);background:var(--in-bg);color:var(--in-ink);line-height:1.6;overflow:hidden;height:100vh;transition:background-color .5s ease,color .4s ease,border-color .4s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--in-bg)}
+::-webkit-scrollbar-thumb{background:var(--in-scrollbar-thumb);border-radius:999px}
+[data-theme="soviet"] ::-webkit-scrollbar-thumb,[data-theme="academic"] ::-webkit-scrollbar-thumb{border-radius:0}
+
+/* ===== 三栏布局 ===== */
+.app{display:flex;height:100vh;padding-top:52px;box-sizing:border-box}
+
+/* ===== 左侧参数面板 ===== */
+.left-panel{width:300px;min-width:280px;max-width:320px;border-right:1px solid var(--in-rule);background:var(--in-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.lp-header{padding:14px 18px 10px;border-bottom:1px solid var(--in-rule);display:flex;align-items:center;gap:10px}
+.lp-header .lp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;background:var(--in-formula-bg);border:1px solid var(--in-formula-border)}
+.lp-header h1{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.lp-header .lp-sub{font-size:.68rem;color:var(--in-muted);margin-top:1px}
+
+[data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
+[data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.92);border-right:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
+[data-theme="cartoon"] .lp-header h1{color:var(--in-accent)}
+[data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .lp-header h1{color:var(--in-accent);text-shadow:var(--in-glow)}
+[data-theme="academic"] .lp-header h1{color:#1a1a2e}
+[data-theme="soviet"] .lp-header h1{color:var(--in-accent)}
+
+/* ===== 中间画布区域 ===== */
+.sim-panel{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.canvas-container{flex:1;position:relative;background:var(--in-canvas-bg);overflow:hidden;transition:background-color .5s ease}
+#simCanvas{display:block;width:100%;height:100%}
+.canvas-overlay{position:absolute;top:14px;left:14px;display:flex;gap:8px;z-index:5;flex-wrap:wrap}
+.overlay-badge{padding:5px 12px;background:rgba(0,0,0,0.5);border:1px solid var(--in-rule);border-radius:8px;font-family:monospace;font-size:0.7rem;color:var(--in-ink2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.overlay-badge.acc{color:var(--in-accent)}
+.canvas-hint{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);z-index:4;pointer-events:none;font-size:0.78rem;color:var(--in-muted);opacity:0.7;text-align:center;font-family:monospace;letter-spacing:1px;background:rgba(0,0,0,0.35);padding:4px 14px;border-radius:20px;backdrop-filter:blur(6px)}
+.canvas-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px}
+
+[data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
+[data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+
+/* ===== 右侧输出+知识面板 ===== */
+.right-panel{width:380px;min-width:340px;border-left:1px solid var(--in-rule);background:var(--in-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
+.rp-header{padding:14px 18px 10px;border-bottom:1px solid var(--in-rule);display:flex;align-items:center;gap:10px}
+.rp-header .rp-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;background:var(--in-formula-bg);border:1px solid var(--in-formula-border)}
+.rp-header h2{font-size:.92rem;font-weight:700;transition:color .4s ease}
+.rp-header .rp-sub{font-size:.68rem;color:var(--in-muted);margin-top:1px}
+
+[data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
+[data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.92);border-left:2px solid rgba(0,0,0,0.06)}
+[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
+[data-theme="cartoon"] .rp-header h2{color:var(--in-accent2)}
+[data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
+[data-theme="cyber"] .rp-header h2{color:var(--in-accent);text-shadow:var(--in-glow)}
+[data-theme="academic"] .rp-header h2{color:var(--in-accent)}
+[data-theme="soviet"] .rp-header h2{color:var(--in-accent)}
+
+/* ===== 通用区块 ===== */
+.side-section{padding:16px 18px;border-bottom:1px solid var(--in-rule);transition:border-color .4s ease}
+.side-section:last-child{border-bottom:none}
+.section-label{font-family:monospace;font-size:0.68rem;font-weight:400;text-transform:uppercase;letter-spacing:2.5px;color:var(--in-accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;transition:color .4s ease}
+.section-label::before{content:'';width:3px;height:14px;background:var(--in-accent);border-radius:2px;transition:background .4s ease}
+
+/* ===== 参数控件 ===== */
+.param-group{margin-bottom:14px}.param-group:last-child{margin-bottom:0}
+.param-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.param-label{font-size:0.8rem;font-weight:600;color:var(--in-ink2);display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.param-label .sym{font-family:"Cambria Math","Times New Roman",serif;font-style:italic;color:var(--in-accent)}
+.param-value{font-family:monospace;font-size:0.76rem;color:var(--in-accent);font-weight:600;min-width:60px;text-align:right;display:flex;align-items:center;gap:6px;justify-content:flex-end;transition:color .4s ease}
+.color-swatch{width:16px;height:10px;border-radius:2px;border:1px solid var(--in-rule);flex-shrink:0}
+input[type="range"]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--in-param-border);outline:none;transition:background .4s ease}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--in-accent);cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.3)}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+
+[data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
+[data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
+[data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+
+/* ===== 模式按钮 ===== */
+.mode-indicator{display:flex;gap:6px}
+.mode-btn{flex:1;padding:9px 4px;border:1px solid var(--in-param-border);background:var(--in-param-bg);color:var(--in-muted);border-radius:8px;font-size:0.74rem;font-weight:600;cursor:pointer;font-family:var(--font-main);text-align:center;transition:all .3s ease;display:flex;flex-direction:column;align-items:center;gap:3px}
+.mode-btn .mb-icon{font-size:1rem}
+.mode-btn.active{border-color:var(--in-accent);color:var(--in-accent);background:var(--in-formula-bg)}
+[data-theme="cyber"] .mode-btn.active{text-shadow:var(--in-glow)}
+[data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
+[data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
+[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+
+/* ===== 控制按钮 ===== */
+.sim-btn{padding:8px 18px;border:1px solid var(--in-rule);background:rgba(0,0,0,0.4);color:var(--in-ink);border-radius:10px;font-family:var(--font-main);font-size:0.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sim-btn:hover{background:rgba(0,0,0,0.6);border-color:var(--in-accent)}
+.sim-btn.primary{background:var(--in-accent);color:#0a0a1a;border-color:var(--in-accent)}
+.sim-btn.primary:hover{filter:brightness(1.15)}
+.sim-btn svg{width:15px;height:15px}
+[data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.85);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
+[data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.85);border:1px solid #d4c4a8;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
+[data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
+
+/* ===== 数据行 ===== */
+.data-row{display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:6px 0;border-bottom:1px dashed var(--in-rule);transition:border-color .4s ease}
+.data-row:last-child{border-bottom:none}
+.data-key{color:var(--in-muted)}
+.data-key .sym{font-family:"Cambria Math",serif;font-style:italic;color:var(--in-ink2)}
+.data-val{color:var(--in-ink);font-family:monospace;font-weight:600;display:flex;align-items:center;gap:6px}
+.data-val .num{color:var(--in-accent)}
+.data-val.b .num{color:var(--in-accent2)}
+.data-val.c .num{color:var(--in-accent3)}
+.data-val.d .num{color:var(--in-accent4)}
+
+/* ===== 横截面/光强图 ===== */
+.cross-container{background:var(--in-data-bg);border:1px solid var(--in-data-border);border-radius:12px;overflow:hidden;position:relative;transition:background-color .5s ease,border-color .4s ease}
+.cross-container canvas{display:block;width:100%;height:160px}
+.cross-label{position:absolute;top:8px;left:10px;font-family:monospace;font-size:0.65rem;color:var(--in-muted);letter-spacing:1px;text-transform:uppercase;pointer-events:none;z-index:2}
+[data-theme="academic"] .cross-container{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="soviet"] .cross-container{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+
+/* ===== 知识卡片 ===== */
+.info-card{background:var(--in-card-bg);border:1px solid var(--in-card-border);border-radius:12px;padding:13px 15px;margin-bottom:10px;transition:background-color .5s ease,border-color .4s ease}
+.info-card:last-child{margin-bottom:0}
+.info-card h3{font-size:0.8rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;transition:color .4s ease}
+.info-card p{font-size:0.74rem;color:var(--in-ink2);line-height:1.65;margin:3px 0}
+.info-card p strong{color:var(--in-ink)}
+.info-card .muted{color:var(--in-muted);font-size:0.7rem}
+[data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .info-card h3{color:var(--in-accent)}
+[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card h3{color:var(--in-accent)}
+[data-theme="cartoon"] .info-card h3{color:var(--in-accent)}
+[data-theme="cyber"] .info-card h3{color:var(--in-accent);text-shadow:var(--in-glow)}
+
+/* ===== 公式块 ===== */
+.formula-block{background:var(--in-formula-bg);border:1px solid var(--in-formula-border);border-radius:10px;padding:11px 13px;margin-bottom:9px;transition:background-color .5s ease,border-color .4s ease}
+.formula-block:last-child{margin-bottom:0}
+.formula-title{font-size:0.76rem;font-weight:700;color:var(--in-ink);margin-bottom:5px;transition:color .4s ease}
+.formula-expr{font-family:"Cambria Math","Times New Roman",monospace;font-size:0.76rem;color:var(--in-accent2);line-height:1.85;white-space:pre-wrap;transition:color .4s ease}
+.formula-expr .eq{color:var(--in-accent);font-style:italic}
+.formula-expr .cond{color:var(--in-accent3);font-weight:600}
+.formula-desc{font-size:0.72rem;color:var(--in-muted);margin-top:5px;line-height:1.55}
+.formula-desc strong{color:var(--in-ink2)}
+[data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
+[data-theme="academic"] .formula-expr{color:#4a6a8a}
+[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#8b4513}
+
+/* ===== 响应式 ===== */
+@media(max-width:1180px){
+  .left-panel{width:268px;min-width:248px}
+  .right-panel{width:340px;min-width:310px}
+}
+@media(max-width:980px){
+  .app{flex-direction:column;height:auto;min-height:100vh}
+  .left-panel{width:100%;min-width:unset;max-width:unset;border-right:none;border-bottom:1px solid var(--in-rule)}
+  .right-panel{width:100%;min-width:unset;border-left:none;border-top:1px solid var(--in-rule)}
+  .sim-panel{min-height:420px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== 左侧参数面板 ===== -->
+  <aside class="left-panel">
+    <div class="lp-header">
+      <div class="lp-icon">💈</div>
+      <div>
+        <h1>双缝干涉</h1>
+        <div class="lp-sub">杨氏实验 · 波动 / 粒子表达</div>
+      </div>
+    </div>
+
+    <!-- 表达模式 -->
+    <div class="side-section">
+      <div class="section-label">表达模式</div>
+      <div class="mode-indicator">
+        <button class="mode-btn active" data-mode="wave"><span class="mb-icon">🌊</span>波动</button>
+        <button class="mode-btn" data-mode="particle"><span class="mb-icon">✦</span>粒子</button>
+        <button class="mode-btn" data-mode="both"><span class="mb-icon">⇄</span>对比</button>
+      </div>
+    </div>
+
+    <!-- 实验参数 -->
+    <div class="side-section">
+      <div class="section-label">实验参数</div>
+      <div class="param-group">
+        <div class="param-header">
+          <span class="param-label">波长 <span class="sym">λ</span></span>
+          <span class="param-value"><span class="color-swatch" id="swatch"></span><span id="valWl">550 nm</span></span>
+        </div>
+        <input type="range" id="slWl" min="380" max="780" value="550" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">双缝间距 <span class="sym">d</span></span><span class="param-value" id="valD">0.50 mm</span></div>
+        <input type="range" id="slD" min="0.1" max="2" value="0.5" step="0.01">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">缝到屏距离 <span class="sym">L</span></span><span class="param-value" id="valL">1.50 m</span></div>
+        <input type="range" id="slL" min="0.5" max="3" value="1.5" step="0.05">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">单缝宽度 <span class="sym">a</span></span><span class="param-value" id="valA">80 μm</span></div>
+        <input type="range" id="slA" min="20" max="200" value="80" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">动画速度</span><span class="param-value" id="valSpd">1.0×</span></div>
+        <input type="range" id="slSpd" min="0.2" max="3" value="1" step="0.1">
+      </div>
+      <div class="param-group">
+        <div class="param-header"><span class="param-label">光子发射率</span><span class="param-value" id="valEmit">8 /帧</span></div>
+        <input type="range" id="slEmit" min="1" max="30" value="8" step="1">
+      </div>
+    </div>
+
+    <!-- 粒子控制 -->
+    <div class="side-section">
+      <div class="section-label">粒子累积控制</div>
+      <div class="info-card">
+        <p><strong>✦ 粒子模式</strong>：光子逐个穿过双缝，按概率分布落在探测屏上，<strong>累积</strong>形成干涉条纹。</p>
+        <p><strong>🌊 波动模式</strong>：显示从两缝发出的圆形波前，实时呈现相长 / 相消干涉。</p>
+        <p><strong>⇄ 对比模式</strong>：上方波动、下方粒子，对照波粒二象性。</p>
+        <p class="muted">提示：改变 d 或 a 会重置粒子累积。</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== 中间画布区域 ===== -->
+  <div class="sim-panel">
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+      <div class="canvas-overlay">
+        <span class="overlay-badge acc" id="badgeMode">🌊 波动表达</span>
+        <span class="overlay-badge" id="badgeFPS">60 FPS</span>
+        <span class="overlay-badge" id="badgeInfo">λ=550nm</span>
+      </div>
+      <div class="canvas-hint" id="canvasHint">圆形波前从双缝发出 · 亮带=相长 · 暗带=相消</div>
+      <div class="canvas-controls">
+        <button class="sim-btn primary" id="btnPlay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+          播放
+        </button>
+        <button class="sim-btn" id="btnPause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16" fill="currentColor" stroke="none"/><rect x="14" y="4" width="4" height="16" fill="currentColor" stroke="none"/></svg>
+          暂停
+        </button>
+        <button class="sim-btn" id="btnReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          重置
+        </button>
+        <button class="sim-btn" id="btnClear">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          清空累积
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 右侧输出+知识面板 ===== -->
+  <aside class="right-panel">
+    <div class="rp-header">
+      <div class="rp-icon">📊</div>
+      <div>
+        <h2>实时数据与知识</h2>
+        <div class="rp-sub">物理量 · 公式 · 波粒二象性</div>
+      </div>
+    </div>
+
+    <!-- 实时数据 -->
+    <div class="side-section">
+      <div class="section-label">实时物理量</div>
+      <div class="data-row"><span class="data-key">波长 <span class="sym">λ</span></span><span class="data-val"><span class="color-swatch" id="swatch2"></span><span class="num" id="dWl">550 nm</span> · <span id="dColor">绿色</span></span></div>
+      <div class="data-row"><span class="data-key">双缝间距 <span class="sym">d</span></span><span class="data-val b"><span class="num" id="dD">0.50 mm</span></span></div>
+      <div class="data-row"><span class="data-key">缝屏距离 <span class="sym">L</span></span><span class="data-val c"><span class="num" id="dL">1.50 m</span></span></div>
+      <div class="data-row"><span class="data-key">单缝宽度 <span class="sym">a</span></span><span class="data-val d"><span class="num" id="dA">80 μm</span></span></div>
+      <div class="data-row"><span class="data-key">条纹间距 <span class="sym">Δy=λL/d</span></span><span class="data-val"><span class="num" id="dDy">1.650 mm</span></span></div>
+      <div class="data-row"><span class="data-key">一级亮纹 <span class="sym">y₁</span></span><span class="data-val b"><span class="num" id="dY1">±1.65 mm</span> (k=±1)</span></div>
+      <div class="data-row"><span class="data-key">二级亮纹 <span class="sym">y₂</span></span><span class="data-val c"><span class="num" id="dY2">±3.30 mm</span> (k=±2)</span></div>
+      <div class="data-row"><span class="data-key">一级暗纹</span><span class="data-val d"><span class="num" id="dDark">±0.83 mm</span></span></div>
+      <div class="data-row"><span class="data-key">已累积光子</span><span class="data-val"><span class="num" id="dCount">0</span></span></div>
+    </div>
+
+    <!-- 光强分布 -->
+    <div class="side-section">
+      <div class="section-label">光强分布 I(y)</div>
+      <div class="cross-container">
+        <span class="cross-label">理论光强曲线 · 单缝包络</span>
+        <canvas id="intCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- 公式 -->
+    <div class="side-section">
+      <div class="section-label">杨氏双缝公式</div>
+      <div class="formula-block">
+        <div class="formula-title">光程差与极值条件</div>
+        <div class="formula-expr"><span class="eq">Δ = d·sinθ ≈ d·y/L</span>
+亮纹：<span class="cond">Δ = kλ</span>  (k=0,±1,±2,…)
+暗纹：<span class="cond">Δ = (k+½)λ</span></div>
+        <div class="formula-desc"><strong>k</strong> 为干涉级次。中央 k=0 为零级亮纹，两侧对称分布。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">条纹间距</div>
+        <div class="formula-expr"><span class="eq">Δy = λL / d</span></div>
+        <div class="formula-desc">条纹间距与 <strong>波长 λ</strong>、<strong>屏距 L</strong> 成正比，与<strong>缝距 d</strong> 成反比。红光条纹比蓝光更宽。</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-title">光强分布（含单缝衍射包络）</div>
+        <div class="formula-expr"><span class="eq">I = I₀·cos²(πdy/λL)·[sinc(πay/λL)]²</span>
+sinc(x) = sin(x)/x</div>
+        <div class="formula-desc">cos² 项为双缝干涉，sinc² 项为<strong>单缝衍射包络</strong>调制整体强度。</div>
+      </div>
+    </div>
+
+    <!-- 知识卡片 -->
+    <div class="side-section">
+      <div class="section-label">知识卡片</div>
+      <div class="info-card">
+        <h3>🎖️ 杨氏双缝实验</h3>
+        <p>1801 年，英国学者<strong>托马斯·杨</strong>首次以双缝实验定量演示了光的干涉，测得光的波长，有力支持了光的<strong>波动说</strong>，动摇了牛顿微粒说的主导地位。</p>
+        <p class="muted">关键词：分波前法 · 相干光源 · 干涉条纹</p>
+      </div>
+      <div class="info-card">
+        <h3>⚛️ 波粒二象性</h3>
+        <p>光既是<strong>波</strong>又是<strong>粒子</strong>。双缝实验是波粒二象性的经典演示：波动表达中波前相干叠加形成条纹；粒子表达中单个光子按概率落点，<strong>累积</strong>后同样呈现干涉图样。</p>
+        <p class="muted">单光子双缝实验：一次只发射一个光子，长时间累积仍出现干涉条纹。</p>
+      </div>
+      <div class="info-card">
+        <h3>📐 单缝衍射包络</h3>
+        <p>每条缝都有有限宽度 <strong>a</strong>，产生单缝衍射，用 <strong>sinc²</strong> 函数描述。它作为包络调制双缝干涉条纹的强度，使高级次条纹变暗甚至消失。</p>
+        <p class="muted">包络第一零点：y = λL/a。a 越小，包络越宽。</p>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="shared-theme.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================================================================
+   工具：波长 → RGB（保留原物理逻辑）
+   ================================================================ */
+function wavelengthToRGB(wl){
+  var r=0,g=0,b=0;
+  if(wl>=380&&wl<440){r=-(wl-440)/(440-380);g=0;b=1;}
+  else if(wl>=440&&wl<490){r=0;g=(wl-440)/(490-440);b=1;}
+  else if(wl>=490&&wl<510){r=0;g=1;b=-(wl-510)/(510-490);}
+  else if(wl>=510&&wl<580){r=(wl-510)/(580-510);g=1;b=0;}
+  else if(wl>=580&&wl<645){r=1;g=-(wl-645)/(645-580);b=0;}
+  else if(wl>=645&&wl<=780){r=1;g=0;b=0;}
+  var factor=1;
+  if(wl>=380&&wl<420) factor=0.3+0.7*(wl-380)/(420-380);
+  else if(wl>=700&&wl<=780) factor=0.3+0.7*(780-wl)/(780-700);
+  var gamma=0.8;
+  r=Math.round(255*Math.pow(Math.max(0,r)*factor,gamma));
+  g=Math.round(255*Math.pow(Math.max(0,g)*factor,gamma));
+  b=Math.round(255*Math.pow(Math.max(0,b)*factor,gamma));
+  return {r:Math.max(0,Math.min(255,r)),g:Math.max(0,Math.min(255,g)),b:Math.max(0,Math.min(255,b))};
+}
+function wavelengthToColorName(wl){
+  if(wl<430)return '紫色';if(wl<470)return '蓝色';if(wl<500)return '青色';
+  if(wl<560)return '绿色';if(wl<590)return '黄色';if(wl<630)return '橙色';return '红色';
+}
+function rgbStr(c,a){if(a===undefined)return 'rgb('+c.r+','+c.g+','+c.b+')';return 'rgba('+c.r+','+c.g+','+c.b+','+a+')';}
+function map(v,a,b,c,d){return c+(v-a)/(b-a)*(d-c);}
+function clamp(v,lo,hi){return v<lo?lo:(v>hi?hi:v);}
+
+/* ================================================================
+   状态
+   ================================================================ */
+var state={
+  mode:'wave',
+  wl_nm:550, d_mm:0.5, L_m:1.5, a_um:80,
+  animSpeed:1.0, emitRate:8,
+  time:0, running:true,
+  photons:[]
+};
+var HIT_MAX=6000;
+var hits=new Float32Array(HIT_MAX); // 存储 f（条纹单位）
+var hitCount=0;
+var histBins=new Float32Array(161);
+var emitAcc=0;
+
+/* ================================================================
+   DOM
+   ================================================================ */
+var simCanvas=document.getElementById('simCanvas');
+var ctx=simCanvas.getContext('2d');
+var intCanvas=document.getElementById('intCanvas');
+var ictx=intCanvas.getContext('2d');
+var html=document.documentElement;
+var waveOff=document.createElement('canvas');
+var waveOffCtx=waveOff.getContext('2d');
+
+var sl={wl:document.getElementById('slWl'),d:document.getElementById('slD'),L:document.getElementById('slL'),a:document.getElementById('slA'),spd:document.getElementById('slSpd'),emit:document.getElementById('slEmit')};
+var badgeMode=document.getElementById('badgeMode');
+var badgeFPS=document.getElementById('badgeFPS');
+var badgeInfo=document.getElementById('badgeInfo');
+var canvasHint=document.getElementById('canvasHint');
+
+/* ================================================================
+   主题颜色读取
+   ================================================================ */
+var TC={};
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function refreshThemeColors(){
+  TC.rule=cssVar('--in-rule')||'rgba(255,255,255,0.07)';
+  TC.accent=cssVar('--in-accent')||'#38bdf8';
+  TC.accent2=cssVar('--in-accent2')||'#a29bfe';
+  TC.muted=cssVar('--in-muted')||'#64748b';
+  TC.ink=cssVar('--in-ink')||'#f1f5f9';
+  TC.ink2=cssVar('--in-ink2')||'#cbd5e1';
+  TC.canvasBg=cssVar('--in-canvas-bg')||'#0a0e1a';
+  TC.highlight=cssVar('--in-highlight')||'#10b981';
+  TC.accent3=cssVar('--in-accent3')||'#34d399';
+  TC.accent4=cssVar('--in-accent4')||'#fbbf24';
+}
+var themeObs=new MutationObserver(function(){refreshThemeColors();});
+themeObs.observe(html,{attributes:true,attributeFilter:['data-theme']});
+
+/* ================================================================
+   物理量
+   ================================================================ */
+function phys(){return {wl:state.wl_nm*1e-9,d:state.d_mm*1e-3,L:state.L_m,a:state.a_um*1e-6};}
+// 真实光强 I(y)，y 单位 m
+function intensityReal(y,p){
+  var beta=Math.PI*p.d*y/(p.wl*p.L);
+  var alpha=Math.PI*p.a*y/(p.wl*p.L);
+  var c=Math.cos(beta);c*=c;
+  var s=Math.abs(alpha)<1e-10?1:Math.sin(alpha)/alpha;
+  return c*s*s;
+}
+
+/* ================================================================
+   显示参数（夸大波长以便可见波前；条纹位置响应参数变化）
+   ================================================================ */
+function dispRatioA(){ // a_disp / d_disp
+  return map(state.a_um,20,200,0.8,0.15);
+}
+// f 空间 CDF：I(f)=cos²(πf)·sinc²(πf·ratio)，f∈[-4,4]
+var fcdf=null, fcdfF=null;
+function buildFCDF(ratio){
+  var N=500, fmax=4;
+  fcdf=new Float32Array(N); fcdfF=new Float32Array(N);
+  var sum=0;
+  for(var i=0;i<N;i++){
+    var f=-fmax+(2*fmax)*(i/(N-1));
+    fcdfF[i]=f;
+    var cf=Math.cos(Math.PI*f);cf*=cf;
+    var al=Math.PI*f*ratio;
+    var snc=Math.abs(al)<1e-10?1:Math.sin(al)/al;
+    var I=cf*snc*snc;
+    sum+=I; fcdf[i]=sum;
+  }
+  if(sum<=0)sum=1;
+  for(var i=0;i<N;i++) fcdf[i]/=sum;
+}
+function sampleF(){
+  if(!fcdf) return (Math.random()-0.5)*2;
+  var u=Math.random();
+  var lo=0,hi=fcdf.length-1;
+  while(lo<hi){var m=(lo+hi)>>1; if(fcdf[m]<u)lo=m+1; else hi=m;}
+  return fcdfF[lo]+(Math.random()-0.5)*0.02;
+}
+
+// 布局：在指定矩形内安排光源/挡板/屏
+function layoutFor(rect){
+  var W=rect.x1-rect.x0, H=rect.y1-rect.y0;
+  var p=phys();
+  var srcX=rect.x0+0.10*W;
+  var barrierX=rect.x0+0.26*W;
+  var Lfrac=map(state.L_m,0.5,3,0.42,0.66);
+  var screenX=Math.min(rect.x1-14, barrierX+Lfrac*W);
+  var cy=rect.y0+H/2;
+  var lambda_disp=map(state.wl_nm,380,780,12,30);
+  var d_disp=map(state.d_mm,0.1,2,70,300);
+  d_disp=Math.min(d_disp,H*0.72);
+  var slit1Y=cy-d_disp/2, slit2Y=cy+d_disp/2;
+  var L_disp=Math.max(40,screenX-barrierX);
+  var a_disp=dispRatioA()*d_disp;
+  var dy_disp=lambda_disp*L_disp/d_disp;
+  var vwave=45*state.animSpeed;
+  var halfH=H*0.44;
+  return {p:p,rect:rect,W:W,H:H,srcX:srcX,barrierX:barrierX,screenX:screenX,cy:cy,
+    lambda_disp:lambda_disp,d_disp:d_disp,slit1Y:slit1Y,slit2Y:slit2Y,L_disp:L_disp,
+    a_disp:a_disp,dy_disp:dy_disp,vwave:vwave,halfH:halfH};
+}
+function fullRect(){var c=simCanvas.parentElement;return {x0:0,y0:0,x1:c.clientWidth,y1:c.clientHeight};}
+
+/* ================================================================
+   Resize
+   ================================================================ */
+function resize(){
+  var dpr=window.devicePixelRatio||1;
+  var c=simCanvas.parentElement;
+  var w=c.clientWidth, h=c.clientHeight;
+  simCanvas.width=Math.max(2,w*dpr); simCanvas.height=Math.max(2,h*dpr);
+  simCanvas.style.width=w+'px'; simCanvas.style.height=h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  var ic=intCanvas.parentElement;
+  var iw=ic.clientWidth;
+  intCanvas.width=Math.max(2,iw*dpr); intCanvas.height=Math.max(2,160*dpr);
+  intCanvas.style.width=iw+'px'; intCanvas.style.height='160px';
+  ictx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize',function(){resize();});
+
+/* ================================================================
+   绘制：背景与网格
+   ================================================================ */
+function clearCanvas(){var c=simCanvas.parentElement;ctx.fillStyle=TC.canvasBg;ctx.fillRect(0,0,c.clientWidth,c.clientHeight);}
+function drawGrid(rect){
+  ctx.strokeStyle=TC.rule;ctx.lineWidth=1;
+  var gs=26;
+  for(var x=rect.x0;x<rect.x1;x+=gs){ctx.beginPath();ctx.moveTo(x,rect.y0);ctx.lineTo(x,rect.y1);ctx.stroke();}
+  for(var y=rect.y0;y<rect.y1;y+=gs){ctx.beginPath();ctx.moveTo(rect.x0,y);ctx.lineTo(rect.x1,y);ctx.stroke();}
+}
+
+/* ================================================================
+   光源 / 入射平面波 / 挡板 / 屏
+   ================================================================ */
+function drawSource(lp){
+  var color=wavelengthToRGB(state.wl_nm);
+  var pulse=0.7+0.3*Math.sin(state.time*4);
+  var g=ctx.createRadialGradient(lp.srcX,lp.cy,1,lp.srcX,lp.cy,26);
+  g.addColorStop(0,rgbStr(color,1*pulse));g.addColorStop(0.4,rgbStr(color,0.4*pulse));g.addColorStop(1,rgbStr(color,0));
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(lp.srcX,lp.cy,26,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=rgbStr(color);ctx.beginPath();ctx.arc(lp.srcX,lp.cy,5,0,Math.PI*2);ctx.fill();
+}
+// 入射平面波（光源→挡板）：移动的竖直亮带
+function drawPlaneWaves(lp){
+  var color=wavelengthToRGB(state.wl_nm);
+  var k=2*Math.PI/lp.lambda_disp, omega=k*lp.vwave, t=state.time;
+  var y0=lp.cy-lp.halfH, y1=lp.cy+lp.halfH;
+  ctx.lineWidth=2;
+  for(var x=lp.srcX+8;x<lp.barrierX-2;x+=2){
+    var psi=Math.cos(k*(x-lp.srcX)-omega*t);
+    var b=Math.max(0,psi);
+    if(b<0.03)continue;
+    ctx.strokeStyle=rgbStr(color,b*0.45);
+    ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke();
+  }
+}
+function drawBarrier(lp){
+  var color=wavelengthToRGB(state.wl_nm);
+  var bw=7;
+  var top=lp.cy-lp.halfH-10, bot=lp.cy+lp.halfH+10;
+  var s1=lp.slit1Y, s2=lp.slit2Y;
+  var gap=3;
+  ctx.fillStyle=TC.ink2;ctx.globalAlpha=0.85;
+  ctx.fillRect(lp.barrierX-bw/2,top,bw,(s1-gap/2)-top);
+  ctx.fillRect(lp.barrierX-bw/2,s1+gap/2,bw,(s2-gap/2)-(s1+gap/2));
+  ctx.fillRect(lp.barrierX-bw/2,s2+gap/2,bw,bot-(s2+gap/2));
+  ctx.globalAlpha=1;
+  // 缝隙发光
+  [s1,s2].forEach(function(sy){
+    var sg=ctx.createLinearGradient(lp.barrierX-2,sy,lp.barrierX+10,sy);
+    sg.addColorStop(0,rgbStr(color,0.9));sg.addColorStop(1,rgbStr(color,0));
+    ctx.fillStyle=sg;ctx.fillRect(lp.barrierX-2,sy-gap/2,12,gap);
+  });
+}
+function drawScreenBar(lp){
+  var top=lp.cy-lp.halfH, bot=lp.cy+lp.halfH;
+  ctx.fillStyle=TC.ink;ctx.globalAlpha=0.18;
+  ctx.fillRect(lp.screenX-2,top,4,bot-top);
+  ctx.globalAlpha=1;
+  ctx.strokeStyle=TC.ink2;ctx.globalAlpha=0.4;ctx.lineWidth=1;
+  ctx.strokeRect(lp.screenX-2,top,4,bot-top);
+  ctx.globalAlpha=1;
+}
+
+/* ================================================================
+   波场（核心波动表达）：两缝发出圆形波前，实时相长/相消
+   ================================================================ */
+function drawWaveField(lp,reg){
+  var rw=reg.x1-reg.x0, rh=reg.y1-reg.y0;
+  if(rw<4||rh<4)return;
+  var SC=3;
+  var ow=Math.max(2,Math.ceil(rw/SC)), oh=Math.max(2,Math.ceil(rh/SC));
+  if(waveOff.width!==ow||waveOff.height!==oh){waveOff.width=ow;waveOff.height=oh;}
+  var img=waveOffCtx.createImageData(ow,oh);
+  var d=img.data;
+  var k=2*Math.PI/lp.lambda_disp;
+  var omega=k*lp.vwave;
+  var t=state.time;
+  var color=wavelengthToRGB(state.wl_nm);
+  var s1x=lp.barrierX-reg.x0, s1y=lp.slit1Y-reg.y0;
+  var s2x=lp.barrierX-reg.x0, s2y=lp.slit2Y-reg.y0;
+  var gain=3.2;
+  for(var j=0;j<oh;j++){
+    for(var i=0;i<ow;i++){
+      var x=i*SC, y=j*SC;
+      var dx1=x-s1x,dy1=y-s1y;var r1=Math.sqrt(dx1*dx1+dy1*dy1);
+      var dx2=x-s2x,dy2=y-s2y;var r2=Math.sqrt(dx2*dx2+dy2*dy2);
+      var a1=1/Math.sqrt(Math.max(r1,6));
+      var a2=1/Math.sqrt(Math.max(r2,6));
+      var psi=a1*Math.cos(k*r1-omega*t)+a2*Math.cos(k*r2-omega*t);
+      var b=psi*gain; if(b<0)b=0; if(b>1)b=1;
+      var idx=(j*ow+i)*4;
+      d[idx]=color.r*b;d[idx+1]=color.g*b;d[idx+2]=color.b*b;d[idx+3]=255;
+    }
+  }
+  waveOffCtx.putImageData(img,0,0);
+  ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(waveOff,0,0,ow,oh,reg.x0,reg.y0,rw,rh);
+}
+
+/* ================================================================
+   屏上条纹条（显示参数光强，与波场匹配）
+   ================================================================ */
+function drawScreenStrip(lp){
+  var color=wavelengthToRGB(state.wl_nm);
+  var x0=lp.screenX-5, x1=lp.screenX+5;
+  var y0=lp.cy-lp.halfH, y1=lp.cy+lp.halfH, mid=lp.cy;
+  for(var py=y0;py<y1;py++){
+    var yd=py-mid;
+    var beta=Math.PI*lp.d_disp*yd/(lp.lambda_disp*lp.L_disp);
+    var alpha=Math.PI*lp.a_disp*yd/(lp.lambda_disp*lp.L_disp);
+    var c=Math.cos(beta);c*=c;
+    var snc=Math.abs(alpha)<1e-10?1:Math.sin(alpha)/alpha;
+    var I=c*snc*snc;
+    var b=Math.pow(I,0.55);
+    ctx.fillStyle=rgbStr(color,b*0.95);
+    ctx.fillRect(x0,py,x1-x0,1);
+  }
+  // 边框
+  ctx.strokeStyle=rgbStr(color,0.35);ctx.lineWidth=1;
+  ctx.strokeRect(x0+0.5,y0+0.5,x1-x0-1,y1-y0-1);
+}
+
+/* ================================================================
+   粒子：光子飞行 + 累积
+   ================================================================ */
+function photonEndpoints(ph,lp){
+  var slitY=ph.slit?lp.slit2Y:lp.slit1Y;
+  if(ph.leg===0)return {sx:lp.srcX,sy:lp.cy,ex:lp.barrierX,ey:slitY};
+  var py=lp.cy+ph.f*lp.dy_disp;
+  return {sx:lp.barrierX,sy:slitY,ex:lp.screenX,ey:py};
+}
+function updatePhotons(dt,lp){
+  if(!lp)return;
+  var spd=260*state.animSpeed;
+  var emit=state.emitRate*state.animSpeed;
+  emitAcc+=emit*dt;var n=Math.floor(emitAcc);emitAcc-=n;
+  for(var i=0;i<n && state.photons.length<220;i++){
+    state.photons.push({slit:Math.random()<0.5?0:1,f:sampleF(),leg:0,t:0});
+  }
+  for(var i=state.photons.length-1;i>=0;i--){
+    var ph=state.photons[i];
+    var ep=photonEndpoints(ph,lp);
+    var dx=ep.ex-ep.sx, dy=ep.ey-ep.sy;var dist=Math.sqrt(dx*dx+dy*dy);
+    ph.t+=spd*dt/Math.max(dist,1);
+    if(ph.t>=1){
+      if(ph.leg===0){ph.leg=1;ph.t=0;}
+      else{registerHit(ph.f);state.photons.splice(i,1);}
+    }
+  }
+}
+function drawPhotons(lp){
+  var color=wavelengthToRGB(state.wl_nm);
+  ctx.globalCompositeOperation='lighter';
+  for(var i=0;i<state.photons.length;i++){
+    var ph=state.photons[i];var ep=photonEndpoints(ph,lp);
+    var x=ep.sx+(ep.ex-ep.sx)*ph.t, y=ep.sy+(ep.ey-ep.sy)*ph.t;
+    var tx=x-(ep.ex-ep.sx)*0.06, ty=y-(ep.ey-ep.sy)*0.06;
+    ctx.strokeStyle=rgbStr(color,0.22);ctx.lineWidth=1.1;
+    ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(x,y);ctx.stroke();
+    ctx.fillStyle=rgbStr(color,0.95);
+    ctx.beginPath();ctx.arc(x,y,1.8,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalCompositeOperation='source-over';
+}
+function registerHit(f){
+  hits[hitCount%HIT_MAX]=f;hitCount++;
+  var bin=Math.round((f+4)/8*160);bin=clamp(bin,0,160);histBins[bin]+=1;
+}
+function clearAccumulation(){hitCount=0;histBins.fill(0);state.photons.length=0;}
+function drawAccumulation(lp){
+  var color=wavelengthToRGB(state.wl_nm);
+  var x0=lp.screenX-6, x1=lp.screenX+6;
+  var y0=lp.cy-lp.halfH, y1=lp.cy+lp.halfH, mid=lp.cy;
+  // 背景 + 极淡理论预测
+  ctx.fillStyle='#000';ctx.fillRect(x0,y0,x1-x0,y1-y0);
+  for(var py=y0;py<y1;py++){
+    var yd=py-mid;
+    var beta=Math.PI*lp.d_disp*yd/(lp.lambda_disp*lp.L_disp);
+    var alpha=Math.PI*lp.a_disp*yd/(lp.lambda_disp*lp.L_disp);
+    var c=Math.cos(beta);c*=c;
+    var snc=Math.abs(alpha)<1e-10?1:Math.sin(alpha)/alpha;
+    var I=c*snc*snc;
+    ctx.fillStyle=rgbStr(color,I*0.10);
+    ctx.fillRect(x0,py,x1-x0,1);
+  }
+  // 累积光子点
+  ctx.globalCompositeOperation='lighter';
+  var n=Math.min(hitCount,HIT_MAX);
+  var start = hitCount>HIT_MAX ? hitCount%HIT_MAX : 0;
+  for(var i=0;i<n;i++){
+    var idx=(start+i)%HIT_MAX;
+    var f=hits[idx];var py=mid+f*lp.dy_disp;
+    if(py<y0||py>y1)continue;
+    ctx.fillStyle=rgbStr(color,0.5);
+    ctx.beginPath();ctx.arc(lp.screenX,py,1.4,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalCompositeOperation='source-over';
+  // 边框
+  ctx.strokeStyle=rgbStr(color,0.4);ctx.lineWidth=1;
+  ctx.strokeRect(x0+0.5,y0+0.5,x1-x0-1,y1-y0-1);
+}
+
+/* ================================================================
+   标注
+   ================================================================ */
+function drawLabels(lp){
+  var color=wavelengthToRGB(state.wl_nm);
+  ctx.font='11px '+getComputedStyle(document.body).fontFamily;
+  ctx.textAlign='center';
+  // 光源
+  ctx.fillStyle=TC.muted;ctx.fillText('光源 S',lp.srcX,lp.cy+lp.halfH+18);
+  ctx.fillStyle=rgbStr(color);ctx.font='10px monospace';
+  ctx.fillText('λ='+state.wl_nm+'nm',lp.srcX,lp.cy+lp.halfH+32);
+  // 挡板
+  ctx.fillStyle=TC.muted;ctx.font='11px sans-serif';
+  ctx.fillText('双缝',lp.barrierX,lp.cy+lp.halfH+18);
+  // 屏
+  ctx.fillText('观察屏',lp.screenX,lp.cy+lp.halfH+18);
+  // d 标注
+  ctx.strokeStyle=TC.accent;ctx.fillStyle=TC.accent;ctx.lineWidth=1;
+  var ax=lp.barrierX+14;
+  ctx.beginPath();ctx.moveTo(ax,lp.slit1Y);ctx.lineTo(ax,lp.slit2Y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ax-3,lp.slit1Y);ctx.lineTo(ax+3,lp.slit1Y);ctx.moveTo(ax-3,lp.slit2Y);ctx.lineTo(ax+3,lp.slit2Y);ctx.stroke();
+  ctx.font='italic 11px "Cambria Math",serif';ctx.textAlign='left';
+  ctx.fillText('d',ax+5,lp.cy+3);
+  // L 标注
+  ctx.strokeStyle=TC.accent;var lY=lp.cy-lp.halfH-10;
+  ctx.beginPath();ctx.moveTo(lp.barrierX,lY);ctx.lineTo(lp.screenX,lY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(lp.barrierX,lY-3);ctx.lineTo(lp.barrierX,lY+3);ctx.moveTo(lp.screenX,lY-3);ctx.lineTo(lp.screenX,lY+3);ctx.stroke();
+  ctx.textAlign='center';ctx.fillText('L',(lp.barrierX+lp.screenX)/2,lY-5);
+}
+
+/* ================================================================
+   各模式渲染
+   ================================================================ */
+function renderWave(lp){
+  clearCanvas();drawGrid(lp.rect);
+  drawSource(lp);
+  drawPlaneWaves(lp);
+  drawBarrier(lp);
+  drawWaveField(lp,{x0:lp.barrierX+4,y0:lp.rect.y0,x1:lp.screenX-4,y1:lp.rect.y1});
+  drawScreenStrip(lp);
+  drawScreenBar(lp);
+  drawLabels(lp);
+  // 标题水印
+  ctx.fillStyle=TC.muted;ctx.globalAlpha=0.5;ctx.font='12px monospace';ctx.textAlign='left';
+  ctx.fillText('波动表达 · 圆形波前相干叠加',16,lp.rect.y1-14);
+  ctx.globalAlpha=1;
+}
+function renderParticle(lp){
+  clearCanvas();drawGrid(lp.rect);
+  drawSource(lp);
+  drawPlaneWaves(lp);
+  drawBarrier(lp);
+  drawPhotons(lp);
+  drawAccumulation(lp);
+  drawScreenBar(lp);
+  drawLabels(lp);
+  ctx.fillStyle=TC.muted;ctx.globalAlpha=0.5;ctx.font='12px monospace';ctx.textAlign='left';
+  ctx.fillText('粒子表达 · 光子逐个累积成纹 (已累积 '+hitCount+')',16,lp.rect.y1-14);
+  ctx.globalAlpha=1;
+}
+function renderBoth(){
+  var c=simCanvas.parentElement;var W=c.clientWidth,H=c.clientHeight;
+  var splitY=Math.floor(H*0.54);
+  var topRect={x0:0,y0:0,x1:W,y1:splitY-1};
+  var botRect={x0:0,y0:splitY+1,x1:W,y1:H};
+  // 上：波动
+  var lpT=layoutFor(topRect);
+  ctx.save();
+  ctx.beginPath();ctx.rect(topRect.x0,topRect.y0,topRect.x1-topRect.x0,topRect.y1-topRect.y0);ctx.clip();
+  clearCanvas();drawGrid(topRect);
+  drawSource(lpT);drawPlaneWaves(lpT);drawBarrier(lpT);
+  drawWaveField(lpT,{x0:lpT.barrierX+4,y0:topRect.y0,x1:lpT.screenX-4,y1:topRect.y1});
+  drawScreenStrip(lpT);drawScreenBar(lpT);drawLabels(lpT);
+  ctx.fillStyle=TC.accent;ctx.globalAlpha=0.8;ctx.font='bold 12px monospace';ctx.textAlign='left';
+  ctx.fillText('🌊 波动表达',14,topRect.y1-14);ctx.globalAlpha=1;
+  ctx.restore();
+  // 分隔线
+  ctx.fillStyle=TC.rule;ctx.fillRect(0,splitY-1,W,2);
+  // 下：粒子
+  var lpB=layoutFor(botRect);
+  ctx.save();
+  ctx.beginPath();ctx.rect(botRect.x0,botRect.y0,botRect.x1-botRect.x0,botRect.y1-botRect.y0);ctx.clip();
+  // 下区背景
+  ctx.fillStyle=TC.canvasBg;ctx.fillRect(botRect.x0,botRect.y0,botRect.x1-botRect.x0,botRect.y1-botRect.y0);
+  drawGrid(botRect);
+  drawSource(lpB);drawPlaneWaves(lpB);drawBarrier(lpB);
+  drawPhotons(lpB);drawAccumulation(lpB);drawScreenBar(lpB);drawLabels(lpB);
+  ctx.fillStyle=TC.accent2;ctx.globalAlpha=0.8;ctx.font='bold 12px monospace';ctx.textAlign='left';
+  ctx.fillText('✦ 粒子表达 · 累积 '+hitCount,14,botRect.y1-14);ctx.globalAlpha=1;
+  ctx.restore();
+  return lpB; // 用于粒子更新
+}
+
+/* ================================================================
+   右侧：理论光强曲线（真实物理）
+   ================================================================ */
+function drawIntensityGraph(){
+  var c=intCanvas.parentElement;var w=c.clientWidth,h=160;
+  ictx.clearRect(0,0,w,h);
+  ictx.fillStyle='rgba(0,0,0,0.0)';ictx.fillRect(0,0,w,h);
+  var color=wavelengthToRGB(state.wl_nm);
+  // 网格
+  ictx.strokeStyle=TC.rule;ictx.lineWidth=1;
+  for(var x=0;x<w;x+=30){ictx.beginPath();ictx.moveTo(x,0);ictx.lineTo(x,h);ictx.stroke();}
+  for(var y=0;y<h;y+=20){ictx.beginPath();ictx.moveTo(0,y);ictx.lineTo(w,y);ictx.stroke();}
+  var padL=34,padR=10,padT=22,padB=20;
+  var plotW=w-padL-padR, plotH=h-padT-padB;
+  var p=phys();
+  var dy=p.wl*p.L/p.d;
+  var yMax=dy*4;
+  // 轴
+  ictx.strokeStyle=TC.muted;ictx.globalAlpha=0.5;ictx.lineWidth=1;
+  ictx.beginPath();ictx.moveTo(padL,padT);ictx.lineTo(padL,padT+plotH);ictx.lineTo(padL+plotW,padT+plotH);ictx.stroke();
+  ictx.globalAlpha=1;
+  ictx.fillStyle=TC.muted;ictx.font='9px monospace';ictx.textAlign='center';
+  for(var k=-4;k<=4;k++){
+    var xx=padL+((k+4)/8)*plotW;
+    ictx.fillText((k*dy*1e3).toFixed(1),xx,padT+plotH+13);
+    ictx.strokeStyle=TC.rule;ictx.beginPath();ictx.moveTo(xx,padT);ictx.lineTo(xx,padT+plotH);ictx.stroke();
+  }
+  ictx.fillText('y (mm)',padL+plotW/2,h-4);
+  ictx.textAlign='right';ictx.fillStyle=TC.muted;
+  ictx.fillText('1.0',padL-4,padT+6);ictx.fillText('0.5',padL-4,padT+plotH/2);ictx.fillText('0',padL-4,padT+plotH+3);
+  ictx.textAlign='left';ictx.fillText('I/I₀',padL-28,padT+6);
+  // 包络（虚线）
+  ictx.strokeStyle=TC.accent2;ictx.globalAlpha=0.6;ictx.setLineDash([4,3]);ictx.lineWidth=1.2;
+  ictx.beginPath();
+  for(var i=0;i<=plotW;i++){
+    var yf=(i/plotW-0.5)*2;var ym=yf*yMax;
+    var al=Math.PI*p.a*ym/(p.wl*p.L);
+    var snc=Math.abs(al)<1e-10?1:Math.sin(al)/al;
+    var Ie=snc*snc;
+    var px=padL+i,py=padT+plotH-Ie*plotH;
+    if(i===0)ictx.moveTo(px,py);else ictx.lineTo(px,py);
+  }
+  ictx.stroke();ictx.setLineDash([]);ictx.globalAlpha=1;
+  // 主曲线
+  ictx.strokeStyle=rgbStr(color,0.3);ictx.lineWidth=4;ictx.beginPath();
+  for(var i=0;i<=plotW;i++){
+    var yf=(i/plotW-0.5)*2;var ym=yf*yMax;
+    var I=intensityReal(ym,p);
+    var px=padL+i,py=padT+plotH-I*plotH;
+    if(i===0)ictx.moveTo(px,py);else ictx.lineTo(px,py);
+  }
+  ictx.stroke();
+  ictx.strokeStyle=rgbStr(color);ictx.lineWidth=1.8;ictx.shadowColor=rgbStr(color);ictx.shadowBlur=5;ictx.beginPath();
+  for(var i=0;i<=plotW;i++){
+    var yf=(i/plotW-0.5)*2;var ym=yf*yMax;
+    var I=intensityReal(ym,p);
+    var px=padL+i,py=padT+plotH-I*plotH;
+    if(i===0)ictx.moveTo(px,py);else ictx.lineTo(px,py);
+  }
+  ictx.stroke();ictx.shadowBlur=0;
+  // 填充
+  ictx.lineTo(padL+plotW,padT+plotH);ictx.lineTo(padL,padT+plotH);ictx.closePath();
+  var fg=ictx.createLinearGradient(0,padT,0,padT+plotH);
+  fg.addColorStop(0,rgbStr(color,0.22));fg.addColorStop(1,rgbStr(color,0));
+  ictx.fillStyle=fg;ictx.fill();
+}
+
+/* ================================================================
+   数据更新
+   ================================================================ */
+function updateData(){
+  var p=phys();
+  var wl_nm=state.wl_nm;
+  var dy=(p.wl*p.L/p.d)*1e3; // mm
+  document.getElementById('dWl').textContent=wl_nm+' nm';
+  document.getElementById('dD').textContent=state.d_mm.toFixed(2)+' mm';
+  document.getElementById('dL').textContent=state.L_m.toFixed(2)+' m';
+  document.getElementById('dA').textContent=state.a_um+' μm';
+  document.getElementById('dDy').textContent=dy.toFixed(3)+' mm';
+  document.getElementById('dY1').textContent='±'+dy.toFixed(2)+' mm';
+  document.getElementById('dY2').textContent='±'+(dy*2).toFixed(2)+' mm';
+  document.getElementById('dDark').textContent='±'+(dy*0.5).toFixed(2)+' mm';
+  var c=wavelengthToRGB(wl_nm);
+  document.getElementById('swatch').style.background=rgbStr(c);
+  document.getElementById('swatch2').style.background=rgbStr(c);
+  document.getElementById('dColor').textContent=wavelengthToColorName(wl_nm);
+  document.getElementById('valWl').textContent=wl_nm+' nm';
+  document.getElementById('valD').textContent=state.d_mm.toFixed(2)+' mm';
+  document.getElementById('valL').textContent=state.L_m.toFixed(2)+' m';
+  document.getElementById('valA').textContent=state.a_um+' μm';
+  document.getElementById('valSpd').textContent=state.animSpeed.toFixed(1)+'×';
+  document.getElementById('valEmit').textContent=state.emitRate+' /帧';
+  badgeInfo.textContent='λ='+wl_nm+'nm · d='+state.d_mm.toFixed(2)+'mm';
+}
+
+/* ================================================================
+   滑块事件
+   ================================================================ */
+function onParam(){
+  var prevD=state.d_mm, prevA=state.a_um;
+  state.wl_nm=+sl.wl.value;
+  state.d_mm=+sl.d.value;
+  state.L_m=+sl.L.value;
+  state.a_um=+sl.a.value;
+  state.animSpeed=+sl.spd.value;
+  state.emitRate=+sl.emit.value;
+  updateData();drawIntensityGraph();
+  if(state.d_mm!==prevD||state.a_um!==prevA){
+    buildFCDF(dispRatioA());
+    clearAccumulation();
+  }
+}
+Object.keys(sl).forEach(function(k){sl[k].addEventListener('input',onParam);});
+
+/* ================================================================
+   模式切换
+   ================================================================ */
+document.querySelectorAll('.mode-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    state.mode=btn.dataset.mode;
+    if(state.mode==='wave'){badgeMode.textContent='🌊 波动表达';canvasHint.textContent='圆形波前从双缝发出 · 亮带=相长 · 暗带=相消';}
+    else if(state.mode==='particle'){badgeMode.textContent='✦ 粒子表达';canvasHint.textContent='光子逐个穿过双缝 · 累积形成干涉条纹';}
+    else{badgeMode.textContent='⇄ 波粒对比';canvasHint.textContent='上：波动相干叠加 · 下：粒子累积 · 同一图样';}
+  });
+});
+
+/* ================================================================
+   控制按钮
+   ================================================================ */
+document.getElementById('btnPlay').addEventListener('click',function(){state.running=true;});
+document.getElementById('btnPause').addEventListener('click',function(){state.running=false;});
+document.getElementById('btnReset').addEventListener('click',function(){state.time=0;clearAccumulation();});
+document.getElementById('btnClear').addEventListener('click',function(){clearAccumulation();});
+
+/* ================================================================
+   主循环
+   ================================================================ */
+var lastT=performance.now(), frameCount=0, fps=60, lastFps=lastT;
+function loop(now){
+  var dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
+  if(state.running){
+    state.time+=dt*state.animSpeed;
+    if(state.mode==='wave'){
+      var lp=layoutFor(fullRect());
+      renderWave(lp);
+    } else if(state.mode==='particle'){
+      var lp2=layoutFor(fullRect());
+      updatePhotons(dt,lp2);
+      renderParticle(lp2);
+    } else {
+      var lpB=renderBoth();
+      updatePhotons(dt,lpB);
+    }
+    document.getElementById('dCount').textContent=hitCount;
+  }
+  frameCount++;
+  if(now-lastFps>=1000){fps=frameCount;frameCount=0;lastFps=now;badgeFPS.textContent=fps+' FPS';}
+  requestAnimationFrame(loop);
+}
+
+/* ================================================================
+   初始化
+   ================================================================ */
+PSUTheme.createSwitcher();
+refreshThemeColors();
+buildFCDF(dispRatioA());
+resize();
+updateData();
+drawIntensityGraph();
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
