@@ -851,3 +851,142 @@ h1, h2, h3 {
 [data-theme="academic"] .nav-dropdown-menu a:hover { color: #1a1a2e; background: #f5f5f5 !important; }
 [data-theme="soviet"] .nav-dropdown-menu a { color: #6a5a4a; }
 [data-theme="soviet"] .nav-dropdown-menu a:hover { color: #c41e1e; background: rgba(196, 30, 30, 0.06) !important; }
+
+/* ===== Knowledge Graph Sphere Ball ===== */
+.nav-kg-sphere {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.52rem !important;
+  line-height: 1.15 !important;
+  font-weight: 700 !important;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  animation: kgSphereFloat 3s ease-in-out infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+.nav-kg-sphere::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 18%;
+  width: 32%;
+  height: 32%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  filter: blur(2px);
+  pointer-events: none;
+  z-index: 1;
+}
+.nav-kg-sphere::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.3);
+  z-index: 0;
+}
+.nav-kg-sphere .kg-sphere-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.nav-kg-sphere:hover {
+  transform: scale(1.12) translateY(-2px);
+  animation-play-state: paused;
+}
+@keyframes kgSphereFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes kgCyberPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.25); }
+}
+
+/* Academic — deep blue planet */
+[data-theme="academic"] .nav-kg-sphere,
+[data-theme="academic"] .nav-kg-sphere:hover,
+[data-theme="academic"] .nav-kg-sphere.active {
+  background: radial-gradient(circle at 30% 30%, #6b8cae 0%, #2c3e6b 50%, #1a1a2e 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(26, 26, 46, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+}
+[data-theme="academic"] .nav-kg-sphere.active {
+  box-shadow: 0 0 14px rgba(107, 140, 174, 0.5), 0 3px 10px rgba(26, 26, 46, 0.3) !important;
+}
+[data-theme="academic"] .nav-kg-sphere:hover {
+  box-shadow: 0 0 16px rgba(107, 140, 174, 0.4), 0 5px 14px rgba(26, 26, 46, 0.3) !important;
+}
+
+/* Glass — frosted blue ice orb */
+[data-theme="glass"] .nav-kg-sphere,
+[data-theme="glass"] .nav-kg-sphere:hover,
+[data-theme="glass"] .nav-kg-sphere.active {
+  background: radial-gradient(circle at 30% 30%, rgba(116, 185, 255, 0.5) 0%, rgba(74, 144, 226, 0.35) 50%, rgba(30, 60, 120, 0.3) 100%) !important;
+  color: #e8f0ff !important;
+  border: 1px solid rgba(116, 185, 255, 0.25);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.15);
+}
+[data-theme="glass"] .nav-kg-sphere.active {
+  box-shadow: 0 0 14px rgba(116, 185, 255, 0.4), 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+}
+[data-theme="glass"] .nav-kg-sphere:hover {
+  box-shadow: 0 0 16px rgba(116, 185, 255, 0.35), 0 5px 14px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Cyber — neon energy orb */
+[data-theme="cyber"] .nav-kg-sphere,
+[data-theme="cyber"] .nav-kg-sphere:hover,
+[data-theme="cyber"] .nav-kg-sphere.active {
+  background: radial-gradient(circle at 30% 30%, #00f3ff 0%, #7c3aed 50%, #1a0033 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(0, 243, 255, 0.3), 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+}
+[data-theme="cyber"] .nav-kg-sphere.active {
+  box-shadow: 0 0 18px rgba(0, 243, 255, 0.5), 0 0 28px rgba(189, 0, 255, 0.3) !important;
+  animation: kgSphereFloat 3s ease-in-out infinite, kgCyberPulse 2s ease-in-out infinite;
+}
+[data-theme="cyber"] .nav-kg-sphere:hover {
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.5), 0 0 30px rgba(189, 0, 255, 0.3) !important;
+}
+
+/* Cartoon — warm candy ball */
+[data-theme="cartoon"] .nav-kg-sphere,
+[data-theme="cartoon"] .nav-kg-sphere:hover,
+[data-theme="cartoon"] .nav-kg-sphere.active {
+  background: radial-gradient(circle at 30% 30%, #ffd166 0%, #ff6b6b 50%, #c44569 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.1);
+}
+[data-theme="cartoon"] .nav-kg-sphere.active {
+  box-shadow: 0 0 14px rgba(255, 209, 102, 0.5), 0 3px 10px rgba(255, 107, 107, 0.3) !important;
+}
+[data-theme="cartoon"] .nav-kg-sphere:hover {
+  box-shadow: 0 0 16px rgba(255, 209, 102, 0.4), 0 5px 14px rgba(255, 107, 107, 0.3) !important;
+}
+
+/* Soviet — red star globe */
+[data-theme="soviet"] .nav-kg-sphere,
+[data-theme="soviet"] .nav-kg-sphere:hover,
+[data-theme="soviet"] .nav-kg-sphere.active {
+  background: radial-gradient(circle at 30% 30%, #ff6b6b 0%, #c41e1e 50%, #8b0000 100%) !important;
+  color: #fff8e7 !important;
+  box-shadow: 0 3px 10px rgba(196, 30, 30, 0.3), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+}
+[data-theme="soviet"] .nav-kg-sphere.active {
+  box-shadow: 0 0 14px rgba(196, 30, 30, 0.5), 0 3px 10px rgba(196, 30, 30, 0.3) !important;
+}
+[data-theme="soviet"] .nav-kg-sphere:hover {
+  box-shadow: 0 0 16px rgba(196, 30, 30, 0.4), 0 5px 14px rgba(196, 30, 30, 0.3) !important;
+}

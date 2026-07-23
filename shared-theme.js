@@ -136,10 +136,11 @@
     if (currentPage === 'index.html' || currentPage === '') homeLink.classList.add('active');
     nav.appendChild(homeLink);
 
-    // Knowledge Graph
+    // Knowledge Graph — sphere ball
     const kgLink = document.createElement('a');
     kgLink.href = 'knowledge-graph.html';
-    kgLink.textContent = '知识图谱';
+    kgLink.className = 'nav-kg-sphere';
+    kgLink.innerHTML = '<span class="kg-sphere-text">知识<br>图谱</span>';
     if (currentPage === 'knowledge-graph.html') kgLink.classList.add('active');
     nav.appendChild(kgLink);
 
