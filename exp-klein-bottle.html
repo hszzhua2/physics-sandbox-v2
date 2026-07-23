@@ -14,8 +14,7 @@
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-        "lil-gui": "https://unpkg.com/lil-gui@0.19.1/dist/lil-gui.esm.min.js"
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
       }
     }
   </script>
@@ -317,26 +316,123 @@
 
     .k-card ul { padding-left: 16px; margin: 6px 0; }
 
-    /* lil-gui style overrides */
-    .lil-gui {
-      --background-color: var(--kb-gui-bg) !important;
-      --text-color: var(--kb-gui-text) !important;
-      --title-background-color: var(--kb-gui-widget) !important;
-      --widget-color: var(--kb-gui-widget) !important;
-      --hover-color: var(--kb-gui-hover) !important;
-      --focus-color: var(--kb-gui-focus) !important;
-      --border-color: var(--kb-gui-border) !important;
-      --number-color: var(--kb-gui-text) !important;
-      --string-color: var(--kb-gui-text) !important;
-      font-family: inherit !important;
-      width: 100% !important;
-      border-radius: var(--kb-radius) !important;
-      --width: 300px;
+    /* lil-gui style overrides — REMOVED, using custom param UI */
+
+    /* ========== Custom Parameter Controls ========== */
+    .lp-header {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid var(--kb-panel-border);
+      display: flex; align-items: center; gap: 10px;
+      transition: all 0.4s ease;
+    }
+    .lp-header .lp-icon {
+      width: 36px; height: 36px; border-radius: var(--kb-radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+      background: var(--kb-card-bg);
+      border: var(--kb-border-width) solid var(--kb-panel-border);
+    }
+    .lp-header h1 { font-size: 0.92rem; font-weight: 700; transition: color 0.4s ease; }
+    .lp-header .lp-sub { font-size: 0.68rem; color: var(--kb-text-muted); margin-top: 1px; }
+
+    .lp-body {
+      padding: 16px 18px;
+      overflow-y: auto;
+      flex: 1;
     }
 
-    .lil-gui .title {
-      font-size: 0.85rem;
+    .section-label {
+      font-family: monospace; font-size: 0.68rem; font-weight: 400;
+      text-transform: uppercase; letter-spacing: 2.5px;
+      color: var(--kb-accent); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+      transition: color 0.4s ease;
     }
+    .section-label::before {
+      content: ''; width: 3px; height: 14px;
+      background: var(--kb-accent); border-radius: 2px;
+      transition: background 0.4s ease;
+    }
+    .section-label + .param-group { margin-top: 0; }
+
+    .param-group { margin-bottom: 16px; }
+    .param-group:last-child { margin-bottom: 0; }
+    .param-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 5px;
+    }
+    .param-label {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--kb-text); transition: color 0.4s ease;
+    }
+    .param-value {
+      font-family: monospace; font-size: 0.78rem;
+      color: var(--kb-accent); font-weight: 400;
+      min-width: 55px; text-align: right;
+    }
+    .param-divider {
+      height: 1px; background: var(--kb-panel-border);
+      margin: 16px 0; transition: background 0.4s ease;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none; width: 100%; height: 4px;
+      border-radius: 2px; background: var(--kb-panel-border);
+      outline: none; transition: background 0.4s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--kb-accent); cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: transform 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--kb-accent); cursor: pointer; border: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .param-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+    }
+    .toggle-switch {
+      position: relative; width: 40px; height: 22px;
+      background: var(--kb-panel-border); border-radius: 11px;
+      transition: background 0.3s ease; flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; transition: transform 0.3s ease;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .toggle-switch.on { background: var(--kb-accent); }
+    .toggle-switch.on::after { transform: translateX(18px); }
+
+    .param-color-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .param-color-input {
+      width: 50px; height: 26px; border: var(--kb-border-width) solid var(--kb-panel-border);
+      border-radius: var(--kb-radius); cursor: pointer; background: transparent;
+      padding: 2px;
+    }
+    .param-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+    .param-color-input::-webkit-color-swatch { border: none; border-radius: calc(var(--kb-radius) - 1px); }
+
+    /* Theme-specific slider tweaks */
+    [data-theme="academic"] input[type="range"] { height: 3px; border-radius: 0; background: #e0e0e0; }
+    [data-theme="academic"] input[type="range"]::-webkit-slider-thumb { width: 14px; height: 14px; border-radius: 0; background: #1a1a2e; box-shadow: none; }
+    [data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb { background: #ff6b6b; box-shadow: 0 2px 8px rgba(255,107,107,0.4); }
+    [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb { background: #c41e1e; }
+    [data-theme="cyber"] input[type="range"]::-webkit-slider-thumb { background: #bd00ff; box-shadow: 0 0 8px rgba(189,0,255,0.6); }
+
+    [data-theme="cyber"] .lp-header h1 { color: var(--kb-accent); text-shadow: 0 0 10px rgba(189,0,255,0.4); }
+    [data-theme="cyber"] .section-label { text-shadow: 0 0 6px rgba(189,0,255,0.3); }
+    [data-theme="cartoon"] .lp-header h1 { color: var(--kb-accent); }
+    [data-theme="soviet"] .lp-header h1 { color: var(--kb-accent); }
+    [data-theme="academic"] .lp-header h1 { color: #1a1a2e; }
 
     /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; }
@@ -361,11 +457,73 @@
       <div id="canvas-container"></div>
     </div>
 
-    <!-- Left Drawer: Controls (lil-gui) -->
+    <!-- Left Drawer: Controls -->
     <div class="left-drawer" id="left-drawer">
       <div class="drawer-toggle" id="left-toggle" onclick="toggleLeftDrawer()" title="展开/收起控制面板">&#9664;</div>
-      <div class="left-drawer-inner">
-        <div id="gui-container"></div>
+      <div class="left-drawer-inner" style="display:flex;flex-direction:column;">
+        <div class="lp-header">
+          <div class="lp-icon">🍶</div>
+          <div>
+            <h1>模型参数配置</h1>
+            <div class="lp-sub">Klein Bottle Parameters</div>
+          </div>
+        </div>
+        <div class="lp-body">
+          <div class="section-label">几何</div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">u 轴细分</span><span class="param-value" id="val-uSeg">100</span></div>
+            <input type="range" id="ctrl-uSeg" min="10" max="400" step="1" value="100">
+          </div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">v 轴细分</span><span class="param-value" id="val-vSeg">100</span></div>
+            <input type="range" id="ctrl-vSeg" min="10" max="400" step="1" value="100">
+          </div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">缩放 (Scale)</span><span class="param-value" id="val-scale">1.00</span></div>
+            <input type="range" id="ctrl-scale" min="0.1" max="5" step="0.05" value="1.0">
+          </div>
+
+          <div class="param-divider"></div>
+          <div class="section-label">材质</div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">表面颜色</span></div>
+            <div class="param-color-row">
+              <span class="param-value" id="val-color" style="text-align:left;min-width:auto;font-size:0.72rem;">#6b8cae</span>
+              <input type="color" class="param-color-input" id="ctrl-color" value="#6b8cae">
+            </div>
+          </div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">不透明度</span><span class="param-value" id="val-opacity">0.70</span></div>
+            <input type="range" id="ctrl-opacity" min="0.05" max="1.0" step="0.01" value="0.7">
+          </div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">粗糙度</span><span class="param-value" id="val-rough">0.20</span></div>
+            <input type="range" id="ctrl-rough" min="0" max="1" step="0.01" value="0.2">
+          </div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">金属度</span><span class="param-value" id="val-metal">0.10</span></div>
+            <input type="range" id="ctrl-metal" min="0" max="1" step="0.01" value="0.1">
+          </div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">清漆层</span><span class="param-value" id="val-cc">0.30</span></div>
+            <input type="range" id="ctrl-cc" min="0" max="1" step="0.01" value="0.3">
+          </div>
+          <div class="param-group param-toggle" id="ctrl-wireframe">
+            <span class="param-label">线框模式</span>
+            <div class="toggle-switch"></div>
+          </div>
+
+          <div class="param-divider"></div>
+          <div class="section-label">动画</div>
+          <div class="param-group param-toggle" id="ctrl-autoRotate">
+            <span class="param-label">自转 (Auto Rotate)</span>
+            <div class="toggle-switch on"></div>
+          </div>
+          <div class="param-group">
+            <div class="param-header"><span class="param-label">自转速度</span><span class="param-value" id="val-rs">0.005</span></div>
+            <input type="range" id="ctrl-rs" min="0" max="0.05" step="0.001" value="0.005">
+          </div>
+        </div>
       </div>
     </div>
 
@@ -421,7 +579,6 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js';
-    import GUI from 'lil-gui';
 
     // ======================
     // Drawer toggle functions (exposed to window for onclick)
@@ -533,45 +690,79 @@
 
     createMesh();
 
-    // --- lil-gui ---
-    const guiContainer = document.getElementById('gui-container');
-    const gui = new GUI({ container: guiContainer, title: '模型参数配置' });
-
-    gui.add(params, 'uSegments', 10, 400, 1).name('u 轴细分').onChange(createMesh);
-    gui.add(params, 'vSegments', 10, 400, 1).name('v 轴细分').onChange(createMesh);
-
-    gui.add(params, 'scale', 0.1, 5).name('缩放 (Scale)').onChange((val) => {
-      mesh.scale.set(val, val, val);
-    });
-
+    // --- Custom parameter controls ---
     let userChangedColor = false;
-    gui.addColor(params, 'color').name('表面颜色').onChange((val) => {
+
+    const $ = id => document.getElementById(id);
+
+    // Helper: update value display
+    function setVal(id, text) { const el = $(id); if (el) el.textContent = text; }
+
+    // u segments
+    $('ctrl-uSeg').addEventListener('input', e => {
+      params.uSegments = parseInt(e.target.value);
+      setVal('val-uSeg', params.uSegments);
+      createMesh();
+    });
+    // v segments
+    $('ctrl-vSeg').addEventListener('input', e => {
+      params.vSegments = parseInt(e.target.value);
+      setVal('val-vSeg', params.vSegments);
+      createMesh();
+    });
+    // scale
+    $('ctrl-scale').addEventListener('input', e => {
+      params.scale = parseFloat(e.target.value);
+      setVal('val-scale', params.scale.toFixed(2));
+      mesh.scale.set(params.scale, params.scale, params.scale);
+    });
+    // color
+    $('ctrl-color').addEventListener('input', e => {
       userChangedColor = true;
-      material.color.set(val);
+      params.color = e.target.value;
+      material.color.set(params.color);
+      setVal('val-color', params.color);
     });
-
-    gui.add(params, 'opacity', 0.05, 1.0).name('不透明度').onChange((val) => {
-      material.opacity = val;
+    // opacity
+    $('ctrl-opacity').addEventListener('input', e => {
+      params.opacity = parseFloat(e.target.value);
+      setVal('val-opacity', params.opacity.toFixed(2));
+      material.opacity = params.opacity;
     });
-
-    gui.add(params, 'roughness', 0, 1).name('粗糙度 (Roughness)').onChange((val) => {
-      material.roughness = val;
+    // roughness
+    $('ctrl-rough').addEventListener('input', e => {
+      params.roughness = parseFloat(e.target.value);
+      setVal('val-rough', params.roughness.toFixed(2));
+      material.roughness = params.roughness;
     });
-
-    gui.add(params, 'metalness', 0, 1).name('金属度 (Metalness)').onChange((val) => {
-      material.metalness = val;
+    // metalness
+    $('ctrl-metal').addEventListener('input', e => {
+      params.metalness = parseFloat(e.target.value);
+      setVal('val-metal', params.metalness.toFixed(2));
+      material.metalness = params.metalness;
     });
-
-    gui.add(params, 'clearcoat', 0, 1).name('清漆层 (Clearcoat)').onChange((val) => {
-      material.clearcoat = val;
+    // clearcoat
+    $('ctrl-cc').addEventListener('input', e => {
+      params.clearcoat = parseFloat(e.target.value);
+      setVal('val-cc', params.clearcoat.toFixed(2));
+      material.clearcoat = params.clearcoat;
     });
-
-    gui.add(params, 'wireframe').name('线框模式').onChange((val) => {
-      material.wireframe = val;
+    // wireframe toggle
+    $('ctrl-wireframe').addEventListener('click', function() {
+      params.wireframe = !params.wireframe;
+      material.wireframe = params.wireframe;
+      this.querySelector('.toggle-switch').classList.toggle('on', params.wireframe);
     });
-
-    gui.add(params, 'autoRotate').name('自转 (Auto Rotate)');
-    gui.add(params, 'rotateSpeed', 0, 0.05).name('自转速度');
+    // autoRotate toggle
+    $('ctrl-autoRotate').addEventListener('click', function() {
+      params.autoRotate = !params.autoRotate;
+      this.querySelector('.toggle-switch').classList.toggle('on', params.autoRotate);
+    });
+    // rotate speed
+    $('ctrl-rs').addEventListener('input', e => {
+      params.rotateSpeed = parseFloat(e.target.value);
+      setVal('val-rs', params.rotateSpeed.toFixed(3));
+    });
 
     // --- OrbitControls ---
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -586,9 +777,8 @@
     controls.addEventListener('start', () => {
       if (params.autoRotate) {
         params.autoRotate = false;
-        gui.controllersRecursive().forEach(c => {
-          if (c.property === 'autoRotate') c.updateDisplay();
-        });
+        const toggle = document.querySelector('#ctrl-autoRotate .toggle-switch');
+        if (toggle) toggle.classList.remove('on');
       }
     });
 
@@ -601,14 +791,14 @@
         scene.background = new THREE.Color(sceneBg);
       }
       // Only reset color to accent if user hasn't manually changed it
-      // We track user-changed color via a flag
       if (!userChangedColor && accent) {
         params.color = accent;
         material.color.set(accent);
-        // Update gui color controller display
-        gui.controllersRecursive().forEach(c => {
-          if (c.property === 'color') c.updateDisplay();
-        });
+        // Update color input display
+        const colorInput = document.getElementById('ctrl-color');
+        const colorVal = document.getElementById('val-color');
+        if (colorInput) colorInput.value = accent;
+        if (colorVal) colorVal.textContent = accent;
       }
     }
 
