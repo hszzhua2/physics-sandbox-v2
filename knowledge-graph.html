@@ -85,6 +85,10 @@
     .link {
       transition: stroke 0.6s ease, stroke-opacity 0.6s ease;
     }
+    .link-tube-shadow { pointer-events: none; }
+    .link-tube-body { pointer-events: none; }
+    .link-tube-highlight { pointer-events: none; }
+    .links g.link-group { cursor: default; }
 
     .node { cursor: pointer; }
     .node circle {
@@ -252,9 +256,9 @@
       font-size: 0.7rem !important;
       font-style: italic;
     }
-    .link.sci-link {
+    .link.sci-link .link-tube-body {
       stroke-dasharray: 4 3;
-      stroke-opacity: 0.35;
+      stroke-opacity: 0.4;
       transition: stroke 0.6s ease, stroke-opacity 0.6s ease;
     }
     .scientist-hidden .sci-node,
@@ -877,6 +881,27 @@
       colorGradMap[color] = 'url(#' + safeId + ')';
     });
 
+    // Link tube gradients (source color → target color)
+    const linkGradMap = {};
+    links.forEach((l, i) => {
+      const sc = (l.source.color || '#999');
+      const tc = (l.target.color || '#999');
+      const gid = 'linkgrad-' + i;
+      const lg = defs.append("linearGradient")
+        .attr("id", gid)
+        .attr("gradientUnits", "userSpaceOnUse")
+        .attr("x1", "0").attr("y1", "0")
+        .attr("x2", "100").attr("y2", "0");
+      const scHsl = d3.hsl(sc);
+      const tcHsl = d3.hsl(tc);
+      const scLight = d3.hsl(scHsl.h, scHsl.s, Math.min(0.85, scHsl.l + 0.20)).formatHex();
+      const tcLight = d3.hsl(tcHsl.h, tcHsl.s, Math.min(0.85, tcHsl.l + 0.20)).formatHex();
+      lg.append("stop").attr("offset", "0%").attr("stop-color", scLight);
+      lg.append("stop").attr("offset", "50%").attr("stop-color", tc);
+      lg.append("stop").attr("offset", "100%").attr("stop-color", scLight);
+      linkGradMap[i] = { id: 'url(#' + gid + ')', sc: sc, tc: tc, gradEl: lg };
+    });
+
     // Zoom behavior
     const zoom = d3.zoom()
       .scaleExtent([0.1, 4])
@@ -904,19 +929,56 @@
       .force("x", d3.forceX(width / 2).strength(0.05))
       .force("y", d3.forceY(height / 2).strength(0.05));
 
-    // Draw links
-    const link = g.append("g")
+    // Draw links — 3D tube structure (shadow + body + highlight)
+    const linkData = g.append("g")
       .attr("class", "links")
-      .selectAll("line")
+      .selectAll("g")
       .data(links)
-      .enter().append("line")
-      .attr("class", d => d.type === "scientist" ? "link sci-link" : "link")
-      .attr("stroke-width", d => {
-        if (d.type === "scientist") return 1;
-        if (d.source.group === 0) return 2.5;
-        if (d.source.group === 1) return 1.5;
-        return 1;
-      });
+      .enter().append("g")
+      .attr("class", d => d.type === "scientist" ? "link-group sci-link" : "link-group");
+
+    // Tube width by hierarchy
+    function getTubeWidth(d) {
+      if (d.type === "scientist") return { shadow: 7, body: 4, highlight: 1.5 };
+      if (d.source.group === 0) return { shadow: 12, body: 7, highlight: 2.5 };
+      if (d.source.group === 1) return { shadow: 9, body: 5, highlight: 2 };
+      return { shadow: 6, body: 3.5, highlight: 1.2 };
+    }
+
+    // Get tube body color from source node
+    function getTubeBodyColor(d) {
+      const c = d.source.color || '#999';
+      const hsl = d3.hsl(c);
+      hsl.l = Math.min(0.75, hsl.l + 0.15);
+      return hsl.formatHex();
+    }
+
+    // Shadow layer (wide, dark — tube depth shadow)
+    linkData.append("line")
+      .attr("class", "link-tube-shadow")
+      .attr("stroke", "#000")
+      .attr("stroke-opacity", 0.18)
+      .attr("stroke-width", d => getTubeWidth(d).shadow)
+      .attr("stroke-linecap", "round");
+
+    // Body layer (solid color — tube surface)
+    linkData.append("line")
+      .attr("class", "link-tube-body")
+      .attr("stroke", d => getTubeBodyColor(d))
+      .attr("stroke-opacity", 0.7)
+      .attr("stroke-width", d => getTubeWidth(d).body)
+      .attr("stroke-linecap", "round");
+
+    // Highlight layer (thin, bright — specular on tube top)
+    linkData.append("line")
+      .attr("class", "link-tube-highlight")
+      .attr("stroke", "#fff")
+      .attr("stroke-opacity", 0.6)
+      .attr("stroke-width", d => getTubeWidth(d).highlight)
+      .attr("stroke-linecap", "round");
+
+    // Keep a reference for theme updates
+    const link = linkData;
 
     // Draw nodes
     const node = g.append("g")
@@ -973,11 +1035,20 @@
 
     // Tick function
     simulation.on("tick", () => {
-      link
+      link.selectAll("line")
         .attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
+
+      // Update gradient endpoints to match line positions
+      links.forEach((l, i) => {
+        if (linkGradMap[i] && linkGradMap[i].gradEl) {
+          linkGradMap[i].gradEl
+            .attr("x1", l.source.x).attr("y1", l.source.y)
+            .attr("x2", l.target.x).attr("y2", l.target.y);
+        }
+      });
 
       node.attr("transform", d => `translate(${d.x},${d.y})`);
     });
@@ -1116,18 +1187,34 @@
       const linkColor = getLinkColor();
       const linkOpacity = getLinkOpacity();
 
-      g.selectAll(".link:not(.sci-link)")
-        .attr("stroke", linkColor)
-        .attr("stroke-opacity", linkOpacity);
+      g.selectAll(".link-group:not(.sci-link) .link-tube-shadow")
+        .attr("stroke", "#000")
+        .attr("stroke-opacity", Math.max(0.08, linkOpacity * 0.35));
+
+      g.selectAll(".link-group:not(.sci-link) .link-tube-body")
+        .attr("stroke", d => getTubeBodyColor(d))
+        .attr("stroke-opacity", Math.min(0.85, linkOpacity * 2.5));
+
+      g.selectAll(".link-group:not(.sci-link) .link-tube-highlight")
+        .attr("stroke", "#fff")
+        .attr("stroke-opacity", theme === 'cyber' ? 0.65 : (theme === 'glass' ? 0.55 : 0.45));
 
       // Scientist links use a distinct warm color
       const sciLinkColors = {
         academic: '#e17055', glass: '#fdcb6e', cyber: '#ff9d00',
         cartoon: '#ff6b6b', soviet: '#c41e1e'
       };
-      g.selectAll(".sci-link")
-        .attr("stroke", sciLinkColors[theme] || '#e17055')
-        .attr("stroke-opacity", 0.35);
+      const sciColor = sciLinkColors[theme] || '#e17055';
+      g.selectAll(".sci-link .link-tube-shadow")
+        .attr("stroke", "#000")
+        .attr("stroke-opacity", 0.08);
+      g.selectAll(".sci-link .link-tube-body")
+        .attr("stroke", sciColor)
+        .attr("stroke-opacity", 0.4)
+        .attr("stroke-dasharray", "4 3");
+      g.selectAll(".sci-link .link-tube-highlight")
+        .attr("stroke", "#fff")
+        .attr("stroke-opacity", 0.2);
 
       g.selectAll(".node circle")
         .attr("fill", d => getNodeFill(d))
