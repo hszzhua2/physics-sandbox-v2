@@ -299,9 +299,9 @@
   <!-- 统计栏 -->
   <div class="stats-bar">
     <span class="stat">📚 <span class="n" id="cnt-cat">6</span> 物理分类</span>
-    <span class="stat">🔬 <span class="n" id="cnt-sub">16</span> 学科</span>
-    <span class="stat">🧪 <span class="n" id="cnt-exp">45</span> 实验</span>
-    <span class="stat">👨‍🔬 <span class="n" id="cnt-sci">34</span> 科学家</span>
+    <span class="stat">🔬 <span class="n" id="cnt-sub">18</span> 学科</span>
+    <span class="stat">🧪 <span class="n" id="cnt-exp">52</span> 实验</span>
+    <span class="stat">👨‍🔬 <span class="n" id="cnt-sci">39</span> 科学家</span>
   </div>
 
   <!-- 左侧知识树 -->
@@ -369,7 +369,8 @@
     { id:'prob', name:'概率统计', parent:'chaos', icon:'📊', color:'#ff6b6b', desc:'概率论与统计分析方法' },
     { id:'phase', name:'相变与临界', parent:'chaos', icon:'🧲', color:'#ff6b6b', desc:'物质相变与临界行为' },
     { id:'manybody', name:'多体系统', parent:'computational', icon:'🧊', color:'#55efc4', desc:'多粒子相互作用系统' },
-    { id:'vision3d', name:'三维视觉', parent:'computational', icon:'👁️', color:'#55efc4', desc:'三维数据处理与可视化' }
+    { id:'vision3d', name:'三维视觉', parent:'computational', icon:'👁️', color:'#55efc4', desc:'三维数据处理与可视化' },
+    { id:'nuclear', name:'核物理', parent:'quantum', icon:'☢️', color:'#a29bfe', desc:'原子核结构与核反应' }
   ];
 
   const EXPERIMENTS = [
@@ -423,7 +424,9 @@
     { id:'refraction', name:'光的折射', parent:'geo_optics', target:'exp-refraction.html', desc:'斯涅尔定律 · 全反射 · 菲涅尔反射率', year:1621, history:'1621年斯涅尔通过实验发现光的折射定律：n₁sin(θ₁)=n₂sin(θ₂)。本实验可视化光线穿过不同介质界面（空气/水/玻璃/钻石）时的折射现象，实时计算折射角、临界角和菲涅尔反射率/透射率，可观察全反射现象。' },
     { id:'lens', name:'透镜成像', parent:'geo_optics', target:'exp-lens.html', desc:'薄透镜方程 · 三条特殊光线 · 实像与虚像', year:1621, history:'薄透镜成像公式1/u+1/v=1/f由斯涅尔和笛卡尔系统化。本实验通过三条特殊光线（平行光→过焦点、过光心→方向不变、过焦点→平行射出）构造成像图，支持凸透镜和凹透镜，实时计算像距、放大率和像的性质（实/虚、正/倒、大/小）。' },
     { id:'interference', name:'双缝干涉', parent:'optics', target:'exp-interference.html', desc:'杨氏双缝实验 · 波粒二象性 · 波动+粒子双表达', year:1801, history:'1801年托马斯·杨首次用双缝实验演示了光的干涉现象，证明光的波动性。本实验同时提供波动表达（实时波前传播与叠加）和粒子表达（光子逐个累积成干涉条纹）两种可视化模式，直观展示波粒二象性。包含单缝衍射包络调制、条纹间距Δy=λL/d计算、光强分布I=cos²(πdy/λL)·sinc²(πay/λL)。' },
-    { id:'galvanometer', name:'检流计', parent:'geo_optics', target:'exp-galvanometer.html', desc:'双镜光束控制 · 反射定律 · PID闭环', year:1820, history:'1820年施魏格尔发明检流计，利用电流在磁场中产生力矩驱动镜面偏转。双镜X/Y检流计系统广泛用于激光投影、医学成像(OCT)和光通信。本实验模拟双镜光束偏转系统，演示反射定律（镜面偏转θ，光束偏转2θ），含PID闭环控制实现光束自动锁定目标。' }
+    { id:'galvanometer', name:'检流计', parent:'geo_optics', target:'exp-galvanometer.html', desc:'双镜光束控制 · 反射定律 · PID闭环', year:1820, history:'1820年施魏格尔发明检流计，利用电流在磁场中产生力矩驱动镜面偏转。双镜X/Y检流计系统广泛用于激光投影、医学成像(OCT)和光通信。本实验模拟双镜光束偏转系统，演示反射定律（镜面偏转θ，光束偏转2θ），含PID闭环控制实现光束自动锁定目标。' },
+    { id:'nuclear-3d', name:'核物理3D模拟', parent:'nuclear', target:'exp-nuclear-3d.html', desc:'核裂变链式反应与核聚变等离子体约束3D模拟', year:1938, history:'1938年奥托·哈恩与弗里茨·施特拉斯曼在柏林发现核裂变现象，莉泽·迈特纳与奥托·弗里施提供了理论解释。本实验通过Three.js 3D引擎模拟核裂变链式反应（铀-235晶格、慢中子轰击、控制棒吸收）与核聚变等离子体约束（氘氚反应、温度与密度调控），实时可视化中子轨迹、反应能量释放和遥测数据。' },
+    { id:'nuclear-plant', name:'核电站', parent:'nuclear', target:'exp-nuclear-plant.html', desc:'压水堆三回路热力循环 · 控制棒 · 汽轮机 · 冷却塔', year:1942, history:'1942年恩里科·费米在芝加哥大学建成人类首座核反应堆CP-1（芝加哥一号堆），实现了受控链式核裂变反应。1954年苏联建成首座核电站奥布宁斯克核电站在奥布宁斯克投入运行。本实验通过3D可视化模拟压水堆核电站的三回路热力循环：一回路（反应堆堆芯加热冷却剂）、二回路（蒸汽发生器产生蒸汽驱动汽轮机）、三回路（冷凝器与冷却塔排热），含控制棒插入深度调节、主蒸汽阀门开度控制、紧急停堆(SCRAM)和实时遥测数据。' }
   ];
 
   const SCIENTISTS = [
@@ -463,7 +466,10 @@
     { id:'sci-lehmann', name:'莱曼', icon:'🔬', color:'#e67e22', desc:'地球固体内核发现者 · 女性地震学先驱', experiments:['geophysics'], years:'1888-1993' },
     { id:'sci-wegener', name:'魏格纳', icon:'🧩', color:'#e67e22', desc:'大陆漂移学说提出者 · 板块构造奠基人', experiments:['geophysics'], years:'1880-1930' },
     { id:'sci-snell', name:'斯涅尔', icon:'📐', color:'#9b59b6', desc:'光的折射定律提出者 · 几何光学奠基人', experiments:['optics_exp','refraction'], years:'1580-1626' },
-    { id:'sci-young', name:'托马斯·杨', icon:'🌊', color:'#f59e0b', desc:'双缝干涉实验 · 光的波动说奠基人 · 杨氏模量', experiments:['interference'], years:'1773-1829' }
+    { id:'sci-young', name:'托马斯·杨', icon:'🌊', color:'#f59e0b', desc:'双缝干涉实验 · 光的波动说奠基人 · 杨氏模量', experiments:['interference'], years:'1773-1829' },
+    { id:'sci-hahn', name:'哈恩', icon:'☢️', color:'#fdcb6e', desc:'核裂变发现者 · 1944年诺贝尔化学奖', experiments:['nuclear-3d','nuclear-plant'], years:'1879-1968' },
+    { id:'sci-meitner', name:'迈特纳', icon:'⚛️', color:'#a29bfe', desc:'核裂变理论解释者 · 元素𬭸以她命名', experiments:['nuclear-3d','nuclear-plant'], years:'1878-1968' },
+    { id:'sci-fermi', name:'费米', icon:'⚛️', color:'#10b981', desc:'首座核反应堆CP-1建造者 · 1938年诺贝尔物理学奖', experiments:['nuclear-3d','nuclear-plant'], years:'1901-1954' }
   ];
 
   // 辅助查找
@@ -509,6 +515,8 @@
     });
 
     // 更新统计
+    document.getElementById('cnt-cat').textContent = CATEGORIES.length;
+    document.getElementById('cnt-sub').textContent = SUBJECTS.length;
     document.getElementById('cnt-exp').textContent = EXPERIMENTS.length;
     document.getElementById('cnt-sci').textContent = SCIENTISTS.length;
   }

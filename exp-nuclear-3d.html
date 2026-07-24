@@ -1,0 +1,1327 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>核物理3D模拟 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css?v=20260724d">
+  <style>
+    /* ============================================================
+       核物理3D模拟 - 主题局部变量 (--nu-*)
+       每个主题定义核物理专用配色：原子/中子/等离子体/控制棒/场景背景
+       ============================================================ */
+
+    /* 默认 = CARTOON */
+    :root {
+      --nu-scene-bg: #0b1426;
+      --nu-grid: rgb(120, 180, 255);
+      --nu-vessel: rgb(120, 180, 255);
+      --nu-atom: #ffd166;
+      --nu-neutron: #ffffff;
+      --nu-fragment: #ef476f;
+      --nu-energy: #ffe66d;
+      --nu-rod: #6c757d;
+      --nu-plasma-d: #4ecdc4;
+      --nu-plasma-t: #ff6b6b;
+      --nu-plasma-he: #ffe66d;
+      --nu-chamber: rgb(120, 180, 255);
+      --nu-panel-accent: #ff6b6b;
+    }
+    :root[data-theme="cartoon"] {
+      --nu-scene-bg: #0b1426;
+      --nu-grid: rgb(120, 180, 255);
+      --nu-vessel: rgb(120, 180, 255);
+      --nu-atom: #ffd166;
+      --nu-neutron: #ffffff;
+      --nu-fragment: #ef476f;
+      --nu-energy: #ffe66d;
+      --nu-rod: #6c757d;
+      --nu-plasma-d: #4ecdc4;
+      --nu-plasma-t: #ff6b6b;
+      --nu-plasma-he: #ffe66d;
+      --nu-chamber: rgb(120, 180, 255);
+      --nu-panel-accent: #ff6b6b;
+    }
+    /* ACADEMIC: 干净白面板、极简边框 */
+    :root[data-theme="academic"] {
+      --nu-scene-bg: #0a0e1a;
+      --nu-grid: rgb(107, 140, 174);
+      --nu-vessel: rgb(107, 140, 174);
+      --nu-atom: #c4956a;
+      --nu-neutron: #eef2f7;
+      --nu-fragment: #6b8cae;
+      --nu-energy: #b8860b;
+      --nu-rod: #7a7a8a;
+      --nu-plasma-d: #6b8cae;
+      --nu-plasma-t: #8a7ca8;
+      --nu-plasma-he: #c4956a;
+      --nu-chamber: rgb(107, 140, 174);
+      --nu-panel-accent: #6b8cae;
+    }
+    /* GLASS: 半透明面板、模糊 */
+    :root[data-theme="glass"] {
+      --nu-scene-bg: #070b14;
+      --nu-grid: rgb(116, 185, 255);
+      --nu-vessel: rgb(116, 185, 255);
+      --nu-atom: #74b9ff;
+      --nu-neutron: #ffffff;
+      --nu-fragment: #fd79a8;
+      --nu-energy: #55efc4;
+      --nu-rod: #8b92a8;
+      --nu-plasma-d: #74b9ff;
+      --nu-plasma-t: #fd79a8;
+      --nu-plasma-he: #55efc4;
+      --nu-chamber: rgb(116, 185, 255);
+      --nu-panel-accent: #74b9ff;
+    }
+    /* CYBER: 暗紫面板、霓虹强调 */
+    :root[data-theme="cyber"] {
+      --nu-scene-bg: #06010f;
+      --nu-grid: rgb(0, 243, 255);
+      --nu-vessel: rgb(189, 0, 255);
+      --nu-atom: #ff9d00;
+      --nu-neutron: #ffffff;
+      --nu-fragment: #ff00ea;
+      --nu-energy: #00f3ff;
+      --nu-rod: #a080c0;
+      --nu-plasma-d: #00f3ff;
+      --nu-plasma-t: #ff00ea;
+      --nu-plasma-he: #ff9d00;
+      --nu-chamber: rgb(189, 0, 255);
+      --nu-panel-accent: #bd00ff;
+    }
+    /* SOVIET: 红色强调、实用主义 */
+    :root[data-theme="soviet"] {
+      --nu-scene-bg: #160a0a;
+      --nu-grid: rgb(196, 30, 30);
+      --nu-vessel: rgb(196, 30, 30);
+      --nu-atom: #b8860b;
+      --nu-neutron: #fff3e0;
+      --nu-fragment: #c41e1e;
+      --nu-energy: #b8860b;
+      --nu-rod: #6a5a4a;
+      --nu-plasma-d: #556b2f;
+      --nu-plasma-t: #c41e1e;
+      --nu-plasma-he: #b8860b;
+      --nu-chamber: rgb(196, 30, 30);
+      --nu-panel-accent: #c41e1e;
+    }
+
+    /* ===== 布局 ===== */
+    body { background-color: var(--bg-color); color: var(--text-color); }
+    .exp-bg { z-index: -1; }
+    #canvas-container { position: fixed; inset: 0; z-index: 0; }
+    canvas { display: block; }
+
+    /* 顶部标题条 */
+    #app-title {
+      position: fixed; top: 62px; left: 50%; transform: translateX(-50%);
+      z-index: 14; pointer-events: none; text-align: center;
+      background: var(--panel-bg); border: var(--border-width) solid var(--panel-border);
+      border-radius: var(--radius); padding: 6px 22px; backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-soft);
+      transition: var(--theme-transition);
+    }
+    #app-title .main { font-size: 0.92rem; font-weight: 700; color: var(--nu-panel-accent); letter-spacing: 2px; }
+    #app-title .sub { display: block; font-size: 0.66rem; color: var(--text-muted); letter-spacing: 1px; margin-top: 1px; }
+
+    /* HUD 遥测覆盖层 */
+    #hud {
+      position: fixed; top: 116px; left: 50%; transform: translateX(-50%);
+      z-index: 13; pointer-events: none; display: flex; gap: 8px;
+      flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 660px);
+    }
+    .hud-chip {
+      background: var(--panel-bg); border: var(--border-width) solid var(--panel-border);
+      border-radius: var(--radius); padding: 6px 14px; backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px); box-shadow: var(--shadow-soft);
+      text-align: center; min-width: 92px; transition: var(--theme-transition);
+    }
+    .hud-chip .label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .hud-chip .value { font-size: 1.1rem; font-weight: 700; color: var(--nu-panel-accent); font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .hud-chip .unit { font-size: 0.6rem; color: var(--text-muted); margin-left: 2px; }
+    #hud-status { font-size: 0.66rem; font-weight: 700; padding: 6px 14px; }
+
+    /* 左侧控制面板 */
+    #left-panel {
+      position: fixed; top: 62px; left: 14px; bottom: 14px;
+      width: 280px; z-index: 11; display: flex; flex-direction: column;
+    }
+    .panel-header {
+      padding: 11px 14px; font-size: 0.88rem; font-weight: 700;
+      color: var(--nu-panel-accent); border-bottom: var(--border-width) solid var(--panel-border);
+      display: flex; align-items: center; gap: 7px; flex-shrink: 0; transition: var(--theme-transition);
+    }
+    .panel-body { padding: 13px 14px; overflow-y: auto; flex: 1; }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+    .section { margin-bottom: 15px; }
+    .section:last-child { margin-bottom: 0; }
+    .section-label { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; transition: var(--theme-transition); }
+
+    .mode-switch { display: flex; gap: 6px; }
+    .mode-switch button { flex: 1; padding: 7px 4px; font-size: 0.8rem; }
+
+    .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; font-size: 0.8rem; color: var(--text-muted); transition: var(--theme-transition); }
+    .param-row .pname { flex-shrink: 0; }
+    .param-row .val { color: var(--nu-panel-accent); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+    .param-row input[type="range"] { flex: 1; margin: 0 8px; }
+
+    button {
+      background: var(--panel-bg); color: var(--text-color);
+      border: var(--border-width) solid var(--panel-border); padding: 7px 14px;
+      border-radius: var(--radius); cursor: pointer; transition: var(--theme-transition);
+      font-size: 0.82rem; font-family: inherit; font-weight: 600;
+    }
+    button:hover { border-color: var(--nu-panel-accent); color: var(--nu-panel-accent); }
+    button.active { background: var(--nu-panel-accent) !important; color: #fff !important; border-color: var(--nu-panel-accent) !important; }
+    .action-btn { width: 100%; padding: 9px; margin-top: 4px; }
+    .btn-fire { border-color: var(--nu-neutron); color: var(--nu-neutron); }
+    .btn-fire:hover { background: var(--nu-neutron); color: #111 !important; }
+    .btn-heat { border-color: var(--nu-energy); color: var(--nu-energy); }
+    .btn-heat:hover { background: var(--nu-energy); color: #111 !important; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.7rem; color: var(--text-muted); margin-top: 6px; }
+    .legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+    /* 右侧信息/图表面板 */
+    #right-panel {
+      position: fixed; top: 62px; right: 14px; bottom: 14px;
+      width: 340px; z-index: 11; display: flex; flex-direction: column;
+    }
+    #right-panel .panel-header { color: var(--accent-2); }
+    .knowledge-content { padding: 13px 14px; overflow-y: auto; flex: 1; }
+    .knowledge-content::-webkit-scrollbar { width: 4px; }
+    .knowledge-content::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+    .theory-block { margin-bottom: 14px; }
+    .theory-block h4 { font-size: 0.84rem; font-weight: 700; color: var(--text-color); margin-bottom: 5px; transition: var(--theme-transition); }
+    .theory-block p { font-size: 0.76rem; color: var(--text-muted); line-height: 1.62; margin-bottom: 5px; transition: var(--theme-transition); }
+    .formula {
+      display: block; padding: 7px 10px; margin: 6px 0; border-radius: var(--radius);
+      background: var(--panel-border); font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem; color: var(--nu-panel-accent); text-align: center; letter-spacing: 0.5px;
+      transition: var(--theme-transition);
+    }
+    .history-item { font-size: 0.74rem; color: var(--text-muted); line-height: 1.62; padding-left: 14px; position: relative; margin-bottom: 3px; transition: var(--theme-transition); }
+    .history-item::before { content: '•'; position: absolute; left: 2px; color: var(--nu-panel-accent); }
+    .history-item b { color: var(--text-color); font-weight: 600; }
+
+    .chart-title { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin: 8px 0 5px; transition: var(--theme-transition); }
+    #chart-container { width: 100%; height: 190px; flex-shrink: 0; border: var(--border-width) solid var(--panel-border); border-radius: var(--radius); transition: var(--theme-transition); }
+
+    @media (max-width: 1180px) {
+      #left-panel { width: 248px; }
+      #right-panel { width: 308px; }
+      #hud { max-width: calc(100vw - 600px); }
+    }
+    @media (max-width: 860px) {
+      #left-panel, #right-panel { display: none; }
+      #hud { max-width: 92vw; top: 96px; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="shared-theme.js?v=20260724d"></script>
+</head>
+<body>
+<div class="exp-bg"></div>
+
+<div id="app-title">
+  <span class="main">核物理3D模拟</span>
+  <span class="sub" id="mode-subtitle">核裂变 · 链式反应与临界控制</span>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- HUD 遥测 -->
+<div id="hud">
+  <div class="hud-chip" id="hud-status">状态: 待机</div>
+  <div class="hud-chip">
+    <div class="label" id="lbl-active">活跃中子</div>
+    <div class="value" id="val-active">0</div>
+  </div>
+  <div class="hud-chip">
+    <div class="label">反应次数</div>
+    <div class="value" id="val-reactions">0</div>
+  </div>
+  <div class="hud-chip">
+    <div class="label">释放能量</div>
+    <div class="value"><span id="val-energy">0</span><span class="unit">MeV</span></div>
+  </div>
+</div>
+
+<!-- 左侧控制面板 -->
+<div id="left-panel" class="glass-panel">
+  <div class="panel-header">&#9763; 反应堆控制台</div>
+  <div class="panel-body">
+    <div class="section">
+      <div class="section-label">反应模式</div>
+      <div class="mode-switch">
+        <button id="btn-fission" class="active">核裂变</button>
+        <button id="btn-fusion">核聚变</button>
+      </div>
+    </div>
+
+    <!-- 裂变参数 -->
+    <div id="group-fission">
+      <div class="section">
+        <div class="section-label">U-235 燃料装载</div>
+        <div class="param-row">
+          <span class="pname">原子数</span>
+          <input type="range" id="range-u235" min="10" max="343" step="1" value="150">
+          <span class="val" id="val-u235">150</span>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label">控制棒吸收率</div>
+        <div class="param-row">
+          <span class="pname">吸收</span>
+          <input type="range" id="range-rod" min="0" max="100" step="1" value="30">
+          <span class="val"><span id="val-rod">30</span>%</span>
+        </div>
+      </div>
+      <div class="section">
+        <button class="action-btn btn-fire" id="btn-fire">&#9889; 发射中子</button>
+      </div>
+      <div class="section">
+        <div class="section-label">图例</div>
+        <div class="legend">
+          <span><i class="dot" id="lg-atom"></i>U-235</span>
+          <span><i class="dot" id="lg-neutron"></i>中子</span>
+          <span><i class="dot" id="lg-rod"></i>控制棒</span>
+          <span><i class="dot" id="lg-frag"></i>裂片</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 聚变参数 -->
+    <div id="group-fusion" style="display:none;">
+      <div class="section">
+        <div class="section-label">等离子体温度</div>
+        <div class="param-row">
+          <span class="pname">温度</span>
+          <input type="range" id="range-temp" min="1" max="100" step="1" value="50">
+          <span class="val"><span id="val-temp">50</span></span>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-label">粒子数密度</div>
+        <div class="param-row">
+          <span class="pname">密度</span>
+          <input type="range" id="range-density" min="20" max="250" step="1" value="100">
+          <span class="val" id="val-density">100</span>
+        </div>
+      </div>
+      <div class="section">
+        <button class="action-btn btn-heat" id="btn-heat">&#128293; 加热注入</button>
+      </div>
+      <div class="section">
+        <div class="section-label">图例</div>
+        <div class="legend">
+          <span><i class="dot" id="lg-d"></i>氘 D</span>
+          <span><i class="dot" id="lg-t"></i>氚 T</span>
+          <span><i class="dot" id="lg-he"></i>氦-4</span>
+          <span><i class="dot" id="lg-n2"></i>中子</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <button class="action-btn" id="btn-reset">&#10227; 重建模拟</button>
+    </div>
+  </div>
+</div>
+
+<!-- 右侧信息/图表面板 -->
+<div id="right-panel" class="glass-panel">
+  <div class="panel-header">&#128202; 实时遥测与理论</div>
+  <div class="knowledge-content">
+    <div class="chart-title">能量释放 &amp; 活跃粒子 (随时间)</div>
+    <div id="chart-container"></div>
+
+    <!-- 裂变理论 -->
+    <div id="theory-fission" style="margin-top:12px;">
+      <div class="theory-block">
+        <h4>核裂变原理</h4>
+        <p>重核（如铀-235）俘获一个慢中子后形成复合核 ²³⁶U*，随即分裂为两个中等质量的核，同时释放 2~3 个中子与巨大能量。</p>
+        <span class="formula">n + ²³⁵U → ²³⁶U* → ¹⁴¹Ba + ⁹²Kr + 3n + E</span>
+        <p>反应前后存在<b>质量亏损</b> Δm，由爱因斯坦质能方程转化为能量：</p>
+        <span class="formula">E = Δm·c² ≈ 200 MeV / 裂变</span>
+      </div>
+      <div class="theory-block">
+        <h4>链式反应与控制</h4>
+        <p>释放的中子可继续引发其他 ²³⁵U 裂变。当中子产生率大于逃逸与吸收损耗时，系统进入<b>超临界</b>，功率指数增长；反之<b>亚临界</b>则反应熄灭。</p>
+        <p><b>控制棒</b>由硼、镉等强中子吸收材料制成，插入堆芯吸收多余中子，将反应维持在稳态临界。</p>
+      </div>
+    </div>
+
+    <!-- 聚变理论 -->
+    <div id="theory-fusion" style="display:none; margin-top:12px;">
+      <div class="theory-block">
+        <h4>核聚变原理</h4>
+        <p>两个轻核结合成较重核并释放能量。最易实现的是氘-氚（D-T）反应，产物为氦-4与高能中子。</p>
+        <span class="formula">²H(D) + ³H(T) → ⁴He(3.5 MeV) + n(14.1 MeV)</span>
+        <p>共释放约 <b>17.6 MeV</b>，其中 80% 能量由中子带走。</p>
+      </div>
+      <div class="theory-block">
+        <h4>库仑势垒与劳森判据</h4>
+        <p>两核均带正电，须有极高动能克服静电<b>库仑势垒</b>才能靠近至核力作用范围，所需温度达上亿开尔文。</p>
+        <p>实现点火需满足<b>劳森判据</b>： n·τ·T ≥ 阈值（密度 × 约束时间 × 温度）。</p>
+        <p><b>磁约束</b>用强磁场将高温等离子体约束在真空室（托卡马克）中，避免接触器壁。</p>
+      </div>
+    </div>
+
+    <!-- 历史 -->
+    <div class="theory-block">
+      <h4>里程碑</h4>
+      <div class="history-item"><b>1938</b> 奥托·哈恩（O. Hahn）与施特拉斯曼发现核裂变现象。</div>
+      <div class="history-item"><b>1939</b> 莉泽·迈特纳（L. Meitner）与弗里施用 E=mc² 解释裂变能量来源。</div>
+      <div class="history-item"><b>1942</b> 费米（E. Fermi）主持建成芝加哥一号堆 CP-1，实现首次自持链式反应。</div>
+      <div class="history-item"><b>1950s</b> 苏联提出并建造托卡马克（Tokamak）磁约束装置。</div>
+      <div class="history-item"><b>ITER</b> 国际热核聚变实验堆，建于法国，验证聚变能可行性。</div>
+      <div class="history-item"><b>NIF</b> 美国国家点火装置，2022 年实现聚变净能量增益 Q&gt;1。</div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   核物理3D模拟引擎
+   - ThreeEngine 类：裂变 / 聚变双模式
+   - 空间哈希网格碰撞优化
+   - 零 GC 优化：预分配 Vector3、复用网格数组与对象池
+   - 自定义球面相机控制（鼠标 + 触摸）
+   ============================================================ */
+
+// ---------- 工具：读取 CSS 变量 ----------
+function readVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// ---------- 预分配临时向量（零 GC） ----------
+const _v1 = new THREE.Vector3();
+const _v2 = new THREE.Vector3();
+const _v3 = new THREE.Vector3();
+
+// ---------- 空间哈希网格 ----------
+class SpatialGrid {
+  constructor(cellSize) {
+    this.cellSize = cellSize;
+    this.inv = 1 / cellSize;
+    this.map = new Map();   // 复用：clear 时清空数组内容但保留 Map 条目
+  }
+  _key(cx, cy, cz) { return ((cx + 4096) * 73856093) ^ ((cy + 4096) * 19349663) ^ ((cz + 4096) * 83492791); }
+  clear() { for (const arr of this.map.values()) arr.length = 0; }
+  insert(idx, x, y, z) {
+    const cx = Math.floor(x * this.inv), cy = Math.floor(y * this.inv), cz = Math.floor(z * this.inv);
+    const k = this._key(cx, cy, cz);
+    let arr = this.map.get(k);
+    if (!arr) { arr = []; this.map.set(k, arr); }
+    arr.push(idx);
+  }
+  // 查询半径 r 内的所有索引，回调 cb(idx)
+  query(x, y, z, r, cb) {
+    const minx = Math.floor((x - r) * this.inv), maxx = Math.floor((x + r) * this.inv);
+    const miny = Math.floor((y - r) * this.inv), maxy = Math.floor((y + r) * this.inv);
+    const minz = Math.floor((z - r) * this.inv), maxz = Math.floor((z + r) * this.inv);
+    for (let cx = minx; cx <= maxx; cx++) {
+      for (let cy = miny; cy <= maxy; cy++) {
+        for (let cz = minz; cz <= maxz; cz++) {
+          const arr = this.map.get(this._key(cx, cy, cz));
+          if (arr) { for (let i = 0; i < arr.length; i++) cb(arr[i]); }
+        }
+      }
+    }
+  }
+}
+
+// ---------- 对象池（零 GC：复用 mesh 与数据对象） ----------
+function makePool(factory, onRelease) {
+  const free = [];
+  return {
+    obtain() {
+      const o = free.pop() || factory();
+      o.alive = true;
+      if (o.mesh) o.mesh.visible = true;
+      return o;
+    },
+    release(o) {
+      o.alive = false;
+      if (o.mesh) o.mesh.visible = false;
+      if (onRelease) onRelease(o);
+      free.push(o);
+    },
+    size() { return free.length; }
+  };
+}
+
+// ============================================================
+//  ThreeEngine
+// ============================================================
+class ThreeEngine {
+  constructor(container) {
+    this.container = container;
+
+    // ---- 渲染器 ----
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(this.renderer.domElement);
+
+    // ---- 场景与相机 ----
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color('#070b14');
+
+    this.camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 500);
+    this.cam = { theta: 0.7, phi: 1.05, radius: 42, target: new THREE.Vector3(0, 0, 0) };
+    this._updateCamera();
+
+    // ---- 灯光 ----
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const dl = new THREE.DirectionalLight(0xffffff, 0.7);
+    dl.position.set(20, 40, 25);
+    this.scene.add(dl);
+    const p1 = new THREE.PointLight(0x66aaff, 0.5, 120);
+    p1.position.set(0, 0, 0);
+    this.scene.add(p1);
+
+    // ---- 场景分组 ----
+    this.gFission = new THREE.Group(); this.scene.add(this.gFission);
+    this.gFusion = new THREE.Group(); this.scene.add(this.gFusion);
+    this.gFx = new THREE.Group(); this.scene.add(this.gFx);   // 共享特效（碎片/闪光）
+
+    // 子组
+    this.atomGroup = new THREE.Group(); this.gFission.add(this.atomGroup);
+    this.rodGroup = new THREE.Group(); this.gFission.add(this.rodGroup);
+    this.vesselGroup = new THREE.Group(); this.gFission.add(this.vesselGroup);
+    this.neutronGroup = new THREE.Group(); this.gFission.add(this.neutronGroup);
+    this.fragGroup = new THREE.Group(); this.gFx.add(this.fragGroup);
+    this.flashGroup = new THREE.Group(); this.gFx.add(this.flashGroup);
+    this.chamberGroup = new THREE.Group(); this.gFusion.add(this.chamberGroup);
+    this.plasmaGroup = new THREE.Group(); this.gFusion.add(this.plasmaGroup);
+
+    // ---- 共享几何 ----
+    this.geomAtom = new THREE.SphereGeometry(1.0, 16, 12);
+    this.geomNeutron = new THREE.SphereGeometry(0.32, 10, 8);
+    this.geomFrag = new THREE.SphereGeometry(0.55, 10, 8);
+    this.geomFlash = new THREE.SphereGeometry(1.0, 12, 10);
+    this.geomPlasma = new THREE.SphereGeometry(0.42, 12, 10);
+    this.geomHe = new THREE.SphereGeometry(0.6, 12, 10);
+
+    // ---- 共享材质 ----
+    this.matAtom = new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0x442200, emissiveIntensity: 0.5, metalness: 0.2, roughness: 0.5 });
+    this.matRod = new THREE.MeshStandardMaterial({ color: 0x6c757d, metalness: 0.7, roughness: 0.4 });
+    this.matVessel = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.4 });
+    this.matNeutron = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    this.matFragment = new THREE.MeshBasicMaterial({ color: 0xef476f });
+    this.matFlash = new THREE.MeshBasicMaterial({ color: 0xffe66d, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false });
+    this.matDeut = new THREE.MeshBasicMaterial({ color: 0x4ecdc4 });
+    this.matTrit = new THREE.MeshBasicMaterial({ color: 0xff6b6b });
+    this.matHelium = new THREE.MeshBasicMaterial({ color: 0xffe66d });
+    this.matChamber = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.45 });
+    this.matGrid = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.25 });
+
+    // 地面网格
+    const grid = new THREE.GridHelper(80, 40, 0x335577, 0x223344);
+    grid.position.y = -16;
+    grid.material = this.matGrid;
+    this.gFission.add(grid);
+    const grid2 = new THREE.GridHelper(80, 40, 0x335577, 0x223344);
+    grid2.position.y = -16;
+    grid2.material = this.matGrid;
+    this.gFusion.add(grid2);
+    this.gridF = grid; this.gridFu = grid2;
+
+    // ---- 对象池 ----
+    this.neutronPool = makePool(() => {
+      const m = new THREE.Mesh(this.geomNeutron, this.matNeutron);
+      this.neutronGroup.add(m);
+      return { mesh: m, pos: new THREE.Vector3(), vel: new THREE.Vector3(), alive: false, life: 0 };
+    });
+    this.fragPool = makePool(() => {
+      const m = new THREE.Mesh(this.geomFrag, this.matFragment);
+      this.fragGroup.add(m);
+      return { mesh: m, pos: new THREE.Vector3(), vel: new THREE.Vector3(), alive: false, life: 0, maxLife: 0 };
+    });
+    this.flashPool = makePool(() => {
+      const m = new THREE.Mesh(this.geomFlash, this.matFlash);
+      this.flashGroup.add(m);
+      return { mesh: m, pos: new THREE.Vector3(), alive: false, life: 0, maxLife: 0, scale: 1 };
+    });
+    this.plasmaPool = makePool(() => {
+      const m = new THREE.Mesh(this.geomPlasma, this.matDeut); // 材质运行时按 type 切换
+      this.plasmaGroup.add(m);
+      return { mesh: m, pos: new THREE.Vector3(), vel: new THREE.Vector3(), type: 'D', alive: false, mat: m.material };
+    });
+
+    // ---- 运行状态 ----
+    this.mode = 'fission';
+    this.atoms = [];          // {mesh,pos,alive,fissioning,scale}
+    this.activeNeutrons = []; // 活跃中子对象（裂变）
+    this.activeFrags = [];
+    this.activeFlashes = [];
+    this.activePlasma = [];   // 聚变粒子
+    this.rodAxes = [];        // {x,z}
+    this.rodMeshes = [];
+    this.vesselHalf = 12;
+
+    // 参数
+    this.uCount = 150;
+    this.rodAbsorb = 0.30;
+    this.fusionTemp = 50;
+    this.fusionDensity = 100;
+
+    // 统计
+    this.stats = { activeNeutrons: 0, reactions: 0, totalEnergy: 0 };
+
+    // 临界性跟踪
+    this.neutronHistory = []; // 最近若干秒活跃中子数
+    this.reactionAccum = 0;    // 用于速率
+    this.lastEnergy = 0;
+
+    // 网格
+    this.grid = new SpatialGrid(3.2);
+    this.gridFu = new SpatialGrid(1.6);
+
+    // 相机控制
+    this._initCameraControls();
+
+    // 初始构建
+    this.setMode('fission');
+  }
+
+  // ---------- 相机控制 ----------
+  _updateCamera() {
+    const sp = Math.sin(this.cam.phi), cp = Math.cos(this.cam.phi);
+    this.camera.position.set(
+      this.cam.target.x + this.cam.radius * sp * Math.cos(this.cam.theta),
+      this.cam.target.y + this.cam.radius * cp,
+      this.cam.target.z + this.cam.radius * sp * Math.sin(this.cam.theta)
+    );
+    this.camera.lookAt(this.cam.target);
+  }
+  _initCameraControls() {
+    const el = this.renderer.domElement;
+    let dragging = false, lx = 0, ly = 0;
+    const onDown = (x, y) => { dragging = true; lx = x; ly = y; };
+    const onMove = (x, y) => {
+      if (!dragging) return;
+      const dx = x - lx, dy = y - ly;
+      lx = x; ly = y;
+      this.cam.theta -= dx * 0.006;
+      this.cam.phi -= dy * 0.006;
+      this.cam.phi = Math.max(0.15, Math.min(Math.PI - 0.15, this.cam.phi));
+      this._updateCamera();
+    };
+    const onUp = () => { dragging = false; };
+    el.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', onUp);
+    el.addEventListener('wheel', e => {
+      e.preventDefault();
+      this.cam.radius *= (1 + e.deltaY * 0.0012);
+      this.cam.radius = Math.max(12, Math.min(120, this.cam.radius));
+      this._updateCamera();
+    }, { passive: false });
+    // 触摸
+    let pinchDist = 0, touchRotate = false;
+    el.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) { touchRotate = true; onDown(e.touches[0].clientX, e.touches[0].clientY); }
+      else if (e.touches.length === 2) {
+        touchRotate = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchDist = Math.hypot(dx, dy);
+      }
+    }, { passive: true });
+    el.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (e.touches.length === 1 && touchRotate) onMove(e.touches[0].clientX, e.touches[0].clientY);
+      else if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
+        const d = Math.hypot(dx, dy);
+        if (pinchDist) {
+          this.cam.radius *= (pinchDist / d);
+          this.cam.radius = Math.max(12, Math.min(120, this.cam.radius));
+          this._updateCamera();
+        }
+        pinchDist = d;
+      }
+    }, { passive: false });
+    el.addEventListener('touchend', () => { touchRotate = false; pinchDist = 0; });
+  }
+
+  // ---------- 主题适配 ----------
+  applyTheme() {
+    const sceneBg = readVar('--nu-scene-bg') || '#070b14';
+    this.scene.background = new THREE.Color(sceneBg);
+    const toRGB = v => v.replace(/rgba?\(([^)]+)\)/, (m, p) => { const a = p.split(','); return `rgb(${a[0]},${a[1]},${a[2]})`; });
+    const set = (mat, v) => { try { mat.color.setStyle(toRGB(readVar(v))); } catch (e) {} };
+    set(this.matAtom, '--nu-atom');
+    const em = readVar('--nu-atom'); try { this.matAtom.emissive.setStyle(toRGB(em)); } catch (e) {}
+    set(this.matRod, '--nu-rod');
+    set(this.matNeutron, '--nu-neutron');
+    set(this.matFragment, '--nu-fragment');
+    set(this.matFlash, '--nu-energy');
+    set(this.matDeut, '--nu-plasma-d');
+    set(this.matTrit, '--nu-plasma-t');
+    set(this.matHelium, '--nu-plasma-he');
+    try { this.matVessel.color.setStyle(toRGB(readVar('--nu-vessel'))); } catch (e) {}
+    try { this.matChamber.color.setStyle(toRGB(readVar('--nu-chamber'))); } catch (e) {}
+    try { this.matGrid.color.setStyle(toRGB(readVar('--nu-grid'))); } catch (e) {}
+    // 地面网格颜色随主题
+    [this.gridF, this.gridFu].forEach(g => {
+      try { g.material.color.setStyle(toRGB(readVar('--nu-grid'))); } catch (e) {}
+    });
+    // 图例点颜色
+    const dot = (id, v) => { const el = document.getElementById(id); if (el) el.style.background = readVar(v); };
+    dot('lg-atom', '--nu-atom'); dot('lg-neutron', '--nu-neutron'); dot('lg-rod', '--nu-rod'); dot('lg-frag', '--nu-fragment');
+    dot('lg-d', '--nu-plasma-d'); dot('lg-t', '--nu-plasma-t'); dot('lg-he', '--nu-plasma-he'); dot('lg-n2', '--nu-neutron');
+  }
+
+  // ---------- 模式切换 ----------
+  setMode(mode) {
+    this.mode = mode;
+    this._clearAll();
+    this.gFission.visible = (mode === 'fission');
+    this.gFusion.visible = (mode === 'fusion');
+    document.getElementById('group-fission').style.display = (mode === 'fission') ? 'block' : 'none';
+    document.getElementById('group-fusion').style.display = (mode === 'fusion') ? 'block' : 'none';
+    document.getElementById('theory-fission').style.display = (mode === 'fission') ? 'block' : 'none';
+    document.getElementById('theory-fusion').style.display = (mode === 'fusion') ? 'block' : 'none';
+    document.getElementById('lbl-active').textContent = (mode === 'fission') ? '活跃中子' : '活跃粒子';
+    document.getElementById('mode-subtitle').textContent = (mode === 'fission')
+      ? '核裂变 · 链式反应与临界控制' : '核聚变 · 磁约束等离子体';
+    if (mode === 'fission') {
+      this.cam.radius = 42; this.cam.target.set(0, 0, 0);
+      this.buildFission(this.uCount, this.rodAbsorb);
+    } else {
+      this.cam.radius = 34; this.cam.target.set(0, 0, 0);
+      this.buildFusion(this.fusionTemp, this.fusionDensity);
+    }
+    this._updateCamera();
+  }
+
+  _clearAll() {
+    // 释放所有动态对象
+    while (this.activeNeutrons.length) this.neutronPool.release(this.activeNeutrons.pop());
+    while (this.activeFrags.length) this.fragPool.release(this.activeFrags.pop());
+    while (this.activeFlashes.length) this.flashPool.release(this.activeFlashes.pop());
+    while (this.activePlasma.length) this.plasmaPool.release(this.activePlasma.pop());
+    // 清除原子
+    for (const a of this.atoms) this.atomGroup.remove(a.mesh);
+    this.atoms.length = 0;
+    // 清除控制棒
+    for (const r of this.rodMeshes) this.rodGroup.remove(r);
+    this.rodMeshes.length = 0; this.rodAxes.length = 0;
+    // 清除容器/腔体线框
+    this._clearGroup(this.vesselGroup);
+    this._clearGroup(this.chamberGroup);
+    // 重置统计
+    this.stats.activeNeutrons = 0; this.stats.reactions = 0; this.stats.totalEnergy = 0;
+    this.neutronHistory.length = 0; this.lastEnergy = 0;
+  }
+  _clearGroup(g) { while (g.children.length) { const c = g.children.pop(); if (c.geometry && c.geometry !== this.geomAtom) c.geometry.dispose && c.geometry.dispose(); } }
+
+  // ============================================================
+  //  裂变模式
+  // ============================================================
+  buildFission(count, rodAbsorb) {
+    this.uCount = count; this.rodAbsorb = rodAbsorb;
+    const spacing = 3.0;
+    const side = Math.max(2, Math.ceil(Math.cbrt(count)));
+    const offset = (side - 1) / 2 * spacing;
+    let placed = 0;
+    for (let ix = 0; ix < side && placed < count; ix++) {
+      for (let iy = 0; iy < side && placed < count; iy++) {
+        for (let iz = 0; iz < side && placed < count; iz++) {
+          const mesh = new THREE.Mesh(this.geomAtom, this.matAtom);
+          const x = ix * spacing - offset, y = iy * spacing - offset, z = iz * spacing - offset;
+          mesh.position.set(x, y, z);
+          this.atomGroup.add(mesh);
+          this.atoms.push({ mesh, pos: mesh.position, alive: true, fissioning: false, scale: 1 });
+          placed++;
+        }
+      }
+    }
+    this.vesselHalf = offset + 3;
+
+    // 容器线框
+    const box = new THREE.BoxGeometry(this.vesselHalf * 2, this.vesselHalf * 2, this.vesselHalf * 2);
+    const edges = new THREE.EdgesGeometry(box);
+    const line = new THREE.LineSegments(edges, this.matVessel);
+    this.vesselGroup.add(line);
+
+    // 控制棒：在交替的格点中心位置
+    const rodLen = this.vesselHalf * 2;
+    this.rodLen = rodLen;
+    for (let ix = 0; ix < side; ix += 2) {
+      for (let iz = 0; iz < side; iz += 2) {
+        const rx = (ix + 0.5) * spacing - offset;
+        const rz = (iz + 0.5) * spacing - offset;
+        this.rodAxes.push({ x: rx, z: rz });
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, rodLen, 10), this.matRod);
+        rod.position.set(rx, 0, rz);
+        this.rodGroup.add(rod);
+        this.rodMeshes.push(rod);
+      }
+    }
+    this._updateRodVisual();
+  }
+
+  _updateRodVisual() {
+    // 吸收率越高 → 控制棒越深插入（位置下移）
+    const topY = this.vesselHalf;     // 棒完全抽出时中心位置
+    const f = this.rodAbsorb;          // 0..1
+    const y = topY * (1 - f);
+    for (const r of this.rodMeshes) r.position.y = y;
+  }
+
+  fireNeutron(n) {
+    n = n || 1;
+    for (let i = 0; i < n; i++) {
+      if (this.activeNeutrons.length >= 350) break;
+      const neu = this.neutronPool.obtain();
+      // 从容器边缘随机位置射向中心区域
+      const ang = Math.random() * Math.PI * 2;
+      const r = this.vesselHalf * 0.9;
+      neu.pos.set(Math.cos(ang) * r, (Math.random() - 0.5) * this.vesselHalf, Math.sin(ang) * r);
+      // 速度指向中心附近（带随机偏移）
+      _v1.set((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4).sub(neu.pos).normalize().multiplyScalar(9);
+      neu.vel.copy(_v1);
+      neu.mesh.position.copy(neu.pos);
+      neu.life = 6.0;
+      this.activeNeutrons.push(neu);
+    }
+  }
+
+  _spawnNeutron(pos, speed) {
+    if (this.activeNeutrons.length >= 350) return null;
+    const neu = this.neutronPool.obtain();
+    neu.pos.copy(pos);
+    _v1.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(speed);
+    neu.vel.copy(_v1);
+    neu.mesh.position.copy(pos);
+    neu.life = 6.0;
+    this.activeNeutrons.push(neu);
+    return neu;
+  }
+  _spawnFragment(pos, dir) {
+    const f = this.fragPool.obtain();
+    f.pos.copy(pos);
+    _v1.copy(dir).multiplyScalar(5 + Math.random() * 3);
+    f.vel.copy(_v1);
+    f.mesh.position.copy(pos);
+    f.life = 0; f.maxLife = 1.0; f.mesh.scale.setScalar(1);
+    this.activeFrags.push(f);
+  }
+  _spawnFlash(pos) {
+    const fl = this.flashPool.obtain();
+    fl.pos.copy(pos); fl.mesh.position.copy(pos);
+    fl.life = 0; fl.maxLife = 0.4; fl.scale = 0.5; fl.mesh.scale.setScalar(fl.scale);
+    this.activeFlashes.push(fl);
+  }
+
+  _fissionAtom(atom) {
+    atom.alive = false; atom.fissioning = true; atom.scale = 1;
+    this.stats.reactions++;
+    this.stats.totalEnergy += 200;
+    // 释放 2~3 个中子
+    const k = 2 + (Math.random() < 0.5 ? 1 : 0);
+    for (let i = 0; i < k; i++) this._spawnNeutron(atom.pos, 9);
+    // 裂片
+    _v2.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+    this._spawnFragment(atom.pos, _v2);
+    _v2.negate();
+    this._spawnFragment(atom.pos, _v2);
+    this._spawnFlash(atom.pos);
+  }
+
+  _updateFission(dt) {
+    // 重建空间网格（仅存活原子）
+    this.grid.clear();
+    for (let i = 0; i < this.atoms.length; i++) {
+      const a = this.atoms[i];
+      if (a.alive) this.grid.insert(i, a.pos.x, a.pos.y, a.pos.z);
+    }
+    const fissionRadius = 1.7;
+    const pFissionPerFrame = 0.14;
+    const cap = 350;
+    const self = this;
+
+    // 中子更新
+    for (let i = this.activeNeutrons.length - 1; i >= 0; i--) {
+      const neu = this.activeNeutrons[i];
+      neu.life -= dt;
+      // 运动
+      _v1.copy(neu.vel).multiplyScalar(dt);
+      neu.pos.add(_v1);
+      neu.mesh.position.copy(neu.pos);
+
+      let consumed = false;
+      // 逃逸
+      if (Math.abs(neu.pos.x) > self.vesselHalf + 2 || Math.abs(neu.pos.y) > self.vesselHalf + 2 || Math.abs(neu.pos.z) > self.vesselHalf + 2 || neu.life <= 0) {
+        consumed = true;
+      }
+      // 控制棒吸收
+      if (!consumed) {
+        for (let r = 0; r < self.rodAxes.length; r++) {
+          const ra = self.rodAxes[r];
+          const dx = neu.pos.x - ra.x, dz = neu.pos.z - ra.z;
+          if (dx * dx + dz * dz < 1.0) {
+            // 棒有效垂直范围
+            const rodY = self.vesselHalf * (1 - self.rodAbsorb);
+            if (neu.pos.y > rodY - self.rodLen / 2 && neu.pos.y < rodY + self.rodLen / 2) {
+              if (Math.random() < self.rodAbsorb * dt * 5.0) { consumed = true; break; }
+            }
+          }
+        }
+      }
+      // 与原子碰撞
+      if (!consumed) {
+        let hit = -1;
+        self.grid.query(neu.pos.x, neu.pos.y, neu.pos.z, fissionRadius, (idx) => {
+          if (hit !== -1) return;
+          const a = self.atoms[idx];
+          if (!a.alive) return;
+          const d2 = a.pos.distanceToSquared(neu.pos);
+          if (d2 < fissionRadius * fissionRadius) {
+            if (Math.random() < pFissionPerFrame) hit = idx;
+          }
+        });
+        if (hit !== -1) {
+          self._fissionAtom(self.atoms[hit]);
+          consumed = true; // 该中子被吸收
+        }
+      }
+      if (consumed) {
+        this.neutronPool.release(neu);
+        this.activeNeutrons.splice(i, 1);
+      }
+    }
+
+    // 原子裂变动画（缩小）
+    for (let i = 0; i < this.atoms.length; i++) {
+      const a = this.atoms[i];
+      if (a.fissioning) {
+        a.scale -= dt * 5;
+        if (a.scale <= 0) { a.scale = 0; a.fissioning = false; a.mesh.visible = false; }
+        else a.mesh.scale.setScalar(a.scale);
+      }
+    }
+
+    // 裂片更新
+    this._updateFrags(dt);
+    // 闪光更新
+    this._updateFlashes(dt);
+
+    this.stats.activeNeutrons = this.activeNeutrons.length;
+  }
+
+  _updateFrags(dt) {
+    for (let i = this.activeFrags.length - 1; i >= 0; i--) {
+      const f = this.activeFrags[i];
+      f.life += dt;
+      _v1.copy(f.vel).multiplyScalar(dt);
+      f.pos.add(_v1); f.mesh.position.copy(f.pos);
+      const t = f.life / f.maxLife;
+      f.mesh.scale.setScalar(Math.max(0, 1 - t));
+      if (f.life >= f.maxLife) { this.fragPool.release(f); this.activeFrags.splice(i, 1); }
+    }
+  }
+  _updateFlashes(dt) {
+    for (let i = this.activeFlashes.length - 1; i >= 0; i--) {
+      const fl = this.activeFlashes[i];
+      fl.life += dt;
+      const t = fl.life / fl.maxLife;
+      // 脉冲：先膨胀后收缩
+      const s = Math.sin(t * Math.PI) * 3.0 + 0.3;
+      fl.mesh.scale.setScalar(Math.max(0.1, s));
+      fl.mesh.material.opacity = (1 - t) * 0.8;
+      if (fl.life >= fl.maxLife) { this.flashPool.release(fl); fl.mesh.material.opacity = 0.8; this.activeFlashes.splice(i, 1); }
+    }
+  }
+
+  // ============================================================
+  //  聚变模式
+  // ============================================================
+  buildFusion(temp, density) {
+    this.fusionTemp = temp; this.fusionDensity = density;
+    this.majorR = 9.0; this.minorR = 3.6;
+    // 托卡马克腔体（圆环线框）
+    const torus = new THREE.TorusGeometry(this.majorR, this.minorR, 14, 48);
+    const wire = new THREE.LineSegments(new THREE.WireframeGeometry(torus), this.matChamber);
+    this.chamberGroup.add(wire);
+    // 中心环线
+    const ringGeo = new THREE.TorusGeometry(this.majorR, 0.05, 8, 64);
+    const ring = new THREE.Mesh(ringGeo, this.matChamber);
+    this.chamberGroup.add(ring);
+
+    // 生成粒子
+    const target = Math.min(600, density);
+    for (let i = 0; i < target; i++) this._spawnPlasmaParticle();
+    this._applyPlasmaSpeeds();
+  }
+
+  _spawnPlasmaParticle(type) {
+    if (this.activePlasma.length >= 600) return null;
+    const p = this.plasmaPool.obtain();
+    p.type = type || (Math.random() < 0.5 ? 'D' : 'T');
+    p.mat = (p.type === 'D') ? this.matDeut : (p.type === 'T') ? this.matTrit : this.matHelium;
+    p.mesh.material = p.mat;
+    // 在环管内随机位置（中心环线 + 管截面内偏移）
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.random() * Math.PI * 2;
+    const rr = Math.random() * (this.minorR - 0.4);
+    const cx = this.majorR * Math.cos(theta), cz = this.majorR * Math.sin(theta);
+    p.pos.set(cx + Math.cos(phi) * rr, Math.sin(phi) * rr, cz);
+    // 切向速度
+    _v1.set(-Math.sin(theta), 0, Math.cos(theta)).multiplyScalar(2 + Math.random() * 2);
+    _v1.x += (Math.random() - 0.5); _v1.y += (Math.random() - 0.5); _v1.z += (Math.random() - 0.5);
+    p.vel.copy(_v1);
+    p.mesh.position.copy(p.pos);
+    this.activePlasma.push(p);
+    return p;
+  }
+
+  _applyPlasmaSpeeds() {
+    const s = 2 + this.fusionTemp * 0.16;
+    for (const p of this.activePlasma) {
+      if (p.type === 'n') continue;
+      const cur = p.vel.length();
+      if (cur > 0.0001) p.vel.multiplyScalar(s / cur);
+    }
+  }
+
+  heat() {
+    this.fusionTemp = Math.min(100, this.fusionTemp + 8);
+    document.getElementById('range-temp').value = this.fusionTemp;
+    document.getElementById('val-temp').textContent = this.fusionTemp;
+    // 给所有粒子速度增益
+    for (const p of this.activePlasma) {
+      if (p.type === 'n') continue;
+      p.vel.multiplyScalar(1.35);
+    }
+    // 补充若干粒子维持密度
+    const want = Math.min(600, this.fusionDensity);
+    let add = Math.max(0, Math.min(8, want - this.activePlasma.length));
+    while (add-- > 0) this._spawnPlasmaParticle();
+  }
+
+  _updateFusion(dt) {
+    const s_target = 2 + this.fusionTemp * 0.16;
+    const barrier = 6.0;
+    const fusionRadius = 1.1;
+    const self = this;
+
+    // 重建网格（仅 D/T 参与聚变检测）
+    this.gridFu.clear();
+    for (let i = 0; i < this.activePlasma.length; i++) {
+      const p = this.activePlasma[i];
+      if (p.type === 'D' || p.type === 'T') this.gridFu.insert(i, p.pos.x, p.pos.y, p.pos.z);
+    }
+
+    // 标记本帧已聚变
+    const fused = new Set();
+
+    // 运动 + 约束
+    for (let i = 0; i < this.activePlasma.length; i++) {
+      const p = this.activePlasma[i];
+      if (p.type === 'n') {
+        // 中子无约束，飞出
+        _v1.copy(p.vel).multiplyScalar(dt);
+        p.pos.add(_v1);
+        p.mesh.position.copy(p.pos);
+        continue;
+      }
+      // 切向漂移维持环向运动
+      const theta = Math.atan2(p.pos.z, p.pos.x);
+      _v1.set(-Math.sin(theta), 0, Math.cos(theta)).multiplyScalar(1.5 * dt);
+      p.vel.add(_v1);
+      // 速度趋向目标（温度）
+      const cur = p.vel.length();
+      if (cur > 0.0001) { const k = 1 + (s_target / cur - 1) * 0.08; p.vel.multiplyScalar(k); }
+      // 位移
+      _v1.copy(p.vel).multiplyScalar(dt);
+      p.pos.add(_v1);
+      // 磁约束：拉回中心环线
+      const cx = this.majorR * Math.cos(theta), cz = this.majorR * Math.sin(theta);
+      const dx = p.pos.x - cx, dy = p.pos.y, dz = p.pos.z - cz;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (dist > this.minorR) {
+        const pull = (dist - this.minorR) * 30.0;
+        const inv = 1 / dist;
+        p.vel.x -= dx * inv * pull * dt;
+        p.vel.y -= dy * inv * pull * dt;
+        p.vel.z -= dz * inv * pull * dt;
+      }
+      p.mesh.position.copy(p.pos);
+    }
+
+    // 聚变检测：D + T
+    for (let i = this.activePlasma.length - 1; i >= 0; i--) {
+      const p = this.activePlasma[i];
+      if (fused.has(i)) continue;
+      if (p.type !== 'D' && p.type !== 'T') continue;
+      let partner = -1;
+      self.gridFu.query(p.pos.x, p.pos.y, p.pos.z, fusionRadius, (j) => {
+        if (partner !== -1 || j === i || fused.has(j)) return;
+        const q = self.activePlasma[j];
+        if (!q || !q.alive) return;
+        if (p.type === q.type) return; // 仅 D-T 反应
+        const d2 = q.pos.distanceToSquared(p.pos);
+        if (d2 < fusionRadius * fusionRadius) {
+          _v1.copy(p.vel).sub(q.vel);
+          const relSpeed = _v1.length();
+          if (relSpeed > barrier && Math.random() < 0.18) partner = j;
+        }
+      });
+      if (partner !== -1) {
+        const q = self.activePlasma[partner];
+        fused.add(i); fused.add(partner);
+        self._fuse(p, q);
+      }
+    }
+
+    // 移除死亡中子（飞出范围）
+    for (let i = this.activePlasma.length - 1; i >= 0; i--) {
+      const p = this.activePlasma[i];
+      if (!p.alive) { this.activePlasma.splice(i, 1); continue; }
+      if (p.type === 'n') {
+        if (p.pos.length() > 40) { this.plasmaPool.release(p); this.activePlasma.splice(i, 1); }
+      }
+    }
+
+    this._updateFrags(dt);
+    this._updateFlashes(dt);
+    this.stats.activeNeutrons = this.activePlasma.length;
+  }
+
+  _fuse(d, t) {
+    // 中点
+    _v1.copy(d.pos).add(t.pos).multiplyScalar(0.5);
+    this.stats.reactions++;
+    this.stats.totalEnergy += 17.6;
+    // 释放氦-4（被约束）
+    const he = this.plasmaPool.obtain();
+    he.type = 'He'; he.mat = this.matHelium; he.mesh.material = he.mat;
+    he.pos.copy(_v1);
+    _v2.copy(d.vel).add(t.vel).multiplyScalar(0.3);
+    he.vel.copy(_v2);
+    he.mesh.position.copy(he.pos);
+    this.activePlasma.push(he);
+    // 释放高能中子（飞出）
+    const n = this.plasmaPool.obtain();
+    n.type = 'n'; n.mat = this.matNeutron; n.mesh.material = n.mat;
+    n.pos.copy(_v1);
+    _v2.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().multiplyScalar(14);
+    n.vel.copy(_v2);
+    n.mesh.position.copy(n.pos);
+    this.activePlasma.push(n);
+    // 闪光
+    this._spawnFlash(_v1);
+    // 标记 D/T 死亡（延迟到清理阶段归还对象池，避免本帧内被复用导致双重引用）
+    d.alive = false; t.alive = false;
+    d.mesh.visible = false; t.mesh.visible = false;
+  }
+
+  // ---------- 主更新 ----------
+  update(dt) {
+    if (dt > 0.05) dt = 0.05; // 限制步长，避免不稳定
+    if (this.mode === 'fission') this._updateFission(dt);
+    else this._updateFusion(dt);
+
+    // 临界性历史记录（每帧采样，保留近 1.5s）
+    this.neutronHistory.push(this.stats.activeNeutrons);
+    if (this.neutronHistory.length > 90) this.neutronHistory.shift();
+  }
+
+  // 临界性判断
+  getStatus() {
+    if (this.mode === 'fission') {
+      if (this.neutronHistory.length < 30) return '启动中';
+      const recent = this.neutronHistory.slice(-30);
+      const older = this.neutronHistory.slice(-60, -30);
+      const avgR = recent.reduce((a, b) => a + b, 0) / recent.length;
+      const avgO = older.length ? older.reduce((a, b) => a + b, 0) / older.length : avgR;
+      if (avgR < 1) return '亚临界';
+      if (avgR > avgO * 1.15) return '超临界';
+      if (avgR < avgO * 0.85) return '亚临界';
+      return '临界';
+    } else {
+      return this.stats.reactions > 0 ? '点火中' : '未点火';
+    }
+  }
+
+  resize() {
+    const c = this.container;
+    this.camera.aspect = c.clientWidth / c.clientHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(c.clientWidth, c.clientHeight);
+  }
+
+  render() { this.renderer.render(this.scene, this.camera); }
+}
+
+// ============================================================
+//  ECharts 实时遥测图
+// ============================================================
+const chartDom = document.getElementById('chart-container');
+const chart = echarts.init(chartDom);
+let chartTimes = [], chartEnergy = [], chartCount = [];
+let lastChartEnergy = 0;
+let simTime = 0;
+
+function buildChartOption() {
+  const muted = readVar('--text-muted') || '#888';
+  const a1 = readVar('--nu-energy') || '#ffe66d';
+  const a2 = readVar('--nu-panel-accent') || '#ff6b6b';
+  return {
+    backgroundColor: 'transparent',
+    grid: { top: 24, bottom: 26, left: 42, right: 14 },
+    tooltip: { trigger: 'axis', formatter: p => p.map(x => `${x.seriesName}: ${x.value[1].toFixed(1)}`).join('<br/>') },
+    legend: { data: ['能量速率', '活跃数'], textStyle: { color: muted, fontSize: 9 }, top: 2, itemWidth: 12, itemHeight: 6 },
+    xAxis: { type: 'value', name: 's', nameTextStyle: { color: muted, fontSize: 9 },
+      axisLabel: { color: muted, fontSize: 9 }, axisLine: { lineStyle: { color: muted } }, splitLine: { show: false } },
+    yAxis: [
+      { type: 'value', name: 'MeV/帧', nameTextStyle: { color: a1, fontSize: 9 },
+        axisLabel: { color: a1, fontSize: 9 }, splitLine: { lineStyle: { color: muted, type: 'dashed', opacity: 0.3 } } },
+      { type: 'value', name: '个', nameTextStyle: { color: a2, fontSize: 9 },
+        axisLabel: { color: a2, fontSize: 9 }, splitLine: { show: false } }
+    ],
+    series: [
+      { name: '能量速率', type: 'line', yAxisIndex: 0, smooth: true, showSymbol: false,
+        lineStyle: { color: a1, width: 1.6 }, areaStyle: { color: a1, opacity: 0.12 }, data: [] },
+      { name: '活跃数', type: 'line', yAxisIndex: 1, smooth: true, showSymbol: false,
+        lineStyle: { color: a2, width: 1.6 }, data: [] }
+    ]
+  };
+}
+chart.setOption(buildChartOption());
+
+function updateChartTheme() { chart.setOption(buildChartOption()); }
+
+function pushTelemetry() {
+  const e = engine.stats.totalEnergy - lastChartEnergy;
+  lastChartEnergy = engine.stats.totalEnergy;
+  simTime += 0.25;
+  chartTimes.push(simTime);
+  chartEnergy.push(e);
+  chartCount.push(engine.stats.activeNeutrons);
+  if (chartTimes.length > 60) { chartTimes.shift(); chartEnergy.shift(); chartCount.shift(); }
+  const data1 = chartTimes.map((t, i) => [t, chartEnergy[i]]);
+  const data2 = chartTimes.map((t, i) => [t, chartCount[i]]);
+  chart.setOption({ series: [{ data: data1 }, { data: data2 }] });
+}
+
+// ============================================================
+//  引擎实例化与主题适配
+// ============================================================
+const container = document.getElementById('canvas-container');
+const engine = new ThreeEngine(container);
+engine.applyTheme();
+
+// 主题变更监听：观察 data-theme 属性，同步 3D 场景与图表配色
+const themeObserver = new MutationObserver(() => {
+  engine.applyTheme();
+  updateChartTheme();
+});
+themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+// 兜底：DOMContentLoaded 后再次应用（shared-theme.js 此时才设定 data-theme）
+document.addEventListener('DOMContentLoaded', () => { engine.applyTheme(); updateChartTheme(); });
+
+// ============================================================
+//  UI 事件绑定
+// ============================================================
+const $ = id => document.getElementById(id);
+
+// 模式切换
+$('btn-fission').addEventListener('click', () => {
+  $('btn-fission').classList.add('active'); $('btn-fusion').classList.remove('active');
+  lastChartEnergy = 0; simTime = 0; chartTimes = []; chartEnergy = []; chartCount = [];
+  engine.setMode('fission');
+});
+$('btn-fusion').addEventListener('click', () => {
+  $('btn-fusion').classList.add('active'); $('btn-fission').classList.remove('active');
+  lastChartEnergy = 0; simTime = 0; chartTimes = []; chartEnergy = []; chartCount = [];
+  engine.setMode('fusion');
+});
+
+// 裂变：U-235 数量（释放时重建）
+$('range-u235').addEventListener('input', e => { $('val-u235').textContent = e.target.value; });
+$('range-u235').addEventListener('change', e => {
+  engine.uCount = parseInt(e.target.value);
+  engine.buildFission(engine.uCount, engine.rodAbsorb);
+});
+// 控制棒吸收率（实时）
+$('range-rod').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  $('val-rod').textContent = v;
+  engine.rodAbsorb = v / 100;
+  engine._updateRodVisual();
+});
+// 发射中子
+$('btn-fire').addEventListener('click', () => engine.fireNeutron(3));
+
+// 聚变：温度（实时影响速度）
+$('range-temp').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  $('val-temp').textContent = v;
+  engine.fusionTemp = v;
+  engine._applyPlasmaSpeeds();
+});
+// 密度（释放时重建）
+$('range-density').addEventListener('input', e => { $('val-density').textContent = e.target.value; });
+$('range-density').addEventListener('change', e => {
+  engine.fusionDensity = parseInt(e.target.value);
+  engine.buildFusion(engine.fusionTemp, engine.fusionDensity);
+});
+// 加热
+$('btn-heat').addEventListener('click', () => engine.heat());
+
+// 重建
+$('btn-reset').addEventListener('click', () => {
+  lastChartEnergy = 0; simTime = 0; chartTimes = []; chartEnergy = []; chartCount = [];
+  engine.setMode(engine.mode);
+});
+
+// 窗口尺寸
+window.addEventListener('resize', () => { engine.resize(); chart.resize(); });
+
+// ============================================================
+//  主循环
+// ============================================================
+const elActive = $('val-active'), elReact = $('val-reactions'), elEnergy = $('val-energy'), elStatus = $('hud-status');
+let lastTime = performance.now();
+let telemetryAccum = 0;
+
+function animate(time) {
+  requestAnimationFrame(animate);
+  const dt = (time - lastTime) / 1000;
+  lastTime = time;
+  engine.update(dt);
+  engine.render();
+
+  // HUD 更新
+  elActive.textContent = engine.stats.activeNeutrons;
+  elReact.textContent = engine.stats.reactions;
+  elEnergy.textContent = engine.stats.totalEnergy.toFixed(0);
+  elStatus.textContent = '状态: ' + engine.getStatus();
+
+  // 遥测图每 0.25s 采样
+  telemetryAccum += dt;
+  if (telemetryAccum >= 0.25) { telemetryAccum = 0; pushTelemetry(); }
+}
+animate(performance.now());
+
+// ============================================================
+//  主题系统：创建导航栏与主题切换器
+// ============================================================
+PSUTheme.createTopNav();
+PSUTheme.createSwitcher();
+</script>
+</body>
+</html>

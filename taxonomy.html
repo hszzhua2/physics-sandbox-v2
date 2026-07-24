@@ -328,10 +328,10 @@
   <!-- 统计栏 -->
   <div class="stats-bar">
     <span class="stat">📚 <span class="n na">6</span> 物理分类</span>
-    <span class="stat">🔬 <span class="n na">17</span> 学科</span>
-    <span class="stat">🧪 <span class="n na">51</span> 实验</span>
-    <span class="stat">👨‍🔬 <span class="n na">37</span> 科学家</span>
-    <span class="stat">🔗 <span class="n">112</span> 关联</span>
+    <span class="stat">🔬 <span class="n na">18</span> 学科</span>
+    <span class="stat">🧪 <span class="n na">53</span> 实验</span>
+    <span class="stat">👨‍🔬 <span class="n na">40</span> 科学家</span>
+    <span class="stat">🔗 <span class="n">120</span> 关联</span>
   </div>
 
   <!-- 3D 画布 -->
@@ -446,6 +446,7 @@
     { id:"phase",         name:"相变与临界", group:6, icon:"🧲",  color:"#ff6b6b", description:"物质相变与临界行为", parent:"chaos" },
     { id:"manybody",      name:"多体系统",   group:6, icon:"🧊",  color:"#55efc4", description:"多粒子相互作用系统", parent:"computational" },
     { id:"vision3d",      name:"三维视觉",   group:6, icon:"👁️",  color:"#55efc4", description:"三维数据处理与可视化", parent:"computational" },
+    { id:"nuclear",        name:"核物理",     group:6, icon:"☢️",  color:"#a29bfe", description:"原子核结构与核反应", parent:"quantum" },
 
     // ===== 实验 (group:7) =====
     { id:"taylor",             name:"泰勒-库埃特流",    group:7, icon:"🧪", color:"#2ecc71", description:"旋转圆柱间的流体不稳定性", target:"exp-taylor.html", parent:"fluid" },
@@ -499,6 +500,8 @@
     { id:"lens",                name:"透镜成像",          group:7, icon:"🧪", color:"#a78bfa", description:"薄透镜方程 · 三条特殊光线 · 实像与虚像", target:"exp-lens.html", parent:"geo_optics" },
     { id:"interference",        name:"双缝干涉",          group:7, icon:"🧪", color:"#f59e0b", description:"杨氏双缝实验 · 波粒二象性 · 波动+粒子双表达", target:"exp-interference.html", parent:"optics" },
     { id:"galvanometer",        name:"检流计",            group:7, icon:"🧪", color:"#00d4ff", description:"双镜光束控制 · 反射定律 · PID闭环", target:"exp-galvanometer.html", parent:"geo_optics" },
+    { id:"nuclear-3d",           name:"核物理3D模拟",     group:7, icon:"🧪", color:"#2ecc71", description:"核裂变链式反应与核聚变等离子体约束3D模拟", target:"exp-nuclear-3d.html", parent:"nuclear" },
+    { id:"nuclear-plant",        name:"核电站",           group:7, icon:"🏭", color:"#10b981", description:"压水堆三回路热力循环 · 控制棒 · 汽轮机 · 冷却塔", target:"exp-nuclear-plant.html", parent:"nuclear" },
 
     // ===== 科学家 (group:8) =====
     { id:"sci-newton",      name:"牛顿",       group:8, icon:"🍎", color:"#e17055", description:"经典力学奠基人 · 万有引力定律", experiments:["spring","gravity_exp","matter","solar","newton-cradle","projectile","elastic-collision","physics-canvas"] },
@@ -537,7 +540,10 @@
     { id:"sci-lehmann",     name:"莱曼",       group:8, icon:"🔬", color:"#e67e22", description:"地球固体内核发现者 · 女性地震学先驱", experiments:["geophysics"] },
     { id:"sci-wegener",     name:"魏格纳",     group:8, icon:"🧩", color:"#e67e22", description:"大陆漂移学说提出者 · 板块构造理论奠基人", experiments:["geophysics"] },
     { id:"sci-snell",       name:"斯涅尔",     group:8, icon:"📐", color:"#9b59b6", description:"光的折射定律(斯涅尔定律)提出者 · 几何光学奠基人", experiments:["optics_exp","refraction"] },
-    { id:"sci-young",       name:"托马斯·杨",   group:8, icon:"🌊", color:"#f59e0b", description:"双缝干涉实验 · 光的波动说奠基人 · 杨氏模量", experiments:["interference"] }
+    { id:"sci-young",       name:"托马斯·杨",   group:8, icon:"🌊", color:"#f59e0b", description:"双缝干涉实验 · 光的波动说奠基人 · 杨氏模量", experiments:["interference"] },
+    { id:"sci-hahn",        name:"哈恩",       group:8, icon:"☢️", color:"#fdcb6e", description:"核裂变发现者 · 1944年诺贝尔化学奖", experiments:["nuclear-3d","nuclear-plant"] },
+    { id:"sci-meitner",     name:"迈特纳",     group:8, icon:"⚛️", color:"#a29bfe", description:"核裂变理论解释者 · 元素𬭸以她命名", experiments:["nuclear-3d","nuclear-plant"] },
+    { id:"sci-fermi",       name:"费米",       group:8, icon:"⚛️", color:"#10b981", description:"首座核反应堆CP-1建造者 · 1938年诺贝尔物理学奖", experiments:["nuclear-3d","nuclear-plant"] }
   ];
 
   // ==========================================

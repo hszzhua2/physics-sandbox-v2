@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>核电站 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css?v=20260724d">
+  <style>
+    /* ============================================================
+       核电站 — 主题局部变量 (--np-*)
+       每个主题定义核电站专用配色：反应堆/蒸汽/冷却/管道/场景背景
+       ============================================================ */
+
+    /* 默认 = CARTOON */
+    :root, :root[data-theme="cartoon"] {
+      --np-scene-bg: #0b1426;
+      --np-grid: rgb(120, 180, 255);
+      --np-steel: #94a3b8;
+      --np-dark-metal: #334155;
+      --np-concrete: #64748b;
+      --np-vessel-glass: rgb(96, 165, 250);
+      --np-fuel: #3b82f6;
+      --np-fuel-emissive: #1e3a8a;
+      --np-rod: #111827;
+      --np-pipe: #64748b;
+      --np-fluid-hot: #ef4444;
+      --np-fluid-cold: #3b82f6;
+      --np-fluid-steam: #ffffff;
+      --np-fluid-warm: #f97316;
+      --np-panel-accent: #f97316;
+      --np-ground: #1e293b;
+    }
+    :root[data-theme="academic"] {
+      --np-scene-bg: #0a0e1a;
+      --np-grid: rgb(107, 140, 174);
+      --np-steel: #8a96a8;
+      --np-dark-metal: #4a5568;
+      --np-concrete: #718096;
+      --np-vessel-glass: rgb(107, 140, 174);
+      --np-fuel: #6b8cae;
+      --np-fuel-emissive: #2d3e5a;
+      --np-rod: #2d3748;
+      --np-pipe: #718096;
+      --np-fluid-hot: #c0392b;
+      --np-fluid-cold: #2980b9;
+      --np-fluid-steam: #ecf0f1;
+      --np-fluid-warm: #d35400;
+      --np-panel-accent: #6b8cae;
+      --np-ground: #2d3748;
+    }
+    :root[data-theme="glass"] {
+      --np-scene-bg: #070b14;
+      --np-grid: rgb(116, 185, 255);
+      --np-steel: #a0aec0;
+      --np-dark-metal: #2d3748;
+      --np-concrete: #718096;
+      --np-vessel-glass: rgb(116, 185, 255);
+      --np-fuel: #74b9ff;
+      --np-fuel-emissive: #1a3a5a;
+      --np-rod: #1a202c;
+      --np-pipe: #718096;
+      --np-fluid-hot: #fd79a8;
+      --np-fluid-cold: #74b9ff;
+      --np-fluid-steam: #ffffff;
+      --np-fluid-warm: #fdcb6e;
+      --np-panel-accent: #74b9ff;
+      --np-ground: #1a202c;
+    }
+    :root[data-theme="cyber"] {
+      --np-scene-bg: #06010f;
+      --np-grid: rgb(0, 243, 255);
+      --np-steel: #64748b;
+      --np-dark-metal: #1e1b3a;
+      --np-concrete: #475569;
+      --np-vessel-glass: rgb(189, 0, 255);
+      --np-fuel: #00f3ff;
+      --np-fuel-emissive: #003a4a;
+      --np-rod: #0a0014;
+      --np-pipe: #475569;
+      --np-fluid-hot: #ff00ea;
+      --np-fluid-cold: #00f3ff;
+      --np-fluid-steam: #e0d0ff;
+      --np-fluid-warm: #ff9d00;
+      --np-panel-accent: #bd00ff;
+      --np-ground: #0a0014;
+    }
+    :root[data-theme="soviet"] {
+      --np-scene-bg: #160a0a;
+      --np-grid: rgb(196, 30, 30);
+      --np-steel: #8a8070;
+      --np-dark-metal: #3a2a1a;
+      --np-concrete: #6a5a4a;
+      --np-vessel-glass: rgb(196, 30, 30);
+      --np-fuel: #c41e1e;
+      --np-fuel-emissive: #4a0a0a;
+      --np-rod: #1a0a0a;
+      --np-pipe: #6a5a4a;
+      --np-fluid-hot: #c41e1e;
+      --np-fluid-cold: #556b2f;
+      --np-fluid-steam: #fff3e0;
+      --np-fluid-warm: #b8860b;
+      --np-panel-accent: #c41e1e;
+      --np-ground: #2a1a0a;
+    }
+
+    /* ===== 布局 ===== */
+    body { background-color: var(--bg-color); color: var(--text-color); }
+    .exp-bg { z-index: -1; }
+    #canvas-container { position: fixed; inset: 0; z-index: 0; }
+    canvas { display: block; }
+
+    /* 顶部标题条 */
+    #app-title {
+      position: fixed; top: 62px; left: 50%; transform: translateX(-50%);
+      z-index: 14; pointer-events: none; text-align: center;
+      background: var(--panel-bg); border: var(--border-width) solid var(--panel-border);
+      border-radius: var(--radius); padding: 6px 22px; backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-soft);
+      transition: var(--theme-transition);
+    }
+    #app-title .main { font-size: 0.92rem; font-weight: 700; color: var(--np-panel-accent); letter-spacing: 2px; }
+    #app-title .sub { display: block; font-size: 0.66rem; color: var(--text-muted); letter-spacing: 1px; margin-top: 1px; }
+
+    /* HUD 遥测覆盖层 */
+    #hud {
+      position: fixed; top: 116px; left: 50%; transform: translateX(-50%);
+      z-index: 13; pointer-events: none; display: flex; gap: 8px;
+      flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 660px);
+    }
+    .hud-chip {
+      background: var(--panel-bg); border: var(--border-width) solid var(--panel-border);
+      border-radius: var(--radius); padding: 6px 14px; backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px); box-shadow: var(--shadow-soft);
+      text-align: center; min-width: 92px; transition: var(--theme-transition);
+    }
+    .hud-chip .label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .hud-chip .value { font-size: 1.1rem; font-weight: 700; color: var(--np-panel-accent); font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .hud-chip .unit { font-size: 0.6rem; color: var(--text-muted); margin-left: 2px; }
+    #hud-status { font-size: 0.66rem; font-weight: 700; padding: 6px 14px; }
+
+    /* 左侧控制面板 */
+    #left-panel {
+      position: fixed; top: 62px; left: 14px; bottom: 14px;
+      width: 280px; z-index: 11; display: flex; flex-direction: column;
+    }
+    .panel-header {
+      padding: 11px 14px; font-size: 0.88rem; font-weight: 700;
+      color: var(--np-panel-accent); border-bottom: var(--border-width) solid var(--panel-border);
+      display: flex; align-items: center; gap: 7px; flex-shrink: 0; transition: var(--theme-transition);
+    }
+    .panel-body { padding: 13px 14px; overflow-y: auto; flex: 1; }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+    .section { margin-bottom: 15px; }
+    .section:last-child { margin-bottom: 0; }
+    .section-label { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; transition: var(--theme-transition); }
+
+    .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; font-size: 0.8rem; color: var(--text-muted); transition: var(--theme-transition); }
+    .param-row .pname { flex-shrink: 0; }
+    .param-row .val { color: var(--np-panel-accent); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+    .param-row input[type="range"] { flex: 1; margin: 0 8px; accent-color: var(--np-panel-accent); }
+
+    button {
+      background: var(--panel-bg); color: var(--text-color);
+      border: var(--border-width) solid var(--panel-border); padding: 7px 14px;
+      border-radius: var(--radius); cursor: pointer; transition: var(--theme-transition);
+      font-size: 0.82rem; font-family: inherit; font-weight: 600;
+    }
+    button:hover { border-color: var(--np-panel-accent); color: var(--np-panel-accent); }
+    button.active { background: var(--np-panel-accent) !important; color: #fff !important; border-color: var(--np-panel-accent) !important; }
+    .action-btn { width: 100%; padding: 9px; margin-top: 4px; }
+    .btn-scram { border-color: var(--np-fluid-hot); color: var(--np-fluid-hot); }
+    .btn-scram:hover { background: var(--np-fluid-hot); color: #fff !important; }
+    .btn-reset { border-color: var(--np-fluid-cold); color: var(--np-fluid-cold); }
+    .btn-reset:hover { background: var(--np-fluid-cold); color: #fff !important; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.7rem; color: var(--text-muted); margin-top: 6px; }
+    .legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+    .status-box {
+      padding: 10px 12px; border-radius: var(--radius); border: var(--border-width) solid var(--panel-border);
+      background: var(--panel-bg); transition: var(--theme-transition);
+    }
+    .status-box.alert { animation: pulseAlert 1s infinite; }
+    @keyframes pulseAlert { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    .status-row { display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.ok { background: #10b981; box-shadow: 0 0 8px #10b981; }
+    .status-dot.warn { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .status-dot.danger { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
+    .status-text { font-size: 0.78rem; font-weight: 600; }
+
+    /* 右侧信息/图表面板 */
+    #right-panel {
+      position: fixed; top: 62px; right: 14px; bottom: 14px;
+      width: 340px; z-index: 11; display: flex; flex-direction: column;
+    }
+    #right-panel .panel-header { color: var(--accent-2); }
+    .knowledge-content { padding: 13px 14px; overflow-y: auto; flex: 1; }
+    .knowledge-content::-webkit-scrollbar { width: 4px; }
+    .knowledge-content::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+    .theory-block { margin-bottom: 14px; }
+    .theory-block h4 { font-size: 0.84rem; font-weight: 700; color: var(--text-color); margin-bottom: 5px; transition: var(--theme-transition); display: flex; align-items: center; gap: 6px; }
+    .tag { font-size: 0.62rem; padding: 1px 7px; border-radius: 50px; font-weight: 600; }
+    .tag-1 { background: rgba(239,68,68,.15); color: #ef4444; }
+    .tag-2 { background: rgba(59,130,252,.15); color: #3b82f6; }
+    .tag-3 { background: rgba(16,185,129,.15); color: #10b981; }
+    .theory-block p { font-size: 0.76rem; color: var(--text-muted); line-height: 1.62; margin-bottom: 5px; transition: var(--theme-transition); }
+    .formula {
+      display: block; padding: 7px 10px; margin: 6px 0; border-radius: var(--radius);
+      background: var(--panel-border); font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem; color: var(--np-panel-accent); text-align: center; letter-spacing: 0.5px;
+      transition: var(--theme-transition);
+    }
+    .history-item { font-size: 0.74rem; color: var(--text-muted); line-height: 1.62; padding-left: 14px; position: relative; margin-bottom: 3px; transition: var(--theme-transition); }
+    .history-item::before { content: '•'; position: absolute; left: 2px; color: var(--np-panel-accent); }
+    .history-item b { color: var(--text-color); font-weight: 600; }
+
+    .chart-title { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin: 8px 0 5px; transition: var(--theme-transition); }
+    #chart-container { width: 100%; height: 190px; flex-shrink: 0; border: var(--border-width) solid var(--panel-border); border-radius: var(--radius); transition: var(--theme-transition); }
+
+    @media (max-width: 1180px) {
+      #left-panel { width: 248px; }
+      #right-panel { width: 308px; }
+      #hud { max-width: calc(100vw - 600px); }
+    }
+    @media (max-width: 860px) {
+      #left-panel, #right-panel { display: none; }
+      #hud { max-width: 92vw; top: 96px; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="shared-theme.js?v=20260724d"></script>
+</head>
+<body>
+<div class="exp-bg"></div>
+
+<div id="app-title">
+  <span class="main">核电站</span>
+  <span class="sub">压水堆 · 三回路热力循环与临界控制</span>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- HUD 遥测 -->
+<div id="hud">
+  <div class="hud-chip" id="hud-status">状态: 运行正常</div>
+  <div class="hud-chip">
+    <div class="label">堆芯温度</div>
+    <div class="value" id="val-temp">300<span class="unit">°C</span></div>
+  </div>
+  <div class="hud-chip">
+    <div class="label">蒸汽压力</div>
+    <div class="value" id="val-pressure">5.0<span class="unit">MPa</span></div>
+  </div>
+  <div class="hud-chip">
+    <div class="label">汽轮机转速</div>
+    <div class="value" id="val-rpm">0<span class="unit">RPM</span></div>
+  </div>
+  <div class="hud-chip">
+    <div class="label">输出电功率</div>
+    <div class="value" id="val-power">0<span class="unit">MW</span></div>
+  </div>
+</div>
+
+<!-- 左侧控制面板 -->
+<div id="left-panel">
+  <div class="panel" style="height:100%;display:flex;flex-direction:column;background:var(--panel-bg);border:var(--border-width) solid var(--panel-border);border-radius:var(--radius);box-shadow:var(--shadow-soft);transition:var(--theme-transition);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
+    <div class="panel-header">⚛️ 中央控制台</div>
+    <div class="panel-body">
+
+      <div class="section">
+        <div class="section-label">一回路 · 反应堆控制</div>
+        <div class="param-row">
+          <span class="pname">控制棒插入深度</span>
+          <span class="val" id="display-rods">80%</span>
+        </div>
+        <input type="range" id="slider-rods" min="0" max="100" value="80" step="1" style="width:100%;accent-color:var(--np-fluid-hot);">
+        <div class="param-row" style="font-size:0.68rem;margin-top:4px;">
+          <span style="opacity:.6;">拔出加速裂变</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">二回路 · 蒸汽与发电</div>
+        <div class="param-row">
+          <span class="pname">主蒸汽阀门开度</span>
+          <span class="val" id="display-valve">50%</span>
+        </div>
+        <input type="range" id="slider-valve" min="0" max="100" value="50" step="1" style="width:100%;accent-color:var(--np-fluid-cold);">
+        <div class="param-row" style="font-size:0.68rem;margin-top:4px;">
+          <span style="opacity:.6;">控制进入汽轮机蒸汽量</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">系统状态</div>
+        <div class="status-box" id="status-box">
+          <div class="status-row">
+            <div class="status-dot ok" id="status-dot"></div>
+            <span class="status-text" id="status-text" style="color:#10b981;">运行正常 (Nominal)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">紧急操作</div>
+        <button class="action-btn btn-scram" id="btn-scram">⚡ 紧急停堆 (SCRAM)</button>
+        <button class="action-btn btn-reset" id="btn-reset" style="margin-top:6px;">⟳ 重置系统</button>
+      </div>
+
+      <div class="section">
+        <div class="section-label">流体图例</div>
+        <div class="legend">
+          <span><span class="dot" style="background:var(--np-fluid-hot);"></span> 一回路热水</span>
+          <span><span class="dot" style="background:var(--np-fluid-cold);"></span> 冷却水</span>
+          <span><span class="dot" style="background:var(--np-fluid-steam);"></span> 蒸汽</span>
+          <span><span class="dot" style="background:var(--np-fluid-warm);"></span> 三回路温水</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 右侧信息面板 -->
+<div id="right-panel">
+  <div class="panel" style="height:100%;display:flex;flex-direction:column;background:var(--panel-bg);border:var(--border-width) solid var(--panel-border);border-radius:var(--radius);box-shadow:var(--shadow-soft);transition:var(--theme-transition);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
+    <div class="panel-header">📊 宏观业务流程图解</div>
+    <div class="chart-title">实时遥测数据</div>
+    <div id="chart-container"></div>
+    <div class="knowledge-content">
+
+      <div class="theory-block">
+        <h4><span class="tag tag-1">一回路</span> 核岛核心</h4>
+        <p>在<b>反应堆压力容器</b>内，铀-235燃料发生裂变释放巨大热量。控制棒由硼/镉制成，吸收中子以控制反应速率。</p>
+        <p>高温高压的放射性冷却水（<span style="color:var(--np-fluid-hot);">红色流体</span>）在此回路中循环，将热量带出但自身不沸腾。</p>
+      </div>
+
+      <div class="theory-block">
+        <h4><span class="tag tag-2">二回路</span> 热交换与做功</h4>
+        <p>一回路水进入<b>蒸汽发生器</b>，通过管壁将热量传给二回路水，使其沸腾产生高压蒸汽（<span style="color:var(--np-fluid-steam);">白色流体</span>）。</p>
+        <p>高压蒸汽推动<b>汽轮机</b>高速旋转，将热能转化为机械能，带动发电机切割磁感线产生电能。</p>
+        <span class="formula">P = η · Q̇ · (T_h - T_c) / T_h</span>
+      </div>
+
+      <div class="theory-block">
+        <h4><span class="tag tag-3">三回路</span> 冷却循环</h4>
+        <p>做功后的乏汽进入<b>冷凝器</b>，被三回路冷却水液化成水重新泵回蒸汽发生器。吸收余热的冷却水送往<b>冷却塔</b>，通过蒸发散热到大气。</p>
+      </div>
+
+      <div class="theory-block">
+        <h4>里程碑</h4>
+        <div class="history-item"><b>1942年</b> 费米在芝加哥大学建成人类首座核反应堆 Chicago Pile-1，首次实现自持链式反应</div>
+        <div class="history-item"><b>1954年</b> 苏联奥布宁斯克核电站投运，世界首座并网发电的核电站</div>
+        <div class="history-item"><b>1957年</b> 美国希平港核电站投运，世界首座商用压水堆核电站</div>
+        <div class="history-item"><b>1970年</b> 中国第一艘核潜艇下水，标志自主掌握核动力技术</div>
+        <div class="history-item"><b>1991年</b> 秦山核电站并网发电，中国自主设计建造的首座核电站</div>
+      </div>
+
+      <div class="theory-block">
+        <h4>教学互动提示</h4>
+        <div class="history-item">逐渐拔出控制棒（向左滑动），观察温度与功率的连锁反应</div>
+        <div class="history-item">温度超过 900°C 触发警报，超过 1200°C 有堆芯熔毁风险</div>
+        <div class="history-item">点击"紧急停堆"观察重力落棒如何瞬间遏制链式反应</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  核电站模拟器 — Three.js 3D引擎 + 物理模型
+// ============================================================
+
+// ---------- 工具函数 ----------
+function readVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function toRGB(v) {
+  if (!v) return '#888888';
+  return v.replace(/rgba?\(([^)]+)\)/, (m, p) => {
+    const a = p.split(','); return `rgb(${a[0]},${a[1]},${a[2]})`;
+  });
+}
+
+// ---------- 模拟状态 ----------
+const state = {
+  controlRods: 80,
+  valveOpenness: 50,
+  coreTemp: 290,
+  steamPressure: 5.0,
+  turbineRPM: 0,
+  powerOutput: 0,
+  ambientTemp: 40,
+  maxSafeTemp: 900,
+  meltdownTemp: 1200,
+  isScrammed: false
+};
+
+// ---------- 物理引擎 ----------
+function updatePhysics(dt) {
+  const rodExtraction = 1 - (state.controlRods / 100);
+  const heatGeneration = (rodExtraction * 300) * (1 - (state.coreTemp / 1800));
+  const coolingRate = (state.coreTemp - state.ambientTemp) * 0.15;
+  state.coreTemp += (heatGeneration - coolingRate) * dt;
+  state.coreTemp = Math.max(state.ambientTemp, state.coreTemp);
+
+  const targetPressure = Math.max(0, (state.coreTemp - 100) * 0.025);
+  state.steamPressure += (targetPressure - state.steamPressure) * 0.5 * dt;
+
+  const effectiveSteam = state.steamPressure * (state.valveOpenness / 100);
+  const targetRPM = effectiveSteam * 300;
+  state.turbineRPM += (targetRPM - state.turbineRPM) * 0.2 * dt;
+  state.powerOutput = state.turbineRPM * 0.45;
+
+  updateAlarms();
+}
+
+function updateAlarms() {
+  const box = document.getElementById('status-box');
+  const dot = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+
+  if (state.coreTemp >= state.meltdownTemp) {
+    box.classList.add('alert');
+    dot.className = 'status-dot danger';
+    text.textContent = '警告：堆芯熔毁风险！';
+    text.style.color = '#ef4444';
+  } else if (state.coreTemp >= state.maxSafeTemp) {
+    box.classList.add('alert');
+    dot.className = 'status-dot warn';
+    text.textContent = '警报：温度过高';
+    text.style.color = '#f59e0b';
+  } else {
+    box.classList.remove('alert');
+    dot.className = 'status-dot ok';
+    text.textContent = '运行正常 (Nominal)';
+    text.style.color = '#10b981';
+  }
+}
+
+function updateUI() {
+  const tempEl = document.getElementById('val-temp');
+  tempEl.innerHTML = state.coreTemp.toFixed(1) + '<span class="unit">°C</span>';
+  if (state.coreTemp > state.maxSafeTemp) tempEl.style.color = '#ef4444';
+  else if (state.coreTemp > 500) tempEl.style.color = '#f59e0b';
+  else tempEl.style.color = '';
+
+  document.getElementById('val-pressure').innerHTML = state.steamPressure.toFixed(2) + '<span class="unit">MPa</span>';
+  document.getElementById('val-rpm').innerHTML = state.turbineRPM.toFixed(0) + '<span class="unit">RPM</span>';
+  document.getElementById('val-power').innerHTML = state.powerOutput.toFixed(0) + '<span class="unit">MW</span>';
+
+  const statusEl = document.getElementById('hud-status');
+  if (state.coreTemp >= state.meltdownTemp) statusEl.textContent = '状态: ⚠️ 熔毁风险';
+  else if (state.coreTemp >= state.maxSafeTemp) statusEl.textContent = '状态: ⚠️ 高温警报';
+  else if (state.powerOutput > 100) statusEl.textContent = '状态: 运行正常';
+  else statusEl.textContent = '状态: 待机';
+}
+
+// ---------- 事件绑定 ----------
+document.getElementById('slider-rods').addEventListener('input', (e) => {
+  state.controlRods = parseInt(e.target.value);
+  document.getElementById('display-rods').textContent = state.controlRods + '%';
+  state.isScrammed = false;
+});
+document.getElementById('slider-valve').addEventListener('input', (e) => {
+  state.valveOpenness = parseInt(e.target.value);
+  document.getElementById('display-valve').textContent = state.valveOpenness + '%';
+});
+document.getElementById('btn-scram').addEventListener('click', () => {
+  state.isScrammed = true;
+  state.controlRods = 100;
+  document.getElementById('slider-rods').value = 100;
+  document.getElementById('display-rods').textContent = '100%';
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  state.controlRods = 80;
+  state.valveOpenness = 50;
+  state.coreTemp = 290;
+  state.steamPressure = 5.0;
+  state.turbineRPM = 0;
+  state.powerOutput = 0;
+  state.isScrammed = false;
+  document.getElementById('slider-rods').value = 80;
+  document.getElementById('slider-valve').value = 50;
+  document.getElementById('display-rods').textContent = '80%';
+  document.getElementById('display-valve').textContent = '50%';
+});
+
+// ---------- ECharts 遥测图表 ----------
+let chart = null;
+const maxDataPoints = 60;
+const chartData = { time: [], temp: [], power: [] };
+const startTime = Date.now();
+
+function initChart() {
+  chart = echarts.init(document.getElementById('chart-container'), null, { renderer: 'canvas' });
+  applyChartTheme();
+  window.addEventListener('resize', () => chart && chart.resize());
+}
+
+function applyChartTheme() {
+  if (!chart) return;
+  const muted = readVar('--text-muted') || '#888';
+  const accent = readVar('--np-panel-accent') || '#f97316';
+  const c1 = readVar('--np-fluid-hot') || '#ef4444';
+  const c2 = readVar('--np-fluid-warm') || '#10b981';
+  const panelBg = readVar('--panel-bg') || 'transparent';
+
+  chart.setOption({
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'axis', backgroundColor: toRGB(panelBg), borderColor: toRGB(accent), textStyle: { fontSize: 11 } },
+    legend: { data: ['堆芯温度 (°C)', '电功率 (MW)'], textStyle: { color: muted, fontSize: 9 }, top: 2, itemWidth: 12, itemHeight: 6 },
+    grid: { top: 28, bottom: 24, left: 38, right: 38 },
+    xAxis: { type: 'category', boundaryGap: false, data: chartData.time, axisLabel: { color: muted, fontSize: 8, formatter: '{value}s' }, axisLine: { lineStyle: { color: muted } } },
+    yAxis: [
+      { type: 'value', name: '温度', min: 0, max: 1500, splitLine: { lineStyle: { color: muted, opacity: 0.1 } }, axisLabel: { color: c1, fontSize: 8 }, nameTextStyle: { color: muted, fontSize: 8 } },
+      { type: 'value', name: '功率', min: 0, max: 1500, splitLine: { show: false }, axisLabel: { color: c2, fontSize: 8 }, nameTextStyle: { color: muted, fontSize: 8 } }
+    ],
+    series: [
+      { name: '堆芯温度 (°C)', type: 'line', smooth: true, showSymbol: false, itemStyle: { color: c1 }, data: chartData.temp },
+      { name: '电功率 (MW)', yAxisIndex: 1, type: 'line', smooth: true, showSymbol: false, itemStyle: { color: c2 },
+        areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: c2 + '40' }, { offset: 1, color: c2 + '00' }] } },
+        data: chartData.power }
+    ],
+    animation: false
+  });
+}
+
+function updateChart() {
+  const t = ((Date.now() - startTime) / 1000).toFixed(1);
+  chartData.time.push(t);
+  chartData.temp.push(parseFloat(state.coreTemp.toFixed(0)));
+  chartData.power.push(parseFloat(state.powerOutput.toFixed(0)));
+  if (chartData.time.length > maxDataPoints) { chartData.time.shift(); chartData.temp.shift(); chartData.power.shift(); }
+  if (chart) chart.setOption({ xAxis: { data: chartData.time }, series: [{ data: chartData.temp }, { data: chartData.power }] });
+}
+
+// ============================================================
+//  3D 核电站场景 — Three.js
+// ============================================================
+class PlantScene {
+  constructor(container) {
+    this.container = container;
+    this.clock = new THREE.Clock();
+    this.labels = [];
+    this.fluidParticles = [];
+    this.steamParticles = [];
+
+    this.initScene();
+    this.buildPlant();
+    this.setupInteraction();
+    this.applyTheme();
+  }
+
+  initScene() {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(toRGB(readVar('--np-scene-bg')) || '#020617');
+    this.scene.fog = new THREE.Fog(toRGB(readVar('--np-scene-bg')) || '#020617', 120, 300);
+
+    const w = this.container.clientWidth || window.innerWidth;
+    const h = this.container.clientHeight || window.innerHeight;
+    this.camera = new THREE.PerspectiveCamera(48, w / h, 1, 1000);
+    this.camera.position.set(60, 55, 130);
+    this.camera.lookAt(0, 5, 0);
+
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    this.renderer.setSize(w, h);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.1;
+    this.container.appendChild(this.renderer.domElement);
+
+    // 灯光
+    const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+    this.scene.add(ambient);
+
+    this.dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+    this.dirLight.position.set(50, 100, 50);
+    this.dirLight.castShadow = true;
+    this.dirLight.shadow.mapSize.set(2048, 2048);
+    this.dirLight.shadow.camera.left = -120;
+    this.dirLight.shadow.camera.right = 120;
+    this.dirLight.shadow.camera.top = 100;
+    this.dirLight.shadow.camera.bottom = -100;
+    this.dirLight.shadow.bias = -0.0005;
+    this.scene.add(this.dirLight);
+
+    // 反应堆辉光
+    this.reactorLight = new THREE.PointLight(0x3b82f6, 1.5, 80);
+    this.reactorLight.position.set(-60, 5, 0);
+    this.scene.add(this.reactorLight);
+
+    // 汽轮机暖光
+    this.turbineLight = new THREE.PointLight(0xf59e0b, 0.6, 60);
+    this.turbineLight.position.set(25, 15, 0);
+    this.scene.add(this.turbineLight);
+
+    // 地面
+    const groundColor = toRGB(readVar('--np-ground')) || '#1e293b';
+    const groundGeo = new THREE.PlaneGeometry(300, 300);
+    const groundMat = new THREE.MeshStandardMaterial({ color: groundColor, roughness: 0.95, metalness: 0.05 });
+    this.ground = new THREE.Mesh(groundGeo, groundMat);
+    this.ground.rotation.x = -Math.PI / 2;
+    this.ground.position.y = -20;
+    this.ground.receiveShadow = true;
+    this.scene.add(this.ground);
+
+    // 网格
+    const gridColor = toRGB(readVar('--np-grid')) || '#334155';
+    this.grid = new THREE.GridHelper(250, 25, gridColor, gridColor);
+    this.grid.position.y = -19.9;
+    this.grid.material.opacity = 0.25;
+    this.grid.material.transparent = true;
+    this.scene.add(this.grid);
+  }
+
+  // ---------- HTML 标签 ----------
+  createLabel(text, position, type) {
+    const el = document.createElement('div');
+    el.style.cssText = `position:absolute;background:var(--panel-bg);border:var(--border-width) solid var(--panel-border);
+      padding:2px 8px;border-radius:var(--radius);color:var(--text-color);font-size:11px;pointer-events:none;
+      transform:translate(-50%,-50%);white-space:nowrap;opacity:0;transition:opacity .2s;backdrop-filter:blur(8px);`;
+    el.textContent = text;
+    document.body.appendChild(el);
+    const dummy = new THREE.Object3D();
+    dummy.position.copy(position);
+    this.scene.add(dummy);
+    this.labels.push({ obj: dummy, el: el });
+  }
+
+  updateLabels() {
+    const w = this.container.clientWidth / 2;
+    const h = this.container.clientHeight / 2;
+    const rect = this.container.getBoundingClientRect();
+    this.labels.forEach(l => {
+      const pos = l.obj.position.clone();
+      pos.project(this.camera);
+      if (pos.z > 1) { l.el.style.opacity = '0'; return; }
+      l.el.style.left = `${rect.left + (pos.x * w) + w}px`;
+      l.el.style.top = `${rect.top + (-pos.y * h) + h}px`;
+      l.el.style.opacity = '0.85';
+    });
+  }
+
+  // ---------- 建造核电站 ----------
+  buildPlant() {
+    const pR = new THREE.Vector3(-60, 0, 0);
+    const pSG = new THREE.Vector3(-20, 0, 0);
+    const pT = new THREE.Vector3(25, 0, 0);
+    const pG = new THREE.Vector3(52, 0, 0);
+    const pC = new THREE.Vector3(25, -8, 0);
+    const pCT = new THREE.Vector3(80, 0, -30);
+
+    // 共享材质
+    this.mats = {
+      steel: new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7, roughness: 0.35 }),
+      steelDark: new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6, roughness: 0.5 }),
+      darkMetal: new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6, roughness: 0.6 }),
+      glass: new THREE.MeshPhysicalMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.18, roughness: 0.1, side: THREE.DoubleSide }),
+      fuel: new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x1e3a8a, emissiveIntensity: 0.5, metalness: 0.3, roughness: 0.4 }),
+      rods: new THREE.MeshStandardMaterial({ color: 0x1a1a2e, metalness: 0.4, roughness: 0.7 }),
+      concrete: new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.92, metalness: 0.02 }),
+      pipe: new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.5, roughness: 0.5 }),
+      copper: new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.8, roughness: 0.3 }),
+      accent: new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xf59e0b, emissiveIntensity: 0.2, metalness: 0.6, roughness: 0.3 })
+    };
+
+    this.buildReactor(pR);
+    this.buildSteamGenerator(pSG);
+    this.buildTurbine(pT);
+    this.buildGenerator(pG);
+    this.buildCondenser(pC);
+    this.buildCoolingTower(pCT);
+    this.buildPipes(pR, pSG, pT, pG, pC, pCT);
+    this.buildSteamParticles(pCT);
+  }
+
+  // ---------- 反应堆 ----------
+  buildReactor(p) {
+    this.reactorGroup = new THREE.Group();
+    this.reactorGroup.position.copy(p);
+
+    // 安全壳穹顶
+    const domeGeo = new THREE.SphereGeometry(18, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+    const dome = new THREE.Mesh(domeGeo, this.mats.concrete);
+    dome.position.y = 22;
+    dome.castShadow = true;
+    this.reactorGroup.add(dome);
+
+    // 安全壳筒体
+    const shellGeo = new THREE.CylinderGeometry(18, 18, 22, 32);
+    const shell = new THREE.Mesh(shellGeo, this.mats.concrete);
+    shell.position.y = 11;
+    shell.castShadow = true;
+    shell.receiveShadow = true;
+    this.reactorGroup.add(shell);
+
+    // 安全壳窗户（玻璃环带）
+    const winGeo = new THREE.CylinderGeometry(18.2, 18.2, 3, 32, 1, true);
+    const win = new THREE.Mesh(winGeo, this.mats.glass);
+    win.position.y = 18;
+    this.reactorGroup.add(win);
+
+    // 反应堆压力容器（内部）
+    const vesselGeo = new THREE.CylinderGeometry(10, 10, 24, 24);
+    const vessel = new THREE.Mesh(vesselGeo, this.mats.glass);
+    vessel.position.y = 8;
+    this.reactorGroup.add(vessel);
+
+    // 堆芯燃料组件
+    this.coreMesh = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 14, 20), this.mats.fuel);
+    this.coreMesh.position.y = 4;
+    this.reactorGroup.add(this.coreMesh);
+
+    // 燃料棒阵列（细节增强）
+    const rodMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, emissive: 0x1e3a8a, emissiveIntensity: 0.3, metalness: 0.4, roughness: 0.3 });
+    this.fuelRods = [];
+    for (let ring = 0; ring < 3; ring++) {
+      const count = 6 + ring * 4;
+      const radius = 2 + ring * 2;
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 12, 6), rodMat);
+        rod.position.set(Math.cos(angle) * radius, 4, Math.sin(angle) * radius);
+        this.reactorGroup.add(rod);
+        this.fuelRods.push(rod);
+      }
+    }
+
+    // 控制棒组
+    this.controlRodsGroup = new THREE.Group();
+    const cRodMat = this.mats.rods;
+    for (let i = 0; i < 5; i++) {
+      const r = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 14, 8), cRodMat);
+      const angle = (i / 5) * Math.PI * 2;
+      if (i > 0) r.position.set(Math.cos(angle) * 3.5, 0, Math.sin(angle) * 3.5);
+      this.controlRodsGroup.add(r);
+    }
+    this.controlRodsGroup.position.y = 12;
+    this.reactorGroup.add(this.controlRodsGroup);
+
+    // 顶部管道法兰
+    const flange = new THREE.Mesh(new THREE.CylinderGeometry(11, 11, 2, 24), this.mats.steelDark);
+    flange.position.y = 21;
+    this.reactorGroup.add(flange);
+
+    this.scene.add(this.reactorGroup);
+    this.createLabel('核反应堆 (一回路)', new THREE.Vector3(p.x, 42, p.z));
+  }
+
+  // ---------- 蒸汽发生器 ----------
+  buildSteamGenerator(p) {
+    this.sgGroup = new THREE.Group();
+    this.sgGroup.position.copy(p);
+
+    // 主筒体（锥形底）
+    const sgGeo = new THREE.CylinderGeometry(7, 9, 28, 20);
+    const sg = new THREE.Mesh(sgGeo, this.mats.steel);
+    sg.position.y = 8;
+    sg.castShadow = true;
+    this.sgGroup.add(sg);
+
+    // 顶部半球封头
+    const topGeo = new THREE.SphereGeometry(7, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+    const top = new THREE.Mesh(topGeo, this.mats.steel);
+    top.position.y = 22;
+    top.castShadow = true;
+    this.sgGroup.add(top);
+
+    // 底部锥形封头
+    const botGeo = new THREE.CylinderGeometry(5, 7, 4, 20);
+    const bot = new THREE.Mesh(botGeo, this.mats.steel);
+    bot.position.y = -4;
+    this.sgGroup.add(bot);
+
+    // 内部管道可见（玻璃窗）
+    const innerGeo = new THREE.CylinderGeometry(6.5, 7.5, 20, 16, 1, true);
+    const inner = new THREE.Mesh(innerGeo, this.mats.glass);
+    inner.position.y = 8;
+    this.sgGroup.add(inner);
+
+    // 细节：检修梯
+    for (let i = 0; i < 4; i++) {
+      const rung = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 2), this.mats.steelDark);
+      rung.position.set(8, 2 + i * 6, 0);
+      this.sgGroup.add(rung);
+    }
+
+    this.scene.add(this.sgGroup);
+    this.createLabel('蒸汽发生器 (热交换)', new THREE.Vector3(p.x, 28, p.z));
+  }
+
+  // ---------- 汽轮机 ----------
+  buildTurbine(p) {
+    this.turbineGroup = new THREE.Group();
+    this.turbineGroup.position.copy(p);
+    this.turbineGroup.rotation.z = Math.PI / 2;
+
+    // 主轴
+    const shaftMat = this.mats.steelDark;
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 24, 12), shaftMat);
+    this.turbineGroup.add(shaft);
+
+    // 多级叶片盘
+    this.turbineBlades = [];
+    const stageConfig = [
+      { r: 7, w: 0.6, y: -8 },
+      { r: 6, w: 0.5, y: -4 },
+      { r: 5, w: 0.5, y: 0 },
+      { r: 4, w: 0.4, y: 4 },
+      { r: 3.5, w: 0.4, y: 8 }
+    ];
+    stageConfig.forEach(cfg => {
+      // 叶轮盘
+      const disk = new THREE.Mesh(new THREE.CylinderGeometry(cfg.r, cfg.r, cfg.w, 24), this.mats.steel);
+      disk.position.y = cfg.y;
+      disk.castShadow = true;
+      this.turbineGroup.add(disk);
+
+      // 叶片（曲面）
+      const bladeCount = Math.floor(cfg.r * 3);
+      for (let i = 0; i < bladeCount; i++) {
+        const angle = (i / bladeCount) * Math.PI * 2;
+        const blade = new THREE.Mesh(
+          new THREE.BoxGeometry(0.15, cfg.r * 0.8, 0.6),
+          this.mats.copper
+        );
+        blade.position.set(0, cfg.y, 0);
+        blade.position.x = Math.cos(angle) * cfg.r * 0.5;
+        blade.position.z = Math.sin(angle) * cfg.r * 0.5;
+        blade.rotation.y = angle + Math.PI / 4;
+        this.turbineGroup.add(blade);
+      }
+    });
+
+    // 半透明外壳
+    const casingGeo = new THREE.CylinderGeometry(8, 6, 22, 24, 1, true, 0, Math.PI * 1.4);
+    const casing = new THREE.Mesh(casingGeo, this.mats.glass);
+    this.turbineGroup.add(casing);
+
+    this.scene.add(this.turbineGroup);
+    this.createLabel('汽轮机 (做功)', new THREE.Vector3(p.x, 18, p.z));
+  }
+
+  // ---------- 发电机 ----------
+  buildGenerator(p) {
+    const group = new THREE.Group();
+    group.position.copy(p);
+
+    // 主壳体
+    const bodyGeo = new THREE.BoxGeometry(14, 11, 11);
+    const body = new THREE.Mesh(bodyGeo, this.mats.steelDark);
+    body.position.y = 6;
+    body.castShadow = true;
+    group.add(body);
+
+    // 冷却翅片
+    for (let i = -3; i <= 3; i++) {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(14.5, 0.4, 1.2), this.mats.steel);
+      fin.position.set(0, 6 + i * 1.4, 5.5);
+      group.add(fin);
+      const fin2 = fin.clone();
+      fin2.position.z = -5.5;
+      group.add(fin2);
+    }
+
+    // 顶部接线盒
+    const top = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 6), this.mats.accent);
+    top.position.y = 13;
+    group.add(top);
+
+    // 输出电缆（弧线）
+    const cableCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 14, 0),
+      new THREE.Vector3(3, 18, 0),
+      new THREE.Vector3(6, 20, 0),
+      new THREE.Vector3(10, 18, 0)
+    ]);
+    const cableGeo = new THREE.TubeGeometry(cableCurve, 16, 0.4, 8, false);
+    const cable = new THREE.Mesh(cableGeo, this.mats.copper);
+    group.add(cable);
+
+    this.scene.add(group);
+    this.createLabel('发电机', new THREE.Vector3(p.x, 17, p.z));
+  }
+
+  // ---------- 冷凝器 ----------
+  buildCondenser(p) {
+    const group = new THREE.Group();
+    group.position.copy(p);
+
+    const bodyGeo = new THREE.BoxGeometry(22, 8, 13);
+    const body = new THREE.Mesh(bodyGeo, this.mats.steel);
+    body.castShadow = true;
+    group.add(body);
+
+    // 顶部管道
+    for (let i = -2; i <= 2; i++) {
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 18, 8), this.mats.copper);
+      pipe.rotation.z = Math.PI / 2;
+      pipe.position.set(0, 5, i * 2);
+      group.add(pipe);
+    }
+
+    // 底部支架
+    for (let i = -1; i <= 1; i += 2) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 1), this.mats.concrete);
+      leg.position.set(i * 8, -6, 0);
+      group.add(leg);
+    }
+
+    this.scene.add(group);
+    this.createLabel('冷凝器', new THREE.Vector3(p.x, 6, p.z));
+  }
+
+  // ---------- 冷却塔 ----------
+  buildCoolingTower(p) {
+    const group = new THREE.Group();
+    group.position.copy(p);
+
+    // 双曲线冷却塔
+    const towerGeo = new THREE.CylinderGeometry(14, 22, 45, 40, 12, true);
+    const posAttr = towerGeo.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+      const y = posAttr.getY(i);
+      const normY = (y + 22.5) / 45;
+      const factor = 1 - Math.sin(normY * Math.PI) * 0.28;
+      posAttr.setX(i, posAttr.getX(i) * factor);
+      posAttr.setZ(i, posAttr.getZ(i) * factor);
+    }
+    towerGeo.computeVertexNormals();
+
+    const towerMesh = new THREE.Mesh(towerGeo, this.mats.concrete);
+    towerMesh.castShadow = true;
+    towerMesh.receiveShadow = true;
+    group.add(towerMesh);
+
+    // 内壁
+    const innerGeo = towerGeo.clone();
+    const innerMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, side: THREE.BackSide });
+    const inner = new THREE.Mesh(innerGeo, innerMat);
+    group.add(inner);
+
+    // 顶部 rim
+    const rimGeo = new THREE.TorusGeometry(14 * 0.72, 0.5, 8, 32);
+    const rim = new THREE.Mesh(rimGeo, this.mats.steelDark);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = 22.5;
+    group.add(rim);
+
+    // 底部 rim
+    const rim2Geo = new THREE.TorusGeometry(22, 0.8, 8, 32);
+    const rim2 = new THREE.Mesh(rim2Geo, this.mats.steelDark);
+    rim2.rotation.x = Math.PI / 2;
+    rim2.position.y = -22.5;
+    group.add(rim2);
+
+    // 支撑柱（X形桁架）
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const col = new THREE.Mesh(
+        new THREE.BoxGeometry(0.6, 8, 0.6),
+        this.mats.steelDark
+      );
+      col.position.set(Math.cos(angle) * 20, -18, Math.sin(angle) * 20);
+      col.lookAt(0, -18, 0);
+      group.add(col);
+    }
+
+    this.scene.add(group);
+    this.createLabel('冷却塔 (三回路)', new THREE.Vector3(p.x, 28, p.z));
+  }
+
+  // ---------- 蒸汽粒子（冷却塔顶部） ----------
+  buildSteamParticles(p) {
+    const steamMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25 });
+    const steamGeo = new THREE.SphereGeometry(2.5, 8, 8);
+
+    for (let i = 0; i < 25; i++) {
+      const mesh = new THREE.Mesh(steamGeo, steamMat.clone());
+      mesh.position.set(
+        p.x + (Math.random() - 0.5) * 12,
+        p.y + 25 + Math.random() * 30,
+        p.z + (Math.random() - 0.5) * 12
+      );
+      mesh.material.opacity = 0.15 + Math.random() * 0.2;
+      mesh.scale.setScalar(0.5 + Math.random() * 1.5);
+      this.scene.add(mesh);
+      this.steamParticles.push({
+        mesh: mesh,
+        basePos: mesh.position.clone(),
+        speed: 0.5 + Math.random() * 1.5,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.5 + Math.random()
+      });
+    }
+  }
+
+  // ---------- 管道 ----------
+  buildPipes(pR, pSG, pT, pG, pC, pCT) {
+    const createPipe = (points, radius = 1.2) => {
+      const curve = new THREE.CatmullRomCurve3(points);
+      const geo = new THREE.TubeGeometry(curve, 24, radius, 8, false);
+      const mesh = new THREE.Mesh(geo, this.mats.pipe);
+      mesh.castShadow = true;
+      this.scene.add(mesh);
+      return curve;
+    };
+
+    // 一回路热段（反应堆→蒸汽发生器）
+    this.pathPrimaryHot = createPipe([
+      new THREE.Vector3(pR.x + 2, 20, 0),
+      new THREE.Vector3(pR.x + 10, 20, 0),
+      new THREE.Vector3(pSG.x - 8, 20, 0),
+      new THREE.Vector3(pSG.x, 18, 0)
+    ], 1.2);
+
+    // 一回路冷段（蒸汽发生器→反应堆）
+    this.pathPrimaryCold = createPipe([
+      new THREE.Vector3(pSG.x, -2, 0),
+      new THREE.Vector3(pSG.x - 8, -8, 0),
+      new THREE.Vector3(pR.x + 10, -8, 0),
+      new THREE.Vector3(pR.x + 2, -2, 0)
+    ], 1.2);
+
+    // 二回路蒸汽（蒸汽发生器→汽轮机）
+    this.pathSteam = createPipe([
+      new THREE.Vector3(pSG.x, 24, 0),
+      new THREE.Vector3(pSG.x + 8, 26, 0),
+      new THREE.Vector3(pT.x - 12, 26, 0),
+      new THREE.Vector3(pT.x - 8, 18, 0)
+    ], 1.0);
+
+    // 二回路回水（冷凝器→蒸汽发生器）
+    this.pathWaterReturn = createPipe([
+      new THREE.Vector3(pC.x - 6, -8, 0),
+      new THREE.Vector3(pSG.x + 6, -8, 0),
+      new THREE.Vector3(pSG.x + 4, -4, 0)
+    ], 0.8);
+
+    // 三回路（冷凝器→冷却塔）
+    this.pathCoolingOut = createPipe([
+      new THREE.Vector3(pC.x + 8, -8, 0),
+      new THREE.Vector3(pCT.x - 12, -8, pCT.z),
+      new THREE.Vector3(pCT.x, -8, pCT.z)
+    ], 1.0);
+
+    // 汽轮机→发电机连接轴
+    const shaftCurve = createPipe([
+      new THREE.Vector3(pT.x + 12, 8, 0),
+      new THREE.Vector3(pT.x + 16, 8, 0),
+      new THREE.Vector3(pG.x - 7, 8, 0)
+    ], 0.8);
+
+    this.initFluidParticles();
+  }
+
+  // ---------- 流体粒子 ----------
+  initFluidParticles() {
+    const spawn = (path, count, colorHex, sizeMod = 1) => {
+      const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+      const geo = new THREE.SphereGeometry(1.8 * sizeMod, 8, 8);
+      for (let i = 0; i < count; i++) {
+        const mesh = new THREE.Mesh(geo, mat);
+        this.scene.add(mesh);
+        this.fluidParticles.push({
+          mesh: mesh, path: path,
+          progress: i / count,
+          speed: 0.2 + Math.random() * 0.05,
+          baseColor: new THREE.Color(colorHex)
+        });
+      }
+    };
+
+    const cHot = toRGB(readVar('--np-fluid-hot')) || '#ef4444';
+    const cCold = toRGB(readVar('--np-fluid-cold')) || '#3b82f6';
+    const cSteam = toRGB(readVar('--np-fluid-steam')) || '#ffffff';
+    const cWarm = toRGB(readVar('--np-fluid-warm')) || '#f97316';
+
+    spawn(this.pathPrimaryHot, 6, new THREE.Color(cHot).getHex());
+    spawn(this.pathPrimaryCold, 6, new THREE.Color(cCold).getHex());
+    spawn(this.pathSteam, 7, new THREE.Color(cSteam).getHex(), 1.3);
+    spawn(this.pathWaterReturn, 5, new THREE.Color(cCold).getHex());
+    spawn(this.pathCoolingOut, 6, new THREE.Color(cWarm).getHex());
+  }
+
+  // ---------- 更新视觉 ----------
+  updateVisuals(dt) {
+    // 控制棒位置
+    const targetRodY = (1 - (state.controlRods / 100)) * 14;
+    this.controlRodsGroup.position.y += (targetRodY + 5 - this.controlRodsGroup.position.y) * 0.08;
+
+    // 堆芯颜色随温度变化
+    let coreColor = new THREE.Color(toRGB(readVar('--np-fuel')) || '#3b82f6');
+    if (state.coreTemp > 800) {
+      const t = Math.min(1, (state.coreTemp - 800) / 400);
+      coreColor.lerp(new THREE.Color(0xff0000), t);
+      this.reactorLight.color.copy(coreColor);
+      this.reactorLight.intensity = 1.5 + t * 3;
+    } else if (state.coreTemp > 400) {
+      const t = (state.coreTemp - 400) / 400;
+      coreColor.lerp(new THREE.Color(0xfacc15), t);
+      this.reactorLight.color.copy(coreColor);
+      this.reactorLight.intensity = 1.5 + t * 0.5;
+    } else {
+      this.reactorLight.intensity = 1.5;
+    }
+    this.coreMesh.material.emissive.copy(coreColor);
+    this.coreMesh.material.emissiveIntensity = 0.5 + (state.coreTemp / 2000);
+
+    // 燃料棒发光
+    this.fuelRods.forEach(r => {
+      r.material.emissive.copy(coreColor);
+      r.material.emissiveIntensity = 0.2 + (state.coreTemp / 3000);
+    });
+
+    // 汽轮机旋转
+    const rps = state.turbineRPM / 60;
+    this.turbineGroup.rotation.x += rps * Math.PI * 2 * dt;
+
+    // 流体粒子动画
+    const flowSpeedPrimary = 0.08 + (state.coreTemp / 1000) * 0.4;
+    const flowSpeedSecondary = 0.04 + (state.valveOpenness / 100) * 0.6;
+
+    this.fluidParticles.forEach(p => {
+      let speedMult = 0.15;
+      if (p.path === this.pathPrimaryHot || p.path === this.pathPrimaryCold) speedMult = flowSpeedPrimary;
+      if (p.path === this.pathSteam || p.path === this.pathWaterReturn) speedMult = flowSpeedSecondary;
+      if (p.path === this.pathCoolingOut) speedMult = 0.25;
+
+      p.progress += p.speed * speedMult * dt;
+      if (p.progress >= 1) p.progress = 0;
+
+      const pos = p.path.getPointAt(p.progress);
+      p.mesh.position.copy(pos);
+
+      // 热段颜色随堆芯温度
+      if (p.path === this.pathPrimaryHot) {
+        p.mesh.material.color.copy(new THREE.Color(toRGB(readVar('--np-fluid-cold')) || '#3b82f6')).lerp(coreColor, 0.7);
+      }
+    });
+
+    // 冷却塔蒸汽粒子
+    this.steamParticles.forEach(s => {
+      s.wobble += s.wobbleSpeed * dt;
+      s.mesh.position.y += s.speed * dt * 8;
+      s.mesh.position.x = s.basePos.x + Math.sin(s.wobble) * 3;
+      s.mesh.position.z = s.basePos.z + Math.cos(s.wobble) * 3;
+      s.mesh.material.opacity *= 0.995;
+
+      if (s.mesh.position.y > s.basePos.y + 40) {
+        s.mesh.position.copy(s.basePos);
+        s.mesh.material.opacity = 0.15 + Math.random() * 0.2;
+        s.mesh.scale.setScalar(0.5 + Math.random() * 1.5);
+      }
+    });
+
+    this.updateLabels();
+  }
+
+  // ---------- 主题适配 ----------
+  applyTheme() {
+    const bg = toRGB(readVar('--np-scene-bg')) || '#020617';
+    this.scene.background = new THREE.Color(bg);
+    this.scene.fog.color = new THREE.Color(bg);
+
+    const setMat = (mat, v) => { try { mat.color.setStyle(toRGB(readVar(v))); } catch(e){} };
+    setMat(this.mats.steel, '--np-steel');
+    setMat(this.mats.darkMetal, '--np-dark-metal');
+    setMat(this.mats.concrete, '--np-concrete');
+    setMat(this.mats.fuel, '--np-fuel');
+    try { this.mats.fuel.emissive.setStyle(toRGB(readVar('--np-fuel-emissive'))); } catch(e){}
+    setMat(this.mats.rods, '--np-rod');
+    setMat(this.mats.pipe, '--np-pipe');
+    setMat(this.ground.material, '--np-ground');
+
+    // 网格
+    const gc = toRGB(readVar('--np-grid')) || '#334155';
+    this.grid.material.color = new THREE.Color(gc);
+
+    // 玻璃材质
+    try { this.mats.glass.color.setStyle(toRGB(readVar('--np-vessel-glass'))); } catch(e){}
+
+    // 图表主题
+    applyChartTheme();
+  }
+
+  // ---------- 交互 ----------
+  setupInteraction() {
+    let isDragging = false;
+    let prevMouse = { x: 0, y: 0 };
+    const target = { theta: 0.43, phi: 0.4, radius: 150 };
+    const center = new THREE.Vector3(0, 5, 0);
+
+    const updateCamera = () => {
+      const r = target.radius;
+      const sp = Math.sin(target.phi);
+      this.camera.position.set(
+        r * sp * Math.cos(target.theta),
+        r * Math.cos(target.phi),
+        r * sp * Math.sin(target.theta)
+      );
+      this.camera.position.add(center);
+      this.camera.lookAt(center);
+    };
+    updateCamera();
+
+    const onDown = (e) => {
+      isDragging = true;
+      prevMouse.x = e.clientX;
+      prevMouse.y = e.clientY;
+      this.container.style.cursor = 'grabbing';
+    };
+    const onUp = () => { isDragging = false; this.container.style.cursor = 'grab'; };
+    const onMove = (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevMouse.x;
+      const dy = e.clientY - prevMouse.y;
+      target.theta -= dx * 0.008;
+      target.phi = Math.max(0.08, Math.min(Math.PI / 2 - 0.05, target.phi - dy * 0.005));
+      updateCamera();
+      prevMouse.x = e.clientX;
+      prevMouse.y = e.clientY;
+    };
+    const onScroll = (e) => {
+      e.preventDefault();
+      target.radius = Math.max(60, Math.min(280, target.radius + Math.sign(e.deltaY) * 8));
+      updateCamera();
+    };
+
+    this.container.addEventListener('mousedown', onDown);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('mousemove', onMove);
+    this.container.addEventListener('wheel', onScroll, { passive: false });
+    this.container.style.cursor = 'grab';
+
+    window.addEventListener('resize', () => {
+      if (!this.container) return;
+      const w = this.container.clientWidth;
+      const h = this.container.clientHeight;
+      this.camera.aspect = w / h;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(w, h);
+    });
+  }
+
+  render() {
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+// ============================================================
+//  主循环
+// ============================================================
+let scene3D = null;
+let lastTime = performance.now();
+
+function animate(currentTime) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+  lastTime = currentTime;
+
+  updatePhysics(dt);
+  updateUI();
+  if (scene3D) { scene3D.updateVisuals(dt); scene3D.render(); }
+}
+
+// ---------- 启动 ----------
+window.addEventListener('load', () => {
+  initChart();
+  setInterval(updateChart, 500);
+
+  scene3D = new PlantScene(document.getElementById('canvas-container'));
+  requestAnimationFrame(animate);
+
+  // 主题切换响应
+  window.addEventListener('themeChanged', () => {
+    if (scene3D) scene3D.applyTheme();
+  });
+});
+</script>
+</body>
+</html>
