@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="academic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>叙事性地图 — 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="shared-theme.css">
+  <script src="shared-theme.js"></script>
+  <style>
+    /* ============================================
+       Narrative Map — CSS Variables for 5 Themes
+       ============================================ */
+
+    /* ---------- ACADEMIC (default) ---------- */
+    :root,
+    :root[data-theme="academic"] {
+      --nm-bg: #f8f9fa;
+      --nm-panel-bg: #ffffff;
+      --nm-panel-border: #e0e0e0;
+      --nm-text: #1a1a2e;
+      --nm-text-muted: #7a7a8a;
+      --nm-accent: #6b8cae;
+      --nm-accent-2: #8a7ca8;
+      --nm-radius: 4px;
+      --nm-backdrop: none;
+      --nm-border-width: 1px;
+      --nm-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --nm-card-bg: #fafafa;
+      --nm-hover: #f0f4f8;
+    }
+
+    /* ---------- GLASS ---------- */
+    :root[data-theme="glass"] {
+      --nm-bg: #0f1117;
+      --nm-panel-bg: rgba(255,255,255,0.06);
+      --nm-panel-border: rgba(255,255,255,0.12);
+      --nm-text: #e0e6ed;
+      --nm-text-muted: #8b92a8;
+      --nm-accent: #74b9ff;
+      --nm-accent-2: #a29bfe;
+      --nm-radius: 20px;
+      --nm-backdrop: blur(20px);
+      --nm-border-width: 1px;
+      --nm-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      --nm-card-bg: rgba(255,255,255,0.04);
+      --nm-hover: rgba(255,255,255,0.1);
+    }
+
+    /* ---------- CYBER ---------- */
+    :root[data-theme="cyber"] {
+      --nm-bg: #0a0014;
+      --nm-panel-bg: rgba(20,0,40,0.6);
+      --nm-panel-border: rgba(189,0,255,0.3);
+      --nm-text: #f0e6ff;
+      --nm-text-muted: #a080c0;
+      --nm-accent: #bd00ff;
+      --nm-accent-2: #00ffff;
+      --nm-radius: 8px;
+      --nm-backdrop: blur(10px);
+      --nm-border-width: 1px;
+      --nm-shadow: 0 0 20px rgba(189,0,255,0.3);
+      --nm-card-bg: rgba(30,0,60,0.5);
+      --nm-hover: rgba(189,0,255,0.15);
+    }
+
+    /* ---------- CARTOON ---------- */
+    :root[data-theme="cartoon"] {
+      --nm-bg: #fef6e4;
+      --nm-panel-bg: rgba(255,255,255,0.9);
+      --nm-panel-border: #2d3436;
+      --nm-text: #2d3436;
+      --nm-text-muted: #636e72;
+      --nm-accent: #ff6b6b;
+      --nm-accent-2: #feca57;
+      --nm-radius: 24px;
+      --nm-backdrop: none;
+      --nm-border-width: 3px;
+      --nm-shadow: 0 4px 0 #2d3436;
+      --nm-card-bg: rgba(255,255,255,0.8);
+      --nm-hover: rgba(255,107,107,0.1);
+    }
+
+    /* ---------- SOVIET ---------- */
+    :root[data-theme="soviet"] {
+      --nm-bg: #f0ebe4;
+      --nm-panel-bg: #fffaf2;
+      --nm-panel-border: #c41e1e;
+      --nm-text: #1a1a1a;
+      --nm-text-muted: #6a5a4a;
+      --nm-accent: #c41e1e;
+      --nm-accent-2: #b8860b;
+      --nm-radius: 2px;
+      --nm-backdrop: none;
+      --nm-border-width: 2px;
+      --nm-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      --nm-card-bg: #fff5e6;
+      --nm-hover: rgba(196,30,30,0.08);
+    }
+
+    /* ============================================
+       Base & Layout
+       ============================================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+      background: var(--nm-bg);
+      color: var(--nm-text);
+      transition: background-color 0.6s ease, color 0.4s ease;
+    }
+
+    /* Override nav to left-align for back button at top-left */
+    .top-nav {
+      justify-content: flex-start !important;
+      padding-left: 16px !important;
+    }
+
+    /* Main layout */
+    .nm-main {
+      display: flex;
+      height: calc(100vh - 52px);
+      margin-top: 52px;
+      overflow: hidden;
+    }
+
+    /* ============================================
+       Left Panel
+       ============================================ */
+    .nm-left {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--nm-panel-bg);
+      backdrop-filter: var(--nm-backdrop);
+      -webkit-backdrop-filter: var(--nm-backdrop);
+      border-right: var(--nm-border-width) solid var(--nm-panel-border);
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.6s ease, border-color 0.4s ease;
+      z-index: 10;
+    }
+
+    .nm-left-header {
+      padding: 16px 18px 10px;
+      border-bottom: var(--nm-border-width) solid var(--nm-panel-border);
+    }
+    .nm-left-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .nm-left-subtitle {
+      font-size: 0.72rem;
+      color: var(--nm-text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Stats bar */
+    .nm-stats {
+      display: flex;
+      gap: 6px;
+      padding: 10px 18px;
+      border-bottom: var(--nm-border-width) solid var(--nm-panel-border);
+    }
+    .nm-stat {
+      flex: 1;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--nm-text-muted);
+      background: var(--nm-card-bg);
+      border-radius: var(--nm-radius);
+      padding: 6px 4px;
+    }
+    .nm-stat-num {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--nm-accent);
+    }
+
+    /* Filter sections */
+    .nm-filter-section {
+      padding: 12px 18px;
+      border-bottom: var(--nm-border-width) solid var(--nm-panel-border);
+    }
+    .nm-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--nm-text);
+    }
+
+    /* Category checkboxes */
+    .nm-cat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nm-cat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--nm-radius);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nm-cat-item:hover {
+      background: var(--nm-hover);
+    }
+    .nm-cat-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--nm-text-muted);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .nm-cat-item.checked .nm-cat-checkbox {
+      background: var(--cat-color);
+      border-color: var(--cat-color);
+    }
+    .nm-cat-item.checked .nm-cat-checkbox::after {
+      content: '✓';
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .nm-cat-icon {
+      font-size: 1rem;
+    }
+    .nm-cat-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .nm-cat-count {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: var(--nm-text-muted);
+      background: var(--nm-card-bg);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* Scientist search */
+    .nm-search {
+      width: 100%;
+      padding: 8px 12px;
+      border: var(--nm-border-width) solid var(--nm-panel-border);
+      border-radius: var(--nm-radius);
+      background: var(--nm-card-bg);
+      color: var(--nm-text);
+      font-size: 0.82rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .nm-search:focus {
+      border-color: var(--nm-accent);
+    }
+    .nm-search::placeholder {
+      color: var(--nm-text-muted);
+    }
+
+    /* Scientist list */
+    .nm-sci-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 8px;
+      max-height: 300px;
+    }
+    .nm-sci-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px;
+      border-radius: var(--nm-radius);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nm-sci-item:hover {
+      background: var(--nm-hover);
+    }
+    .nm-sci-item.active {
+      background: var(--nm-hover);
+      border-left: 3px solid var(--nm-accent);
+    }
+    .nm-sci-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      border: 2px solid rgba(0,0,0,0.1);
+    }
+    .nm-sci-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .nm-sci-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nm-sci-years {
+      font-size: 0.68rem;
+      color: var(--nm-text-muted);
+    }
+
+    /* Action buttons */
+    .nm-actions {
+      display: flex;
+      gap: 8px;
+      padding: 12px 18px;
+      border-top: var(--nm-border-width) solid var(--nm-panel-border);
+    }
+    .nm-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: var(--nm-border-width) solid var(--nm-panel-border);
+      border-radius: var(--nm-radius);
+      background: var(--nm-card-bg);
+      color: var(--nm-text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .nm-btn:hover {
+      background: var(--nm-hover);
+      border-color: var(--nm-accent);
+    }
+    .nm-btn.active {
+      background: var(--nm-accent);
+      color: #fff;
+      border-color: var(--nm-accent);
+    }
+
+    /* ============================================
+       Center Column (Map + Timeline)
+       ============================================ */
+    .nm-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #map {
+      flex: 1;
+      z-index: 1;
+      background: var(--nm-bg);
+    }
+
+    /* Timeline bar at bottom of map */
+    .nm-timeline-bar {
+      flex-shrink: 0;
+      padding: 12px 24px 16px;
+      background: var(--nm-panel-bg);
+      backdrop-filter: var(--nm-backdrop);
+      -webkit-backdrop-filter: var(--nm-backdrop);
+      border-top: var(--nm-border-width) solid var(--nm-panel-border);
+      z-index: 500;
+      transition: background-color 0.6s ease, border-color 0.4s ease;
+    }
+    .nm-timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .nm-timeline-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--nm-text);
+    }
+    .nm-timeline-values {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--nm-accent);
+    }
+
+    /* Dual range slider */
+    .nm-slider-container {
+      position: relative;
+      height: 28px;
+      display: flex;
+      align-items: center;
+    }
+    .nm-slider-track {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: var(--nm-panel-border);
+      border-radius: 3px;
+    }
+    .nm-slider-range {
+      position: absolute;
+      height: 5px;
+      background: var(--nm-accent);
+      border-radius: 3px;
+      transition: background 0.4s;
+    }
+    .nm-slider-container input[type="range"] {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 28px;
+      background: transparent;
+      -webkit-appearance: none;
+      pointer-events: none;
+      outline: none;
+      margin: 0;
+    }
+    .nm-slider-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      pointer-events: auto;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--nm-accent);
+      border: 3px solid var(--nm-panel-bg);
+      cursor: pointer;
+      transition: transform 0.15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .nm-slider-container input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+    .nm-slider-container input[type="range"]::-moz-range-thumb {
+      pointer-events: auto;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--nm-accent);
+      border: 3px solid var(--nm-panel-bg);
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .nm-timeline-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      padding: 0 2px;
+    }
+    .nm-timeline-tick {
+      font-size: 0.65rem;
+      color: var(--nm-text-muted);
+    }
+
+    /* Map controls overlay */
+    .nm-map-controls {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 600;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .nm-map-btn {
+      padding: 8px 14px;
+      border: var(--nm-border-width) solid var(--nm-panel-border);
+      border-radius: var(--nm-radius);
+      background: var(--nm-panel-bg);
+      backdrop-filter: var(--nm-backdrop);
+      -webkit-backdrop-filter: var(--nm-backdrop);
+      color: var(--nm-text);
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      box-shadow: var(--nm-shadow);
+    }
+    .nm-map-btn:hover {
+      background: var(--nm-hover);
+    }
+    .nm-map-btn.active {
+      background: var(--nm-accent);
+      color: #fff;
+      border-color: var(--nm-accent);
+    }
+
+    /* Map legend */
+    .nm-map-legend {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      z-index: 600;
+      padding: 10px 14px;
+      background: var(--nm-panel-bg);
+      backdrop-filter: var(--nm-backdrop);
+      -webkit-backdrop-filter: var(--nm-backdrop);
+      border: var(--nm-border-width) solid var(--nm-panel-border);
+      border-radius: var(--nm-radius);
+      box-shadow: var(--nm-shadow);
+      font-size: 0.72rem;
+      transition: background-color 0.6s ease, border-color 0.4s ease;
+    }
+    .nm-legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 2px 0;
+    }
+    .nm-legend-dot-sci {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.2);
+      background: var(--nm-accent);
+    }
+    .nm-legend-dot-exp {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.5);
+      background: var(--nm-accent-2);
+    }
+
+    /* ============================================
+       Right Panel
+       ============================================ */
+    .nm-right {
+      width: 340px;
+      flex-shrink: 0;
+      background: var(--nm-panel-bg);
+      backdrop-filter: var(--nm-backdrop);
+      -webkit-backdrop-filter: var(--nm-backdrop);
+      border-left: var(--nm-border-width) solid var(--nm-panel-border);
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.6s ease, border-color 0.4s ease;
+      z-index: 10;
+    }
+
+    .nm-right-header {
+      padding: 16px 18px 10px;
+      border-bottom: var(--nm-border-width) solid var(--nm-panel-border);
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .nm-details {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+    }
+
+    /* Default (no selection) state */
+    .nm-default-state {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .nm-default-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+    .nm-default-text {
+      font-size: 0.85rem;
+      color: var(--nm-text-muted);
+      line-height: 1.6;
+    }
+
+    /* Scientist detail card */
+    .nm-detail-card {
+      margin-bottom: 16px;
+    }
+    .nm-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .nm-detail-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      border: 3px solid rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+    .nm-detail-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+    .nm-detail-years {
+      font-size: 0.78rem;
+      color: var(--nm-text-muted);
+    }
+    .nm-detail-location {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--nm-text-muted);
+      margin-bottom: 10px;
+    }
+    .nm-detail-desc {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: var(--nm-text);
+      padding: 10px 12px;
+      background: var(--nm-card-bg);
+      border-radius: var(--nm-radius);
+      margin-bottom: 14px;
+    }
+
+    /* Experiment list in details */
+    .nm-detail-exps-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--nm-text);
+    }
+    .nm-detail-exp-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nm-detail-exp-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--nm-card-bg);
+      border-radius: var(--nm-radius);
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: var(--nm-text);
+    }
+    .nm-detail-exp-item:hover {
+      background: var(--nm-hover);
+    }
+    .nm-detail-exp-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .nm-detail-exp-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex: 1;
+    }
+    .nm-detail-exp-year {
+      font-size: 0.72rem;
+      color: var(--nm-text-muted);
+    }
+    .nm-detail-exp-arrow {
+      font-size: 0.7rem;
+      color: var(--nm-accent);
+    }
+
+    /* Experiment detail */
+    .nm-exp-detail {
+      margin-bottom: 16px;
+    }
+    .nm-exp-detail-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .nm-exp-detail-year {
+      font-size: 0.82rem;
+      color: var(--nm-accent);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .nm-exp-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--nm-card-bg);
+      border-radius: var(--nm-radius);
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+    }
+    .nm-exp-detail-label {
+      color: var(--nm-text-muted);
+      font-weight: 600;
+      min-width: 60px;
+    }
+    .nm-exp-detail-value {
+      font-weight: 600;
+    }
+    .nm-exp-detail-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--nm-accent);
+      color: #fff;
+      border-radius: var(--nm-radius);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-top: 12px;
+      transition: opacity 0.2s;
+    }
+    .nm-exp-detail-link:hover {
+      opacity: 0.85;
+    }
+
+    /* Knowledge development timeline */
+    .nm-kt-section {
+      flex-shrink: 0;
+      padding: 14px 18px;
+      border-top: var(--nm-border-width) solid var(--nm-panel-border);
+    }
+    .nm-kt-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .nm-kt-axis {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--nm-text-muted);
+      margin-bottom: 4px;
+    }
+    .nm-kt-track {
+      position: relative;
+      height: 40px;
+      background: var(--nm-card-bg);
+      border-radius: var(--nm-radius);
+      overflow: hidden;
+    }
+    .nm-kt-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.15s;
+      border: 1px solid rgba(255,255,255,0.3);
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .nm-kt-dot:hover {
+      transform: translate(-50%, -50%) scale(1.8);
+      z-index: 2;
+    }
+    .nm-kt-dot.active {
+      transform: translate(-50%, -50%) scale(2.2);
+      z-index: 3;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* ============================================
+       Leaflet Marker Styles
+       ============================================ */
+    .nm-sci-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    .nm-sci-marker-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      border: 3px solid rgba(255,255,255,0.7);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+      background: var(--marker-color, #ccc);
+    }
+    .nm-sci-marker:hover .nm-sci-marker-circle {
+      transform: scale(1.15);
+    }
+    .nm-sci-marker.active .nm-sci-marker-circle {
+      transform: scale(1.25);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.4), 0 4px 12px rgba(0,0,0,0.4);
+      animation: nmPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes nmPulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(255,255,255,0.3), 0 4px 12px rgba(0,0,0,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(255,255,255,0.15), 0 4px 12px rgba(0,0,0,0.4); }
+    }
+    .nm-sci-marker-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-top: 2px;
+      text-shadow: 0 0 4px rgba(0,0,0,0.5), 0 0 4px rgba(0,0,0,0.5);
+      color: var(--nm-text);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    [data-theme="glass"] .nm-sci-marker-label,
+    [data-theme="cyber"] .nm-sci-marker-label {
+      color: #fff;
+    }
+
+    .nm-exp-marker {
+      cursor: pointer;
+    }
+    .nm-exp-marker-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.6);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+      background: var(--marker-color, #ccc);
+    }
+    .nm-exp-marker:hover .nm-exp-marker-dot {
+      transform: scale(1.4);
+    }
+    .nm-exp-marker.active .nm-exp-marker-dot {
+      transform: scale(1.5);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.4), 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    /* Dark theme map tile filter (fallback when dark tiles unavailable) */
+    .nm-map-dark-fallback .leaflet-tile-pane {
+      filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.1);
+    }
+
+    /* Leaflet control theming */
+    .leaflet-control-zoom a {
+      background: var(--nm-panel-bg) !important;
+      color: var(--nm-text) !important;
+      border-color: var(--nm-panel-border) !important;
+      backdrop-filter: var(--nm-backdrop);
+    }
+    .leaflet-control-zoom a:hover {
+      background: var(--nm-hover) !important;
+    }
+    .leaflet-control-attribution {
+      background: var(--nm-panel-bg) !important;
+      color: var(--nm-text-muted) !important;
+      backdrop-filter: var(--nm-backdrop);
+      font-size: 0.65rem !important;
+    }
+    .leaflet-control-attribution a {
+      color: var(--nm-accent) !important;
+    }
+    .leaflet-tooltip {
+      background: var(--nm-panel-bg) !important;
+      color: var(--nm-text) !important;
+      border: var(--nm-border-width) solid var(--nm-panel-border) !important;
+      border-radius: var(--nm-radius) !important;
+      font-size: 0.75rem !important;
+      box-shadow: var(--nm-shadow) !important;
+    }
+    .leaflet-tooltip-top:before {
+      border-top-color: var(--nm-panel-border) !important;
+    }
+
+    /* ============================================
+       Scrollbar
+       ============================================ */
+    .nm-left ::-webkit-scrollbar,
+    .nm-right ::-webkit-scrollbar,
+    .nm-sci-list::-webkit-scrollbar,
+    .nm-details::-webkit-scrollbar {
+      width: 6px;
+    }
+    .nm-left ::-webkit-scrollbar-track,
+    .nm-right ::-webkit-scrollbar-track,
+    .nm-sci-list::-webkit-scrollbar-track,
+    .nm-details::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    [data-theme="academic"] .nm-sci-list::-webkit-scrollbar-thumb,
+    [data-theme="academic"] .nm-details::-webkit-scrollbar-thumb {
+      background: #d0d0d0;
+      border-radius: 0;
+    }
+    [data-theme="glass"] .nm-sci-list::-webkit-scrollbar-thumb,
+    [data-theme="glass"] .nm-details::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+    }
+    [data-theme="cyber"] .nm-sci-list::-webkit-scrollbar-thumb,
+    [data-theme="cyber"] .nm-details::-webkit-scrollbar-thumb {
+      background: rgba(189,0,255,0.3);
+      border-radius: 4px;
+    }
+    [data-theme="cartoon"] .nm-sci-list::-webkit-scrollbar-thumb,
+    [data-theme="cartoon"] .nm-details::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.15);
+      border-radius: 4px;
+    }
+    [data-theme="soviet"] .nm-sci-list::-webkit-scrollbar-thumb,
+    [data-theme="soviet"] .nm-details::-webkit-scrollbar-thumb {
+      background: #c41e1e;
+      border-radius: 0;
+    }
+
+    /* ============================================
+       Mobile Toggle Button
+       ============================================ */
+    .nm-mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 60px;
+      left: 12px;
+      z-index: 1001;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--nm-radius);
+      background: var(--nm-panel-bg);
+      backdrop-filter: var(--nm-backdrop);
+      border: var(--nm-border-width) solid var(--nm-panel-border);
+      color: var(--nm-text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--nm-shadow);
+    }
+
+    /* ============================================
+       Responsive
+       ============================================ */
+    @media (max-width: 1024px) {
+      .nm-right {
+        display: none;
+      }
+    }
+    @media (max-width: 768px) {
+      .nm-left {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+      }
+      .nm-left.open {
+        transform: translateX(0);
+      }
+      .nm-mobile-toggle {
+        display: flex;
+      }
+      .nm-map-legend {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Theme Switcher -->
+  <div class="theme-switcher" id="theme-switcher"></div>
+
+  <!-- Mobile Toggle -->
+  <button class="nm-mobile-toggle" id="nm-mobile-toggle">☰</button>
+
+  <!-- Main Layout -->
+  <div class="nm-main">
+
+    <!-- ===== Left Panel ===== -->
+    <aside class="nm-left" id="nm-left">
+      <div class="nm-left-header">
+        <div class="nm-left-title">🗺️ 叙事地图</div>
+        <div class="nm-left-subtitle">Narrative Map</div>
+      </div>
+
+      <div class="nm-stats">
+        <div class="nm-stat"><span class="nm-stat-num" id="nm-stat-cat">6</span>分类</div>
+        <div class="nm-stat"><span class="nm-stat-num" id="nm-stat-exp">51</span>实验</div>
+        <div class="nm-stat"><span class="nm-stat-num" id="nm-stat-sci">37</span>科学家</div>
+      </div>
+
+      <div class="nm-filter-section">
+        <div class="nm-section-title">📚 知识分类</div>
+        <div class="nm-cat-list" id="nm-cat-list"></div>
+      </div>
+
+      <div class="nm-filter-section" style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+        <div class="nm-section-title">🔬 科学家名录</div>
+        <input type="text" class="nm-search" id="nm-sci-search" placeholder="搜索科学家...">
+        <div class="nm-sci-list" id="nm-sci-list"></div>
+      </div>
+
+      <div class="nm-actions">
+        <button class="nm-btn" id="nm-reset">重置筛选</button>
+        <button class="nm-btn active" id="nm-toggle-lines">隐藏连线</button>
+      </div>
+    </aside>
+
+    <!-- ===== Center Column ===== -->
+    <div class="nm-center">
+      <div id="map"></div>
+
+      <!-- Map Controls -->
+      <div class="nm-map-controls">
+        <button class="nm-map-btn" id="nm-fit-all">📍 全景视图</button>
+      </div>
+
+      <!-- Map Legend -->
+      <div class="nm-map-legend">
+        <div class="nm-legend-row"><span class="nm-legend-dot-sci"></span> 科学家</div>
+        <div class="nm-legend-row"><span class="nm-legend-dot-exp"></span> 实验</div>
+      </div>
+
+      <!-- Timeline Bar -->
+      <div class="nm-timeline-bar">
+        <div class="nm-timeline-header">
+          <span class="nm-timeline-label">📅 时间范围</span>
+          <span class="nm-timeline-values" id="nm-timeline-values">前300 — 2030</span>
+        </div>
+        <div class="nm-slider-container">
+          <div class="nm-slider-track"></div>
+          <div class="nm-slider-range" id="nm-slider-range"></div>
+          <input type="range" id="nm-year-min" min="-300" max="2030" value="-300" step="1">
+          <input type="range" id="nm-year-max" min="-300" max="2030" value="2030" step="1">
+        </div>
+        <div class="nm-timeline-ticks">
+          <span class="nm-timeline-tick">前300</span>
+          <span class="nm-timeline-tick">0</span>
+          <span class="nm-timeline-tick">500</span>
+          <span class="nm-timeline-tick">1000</span>
+          <span class="nm-timeline-tick">1500</span>
+          <span class="nm-timeline-tick">2030</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Right Panel ===== -->
+    <aside class="nm-right">
+      <div class="nm-right-header">📋 详情信息</div>
+      <div class="nm-details" id="nm-details">
+        <div class="nm-default-state">
+          <div class="nm-default-icon">🌍</div>
+          <div class="nm-default-text">
+            点击地图上的标记或左侧科学家名录<br>查看详细信息
+          </div>
+        </div>
+      </div>
+      <div class="nm-kt-section">
+        <div class="nm-kt-title">📈 知识发展时间线</div>
+        <div class="nm-kt-axis">
+          <span id="nm-kt-start">前300</span>
+          <span id="nm-kt-end">2030</span>
+        </div>
+        <div class="nm-kt-track" id="nm-kt-track"></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    /* ============================================
+       DATA
+       ============================================ */
+
+    const SCIENTISTS = [
+      { id:'sci-archimedes', name:'阿基米德', icon:'🛁', color:'#10b981', years:'前287-前212', birthYear:-287, deathYear:-212, lat:37.07, lng:15.27, city:'叙拉古(古希腊)', country:'西西里', desc:'浮力定律发现者 · 杠杆原理', experiments:['buoyancy'] },
+      { id:'sci-copernicus', name:'哥白尼', icon:'☀️', color:'#fdcb6e', years:'1473-1543', birthYear:1473, deathYear:1543, lat:53.01, lng:18.60, city:'托伦', country:'波兰', desc:'日心说创立者 · 现代天文学奠基人', experiments:['solar'] },
+      { id:'sci-galileo', name:'伽利略', icon:'🔭', color:'#f0c060', years:'1564-1642', birthYear:1564, deathYear:1642, lat:43.77, lng:11.25, city:'比萨/佛罗伦萨', country:'意大利', desc:'现代天文学之父 · 望远镜观测与运动学', experiments:['solar','matter','spring','projectile','incline'] },
+      { id:'sci-kepler', name:'开普勒', icon:'🪐', color:'#4ecdc4', years:'1571-1630', birthYear:1571, deathYear:1630, lat:48.77, lng:8.87, city:'威尔德斯塔特', country:'德国', desc:'行星运动三定律提出者', experiments:['solar','gravity_exp','earth-satellite'] },
+      { id:'sci-snell', name:'斯涅尔', icon:'📐', color:'#9b59b6', years:'1580-1626', birthYear:1580, deathYear:1626, lat:52.16, lng:4.49, city:'莱顿', country:'荷兰', desc:'光的折射定律提出者 · 几何光学奠基人', experiments:['optics_exp','refraction'] },
+      { id:'sci-huygens', name:'惠更斯', icon:'🎱', color:'#e74c3c', years:'1629-1695', birthYear:1629, deathYear:1695, lat:52.07, lng:4.30, city:'海牙', country:'荷兰', desc:'碰撞定律与摆钟 · 光的波动说', experiments:['elastic-collision','interference'] },
+      { id:'sci-newton', name:'牛顿', icon:'🍎', color:'#e17055', years:'1643-1727', birthYear:1643, deathYear:1727, lat:52.80, lng:-0.59, city:'伍尔索普', country:'英国', desc:'经典力学奠基人 · 万有引力定律', experiments:['spring','gravity_exp','matter','solar','newton-cradle','projectile','elastic-collision','physics-canvas'] },
+      { id:'sci-bernoulli', name:'伯努利', icon:'🌊', color:'#4ecdc4', years:'1700-1782', birthYear:1700, deathYear:1782, lat:53.22, lng:6.57, city:'格罗宁根', country:'荷兰', desc:'流体力学奠基人 · 伯努利方程', experiments:['bernoulli','taylor'] },
+      { id:'sci-euler', name:'欧拉', icon:'📐', color:'#dfe6e9', years:'1707-1783', birthYear:1707, deathYear:1783, lat:47.56, lng:7.59, city:'巴塞尔', country:'瑞士', desc:'微积分与梁理论奠基人', experiments:['cantilever','bicycle'] },
+      { id:'sci-coulomb', name:'库仑', icon:'⚡', color:'#1abc9c', years:'1736-1806', birthYear:1736, deathYear:1806, lat:45.65, lng:0.16, city:'昂古莱姆', country:'法国', desc:'库仑定律提出者 · 电荷间相互作用', experiments:['electric-deflection'] },
+      { id:'sci-chladni', name:'克拉尼', icon:'🎵', color:'#fd79a8', years:'1756-1827', birthYear:1756, deathYear:1827, lat:51.87, lng:12.65, city:'维滕贝格', country:'德国', desc:'声学振动模式可视化先驱', experiments:['chladni'] },
+      { id:'sci-brown', name:'布朗', icon:'🔬', color:'#74b9ff', years:'1773-1858', birthYear:1773, deathYear:1858, lat:56.71, lng:-2.47, city:'蒙特罗斯', country:'苏格兰', desc:'布朗运动发现者', experiments:['brownian'] },
+      { id:'sci-young', name:'托马斯·杨', icon:'🌊', color:'#f59e0b', years:'1773-1829', birthYear:1773, deathYear:1829, lat:51.38, lng:-3.54, city:'米尔弗顿', country:'英国', desc:'双缝干涉实验 · 光的波动说奠基人 · 杨氏模量', experiments:['interference'] },
+      { id:'sci-faraday', name:'法拉第', icon:'🧲', color:'#fdcb6e', years:'1791-1867', birthYear:1791, deathYear:1867, lat:51.51, lng:-0.13, city:'伦敦', country:'英国', desc:'电磁感应之父 · 磁力线提出者', experiments:['magnetic'] },
+      { id:'sci-doppler', name:'多普勒', icon:'🚑', color:'#00d4ff', years:'1803-1853', birthYear:1803, deathYear:1853, lat:47.81, lng:13.04, city:'萨尔茨堡', country:'奥地利', desc:'多普勒效应提出者 · 波源运动与频率变化', experiments:['doppler'] },
+      { id:'sci-galton', name:'高尔顿', icon:'📊', color:'#fab1a0', years:'1822-1911', birthYear:1822, deathYear:1911, lat:52.48, lng:-1.89, city:'伯明翰', country:'英国', desc:'统计学与回归分析先驱', experiments:['galton'] },
+      { id:'sci-lissajous', name:'利萨如', icon:'🎵', color:'#fd79a8', years:'1822-1880', birthYear:1822, deathYear:1880, lat:48.80, lng:2.13, city:'凡尔赛', country:'法国', desc:'利萨茹曲线发现者 · 声学振动可视化', experiments:['lissajous'] },
+      { id:'sci-tesla', name:'特斯拉', icon:'⚡', color:'#ffeaa7', years:'1856-1943', birthYear:1856, deathYear:1943, lat:44.12, lng:15.24, city:'斯米良', country:'克罗地亚(奥帝国)', desc:'交流电与高频电力先驱', experiments:['tesla'] },
+      { id:'sci-lorentzforce', name:'洛伦兹(力)', icon:'🧲', color:'#9b59b6', years:'1853-1928', birthYear:1853, deathYear:1928, lat:51.99, lng:5.91, city:'阿纳姆', country:'荷兰', desc:'洛伦兹力提出者 · 电磁理论与电子论', experiments:['magnetic-circle'] },
+      { id:'sci-klein', name:'克莱因', icon:'🫙', color:'#8a7ca8', years:'1849-1925', birthYear:1849, deathYear:1925, lat:51.23, lng:6.78, city:'杜塞尔多夫', country:'德国', desc:'拓扑学与几何学大师', experiments:['klein-bottle'] },
+      { id:'sci-einstein', name:'爱因斯坦', icon:'🧠', color:'#fdcb6e', years:'1879-1955', birthYear:1879, deathYear:1955, lat:48.40, lng:9.99, city:'乌尔姆', country:'德国', desc:'相对论创立者 · 质能方程', experiments:['blackhole','blackhole_adv','wormhole','gravitational-wave'] },
+      { id:'sci-mohorovicic', name:'莫霍洛维奇', icon:'🌍', color:'#e67e22', years:'1857-1936', birthYear:1857, deathYear:1936, lat:45.34, lng:14.30, city:'奥帕蒂亚', country:'克罗地亚', desc:'莫霍面发现者 · 地震学先驱', experiments:['geophysics'] },
+      { id:'sci-gutenberg', name:'古登堡', icon:'📊', color:'#e67e22', years:'1889-1960', birthYear:1889, deathYear:1960, lat:49.87, lng:8.65, city:'达姆施塔特', country:'德国', desc:'古登堡面发现者 · 地震学家', experiments:['geophysics'] },
+      { id:'sci-lehmann', name:'莱曼', icon:'🔬', color:'#e67e22', years:'1888-1993', birthYear:1888, deathYear:1993, lat:55.68, lng:12.57, city:'哥本哈根', country:'丹麦', desc:'地球固体内核发现者 · 女性地震学先驱', experiments:['geophysics'] },
+      { id:'sci-wegener', name:'魏格纳', icon:'🧩', color:'#e67e22', years:'1880-1930', birthYear:1880, deathYear:1930, lat:52.52, lng:13.40, city:'柏林', country:'德国', desc:'大陆漂移学说提出者 · 板块构造奠基人', experiments:['geophysics'] },
+      { id:'sci-schrodinger', name:'薛定谔', icon:'🐱', color:'#a29bfe', years:'1887-1961', birthYear:1887, deathYear:1961, lat:48.21, lng:16.37, city:'维也纳', country:'奥地利', desc:'量子力学波动方程提出者', experiments:['quantum_exp','potential'] },
+      { id:'sci-ising', name:'伊辛', icon:'🧲', color:'#55efc4', years:'1900-1998', birthYear:1900, deathYear:1998, lat:50.94, lng:6.96, city:'科隆', country:'德国', desc:'相变统计模型提出者', experiments:['ising'] },
+      { id:'sci-vonneumann', name:'冯·诺依曼', icon:'🧮', color:'#74b9ff', years:'1903-1957', birthYear:1903, deathYear:1957, lat:47.50, lng:19.04, city:'布达佩斯', country:'匈牙利', desc:'元胞自动机创始人 · 计算机科学先驱', experiments:['ca3d'] },
+      { id:'sci-lorenz', name:'洛伦兹(混沌)', icon:'🦋', color:'#ff6b6b', years:'1917-2008', birthYear:1917, deathYear:2008, lat:41.76, lng:-72.74, city:'西哈特福德', country:'美国', desc:'混沌理论先驱 · 蝴蝶效应', experiments:['lorenz','pendulum'] },
+      { id:'sci-calabi', name:'卡拉比', icon:'📐', color:'#a29bfe', years:'1923-', birthYear:1923, deathYear:null, lat:45.46, lng:9.19, city:'米兰', country:'意大利', desc:'微分几何学家 · 卡拉比猜想提出者', experiments:['calabi-yau'] },
+      { id:'sci-conway', name:'Conway', icon:'🎮', color:'#55efc4', years:'1937-2020', birthYear:1937, deathYear:2020, lat:53.40, lng:-2.99, city:'利物浦', country:'英国', desc:'生命游戏发明者 · 元胞自动机先驱', experiments:['ca3d'] },
+      { id:'sci-sutherland', name:'Sutherland', icon:'💻', color:'#a29bfe', years:'1938-', birthYear:1938, deathYear:null, lat:40.59, lng:-98.39, city:'黑斯廷斯', country:'美国', desc:'计算机图形学之父 · 三维交互先驱', experiments:['pointcloud'] },
+      { id:'sci-mandelbrot', name:'曼德博', icon:'🌀', color:'#fdcb6e', years:'1924-2010', birthYear:1924, deathYear:2010, lat:52.23, lng:21.01, city:'华沙', country:'波兰', desc:'分形几何学之父 · 自相似理论', experiments:['fractal'] },
+      { id:'sci-yau', name:'丘成桐', icon:'🔷', color:'#a29bfe', years:'1949-', birthYear:1949, deathYear:null, lat:23.35, lng:116.68, city:'汕头', country:'中国', desc:'菲尔兹奖得主 · 证明卡拉比猜想', experiments:['calabi-yau'] },
+      { id:'sci-helbing', name:'Helbing', icon:'🚶', color:'#a8e6cf', years:'1965-', birthYear:1965, deathYear:null, lat:48.14, lng:11.58, city:'慕尼黑', country:'德国', desc:'社会力模型提出者', experiments:['socialforce'] },
+      { id:'sci-canup', name:'Canup', icon:'🌙', color:'#dfe6e9', years:'1963-', birthYear:1963, deathYear:null, lat:41.59, lng:-93.61, city:'爱荷华', country:'美国', desc:'大撞击假说数值模拟先驱', experiments:['theia-impact'] },
+      { id:'sci-pluchino', name:'Pluchino', icon:'🎲', color:'#fdcb6e', years:'1968-', birthYear:1968, deathYear:null, lat:37.50, lng:15.09, city:'卡塔尼亚', country:'意大利', desc:'随机才能模型提出者 · 运气与成功', experiments:['pluchino'] }
+    ];
+
+    const EXPERIMENTS = [
+      { id:'buoyancy', name:'浮力', year:-250, sciId:'sci-archimedes', cat:'classical', sub:'fluid' },
+      { id:'solar', name:'地动说·太阳系', year:1543, sciId:'sci-copernicus', cat:'relativity', sub:'astro' },
+      { id:'projectile', name:'抛体运动', year:1638, sciId:'sci-galileo', cat:'classical', sub:'mechanics' },
+      { id:'incline', name:'斜面滑块', year:1604, sciId:'sci-galileo', cat:'classical', sub:'mechanics' },
+      { id:'spring', name:'弹簧振子', year:1676, sciId:'sci-galileo', cat:'classical', sub:'mechanics' },
+      { id:'matter', name:'刚体沙盒', year:1687, sciId:'sci-newton', cat:'classical', sub:'mechanics' },
+      { id:'gravity_exp', name:'万有引力', year:1687, sciId:'sci-newton', cat:'relativity', sub:'gravity' },
+      { id:'newton-cradle', name:'牛顿摆', year:1687, sciId:'sci-newton', cat:'classical', sub:'mechanics' },
+      { id:'elastic-collision', name:'弹性碰撞', year:1669, sciId:'sci-huygens', cat:'classical', sub:'mechanics' },
+      { id:'physics-canvas', name:'自由物理画布', year:1687, sciId:'sci-newton', cat:'classical', sub:'mechanics' },
+      { id:'optics_exp', name:'初中光学', year:1621, sciId:'sci-snell', cat:'classical', sub:'geo_optics' },
+      { id:'refraction', name:'光的折射', year:1621, sciId:'sci-snell', cat:'classical', sub:'geo_optics' },
+      { id:'lens', name:'透镜成像', year:1621, sciId:'sci-snell', cat:'classical', sub:'geo_optics' },
+      { id:'interference', name:'双缝干涉', year:1801, sciId:'sci-young', cat:'classical', sub:'optics' },
+      { id:'wave', name:'波的干涉', year:1801, sciId:'sci-young', cat:'classical', sub:'optics' },
+      { id:'bernoulli', name:'伯努利原理', year:1738, sciId:'sci-bernoulli', cat:'classical', sub:'fluid' },
+      { id:'taylor', name:'泰勒-库埃特流', year:1923, sciId:'sci-bernoulli', cat:'classical', sub:'fluid' },
+      { id:'cantilever', name:'悬臂梁分析', year:1744, sciId:'sci-euler', cat:'classical', sub:'mechanics' },
+      { id:'bicycle', name:'齿轮与自行车', year:1860, sciId:'sci-euler', cat:'classical', sub:'mechanics' },
+      { id:'electric-deflection', name:'电场偏转', year:1785, sciId:'sci-coulomb', cat:'classical', sub:'electromag' },
+      { id:'chladni', name:'克拉尼图形', year:1787, sciId:'sci-chladni', cat:'classical', sub:'acoustic' },
+      { id:'brownian', name:'布朗运动', year:1827, sciId:'sci-brown', cat:'chaos', sub:'prob' },
+      { id:'magnetic', name:'磁场与铁粉', year:1831, sciId:'sci-faraday', cat:'classical', sub:'electromag' },
+      { id:'doppler', name:'多普勒效应', year:1842, sciId:'sci-doppler', cat:'classical', sub:'acoustic' },
+      { id:'galton', name:'高尔顿钉板', year:1894, sciId:'sci-galton', cat:'chaos', sub:'prob' },
+      { id:'medical', name:'名医的诞生', year:1763, sciId:'sci-galton', cat:'chaos', sub:'prob' },
+      { id:'lissajous', name:'利萨茹曲线', year:1857, sciId:'sci-lissajous', cat:'classical', sub:'harmonic' },
+      { id:'tesla', name:'特斯拉线圈', year:1891, sciId:'sci-tesla', cat:'classical', sub:'electromag' },
+      { id:'magnetic-circle', name:'磁场圆周运动', year:1892, sciId:'sci-lorentzforce', cat:'classical', sub:'electromag' },
+      { id:'klein-bottle', name:'克莱因瓶', year:1882, sciId:'sci-klein', cat:'classical', sub:'mechanics' },
+      { id:'engine', name:'多缸内燃机', year:1876, sciId:'sci-euler', cat:'classical', sub:'mechanics' },
+      { id:'blackhole', name:'黑洞吸积盘', year:1916, sciId:'sci-einstein', cat:'relativity', sub:'relativity_gr' },
+      { id:'blackhole_adv', name:'黑洞吸积盘(高级)', year:2019, sciId:'sci-einstein', cat:'relativity', sub:'relativity_gr' },
+      { id:'wormhole', name:'爱因斯坦-罗森桥', year:1935, sciId:'sci-einstein', cat:'relativity', sub:'relativity_gr' },
+      { id:'gravitational-wave', name:'引力波探测', year:2015, sciId:'sci-einstein', cat:'relativity', sub:'astro' },
+      { id:'earth-satellite', name:'地球卫星', year:1957, sciId:'sci-kepler', cat:'relativity', sub:'astro' },
+      { id:'solar-system', name:'太阳系沙盘', year:1957, sciId:'sci-kepler', cat:'relativity', sub:'astro' },
+      { id:'theia-impact', name:'忒伊亚撞击', year:1975, sciId:'sci-canup', cat:'relativity', sub:'astro' },
+      { id:'quantum_exp', name:'双缝干涉', year:1961, sciId:'sci-schrodinger', cat:'quantum', sub:'wave_particle' },
+      { id:'potential', name:'一维势阱', year:1926, sciId:'sci-schrodinger', cat:'quantum', sub:'schrodinger' },
+      { id:'lorenz', name:'洛伦兹吸引子', year:1963, sciId:'sci-lorenz', cat:'chaos', sub:'chaos_theory' },
+      { id:'pendulum', name:'混沌双摆', year:1963, sciId:'sci-lorenz', cat:'chaos', sub:'chaos_theory' },
+      { id:'fractal', name:'分形几何', year:1975, sciId:'sci-mandelbrot', cat:'chaos', sub:'chaos_theory' },
+      { id:'calabi-yau', name:'卡拉比-丘流形', year:1977, sciId:'sci-yau', cat:'chaos', sub:'chaos_theory' },
+      { id:'ising', name:'伊辛模型', year:1925, sciId:'sci-ising', cat:'chaos', sub:'phase' },
+      { id:'ca3d', name:'3D元胞自动机', year:1948, sciId:'sci-vonneumann', cat:'computational', sub:'manybody' },
+      { id:'socialforce', name:'社会力模型', year:1995, sciId:'sci-helbing', cat:'computational', sub:'manybody' },
+      { id:'pointcloud', name:'点云探索', year:1963, sciId:'sci-sutherland', cat:'computational', sub:'vision3d' },
+      { id:'pluchino', name:'成功随机性', year:2018, sciId:'sci-pluchino', cat:'chaos', sub:'prob' },
+      { id:'geophysics', name:'地球物理', year:1909, sciId:'sci-mohorovicic', cat:'geophysics_cat', sub:'geophysics_cat' },
+      { id:'galvanometer', name:'检流计', year:1820, sciId:'sci-snell', cat:'classical', sub:'geo_optics' }
+    ];
+
+    const CATEGORIES = [
+      { id:'classical', name:'经典物理', icon:'⚙️', color:'#4ecdc4' },
+      { id:'quantum', name:'量子物理', icon:'⚛️', color:'#a29bfe' },
+      { id:'relativity', name:'相对论与宇宙学', icon:'🌠', color:'#ff9f43' },
+      { id:'chaos', name:'统计与混沌', icon:'🦋', color:'#ff6b6b' },
+      { id:'computational', name:'计算物理', icon:'💻', color:'#55efc4' },
+      { id:'geophysics_cat', name:'地球科学', icon:'🌍', color:'#e67e22' }
+    ];
+
+    const SUB_LABELS = {
+      'fluid':'流体力学','mechanics':'力学','geo_optics':'几何光学','optics':'波动光学',
+      'electromag':'电磁学','acoustic':'声学','harmonic':'简谐运动',
+      'wave_particle':'波粒二象性','schrodinger':'薛定谔方程',
+      'astro':'天体物理','gravity':'引力','relativity_gr':'广义相对论',
+      'prob':'概率统计','chaos_theory':'混沌理论','phase':'相变',
+      'manybody':'多体系统','vision3d':'三维视觉','geophysics_cat':'地球物理'
+    };
+
+    // Map experiment IDs to HTML filenames
+    const EXP_FILE_MAP = {
+      'gravity_exp':'exp-gravity.html','optics_exp':'exp-optics.html',
+      'blackhole_adv':'exp-blackhole-advanced.html','quantum_exp':'exp-quantum.html',
+      'socialforce':'exp-social-force.html'
+    };
+    function getExpUrl(id) {
+      if (EXP_FILE_MAP[id]) return EXP_FILE_MAP[id];
+      return 'exp-' + id + '.html';
+    }
+
+    /* ============================================
+       STATE
+       ============================================ */
+    let map, currentTileLayer;
+    let scientistMarkers = {};  // sciId -> L.marker
+    let experimentMarkers = {}; // expId -> L.marker
+    let connectionLines = [];
+    let showConnections = true;
+    let selectedEntity = null; // { type:'scientist'|'experiment', id }
+    let searchQuery = '';
+
+    const filters = {
+      categories: new Set(CATEGORIES.map(c => c.id)),
+      yearStart: -300,
+      yearEnd: 2030
+    };
+
+    const MIN_YEAR = -300;
+    const MAX_YEAR = 2030;
+    const YEAR_RANGE = MAX_YEAR - MIN_YEAR;
+
+    /* ============================================
+       UTILITY
+       ============================================ */
+    function formatYear(y) {
+      if (y < 0) return '前' + Math.abs(y);
+      return String(y);
+    }
+
+    function getScientist(id) {
+      return SCIENTISTS.find(s => s.id === id);
+    }
+
+    function getExperiment(id) {
+      return EXPERIMENTS.find(e => e.id === id);
+    }
+
+    function getCategory(id) {
+      return CATEGORIES.find(c => c.id === id);
+    }
+
+    function getExperimentsForScientist(sciId) {
+      return EXPERIMENTS.filter(e => e.sciId === sciId);
+    }
+
+    function getScientistExperiments(sciId) {
+      // Use scientist's experiments array for broader association
+      const sci = getScientist(sciId);
+      if (!sci) return [];
+      return sci.experiments.map(eid => getExperiment(eid)).filter(Boolean);
+    }
+
+    function isExperimentVisible(exp) {
+      return filters.categories.has(exp.cat) &&
+             exp.year >= filters.yearStart &&
+             exp.year <= filters.yearEnd;
+    }
+
+    function isScientistVisible(sci) {
+      // Scientist is visible if any of their experiments (from EXPERIMENTS array by sciId) are visible
+      const exps = getExperimentsForScientist(sci.id);
+      return exps.some(e => isExperimentVisible(e));
+    }
+
+    // Cluster offset for experiment markers around scientist location
+    function getClusteredPosition(sci, index, total) {
+      if (total <= 1) return [sci.lat, sci.lng];
+      const radius = 0.012 + Math.min(total, 8) * 0.003;
+      const angle = (2 * Math.PI * index) / total - Math.PI / 2;
+      const latOff = radius * Math.cos(angle);
+      const lngOff = radius * Math.sin(angle) / Math.cos(sci.lat * Math.PI / 180);
+      return [sci.lat + latOff, sci.lng + lngOff];
+    }
+
+    /* ============================================
+       MAP INITIALIZATION
+       ============================================ */
+    function initMap() {
+      map = L.map('map', {
+        center: [46, 10],
+        zoom: 3,
+        minZoom: 2,
+        maxZoom: 12,
+        worldCopyJump: true,
+        zoomControl: true,
+        attributionControl: true
+      });
+
+      switchMapTiles(getCurrentTheme());
+
+      // Create all markers
+      SCIENTISTS.forEach(sci => {
+        createScientistMarker(sci);
+      });
+
+      // Group experiments by scientist for clustering
+      const expsByScientist = {};
+      EXPERIMENTS.forEach(exp => {
+        if (!expsByScientist[exp.sciId]) expsByScientist[exp.sciId] = [];
+        expsByScientist[exp.sciId].push(exp);
+      });
+
+      Object.keys(expsByScientist).forEach(sciId => {
+        const sci = getScientist(sciId);
+        if (!sci) return;
+        const exps = expsByScientist[sciId];
+        exps.forEach((exp, idx) => {
+          const pos = getClusteredPosition(sci, idx, exps.length);
+          createExperimentMarker(exp, sci, pos);
+        });
+      });
+
+      updateMarkers();
+      updateConnections();
+    }
+
+    function getCurrentTheme() {
+      return document.documentElement.getAttribute('data-theme') || 'academic';
+    }
+
+    function switchMapTiles(theme) {
+      const darkThemes = ['glass', 'cyber'];
+      const isDark = darkThemes.includes(theme);
+      const mapEl = document.getElementById('map');
+
+      if (currentTileLayer) {
+        map.removeLayer(currentTileLayer);
+        currentTileLayer = null;
+      }
+
+      // Tile providers in priority order (most reliable first)
+      var providers = isDark ? [
+        { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', sub: 'abcd', attr: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 },
+        { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', sub: 'abc', attr: '&copy; OpenStreetMap', maxZoom: 19, darkFilter: true }
+      ] : [
+        { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', sub: 'abc', attr: '&copy; OpenStreetMap', maxZoom: 19 },
+        { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', sub: 'abcd', attr: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 }
+      ];
+
+      var providerIdx = 0;
+      var errorCount = 0;
+      var switched = false;
+
+      function loadProvider(idx) {
+        if (idx >= providers.length) return;
+        var p = providers[idx];
+        if (currentTileLayer) map.removeLayer(currentTileLayer);
+
+        // Toggle dark CSS filter
+        if (p.darkFilter) {
+          mapEl.classList.add('nm-map-dark-fallback');
+        } else {
+          mapEl.classList.remove('nm-map-dark-fallback');
+        }
+
+        currentTileLayer = L.tileLayer(p.url, {
+          attribution: p.attr,
+          subdomains: p.sub,
+          maxZoom: p.maxZoom
+        });
+
+        errorCount = 0;
+        currentTileLayer.on('tileerror', function() {
+          errorCount++;
+          if (errorCount > 5 && !switched && idx + 1 < providers.length) {
+            switched = true;
+            loadProvider(idx + 1);
+          }
+        });
+
+        currentTileLayer.addTo(map);
+      }
+
+      loadProvider(0);
+    }
+
+    /* ============================================
+       MARKERS
+       ============================================ */
+    function createScientistMarker(sci) {
+      const icon = L.divIcon({
+        className: 'nm-sci-marker-wrap',
+        html: '<div class="nm-sci-marker" data-sci-id="' + sci.id + '">' +
+              '<div class="nm-sci-marker-circle" style="--marker-color:' + sci.color + ';background:' + sci.color + '">' +
+              sci.icon + '</div>' +
+              '<div class="nm-sci-marker-label">' + sci.name + '</div>' +
+              '</div>',
+        iconSize: [40, 52],
+        iconAnchor: [20, 20],
+        tooltipAnchor: [0, -24]
+      });
+
+      const marker = L.marker([sci.lat, sci.lng], { icon: icon, riseOnHover: true });
+      marker.bindTooltip(sci.name + ' (' + sci.years + ')', { direction: 'top', offset: [0, -20] });
+      marker.on('click', function() { selectScientist(sci.id); });
+      marker.addTo(map);
+      scientistMarkers[sci.id] = marker;
+    }
+
+    function createExperimentMarker(exp, sci, pos) {
+      const cat = getCategory(exp.cat);
+      const icon = L.divIcon({
+        className: 'nm-exp-marker-wrap',
+        html: '<div class="nm-exp-marker" data-exp-id="' + exp.id + '">' +
+              '<div class="nm-exp-marker-dot" style="--marker-color:' + cat.color + ';background:' + cat.color + '"></div>' +
+              '</div>',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+        tooltipAnchor: [0, -8]
+      });
+
+      const marker = L.marker(pos, { icon: icon, riseOnHover: true });
+      marker.bindTooltip(exp.name + ' (' + formatYear(exp.year) + ')', { direction: 'top', offset: [0, -6] });
+      marker.on('click', function() { selectExperiment(exp.id); });
+      marker.addTo(map);
+      experimentMarkers[exp.id] = marker;
+    }
+
+    function updateMarkers() {
+      // Update scientist markers visibility
+      SCIENTISTS.forEach(sci => {
+        const marker = scientistMarkers[sci.id];
+        if (!marker) return;
+        const visible = isScientistVisible(sci);
+        const el = marker.getElement();
+        if (el) {
+          const inner = el.querySelector('.nm-sci-marker');
+          if (inner) {
+            inner.classList.toggle('active', selectedEntity && selectedEntity.type === 'scientist' && selectedEntity.id === sci.id);
+          }
+          el.style.opacity = visible ? '1' : '0.15';
+          el.style.pointerEvents = visible ? 'auto' : 'none';
+        }
+      });
+
+      // Update experiment markers visibility
+      EXPERIMENTS.forEach(exp => {
+        const marker = experimentMarkers[exp.id];
+        if (!marker) return;
+        const visible = isExperimentVisible(exp);
+        const el = marker.getElement();
+        if (el) {
+          const inner = el.querySelector('.nm-exp-marker');
+          if (inner) {
+            inner.classList.toggle('active', selectedEntity && selectedEntity.type === 'experiment' && selectedEntity.id === exp.id);
+          }
+          el.style.opacity = visible ? '0.9' : '0';
+          el.style.pointerEvents = visible ? 'auto' : 'none';
+        }
+      });
+    }
+
+    /* ============================================
+       CONNECTION LINES
+       ============================================ */
+    function updateConnections() {
+      // Clear existing
+      connectionLines.forEach(line => map.removeLayer(line));
+      connectionLines = [];
+
+      if (!showConnections) return;
+
+      // For each category, connect scientists chronologically
+      filters.categories.forEach(catId => {
+        const cat = getCategory(catId);
+        if (!cat) return;
+
+        // Get scientists with experiments in this category, within time range
+        const scientistsInCat = SCIENTISTS.filter(sci => {
+          const exps = getExperimentsForScientist(sci.id).filter(e => e.cat === catId && isExperimentVisible(e));
+          return exps.length > 0;
+        });
+
+        if (scientistsInCat.length < 2) return;
+
+        // Sort by earliest experiment year in this category within time range
+        scientistsInCat.sort((a, b) => {
+          const yearA = Math.min.apply(null, getExperimentsForScientist(a.id)
+            .filter(e => e.cat === catId && isExperimentVisible(e))
+            .map(e => e.year));
+          const yearB = Math.min.apply(null, getExperimentsForScientist(b.id)
+            .filter(e => e.cat === catId && isExperimentVisible(e))
+            .map(e => e.year));
+          return yearA - yearB;
+        });
+
+        // Draw lines between consecutive scientists
+        for (let i = 0; i < scientistsInCat.length - 1; i++) {
+          const a = scientistsInCat[i];
+          const b = scientistsInCat[i + 1];
+          const line = L.polyline(
+            [[a.lat, a.lng], [b.lat, b.lng]],
+            {
+              color: cat.color,
+              weight: 2,
+              opacity: 0.35,
+              dashArray: '6, 8',
+              interactive: false
+            }
+          ).addTo(map);
+          connectionLines.push(line);
+        }
+      });
+    }
+
+    /* ============================================
+       SELECTION & DETAILS
+       ============================================ */
+    function selectScientist(sciId) {
+      const sci = getScientist(sciId);
+      if (!sci) return;
+
+      selectedEntity = { type: 'scientist', id: sciId };
+
+      // Fly to location
+      map.flyTo([sci.lat, sci.lng], Math.max(map.getZoom(), 5), { duration: 0.8 });
+
+      renderScientistDetails(sci);
+      updateMarkers();
+      renderKnowledgeTimeline();
+      updateScientistListSelection();
+    }
+
+    function selectExperiment(expId) {
+      const exp = getExperiment(expId);
+      if (!exp) return;
+
+      selectedEntity = { type: 'experiment', id: expId };
+
+      const sci = getScientist(exp.sciId);
+      if (sci) {
+        const marker = experimentMarkers[expId];
+        if (marker) {
+          const pos = marker.getLatLng();
+          map.flyTo([pos.lat, pos.lng], Math.max(map.getZoom(), 5), { duration: 0.8 });
+        }
+      }
+
+      renderExperimentDetails(exp);
+      updateMarkers();
+      renderKnowledgeTimeline();
+      updateScientistListSelection();
+    }
+
+    function clearSelection() {
+      selectedEntity = null;
+      renderDefaultDetails();
+      updateMarkers();
+      renderKnowledgeTimeline();
+      updateScientistListSelection();
+    }
+
+    function renderDefaultDetails() {
+      const el = document.getElementById('nm-details');
+      el.innerHTML =
+        '<div class="nm-default-state">' +
+        '<div class="nm-default-icon">🌍</div>' +
+        '<div class="nm-default-text">' +
+        '点击地图上的标记或左侧科学家名录<br>查看详细信息' +
+        '</div>' +
+        '</div>';
+    }
+
+    function renderScientistDetails(sci) {
+      const el = document.getElementById('nm-details');
+      const sciExps = getScientistExperiments(sci.id);
+
+      let expsHtml = '';
+      if (sciExps.length > 0) {
+        sciExps.sort((a, b) => a.year - b.year);
+        expsHtml = '<div class="nm-detail-exps-title">相关实验 (' + sciExps.length + ')</div>';
+        expsHtml += '<div class="nm-detail-exp-list">';
+        sciExps.forEach(exp => {
+          const cat = getCategory(exp.cat);
+          expsHtml +=
+            '<a class="nm-detail-exp-item" href="' + getExpUrl(exp.id) + '">' +
+            '<span class="nm-detail-exp-dot" style="background:' + cat.color + '"></span>' +
+            '<span class="nm-detail-exp-name">' + exp.name + '</span>' +
+            '<span class="nm-detail-exp-year">' + formatYear(exp.year) + '</span>' +
+            '<span class="nm-detail-exp-arrow">▶</span>' +
+            '</a>';
+        });
+        expsHtml += '</div>';
+      }
+
+      el.innerHTML =
+        '<div class="nm-detail-card">' +
+        '<div class="nm-detail-header">' +
+        '<div class="nm-detail-icon" style="background:' + sci.color + '">' + sci.icon + '</div>' +
+        '<div><div class="nm-detail-name">' + sci.name + '</div>' +
+        '<div class="nm-detail-years">' + sci.years + '</div></div>' +
+        '</div>' +
+        '<div class="nm-detail-location">📍 ' + sci.city + ', ' + sci.country + '</div>' +
+        '<div class="nm-detail-desc">' + sci.desc + '</div>' +
+        expsHtml +
+        '</div>';
+    }
+
+    function renderExperimentDetails(exp) {
+      const el = document.getElementById('nm-details');
+      const sci = getScientist(exp.sciId);
+      const cat = getCategory(exp.cat);
+      const subLabel = SUB_LABELS[exp.sub] || exp.sub;
+
+      let sciHtml = '';
+      if (sci) {
+        sciHtml =
+          '<div class="nm-exp-detail-row" style="cursor:pointer" id="nm-exp-sci-link">' +
+          '<span class="nm-exp-detail-label">科学家</span>' +
+          '<span class="nm-exp-detail-value">' + sci.icon + ' ' + sci.name + '</span>' +
+          '</div>';
+      }
+
+      el.innerHTML =
+        '<div class="nm-exp-detail">' +
+        '<div class="nm-exp-detail-title">' + exp.name + '</div>' +
+        '<div class="nm-exp-detail-year">' + formatYear(exp.year) + ' 年</div>' +
+        '<div class="nm-exp-detail-row">' +
+        '<span class="nm-exp-detail-label">分类</span>' +
+        '<span class="nm-exp-detail-value">' + cat.icon + ' ' + cat.name + '</span>' +
+        '<span class="nm-detail-exp-dot" style="background:' + cat.color + ';margin-left:auto"></span>' +
+        '</div>' +
+        '<div class="nm-exp-detail-row">' +
+        '<span class="nm-exp-detail-label">子类</span>' +
+        '<span class="nm-exp-detail-value">' + subLabel + '</span>' +
+        '</div>' +
+        sciHtml +
+        '<a class="nm-exp-detail-link" href="' + getExpUrl(exp.id) + '">打开实验页面 ▶</a>' +
+        '</div>';
+
+      // Wire scientist link
+      const sciLink = document.getElementById('nm-exp-sci-link');
+      if (sciLink && sci) {
+        sciLink.addEventListener('click', function() { selectScientist(sci.id); });
+      }
+    }
+
+    /* ============================================
+       KNOWLEDGE TIMELINE (right panel)
+       ============================================ */
+    function renderKnowledgeTimeline() {
+      const track = document.getElementById('nm-kt-track');
+      const startLabel = document.getElementById('nm-kt-start');
+      const endLabel = document.getElementById('nm-kt-end');
+      if (!track) return;
+
+      track.innerHTML = '';
+      startLabel.textContent = formatYear(filters.yearStart);
+      endLabel.textContent = formatYear(filters.yearEnd);
+
+      const visibleExps = EXPERIMENTS.filter(e => isExperimentVisible(e));
+      const range = filters.yearEnd - filters.yearStart || 1;
+
+      visibleExps.forEach(exp => {
+        const cat = getCategory(exp.cat);
+        const percent = ((exp.year - filters.yearStart) / range) * 100;
+        const dot = document.createElement('div');
+        dot.className = 'nm-kt-dot';
+        dot.style.left = percent + '%';
+        dot.style.background = cat.color;
+        dot.style.color = cat.color;
+        dot.title = exp.name + ' (' + formatYear(exp.year) + ')';
+        if (selectedEntity && selectedEntity.type === 'experiment' && selectedEntity.id === exp.id) {
+          dot.classList.add('active');
+        }
+        dot.addEventListener('click', function() { selectExperiment(exp.id); });
+        track.appendChild(dot);
+      });
+    }
+
+    /* ============================================
+       CATEGORY FILTER
+       ============================================ */
+    function renderCategoryFilter() {
+      const container = document.getElementById('nm-cat-list');
+      container.innerHTML = '';
+
+      CATEGORIES.forEach(cat => {
+        const count = EXPERIMENTS.filter(e => e.cat === cat.id).length;
+        const item = document.createElement('div');
+        item.className = 'nm-cat-item' + (filters.categories.has(cat.id) ? ' checked' : '');
+        item.style.setProperty('--cat-color', cat.color);
+        item.innerHTML =
+          '<div class="nm-cat-checkbox"></div>' +
+          '<span class="nm-cat-icon">' + cat.icon + '</span>' +
+          '<span class="nm-cat-name">' + cat.name + '</span>' +
+          '<span class="nm-cat-count">' + count + '</span>';
+        item.addEventListener('click', function() {
+          if (filters.categories.has(cat.id)) {
+            filters.categories.delete(cat.id);
+            item.classList.remove('checked');
+          } else {
+            filters.categories.add(cat.id);
+            item.classList.add('checked');
+          }
+          updateAll();
+        });
+        container.appendChild(item);
+      });
+    }
+
+    /* ============================================
+       SCIENTIST LIST
+       ============================================ */
+    function renderScientistList() {
+      const container = document.getElementById('nm-sci-list');
+      container.innerHTML = '';
+
+      const filtered = SCIENTISTS.filter(sci => {
+        if (!searchQuery) return true;
+        return sci.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               sci.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               sci.country.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+
+      filtered.forEach(sci => {
+        const item = document.createElement('div');
+        item.className = 'nm-sci-item';
+        item.dataset.sciId = sci.id;
+        if (selectedEntity && selectedEntity.type === 'scientist' && selectedEntity.id === sci.id) {
+          item.classList.add('active');
+        }
+        item.innerHTML =
+          '<div class="nm-sci-icon" style="background:' + sci.color + '">' + sci.icon + '</div>' +
+          '<div class="nm-sci-info">' +
+          '<div class="nm-sci-name">' + sci.name + '</div>' +
+          '<div class="nm-sci-years">' + sci.years + '</div>' +
+          '</div>';
+        item.addEventListener('click', function() { selectScientist(sci.id); });
+        container.appendChild(item);
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="padding:12px;text-align:center;color:var(--nm-text-muted);font-size:0.8rem">未找到匹配的科学家</div>';
+      }
+    }
+
+    function updateScientistListSelection() {
+      document.querySelectorAll('.nm-sci-item').forEach(item => {
+        item.classList.toggle('active',
+          selectedEntity && selectedEntity.type === 'scientist' && item.dataset.sciId === selectedEntity.id);
+      });
+    }
+
+    /* ============================================
+       STATS
+       ============================================ */
+    function updateStats() {
+      const visibleExps = EXPERIMENTS.filter(e => isExperimentVisible(e));
+      const visibleScis = new Set(visibleExps.map(e => e.sciId));
+      const visibleCats = new Set(visibleExps.map(e => e.cat));
+
+      document.getElementById('nm-stat-cat').textContent = visibleCats.size;
+      document.getElementById('nm-stat-exp').textContent = visibleExps.length;
+      document.getElementById('nm-stat-sci').textContent = visibleScis.size;
+    }
+
+    /* ============================================
+       TIMELINE SLIDER
+       ============================================ */
+    function initTimelineSlider() {
+      const minSlider = document.getElementById('nm-year-min');
+      const maxSlider = document.getElementById('nm-year-max');
+      const rangeFill = document.getElementById('nm-slider-range');
+      const valuesLabel = document.getElementById('nm-timeline-values');
+
+      function updateSlider() {
+        let minVal = parseInt(minSlider.value);
+        let maxVal = parseInt(maxSlider.value);
+
+        if (minVal > maxVal) {
+          if (document.activeElement === minSlider) {
+            minVal = maxVal;
+            minSlider.value = minVal;
+          } else {
+            maxVal = minVal;
+            maxSlider.value = maxVal;
+          }
+        }
+
+        const minPct = ((minVal - MIN_YEAR) / YEAR_RANGE) * 100;
+        const maxPct = ((maxVal - MIN_YEAR) / YEAR_RANGE) * 100;
+
+        rangeFill.style.left = minPct + '%';
+        rangeFill.style.right = (100 - maxPct) + '%';
+
+        valuesLabel.textContent = formatYear(minVal) + ' — ' + formatYear(maxVal);
+
+        filters.yearStart = minVal;
+        filters.yearEnd = maxVal;
+      }
+
+      let debounceTimer;
+      function debouncedUpdate() {
+        updateSlider();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function() {
+          updateAll();
+        }, 80);
+      }
+
+      minSlider.addEventListener('input', debouncedUpdate);
+      maxSlider.addEventListener('input', debouncedUpdate);
+
+      updateSlider();
+    }
+
+    /* ============================================
+       UPDATE ALL
+       ============================================ */
+    function updateAll() {
+      updateMarkers();
+      updateConnections();
+      updateStats();
+      renderKnowledgeTimeline();
+    }
+
+    /* ============================================
+       THEME SWITCHER INIT
+       ============================================ */
+    function initThemeSwitcher() {
+      const container = document.getElementById('theme-switcher');
+      if (!container) return;
+      if (container.children.length > 0) return;
+
+      const themes = [
+        { key: 'academic', label: '📐 学术' },
+        { key: 'glass', label: '🧊 玻璃' },
+        { key: 'cartoon', label: '🎨 卡通' },
+        { key: 'cyber', label: '👾 赛博' },
+        { key: 'soviet', label: '☭ 苏维埃' }
+      ];
+
+      let current = 'academic';
+      if (typeof PSUTheme !== 'undefined' && PSUTheme.get) {
+        current = PSUTheme.get();
+      }
+
+      themes.forEach(function(t) {
+        const btn = document.createElement('button');
+        btn.textContent = t.label;
+        btn.dataset.theme = t.key;
+        if (t.key === current) btn.classList.add('active');
+        btn.addEventListener('click', function() {
+          if (typeof PSUTheme !== 'undefined' && PSUTheme.set) {
+            PSUTheme.set(t.key);
+          } else {
+            document.documentElement.setAttribute('data-theme', t.key);
+          }
+          container.querySelectorAll('button').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.theme === t.key);
+          });
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    /* ============================================
+       EVENT HANDLERS
+       ============================================ */
+    function initEventHandlers() {
+      // Search
+      document.getElementById('nm-sci-search').addEventListener('input', function(e) {
+        searchQuery = e.target.value;
+        renderScientistList();
+      });
+
+      // Reset
+      document.getElementById('nm-reset').addEventListener('click', function() {
+        filters.categories = new Set(CATEGORIES.map(function(c) { return c.id; }));
+        filters.yearStart = MIN_YEAR;
+        filters.yearEnd = MAX_YEAR;
+        document.getElementById('nm-year-min').value = MIN_YEAR;
+        document.getElementById('nm-year-max').value = MAX_YEAR;
+
+        // Update slider visuals
+        var rangeFill = document.getElementById('nm-slider-range');
+        rangeFill.style.left = '0%';
+        rangeFill.style.right = '0%';
+        document.getElementById('nm-timeline-values').textContent = formatYear(MIN_YEAR) + ' — ' + formatYear(MAX_YEAR);
+
+        clearSelection();
+        renderCategoryFilter();
+        renderScientistList();
+        updateAll();
+      });
+
+      // Toggle connections
+      document.getElementById('nm-toggle-lines').addEventListener('click', function() {
+        showConnections = !showConnections;
+        this.textContent = showConnections ? '隐藏连线' : '显示连线';
+        this.classList.toggle('active', showConnections);
+        updateConnections();
+      });
+
+      // Fit all
+      document.getElementById('nm-fit-all').addEventListener('click', function() {
+        var visibleExps = EXPERIMENTS.filter(function(e) { return isExperimentVisible(e); });
+        if (visibleExps.length === 0) return;
+        var points = visibleExps.map(function(e) {
+          var sci = getScientist(e.sciId);
+          return [sci.lat, sci.lng];
+        });
+        if (points.length > 0) {
+          map.flyToBounds(L.latLngBounds(points).pad(0.2), { duration: 0.8 });
+        }
+      });
+
+      // Mobile toggle
+      document.getElementById('nm-mobile-toggle').addEventListener('click', function() {
+        document.getElementById('nm-left').classList.toggle('open');
+      });
+    }
+
+    /* ============================================
+       THEME OBSERVER
+       ============================================ */
+    function initThemeObserver() {
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.attributeName === 'data-theme') {
+            var theme = getCurrentTheme();
+            switchMapTiles(theme);
+          }
+        });
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
+    /* ============================================
+       INIT
+       ============================================ */
+    function init() {
+      // Set initial theme
+      var theme = 'academic';
+      if (typeof PSUTheme !== 'undefined' && PSUTheme.get) {
+        theme = PSUTheme.get();
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+
+      // Initialize theme switcher
+      initThemeSwitcher();
+
+      // Initialize UI components
+      renderCategoryFilter();
+      renderScientistList();
+      initTimelineSlider();
+      initEventHandlers();
+      initThemeObserver();
+
+      // Initialize map (needs Leaflet loaded)
+      if (typeof L !== 'undefined') {
+        initMap();
+        updateStats();
+        renderKnowledgeTimeline();
+      }
+
+      // Fix map size after layout
+      setTimeout(function() {
+        if (map) map.invalidateSize();
+      }, 200);
+    }
+
+    // Run when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+  })();
+  </script>
+</body>
+</html>

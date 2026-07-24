@@ -164,6 +164,13 @@
     if (currentPage === 'physics-building.html') pbLink.classList.add('active');
     nav.appendChild(pbLink);
 
+    // Narrative Map link
+    const nmLink = document.createElement('a');
+    nmLink.href = 'narrative-map.html';
+    nmLink.textContent = '叙事地图';
+    if (currentPage === 'narrative-map.html') nmLink.classList.add('active');
+    nav.appendChild(nmLink);
+
     // Library dropdown
     const libDropdown = document.createElement('div');
     libDropdown.className = 'nav-dropdown';
