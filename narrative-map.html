@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>叙事性地图 — 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script>window.CESIUM_BASE_URL = 'https://cdn.jsdelivr.net/npm/cesium@1.120/Build/Cesium/';</script>
+  <link href="https://cdn.jsdelivr.net/npm/cesium@1.120/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.120/Build/Cesium/Cesium.js"></script>
+  <link rel="stylesheet" href="shared-theme.css?v=20260724d">
+  <script src="shared-theme.js?v=20260724d"></script>
   <style>
     /* ============================================
        Narrative Map — CSS Variables for 5 Themes
@@ -355,6 +357,7 @@
        ============================================ */
     .nm-center {
       flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       position: relative;
@@ -363,8 +366,11 @@
 
     #map {
       flex: 1;
+      min-height: 0;
+      position: relative;
       z-index: 1;
       background: var(--nm-bg);
+      overflow: hidden;
     }
 
     /* Timeline bar at bottom of map */
@@ -777,7 +783,7 @@
     }
 
     /* ============================================
-       Leaflet Marker Styles
+       Cesium Marker Styles
        ============================================ */
     .nm-sci-marker {
       display: flex;
@@ -845,39 +851,26 @@
     }
 
     /* Dark theme map tile filter (fallback when dark tiles unavailable) */
-    .nm-map-dark-fallback .leaflet-tile-pane {
+    .nm-map-dark-fallback .cesium-widget {
       filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.1);
     }
 
-    /* Leaflet control theming */
-    .leaflet-control-zoom a {
-      background: var(--nm-panel-bg) !important;
-      color: var(--nm-text) !important;
-      border-color: var(--nm-panel-border) !important;
-      backdrop-filter: var(--nm-backdrop);
+    /* Cesium container & default UI hiding */
+    #map .cesium-viewer { background: transparent; }
+    .cesium-viewer-bottom, .cesium-viewer-toolbar, .cesium-viewer-fullscreenContainer,
+    .cesium-viewer-vrContainer, .cesium-viewer-animationContainer,
+    .cesium-viewer-timelineContainer, .cesium-credit-container,
+    .cesium-widget-credits { display:none !important; }
+
+    /* HTML overlay container for markers */
+    .nm-overlay-container {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none; overflow: hidden; z-index: 10;
     }
-    .leaflet-control-zoom a:hover {
-      background: var(--nm-hover) !important;
-    }
-    .leaflet-control-attribution {
-      background: var(--nm-panel-bg) !important;
-      color: var(--nm-text-muted) !important;
-      backdrop-filter: var(--nm-backdrop);
-      font-size: 0.65rem !important;
-    }
-    .leaflet-control-attribution a {
-      color: var(--nm-accent) !important;
-    }
-    .leaflet-tooltip {
-      background: var(--nm-panel-bg) !important;
-      color: var(--nm-text) !important;
-      border: var(--nm-border-width) solid var(--nm-panel-border) !important;
-      border-radius: var(--nm-radius) !important;
-      font-size: 0.75rem !important;
-      box-shadow: var(--nm-shadow) !important;
-    }
-    .leaflet-tooltip-top:before {
-      border-top-color: var(--nm-panel-border) !important;
+    .nm-overlay-item {
+      position: absolute; pointer-events: auto;
+      transform: translate(-50%, -50%);
+      will-change: transform, left, top;
     }
 
     /* ============================================
@@ -1016,10 +1009,13 @@
     <!-- ===== Center Column ===== -->
     <div class="nm-center">
       <div id="map"></div>
+      <div class="nm-overlay-container" id="nm-overlay"></div>
 
       <!-- Map Controls -->
       <div class="nm-map-controls">
         <button class="nm-map-btn" id="nm-fit-all">📍 全景视图</button>
+        <button class="nm-map-btn active" id="nm-view-3d">🌍 3D</button>
+        <button class="nm-map-btn" id="nm-view-2d">🗺️ 2D</button>
       </div>
 
       <!-- Map Legend -->
@@ -1075,7 +1071,6 @@
   </div>
 
   <!-- Scripts -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
   (function() {
     'use strict';
@@ -1210,10 +1205,12 @@
     /* ============================================
        STATE
        ============================================ */
-    let map, currentTileLayer;
-    let scientistMarkers = {};  // sciId -> L.marker
-    let experimentMarkers = {}; // expId -> L.marker
-    let connectionLines = [];
+    let viewer, currentImageryLayer;
+    let scientistMarkers = {};  // sciId -> { entity, el, cart3 }
+    let experimentMarkers = {}; // expId -> { entity, el, cart3 }
+    let connectionLines = [];   // Cesium entities
+    let overlayContainer;
+    let is2DMode = false;
     let showConnections = true;
     let selectedEntity = null; // { type:'scientist'|'experiment', id }
     let searchQuery = '';
@@ -1285,42 +1282,86 @@
        MAP INITIALIZATION
        ============================================ */
     function initMap() {
-      map = L.map('map', {
-        center: [46, 10],
-        zoom: 3,
-        minZoom: 2,
-        maxZoom: 12,
-        worldCopyJump: true,
-        zoomControl: true,
-        attributionControl: true
+      var mapEl = document.getElementById('map');
+      var w = mapEl.clientWidth, h = mapEl.clientHeight;
+      if (w < 2 || h < 2) {
+        requestAnimationFrame(initMap);
+        return;
+      }
+
+      overlayContainer = document.getElementById('nm-overlay');
+
+      try {
+        viewer = new Cesium.Viewer('map', {
+          baseLayerPicker: false,
+          baseLayer: false,
+          geocoder: false,
+          homeButton: false,
+          sceneModePicker: false,
+          navigationHelpButton: false,
+          animation: false,
+          timeline: false,
+          fullscreenButton: false,
+          vrButton: false,
+          infoBox: false,
+          selectionIndicator: false,
+          shadows: false,
+          shouldAnimate: true,
+          sceneMode: Cesium.SceneMode.SCENE3D
+        });
+      } catch(e) {
+        console.error('Cesium Viewer init error:', e);
+        return;
+      }
+
+      // 抑制 Cesium 渲染错误弹窗，防止 shader 编译失败时阻塞用户交互
+      viewer.cesiumWidget.showErrorPanel = function() {};
+      viewer.scene.renderError.addEventListener(function(error) {
+        console.warn('Cesium render error (suppressed):', error);
       });
 
+      // 切换底图（baseLayer: false 已跳过默认底图）
       switchMapTiles(getCurrentTheme());
 
-      // Create all markers
-      SCIENTISTS.forEach(sci => {
-        createScientistMarker(sci);
+      // 设置初始相机视角（欧洲视角，与原 Leaflet center [46, 10] zoom 3 对应）
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(10, 46, 6000000),
+        duration: 0
       });
 
-      // Group experiments by scientist for clustering
+      // 创建标记
+      SCIENTISTS.forEach(sci => createScientistMarker(sci));
+
+      // 聚类实验标记
       const expsByScientist = {};
       EXPERIMENTS.forEach(exp => {
         if (!expsByScientist[exp.sciId]) expsByScientist[exp.sciId] = [];
         expsByScientist[exp.sciId].push(exp);
       });
-
       Object.keys(expsByScientist).forEach(sciId => {
         const sci = getScientist(sciId);
         if (!sci) return;
-        const exps = expsByScientist[sciId];
-        exps.forEach((exp, idx) => {
-          const pos = getClusteredPosition(sci, idx, exps.length);
+        expsByScientist[sciId].forEach((exp, idx) => {
+          const pos = getClusteredPosition(sci, idx, expsByScientist[sciId].length);
           createExperimentMarker(exp, sci, pos);
         });
       });
 
       updateMarkers();
       updateConnections();
+
+      // 添加 postRender 监听器更新 HTML overlay 位置
+      viewer.scene.postRender.addEventListener(updateOverlayPositions);
+
+      // 场景变形完成后强制刷新标记位置和连线
+      viewer.scene.morphComplete.addEventListener(function() {
+        updateOverlayPositions();
+        updateConnections();
+      });
+      viewer.scene.morphStart.addEventListener(function() {
+        // 变形开始时标记位置会剧烈变化，延迟刷新
+        setTimeout(updateOverlayPositions, 200);
+      });
     }
 
     function getCurrentTheme() {
@@ -1332,130 +1373,119 @@
       var isDark = darkThemes.includes(theme);
       var mapEl = document.getElementById('map');
 
-      if (currentTileLayer) {
-        map.removeLayer(currentTileLayer);
-        currentTileLayer = null;
+      if (currentImageryLayer) {
+        viewer.imageryLayers.remove(currentImageryLayer);
+        currentImageryLayer = null;
       }
 
-      // Tile providers in priority order (Gaode first — most reliable in China)
-      var providers = isDark ? [
-        { url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', sub: '1234', attr: '&copy; AutoNavi (高德地图)', maxZoom: 18, darkFilter: true },
-        { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', sub: 'abcd', attr: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 },
-        { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', sub: 'abc', attr: '&copy; OpenStreetMap', maxZoom: 19, darkFilter: true }
-      ] : [
-        { url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', sub: '1234', attr: '&copy; AutoNavi (高德地图)', maxZoom: 18 },
-        { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', sub: 'abc', attr: '&copy; OpenStreetMap', maxZoom: 19 },
-        { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', sub: 'abcd', attr: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 }
-      ];
+      // 高德地图瓦片
+      var provider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+        subdomains: ['1','2','3','4'],
+        maximumLevel: 18
+      });
 
-      var errorCount = 0;
-      var switched = false;
+      currentImageryLayer = viewer.imageryLayers.addImageryProvider(provider);
 
-      function loadProvider(idx) {
-        if (idx >= providers.length) return;
-        var p = providers[idx];
-        if (currentTileLayer) map.removeLayer(currentTileLayer);
-
-        // Toggle dark CSS filter
-        if (p.darkFilter) {
-          mapEl.classList.add('nm-map-dark-fallback');
-        } else {
-          mapEl.classList.remove('nm-map-dark-fallback');
-        }
-
-        currentTileLayer = L.tileLayer(p.url, {
-          attribution: p.attr,
-          subdomains: p.sub,
-          maxZoom: p.maxZoom
-        });
-
-        errorCount = 0;
-        currentTileLayer.on('tileerror', function() {
-          errorCount++;
-          if (errorCount > 5 && !switched && idx + 1 < providers.length) {
-            switched = true;
-            loadProvider(idx + 1);
-          }
-        });
-
-        currentTileLayer.addTo(map);
+      // 暗色主题滤镜
+      if (isDark) {
+        mapEl.classList.add('nm-map-dark-fallback');
+        currentImageryLayer.brightness = 0.6;
+        currentImageryLayer.contrast = 1.2;
+      } else {
+        mapEl.classList.remove('nm-map-dark-fallback');
+        currentImageryLayer.brightness = 1.0;
+        currentImageryLayer.contrast = 1.0;
       }
-
-      loadProvider(0);
     }
 
     /* ============================================
        MARKERS
        ============================================ */
     function createScientistMarker(sci) {
-      const icon = L.divIcon({
-        className: 'nm-sci-marker-wrap',
-        html: '<div class="nm-sci-marker" data-sci-id="' + sci.id + '">' +
-              '<div class="nm-sci-marker-circle" style="--marker-color:' + sci.color + ';background:' + sci.color + '">' +
-              sci.icon + '</div>' +
-              '<div class="nm-sci-marker-label">' + sci.name + '</div>' +
-              '</div>',
-        iconSize: [40, 52],
-        iconAnchor: [20, 20],
-        tooltipAnchor: [0, -24]
-      });
+      var el = document.createElement('div');
+      el.className = 'nm-overlay-item';
+      el.innerHTML = '<div class="nm-sci-marker" data-sci-id="' + sci.id + '">' +
+        '<div class="nm-sci-marker-circle" style="--marker-color:' + sci.color + ';background:' + sci.color + '">' +
+        sci.icon + '</div>' +
+        '<div class="nm-sci-marker-label">' + sci.name + '</div></div>';
+      el.title = sci.name + ' (' + sci.years + ')';
+      el.addEventListener('click', function() { selectScientist(sci.id); });
+      overlayContainer.appendChild(el);
 
-      const marker = L.marker([sci.lat, sci.lng], { icon: icon, riseOnHover: true });
-      marker.bindTooltip(sci.name + ' (' + sci.years + ')', { direction: 'top', offset: [0, -20] });
-      marker.on('click', function() { selectScientist(sci.id); });
-      marker.addTo(map);
-      scientistMarkers[sci.id] = marker;
+      var cart3 = Cesium.Cartesian3.fromDegrees(sci.lng, sci.lat);
+      scientistMarkers[sci.id] = { el: el, cart3: cart3 };
     }
 
     function createExperimentMarker(exp, sci, pos) {
-      const cat = getCategory(exp.cat);
-      const icon = L.divIcon({
-        className: 'nm-exp-marker-wrap',
-        html: '<div class="nm-exp-marker" data-exp-id="' + exp.id + '">' +
-              '<div class="nm-exp-marker-dot" style="--marker-color:' + cat.color + ';background:' + cat.color + '"></div>' +
-              '</div>',
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
-        tooltipAnchor: [0, -8]
-      });
+      var cat = getCategory(exp.cat);
+      var el = document.createElement('div');
+      el.className = 'nm-overlay-item';
+      el.innerHTML = '<div class="nm-exp-marker" data-exp-id="' + exp.id + '">' +
+        '<div class="nm-exp-marker-dot" style="--marker-color:' + cat.color + ';background:' + cat.color + '"></div></div>';
+      el.title = exp.name + ' (' + formatYear(exp.year) + ')';
+      el.addEventListener('click', function() { selectExperiment(exp.id); });
+      overlayContainer.appendChild(el);
 
-      const marker = L.marker(pos, { icon: icon, riseOnHover: true });
-      marker.bindTooltip(exp.name + ' (' + formatYear(exp.year) + ')', { direction: 'top', offset: [0, -6] });
-      marker.on('click', function() { selectExperiment(exp.id); });
-      marker.addTo(map);
-      experimentMarkers[exp.id] = marker;
+      var cart3 = Cesium.Cartesian3.fromDegrees(pos[1], pos[0]); // [lat, lng] -> lng, lat
+      experimentMarkers[exp.id] = { el: el, cart3: cart3 };
     }
 
     function updateMarkers() {
-      // Update scientist markers visibility
       SCIENTISTS.forEach(sci => {
-        const marker = scientistMarkers[sci.id];
+        var marker = scientistMarkers[sci.id];
         if (!marker) return;
-        const visible = isScientistVisible(sci);
-        const el = marker.getElement();
-        if (el) {
-          const inner = el.querySelector('.nm-sci-marker');
-          if (inner) {
-            inner.classList.toggle('active', selectedEntity && selectedEntity.type === 'scientist' && selectedEntity.id === sci.id);
-          }
-          el.style.opacity = visible ? '1' : '0.15';
-          el.style.pointerEvents = visible ? 'auto' : 'none';
+        var visible = isScientistVisible(sci);
+        var inner = marker.el.querySelector('.nm-sci-marker');
+        if (inner) {
+          inner.classList.toggle('active', selectedEntity && selectedEntity.type === 'scientist' && selectedEntity.id === sci.id);
+        }
+        marker.el.style.opacity = visible ? '1' : '0.15';
+        marker.el.style.pointerEvents = visible ? 'auto' : 'none';
+      });
+
+      EXPERIMENTS.forEach(exp => {
+        var marker = experimentMarkers[exp.id];
+        if (!marker) return;
+        var visible = isExperimentVisible(exp);
+        var inner = marker.el.querySelector('.nm-exp-marker');
+        if (inner) {
+          inner.classList.toggle('active', selectedEntity && selectedEntity.type === 'experiment' && selectedEntity.id === exp.id);
+        }
+        marker.el.style.opacity = visible ? '0.9' : '0';
+        marker.el.style.pointerEvents = visible ? 'auto' : 'none';
+      });
+    }
+
+    function updateOverlayPositions() {
+      if (!viewer || !overlayContainer) return;
+      var canvas = viewer.scene.canvas;
+      var width = canvas.width;
+      var height = canvas.height;
+
+      // 更新科学家标记位置
+      Object.keys(scientistMarkers).forEach(id => {
+        var marker = scientistMarkers[id];
+        var screenPos = viewer.scene.cartesianToCanvasCoordinates(marker.cart3);
+        if (screenPos) {
+          marker.el.style.display = 'block';
+          marker.el.style.left = screenPos.x + 'px';
+          marker.el.style.top = screenPos.y + 'px';
+        } else {
+          marker.el.style.display = 'none';
         }
       });
 
-      // Update experiment markers visibility
-      EXPERIMENTS.forEach(exp => {
-        const marker = experimentMarkers[exp.id];
-        if (!marker) return;
-        const visible = isExperimentVisible(exp);
-        const el = marker.getElement();
-        if (el) {
-          const inner = el.querySelector('.nm-exp-marker');
-          if (inner) {
-            inner.classList.toggle('active', selectedEntity && selectedEntity.type === 'experiment' && selectedEntity.id === exp.id);
-          }
-          el.style.opacity = visible ? '0.9' : '0';
-          el.style.pointerEvents = visible ? 'auto' : 'none';
+      // 更新实验标记位置
+      Object.keys(experimentMarkers).forEach(id => {
+        var marker = experimentMarkers[id];
+        var screenPos = viewer.scene.cartesianToCanvasCoordinates(marker.cart3);
+        if (screenPos) {
+          marker.el.style.display = 'block';
+          marker.el.style.left = screenPos.x + 'px';
+          marker.el.style.top = screenPos.y + 'px';
+        } else {
+          marker.el.style.display = 'none';
         }
       });
     }
@@ -1464,51 +1494,40 @@
        CONNECTION LINES
        ============================================ */
     function updateConnections() {
-      // Clear existing
-      connectionLines.forEach(line => map.removeLayer(line));
+      connectionLines.forEach(ent => viewer.entities.remove(ent));
       connectionLines = [];
 
       if (!showConnections) return;
 
-      // For each category, connect scientists chronologically
       filters.categories.forEach(catId => {
-        const cat = getCategory(catId);
+        var cat = getCategory(catId);
         if (!cat) return;
 
-        // Get scientists with experiments in this category, within time range
-        const scientistsInCat = SCIENTISTS.filter(sci => {
-          const exps = getScientistExperiments(sci.id).filter(e => e.cat === catId && isExperimentVisible(e));
+        var scientistsInCat = SCIENTISTS.filter(sci => {
+          var exps = getScientistExperiments(sci.id).filter(e => e.cat === catId && isExperimentVisible(e));
           return exps.length > 0;
         });
-
         if (scientistsInCat.length < 2) return;
 
-        // Sort by earliest experiment year in this category within time range
         scientistsInCat.sort((a, b) => {
-          const yearA = Math.min.apply(null, getScientistExperiments(a.id)
-            .filter(e => e.cat === catId && isExperimentVisible(e))
-            .map(e => e.year));
-          const yearB = Math.min.apply(null, getScientistExperiments(b.id)
-            .filter(e => e.cat === catId && isExperimentVisible(e))
-            .map(e => e.year));
+          var yearA = Math.min.apply(null, getScientistExperiments(a.id).filter(e => e.cat === catId && isExperimentVisible(e)).map(e => e.year));
+          var yearB = Math.min.apply(null, getScientistExperiments(b.id).filter(e => e.cat === catId && isExperimentVisible(e)).map(e => e.year));
           return yearA - yearB;
         });
 
-        // Draw lines between consecutive scientists
-        for (let i = 0; i < scientistsInCat.length - 1; i++) {
-          const a = scientistsInCat[i];
-          const b = scientistsInCat[i + 1];
-          const line = L.polyline(
-            [[a.lat, a.lng], [b.lat, b.lng]],
-            {
-              color: cat.color,
-              weight: 2,
-              opacity: 0.35,
-              dashArray: '6, 8',
-              interactive: false
+        for (var i = 0; i < scientistsInCat.length - 1; i++) {
+          var a = scientistsInCat[i];
+          var b = scientistsInCat[i + 1];
+          var entity = viewer.entities.add({
+            polyline: {
+              positions: Cesium.Cartesian3.fromDegreesArray([a.lng, a.lat, b.lng, b.lat]),
+              width: 1.5,
+              material: new Cesium.ColorMaterialProperty(
+                Cesium.Color.fromCssColorString(cat.color).withAlpha(0.4)
+              )
             }
-          ).addTo(map);
-          connectionLines.push(line);
+          });
+          connectionLines.push(entity);
         }
       });
     }
@@ -1522,8 +1541,13 @@
 
       selectedEntity = { type: 'scientist', id: sciId };
 
-      // Fly to location
-      map.flyTo([sci.lat, sci.lng], Math.max(map.getZoom(), 5), { duration: 0.8 });
+      // Fly to location（try-catch 防止渲染异常时阻塞详情面板更新）
+      try {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(sci.lng, sci.lat, 2000000),
+          duration: 0.8
+        });
+      } catch(e) { console.warn('camera.flyTo error:', e); }
 
       renderScientistDetails(sci);
       updateMarkers();
@@ -1539,10 +1563,15 @@
 
       const sci = getScientist(exp.sciId);
       if (sci) {
-        const marker = experimentMarkers[expId];
+        var marker = experimentMarkers[expId];
         if (marker) {
-          const pos = marker.getLatLng();
-          map.flyTo([pos.lat, pos.lng], Math.max(map.getZoom(), 5), { duration: 0.8 });
+          try {
+            var carto = Cesium.Cartographic.fromCartesian(marker.cart3);
+            viewer.camera.flyTo({
+              destination: Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, 2000000),
+              duration: 0.8
+            });
+          } catch(e) { console.warn('camera.flyTo error:', e); }
         }
       }
 
@@ -1872,13 +1901,43 @@
           return [sci.lat, sci.lng];
         });
         if (points.length > 0) {
-          map.flyToBounds(L.latLngBounds(points).pad(0.2), { duration: 0.8 });
+          // 计算边界
+          var lats = points.map(p => p[0]);
+          var lngs = points.map(p => p[1]);
+          var west = Math.min.apply(null, lngs) - 5;
+          var east = Math.max.apply(null, lngs) + 5;
+          var south = Math.min.apply(null, lats) - 5;
+          var north = Math.max.apply(null, lats) + 5;
+          try {
+            viewer.camera.flyTo({
+              destination: Cesium.Rectangle.fromDegrees(west, south, east, north),
+              duration: 0.8
+            });
+          } catch(e) { console.warn('fitAll camera.flyTo error:', e); }
         }
       });
 
       // Mobile toggle
       document.getElementById('nm-mobile-toggle').addEventListener('click', function() {
         document.getElementById('nm-left').classList.toggle('open');
+      });
+
+      // 2D/3D view toggle
+      document.getElementById('nm-view-2d').addEventListener('click', function() {
+        if (!is2DMode) {
+          is2DMode = true;
+          try { viewer.scene.morphTo2D(1.0); } catch(e) { console.warn('morphTo2D error:', e); }
+          this.classList.add('active');
+          document.getElementById('nm-view-3d').classList.remove('active');
+        }
+      });
+      document.getElementById('nm-view-3d').addEventListener('click', function() {
+        if (is2DMode) {
+          is2DMode = false;
+          try { viewer.scene.morphTo3D(1.0); } catch(e) { console.warn('morphTo3D error:', e); }
+          this.classList.add('active');
+          document.getElementById('nm-view-2d').classList.remove('active');
+        }
       });
     }
 
@@ -1915,17 +1974,12 @@
       initEventHandlers();
       initThemeObserver();
 
-      // Initialize map (needs Leaflet loaded)
-      if (typeof L !== 'undefined') {
+      // Initialize map (needs Cesium loaded)
+      if (typeof Cesium !== 'undefined') {
         initMap();
         updateStats();
         renderKnowledgeTimeline();
       }
-
-      // Fix map size after layout
-      setTimeout(function() {
-        if (map) map.invalidateSize();
-      }, 200);
     }
 
     // Run when DOM is ready
@@ -1934,6 +1988,21 @@
     } else {
       init();
     }
+
+    // Debug interface
+    window._nmDebug = {
+      getViewer: function() { return viewer; },
+      getSceneMode: function() { return viewer ? viewer.scene.mode : -1; },
+      getMarkerCount: function() { return Object.keys(scientistMarkers).length; },
+      getExpMarkerCount: function() { return Object.keys(experimentMarkers).length; },
+      getOverlayChildren: function() { return overlayContainer ? overlayContainer.children.length : 0; },
+      getConnectionCount: function() { return connectionLines.length; },
+      selectScientist: selectScientist,
+      selectExperiment: selectExperiment,
+      toggle2D: function() { document.getElementById('nm-view-2d').click(); },
+      toggle3D: function() { document.getElementById('nm-view-3d').click(); },
+      fitAll: function() { document.getElementById('nm-fit-all').click(); }
+    };
 
   })();
   </script>
