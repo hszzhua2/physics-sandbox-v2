@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>教师备课 — 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css">
+  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     html, body {
@@ -338,16 +338,7 @@
     <button onclick="document.getElementById('tree-panel').classList.toggle('show')">📚 导航</button>
   </div>
 
-  <!-- 主题切换器 -->
-  <div class="theme-switcher" id="theme-switcher"></div>
-
-  <script src="shared-theme.js"></script>
-  <script>
-  // 初始化主题切换器
-  window.addEventListener('DOMContentLoaded', function() {
-    if (window.PSUTheme) PSUTheme.createSwitcher();
-  });
-  </script>
+  <script src="shared-theme.js?v=20260724b"></script>
   <script>
   // ==========================================
   // 知识数据 (与知识图谱同步)

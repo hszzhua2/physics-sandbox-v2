@@ -80,7 +80,13 @@
       container.appendChild(btn);
     });
 
-    document.body.appendChild(container);
+    // Append to #top-nav if it exists, otherwise float on body
+    const nav = document.getElementById('top-nav');
+    if (nav) {
+      nav.appendChild(container);
+    } else {
+      document.body.appendChild(container);
+    }
   }
 
   function updateThemeSwitcherUI(themeName) {
@@ -108,26 +114,6 @@
     nav.className = 'top-nav';
 
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-    // Back link (only on non-index pages)
-    if (currentPage !== 'index.html' && currentPage !== '') {
-      const backLink = document.createElement('a');
-      backLink.href = 'index.html';
-      backLink.className = 'nav-back-link';
-      backLink.innerHTML = '← 返回上一级';
-      backLink.addEventListener('click', (e) => {
-        if (history.length > 1) {
-          e.preventDefault();
-          history.back();
-        }
-      });
-      nav.appendChild(backLink);
-
-      // Separator
-      const sep = document.createElement('span');
-      sep.className = 'nav-separator';
-      nav.appendChild(sep);
-    }
 
     // Home
     const homeLink = document.createElement('a');
@@ -267,9 +253,10 @@
     if (window.parent !== window) {
       listenToParentTheme();
     }
-    // Auto-create top nav on all pages
+    // Auto-create top nav + theme switcher on all pages
     if (window.parent === window) {
       createTopNav();
+      createThemeSwitcher();
     }
   });
 

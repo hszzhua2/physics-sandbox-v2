@@ -375,16 +375,23 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-color: #5c0000;
 }
 
-/* Theme switcher floating button styles — bottom-left attached */
+/* Theme switcher — embedded in nav bar (right side) */
 .theme-switcher {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 50px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Fallback: floating when NOT inside nav */
+body > .theme-switcher {
   position: fixed;
   bottom: 20px;
   left: 20px;
   z-index: 1000;
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 50px;
 }
 
 [data-theme="cartoon"] .theme-switcher {
@@ -423,14 +430,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .theme-switcher button {
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 50px;
   border: none;
   cursor: pointer;
   font-weight: bold;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   transition: all 0.3s ease;
   font-family: var(--font-main);
+  white-space: nowrap;
 }
 
 [data-theme="cartoon"] .theme-switcher button {

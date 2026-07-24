@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -143,7 +143,7 @@
 
     /* ===== 主题切换器 ===== */
     .theme-switcher{
-      position:fixed;bottom:16px;right:16px;z-index:200;
+      margin-left:auto;flex-shrink:0;
       display:flex;gap:4px;padding:4px;
       background:var(--panel);border:1px solid var(--border);
       border-radius:50px;box-shadow:var(--shadow);
@@ -321,6 +321,8 @@
         <a href="https://github.com/hszzhua2" target="_blank">🐙 GitHub</a>
       </div>
     </div>
+    <!-- 主题切换器 -->
+    <div class="theme-switcher" id="theme-switcher"></div>
   </nav>
 
   <!-- 统计栏 -->
@@ -362,9 +364,6 @@
 
   <!-- Tooltip -->
   <div class="tooltip" id="tooltip"></div>
-
-  <!-- 主题切换器 -->
-  <div class="theme-switcher" id="theme-switcher"></div>
 
   <script type="module">
   import * as THREE from './lib/three.module.js';

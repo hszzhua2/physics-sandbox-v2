@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -479,7 +479,7 @@
 
     /* ---------- Theme Switcher ---------- */
     .theme-switcher {
-      position: fixed; bottom: 20px; left: 20px; z-index: 1000;
+      margin-left: auto; flex-shrink: 0;
       display: flex; gap: 8px; padding: 8px; border-radius: 50px;
     }
     [data-theme="cartoon"] .theme-switcher {
@@ -670,7 +670,12 @@
         });
         container.appendChild(btn);
       });
-      document.body.appendChild(container);
+      const nav = document.getElementById('top-nav');
+      if (nav) {
+        nav.appendChild(container);
+      } else {
+        document.body.appendChild(container);
+      }
     }
 
     function updateThemeSwitcherUI(themeName) {

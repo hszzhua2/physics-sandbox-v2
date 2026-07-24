@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" data-theme="academic">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>叙事性地图 — 物理沙盒宇宙</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="shared-theme.css">
-  <script src="shared-theme.js"></script>
+  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <script src="shared-theme.js?v=20260724b"></script>
   <style>
     /* ============================================
        Narrative Map — CSS Variables for 5 Themes
@@ -111,12 +111,6 @@
       background: var(--nm-bg);
       color: var(--nm-text);
       transition: background-color 0.6s ease, color 0.4s ease;
-    }
-
-    /* Override nav to left-align for back button at top-left */
-    .top-nav {
-      justify-content: flex-start !important;
-      padding-left: 16px !important;
     }
 
     /* Main layout */
@@ -983,9 +977,6 @@
 </head>
 <body>
 
-  <!-- Theme Switcher -->
-  <div class="theme-switcher" id="theme-switcher"></div>
-
   <!-- Mobile Toggle -->
   <button class="nm-mobile-toggle" id="nm-mobile-toggle">☰</button>
 
@@ -1835,46 +1826,6 @@
     }
 
     /* ============================================
-       THEME SWITCHER INIT
-       ============================================ */
-    function initThemeSwitcher() {
-      const container = document.getElementById('theme-switcher');
-      if (!container) return;
-      if (container.children.length > 0) return;
-
-      const themes = [
-        { key: 'academic', label: '📐 学术' },
-        { key: 'glass', label: '🧊 玻璃' },
-        { key: 'cartoon', label: '🎨 卡通' },
-        { key: 'cyber', label: '👾 赛博' },
-        { key: 'soviet', label: '☭ 苏维埃' }
-      ];
-
-      let current = 'academic';
-      if (typeof PSUTheme !== 'undefined' && PSUTheme.get) {
-        current = PSUTheme.get();
-      }
-
-      themes.forEach(function(t) {
-        const btn = document.createElement('button');
-        btn.textContent = t.label;
-        btn.dataset.theme = t.key;
-        if (t.key === current) btn.classList.add('active');
-        btn.addEventListener('click', function() {
-          if (typeof PSUTheme !== 'undefined' && PSUTheme.set) {
-            PSUTheme.set(t.key);
-          } else {
-            document.documentElement.setAttribute('data-theme', t.key);
-          }
-          container.querySelectorAll('button').forEach(function(b) {
-            b.classList.toggle('active', b.dataset.theme === t.key);
-          });
-        });
-        container.appendChild(btn);
-      });
-    }
-
-    /* ============================================
        EVENT HANDLERS
        ============================================ */
     function initEventHandlers() {
@@ -1956,9 +1907,6 @@
         theme = PSUTheme.get();
       }
       document.documentElement.setAttribute('data-theme', theme);
-
-      // Initialize theme switcher
-      initThemeSwitcher();
 
       // Initialize UI components
       renderCategoryFilter();
