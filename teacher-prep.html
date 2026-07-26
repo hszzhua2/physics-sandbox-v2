@@ -426,7 +426,8 @@
     { id:'interference', name:'双缝干涉', parent:'optics', target:'exp-interference.html', desc:'杨氏双缝实验 · 波粒二象性 · 波动+粒子双表达', year:1801, history:'1801年托马斯·杨首次用双缝实验演示了光的干涉现象，证明光的波动性。本实验同时提供波动表达（实时波前传播与叠加）和粒子表达（光子逐个累积成干涉条纹）两种可视化模式，直观展示波粒二象性。包含单缝衍射包络调制、条纹间距Δy=λL/d计算、光强分布I=cos²(πdy/λL)·sinc²(πay/λL)。' },
     { id:'galvanometer', name:'检流计', parent:'geo_optics', target:'exp-galvanometer.html', desc:'双镜光束控制 · 反射定律 · PID闭环', year:1820, history:'1820年施魏格尔发明检流计，利用电流在磁场中产生力矩驱动镜面偏转。双镜X/Y检流计系统广泛用于激光投影、医学成像(OCT)和光通信。本实验模拟双镜光束偏转系统，演示反射定律（镜面偏转θ，光束偏转2θ），含PID闭环控制实现光束自动锁定目标。' },
     { id:'nuclear-3d', name:'核物理3D模拟', parent:'nuclear', target:'exp-nuclear-3d.html', desc:'核裂变链式反应与核聚变等离子体约束3D模拟', year:1938, history:'1938年奥托·哈恩与弗里茨·施特拉斯曼在柏林发现核裂变现象，莉泽·迈特纳与奥托·弗里施提供了理论解释。本实验通过Three.js 3D引擎模拟核裂变链式反应（铀-235晶格、慢中子轰击、控制棒吸收）与核聚变等离子体约束（氘氚反应、温度与密度调控），实时可视化中子轨迹、反应能量释放和遥测数据。' },
-    { id:'nuclear-plant', name:'核电站', parent:'nuclear', target:'exp-nuclear-plant.html', desc:'压水堆三回路热力循环 · 控制棒 · 汽轮机 · 冷却塔', year:1942, history:'1942年恩里科·费米在芝加哥大学建成人类首座核反应堆CP-1（芝加哥一号堆），实现了受控链式核裂变反应。1954年苏联建成首座核电站奥布宁斯克核电站在奥布宁斯克投入运行。本实验通过3D可视化模拟压水堆核电站的三回路热力循环：一回路（反应堆堆芯加热冷却剂）、二回路（蒸汽发生器产生蒸汽驱动汽轮机）、三回路（冷凝器与冷却塔排热），含控制棒插入深度调节、主蒸汽阀门开度控制、紧急停堆(SCRAM)和实时遥测数据。' }
+    { id:'nuclear-plant', name:'核电站', parent:'nuclear', target:'exp-nuclear-plant.html', desc:'压水堆三回路热力循环 · 控制棒 · 汽轮机 · 冷却塔', year:1942, history:'1942年恩里科·费米在芝加哥大学建成人类首座核反应堆CP-1（芝加哥一号堆），实现了受控链式核裂变反应。1954年苏联建成首座核电站奥布宁斯克核电站在奥布宁斯克投入运行。本实验通过3D可视化模拟压水堆核电站的三回路热力循环：一回路（反应堆堆芯加热冷却剂）、二回路（蒸汽发生器产生蒸汽驱动汽轮机）、三回路（冷凝器与冷却塔排热），含控制棒插入深度调节、主蒸汽阀门开度控制、紧急停堆(SCRAM)和实时遥测数据。' },
+    { id:'hairy-ball', name:'毛球定理', parent:'mechanics', target:'exp-hairy-ball.html', desc:'球面切向量场必存在奇点 · 庞加莱-霍普夫定理 · 拓扑不变量', year:1912, history:'1912年荷兰数学家鲁伊兹·布劳威尔(L.E.J. Brouwer)证明了毛球定理：在偶数维球面S²ⁿ上不存在处处非零的连续切向量场。该定理是庞加莱-霍普夫指数定理(Σ Index(pᵢ) = χ(S²) = 2)的直接推论，也是代数拓扑的经典结果。本实验通过Three.js 3D引擎可视化球面上的多种切向量场（偶极场、涡旋场、鞍点场、随机场），实时检测并标记零点（奇点），直观展示"你不能把毛球梳平而不留下旋涡"这一拓扑必然性。' }
   ];
 
   const SCIENTISTS = [
@@ -469,7 +470,8 @@
     { id:'sci-young', name:'托马斯·杨', icon:'🌊', color:'#f59e0b', desc:'双缝干涉实验 · 光的波动说奠基人 · 杨氏模量', experiments:['interference'], years:'1773-1829' },
     { id:'sci-hahn', name:'哈恩', icon:'☢️', color:'#fdcb6e', desc:'核裂变发现者 · 1944年诺贝尔化学奖', experiments:['nuclear-3d','nuclear-plant'], years:'1879-1968' },
     { id:'sci-meitner', name:'迈特纳', icon:'⚛️', color:'#a29bfe', desc:'核裂变理论解释者 · 元素𬭸以她命名', experiments:['nuclear-3d','nuclear-plant'], years:'1878-1968' },
-    { id:'sci-fermi', name:'费米', icon:'⚛️', color:'#10b981', desc:'首座核反应堆CP-1建造者 · 1938年诺贝尔物理学奖', experiments:['nuclear-3d','nuclear-plant'], years:'1901-1954' }
+    { id:'sci-fermi', name:'费米', icon:'⚛️', color:'#10b981', desc:'首座核反应堆CP-1建造者 · 1938年诺贝尔物理学奖', experiments:['nuclear-3d','nuclear-plant'], years:'1901-1954' },
+    { id:'sci-brouwer', name:'布劳威尔', icon:'⚽', color:'#e84393', desc:'拓扑学奠基人 · 毛球定理证明者 · 布劳威尔不动点定理', experiments:['hairy-ball'], years:'1881-1966' }
   ];
 
   // 辅助查找

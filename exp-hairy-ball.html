@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>毛球定理 - 物理沙盒宇宙</title>
+  <link rel="stylesheet" href="shared-theme.css?v=20260726">
+  <style>
+    /* ============================================================
+       毛球定理 — 主题局部变量 (--hb-*)
+       每个主题定义毛球定理专用配色：球体/向量场/奇点/场景背景
+       ============================================================ */
+
+    /* 默认 = CARTOON */
+    :root, :root[data-theme="cartoon"] {
+      --hb-scene-bg: #0b1426;
+      --hb-grid: rgb(120, 180, 255);
+      --hb-sphere: #4ecdc4;
+      --hb-sphere-emissive: #1a5550;
+      --hb-arrow: #ffd166;
+      --hb-arrow-zero: #ef476f;
+      --hb-singularity: #ef476f;
+      --hb-singularity-glow: #ff006e;
+      --hb-panel-accent: #ffd166;
+      --hb-wireframe: rgba(78, 205, 196, 0.3);
+      --hb-flow: #74b9ff;
+    }
+    :root[data-theme="academic"] {
+      --hb-scene-bg: #0a0e1a;
+      --hb-grid: rgb(107, 140, 174);
+      --hb-sphere: #6b8cae;
+      --hb-sphere-emissive: #2d3e5a;
+      --hb-arrow: #c4956a;
+      --hb-arrow-zero: #8a7ca8;
+      --hb-singularity: #c0392b;
+      --hb-singularity-glow: #e74c3c;
+      --hb-panel-accent: #6b8cae;
+      --hb-wireframe: rgba(107, 140, 174, 0.2);
+      --hb-flow: #7a8faa;
+    }
+    :root[data-theme="glass"] {
+      --hb-scene-bg: #070b14;
+      --hb-grid: rgb(116, 185, 255);
+      --hb-sphere: #74b9ff;
+      --hb-sphere-emissive: #1a3a5a;
+      --hb-arrow: #55efc4;
+      --hb-arrow-zero: #fd79a8;
+      --hb-singularity: #fd79a8;
+      --hb-singularity-glow: #e84393;
+      --hb-panel-accent: #74b9ff;
+      --hb-wireframe: rgba(116, 185, 255, 0.2);
+      --hb-flow: #a29bfe;
+    }
+    :root[data-theme="cyber"] {
+      --hb-scene-bg: #06010f;
+      --hb-grid: rgb(0, 243, 255);
+      --hb-sphere: #bd00ff;
+      --hb-sphere-emissive: #4a0066;
+      --hb-arrow: #00f3ff;
+      --hb-arrow-zero: #ff00ea;
+      --hb-singularity: #ff00ea;
+      --hb-singularity-glow: #ff00ff;
+      --hb-panel-accent: #bd00ff;
+      --hb-wireframe: rgba(189, 0, 255, 0.25);
+      --hb-flow: #00f3ff;
+    }
+    :root[data-theme="soviet"] {
+      --hb-scene-bg: #160a0a;
+      --hb-grid: rgb(196, 30, 30);
+      --hb-sphere: #c41e1e;
+      --hb-sphere-emissive: #5a0a0a;
+      --hb-arrow: #b8860b;
+      --hb-arrow-zero: #c41e1e;
+      --hb-singularity: #c41e1e;
+      --hb-singularity-glow: #ff3333;
+      --hb-panel-accent: #c41e1e;
+      --hb-wireframe: rgba(196, 30, 30, 0.2);
+      --hb-flow: #d4a017;
+    }
+
+    /* ===== 布局 ===== */
+    body { background-color: var(--bg-color); color: var(--text-color); }
+    .exp-bg { z-index: -1; }
+    #canvas-container { position: fixed; inset: 0; z-index: 0; }
+    canvas { display: block; }
+
+    /* 顶部标题条 */
+    #app-title {
+      position: fixed; top: 62px; left: 50%; transform: translateX(-50%);
+      z-index: 14; pointer-events: none; text-align: center;
+      background: var(--panel-bg); border: var(--border-width) solid var(--panel-border);
+      border-radius: var(--radius); padding: 6px 22px; backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-soft);
+      transition: var(--theme-transition);
+    }
+    #app-title .main { font-size: 0.92rem; font-weight: 700; color: var(--hb-panel-accent); letter-spacing: 2px; }
+    #app-title .sub { display: block; font-size: 0.66rem; color: var(--text-muted); letter-spacing: 1px; margin-top: 1px; }
+
+    /* HUD 遥测覆盖层 */
+    #hud {
+      position: fixed; top: 116px; left: 50%; transform: translateX(-50%);
+      z-index: 13; pointer-events: none; display: flex; gap: 8px;
+      flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 660px);
+    }
+    .hud-chip {
+      background: var(--panel-bg); border: var(--border-width) solid var(--panel-border);
+      border-radius: var(--radius); padding: 6px 14px; backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px); box-shadow: var(--shadow-soft);
+      text-align: center; min-width: 92px; transition: var(--theme-transition);
+    }
+    .hud-chip .label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .hud-chip .value { font-size: 1.1rem; font-weight: 700; color: var(--hb-panel-accent); font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .hud-chip .unit { font-size: 0.6rem; color: var(--text-muted); margin-left: 2px; }
+    #hud-status { font-size: 0.66rem; font-weight: 700; padding: 6px 14px; }
+
+    /* 左侧控制面板 */
+    #left-panel {
+      position: fixed; top: 62px; left: 14px; bottom: 14px;
+      width: 280px; z-index: 11; display: flex; flex-direction: column;
+    }
+    .panel-header {
+      padding: 11px 14px; font-size: 0.88rem; font-weight: 700;
+      color: var(--hb-panel-accent); border-bottom: var(--border-width) solid var(--panel-border);
+      display: flex; align-items: center; gap: 7px; flex-shrink: 0; transition: var(--theme-transition);
+    }
+    .panel-body { padding: 13px 14px; overflow-y: auto; flex: 1; }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+    .section { margin-bottom: 15px; }
+    .section:last-child { margin-bottom: 0; }
+    .section-label { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; transition: var(--theme-transition); }
+
+    .mode-switch { display: flex; gap: 6px; }
+    .mode-switch button { flex: 1; padding: 7px 4px; font-size: 0.8rem; }
+
+    .param-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; font-size: 0.8rem; color: var(--text-muted); transition: var(--theme-transition); }
+    .param-row .pname { flex-shrink: 0; }
+    .param-row .val { color: var(--hb-panel-accent); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+    .param-row input[type="range"] { flex: 1; margin: 0 8px; }
+
+    button {
+      background: var(--panel-bg); color: var(--text-color);
+      border: var(--border-width) solid var(--panel-border); padding: 7px 14px;
+      border-radius: var(--radius); cursor: pointer; transition: var(--theme-transition);
+      font-size: 0.82rem; font-family: inherit; font-weight: 600;
+    }
+    button:hover { border-color: var(--hb-panel-accent); color: var(--hb-panel-accent); }
+    button.active { background: var(--hb-panel-accent) !important; color: #fff !important; border-color: var(--hb-panel-accent) !important; }
+    .action-btn { width: 100%; padding: 9px; margin-top: 4px; }
+    .btn-comb { border-color: var(--hb-arrow); color: var(--hb-arrow); }
+    .btn-comb:hover { background: var(--hb-arrow); color: #111 !important; }
+    .btn-zero { border-color: var(--hb-singularity); color: var(--hb-singularity); }
+    .btn-zero:hover { background: var(--hb-singularity); color: #fff !important; }
+
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.7rem; color: var(--text-muted); margin-top: 6px; }
+    .legend span { display: flex; align-items: center; gap: 4px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+    /* 右侧信息/图表面板 */
+    #right-panel {
+      position: fixed; top: 62px; right: 14px; bottom: 14px;
+      width: 340px; z-index: 11; display: flex; flex-direction: column;
+    }
+    #right-panel .panel-header { color: var(--accent-2); }
+    .knowledge-content { padding: 13px 14px; overflow-y: auto; flex: 1; }
+    .knowledge-content::-webkit-scrollbar { width: 4px; }
+    .knowledge-content::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 2px; }
+
+    .theory-block { margin-bottom: 14px; }
+    .theory-block h4 { font-size: 0.84rem; font-weight: 700; color: var(--text-color); margin-bottom: 5px; transition: var(--theme-transition); }
+    .theory-block p { font-size: 0.76rem; color: var(--text-muted); line-height: 1.62; margin-bottom: 5px; transition: var(--theme-transition); }
+    .formula {
+      display: block; padding: 7px 10px; margin: 6px 0; border-radius: var(--radius);
+      background: var(--panel-border); font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem; color: var(--hb-panel-accent); text-align: center; letter-spacing: 0.5px;
+      transition: var(--theme-transition);
+    }
+    .history-item { font-size: 0.74rem; color: var(--text-muted); line-height: 1.62; padding-left: 14px; position: relative; margin-bottom: 3px; transition: var(--theme-transition); }
+    .history-item::before { content: '•'; position: absolute; left: 2px; color: var(--hb-panel-accent); }
+    .history-item b { color: var(--text-color); font-weight: 600; }
+
+    @media (max-width: 1180px) {
+      #left-panel { width: 248px; }
+      #right-panel { width: 308px; }
+      #hud { max-width: calc(100vw - 600px); }
+    }
+    @media (max-width: 860px) {
+      #left-panel, #right-panel { display: none; }
+      #hud { max-width: 92vw; top: 96px; }
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script src="shared-theme.js?v=20260726"></script>
+</head>
+<body>
+<div class="exp-bg"></div>
+
+<div id="app-title">
+  <span class="main">毛球定理</span>
+  <span class="sub">Hairy Ball Theorem · 球面切向量场必存在奇点</span>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- HUD 遥测 -->
+<div id="hud">
+  <div class="hud-chip" id="hud-status">定理验证中</div>
+  <div class="hud-chip">
+    <div class="label">向量场点数</div>
+    <div class="value" id="val-points">256</div>
+  </div>
+  <div class="hud-chip">
+    <div class="label">奇点数</div>
+    <div class="value" id="val-singularities">2</div>
+  </div>
+  <div class="hud-chip">
+    <div class="label">欧拉示性数</div>
+    <div class="value">χ=2</div>
+  </div>
+</div>
+
+<!-- 左侧控制面板 -->
+<div id="left-panel" class="glass-panel">
+  <div class="panel-header">🌀 向量场控制台</div>
+  <div class="panel-body">
+    <div class="section">
+      <div class="section-label">向量场模式</div>
+      <div class="mode-switch">
+        <button id="btn-dipole" class="active">偶极场</button>
+        <button id="btn-vortex">涡旋场</button>
+        <button id="btn-saddle">鞍点场</button>
+      </div>
+      <div class="mode-switch" style="margin-top:6px;">
+        <button id="btn-random">随机场</button>
+        <button id="btn-comb">尝试梳理</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">球面采样密度</div>
+      <div class="param-row">
+        <span class="pname">向量数</span>
+        <input type="range" id="range-density" min="64" max="1024" step="16" value="256">
+        <span class="val" id="val-density">256</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">向量长度</div>
+      <div class="param-row">
+        <span class="pname">长度</span>
+        <input type="range" id="range-length" min="0.3" max="2.0" step="0.1" value="0.8">
+        <span class="val" id="val-length">0.8</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">动画速度</div>
+      <div class="param-row">
+        <span class="pname">速度</span>
+        <input type="range" id="range-speed" min="0" max="3" step="0.1" value="1.0">
+        <span class="val" id="val-speed">1.0</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">显示选项</div>
+      <div class="param-row">
+        <span class="pname">显示球体</span>
+        <input type="checkbox" id="chk-sphere" checked>
+      </div>
+      <div class="param-row">
+        <span class="pname">高亮奇点</span>
+        <input type="checkbox" id="chk-singularity" checked>
+      </div>
+      <div class="param-row">
+        <span class="pname">流线追踪</span>
+        <input type="checkbox" id="chk-flowlines">
+      </div>
+    </div>
+
+    <div class="section">
+      <button class="action-btn btn-comb" id="btn-auto-comb">🔬 自动寻找奇点</button>
+    </div>
+
+    <div class="section">
+      <div class="section-label">图例</div>
+      <div class="legend">
+        <span><i class="dot" id="lg-arrow"></i>切向量</span>
+        <span><i class="dot" id="lg-zero"></i>零点(奇点)</span>
+        <span><i class="dot" id="lg-sphere"></i>球面</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 右侧信息面板 -->
+<div id="right-panel" class="glass-panel">
+  <div class="panel-header">📖 毛球定理详解</div>
+  <div class="knowledge-content">
+    <div class="theory-block">
+      <h4>定理陈述</h4>
+      <p>毛球定理 (Hairy Ball Theorem) 是代数拓扑中的一个经典结果：<b>在偶数维球面 S²ⁿ 上，不存在处处非零的连续切向量场。</b> 通俗地说，"你不能把一个毛球梳平而不留下旋涡"。</p>
+      <div class="formula">∀ V: S² → TS² 连续, ∃ p ∈ S² 使得 V(p) = 0</div>
+    </div>
+
+    <div class="theory-block">
+      <h4>数学本质</h4>
+      <p>该定理是 <b>Poincaré-Hopf 指标定理</b> 的直接推论。球面 S² 的欧拉示性数 χ(S²) = 2，因此任何切向量场的奇点指标之和必须等于 2。这意味着奇点不可避免——至少存在一个零点。</p>
+      <div class="formula">Σ Index(pᵢ) = χ(S²) = 2</div>
+      <p>奇点可以是源 (index=+1)、汇 (index=+1) 或鞍点 (index=-1)。最常见的偶极场有两个汇/源，各贡献指标 +1，总和为 2。</p>
+    </div>
+
+    <div class="theory-block">
+      <h4>向量场模式说明</h4>
+      <p><b>偶极场</b>：两个奇点分别位于南北极，一个为源(index=+1)，一个为汇(index=+1)，总和=2 ✓</p>
+      <p><b>涡旋场</b>：赤道附近的旋转流，两极各有一个涡旋奇点(index=+1)，总和=2 ✓</p>
+      <p><b>鞍点场</b>：包含鞍点(index=-1)和源/汇的组合，指标总和仍=2 ✓</p>
+      <p><b>尝试梳理</b>：尝试构造无奇点场——但定理保证必然出现零点！</p>
+    </div>
+
+    <div class="theory-block">
+      <h4>历史里程碑</h4>
+      <div class="history-item"><b>1885</b> · 庞加莱 (Poincaré) 建立向量场指标理论的基础</div>
+      <div class="history-item"><b>1911</b> · 布劳威尔 (Brouwer) 证明球面不动点定理，蕴含毛球定理</div>
+      <div class="history-item"><b>1926</b> · 霍普夫 (Hopf) 推广为 Poincaré-Hopf 指标定理</div>
+      <div class="history-item"><b>应用</b> · 气象学(大气环流必有静风点)、磁单极子不存在性、机器人路径规划</div>
+    </div>
+
+    <div class="theory-block">
+      <h4>教学互动提示</h4>
+      <p>• 切换不同向量场模式，观察每种模式的奇点位置和数量</p>
+      <p>• 调节采样密度，理解离散化与连续性的关系</p>
+      <p>• 尝试"梳理"模式——无论如何调整，奇点始终存在</p>
+      <p>• 开启流线追踪，直观看到向量场的全局结构</p>
+      <p>• 奇点数之和恒为偶数(至少1个)，指标和恒为2</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ============================================================
+//  工具函数
+// ============================================================
+function readVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function toRGB(v) {
+  if (!v) return '#888888';
+  return v.replace(/rgba?\(([^)]+)\)/, (m, p) => {
+    const a = p.split(','); return `rgb(${a[0]},${a[1]},${a[2]})`;
+  });
+}
+function hexToInt(hex) {
+  return parseInt(hex.replace('#', ''), 16);
+}
+
+// ============================================================
+//  状态管理
+// ============================================================
+const state = {
+  mode: 'dipole',
+  density: 256,
+  arrowLength: 0.8,
+  animSpeed: 1.0,
+  showSphere: true,
+  showSingularity: true,
+  showFlowLines: false,
+  time: 0,
+  singularities: []
+};
+
+// ============================================================
+//  斐波那契球面采样 — 保证均匀分布
+// ============================================================
+function fibonacciSphere(n) {
+  const points = [];
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / (n - 1)) * 2;
+    const radius = Math.sqrt(1 - y * y);
+    const theta = goldenAngle * i;
+    const x = Math.cos(theta) * radius;
+    const z = Math.sin(theta) * radius;
+    points.push(new THREE.Vector3(x, y, z));
+  }
+  return points;
+}
+
+// ============================================================
+//  向量场定义 — 每种模式返回球面上某点的切向量
+// ============================================================
+function vectorField(point, mode, t) {
+  const { x, y, z } = point;
+  const len = Math.sqrt(x*x + y*y + z*z);
+  if (len < 1e-10) return new THREE.Vector3(0, 0, 0);
+  const p = new THREE.Vector3(x/len, y/len, z/len);
+
+  let v = new THREE.Vector3();
+
+  switch (mode) {
+    case 'dipole': {
+      // 偶极场：从北极流向南极，两极为零点
+      // 使用经线方向 (沿子午线的切向量)
+      const north = new THREE.Vector3(0, 1, 0);
+      v = new THREE.Vector3(0, -1, 0);
+      // 投影到切平面
+      const dot = v.dot(p);
+      v.sub(p.clone().multiplyScalar(dot));
+      break;
+    }
+    case 'vortex': {
+      // 涡旋场：绕Y轴旋转，两极为零点
+      const axis = new THREE.Vector3(0, 1, 0);
+      v = axis.clone().cross(p);
+      break;
+    }
+    case 'saddle': {
+      // 鞍点场：四个鞍点 + 两个源/汇
+      // V = (z, 0, -x) 的变形
+      const phase = t * 0.3;
+      v.x = p.z * Math.cos(phase) - p.x * p.y;
+      v.y = -p.x * p.x + p.z * p.z;
+      v.z = -p.x * Math.cos(phase) - p.y * p.z;
+      // 投影到切平面
+      const dot2 = v.dot(p);
+      v.sub(p.clone().multiplyScalar(dot2));
+      break;
+    }
+    case 'random': {
+      // 伪随机场：基于位置的确定性噪声
+      const seed = Math.sin(p.x * 12.9898 + p.y * 78.233 + p.z * 37.719) * 43758.5453;
+      const seed2 = Math.sin(p.x * 39.346 + p.y * 11.135 + p.z * 93.985) * 24634.3463;
+      const seed3 = Math.sin(p.x * 73.156 + p.y * 52.948 + p.z * 18.473) * 31245.7891;
+      v.x = (seed - Math.floor(seed)) * 2 - 1;
+      v.y = (seed2 - Math.floor(seed2)) * 2 - 1;
+      v.z = (seed3 - Math.floor(seed3)) * 2 - 1;
+      // 投影到切平面
+      const dot3 = v.dot(p);
+      v.sub(p.clone().multiplyScalar(dot3));
+      break;
+    }
+    case 'comb': {
+      // 尝试梳理：尽量平滑的场，但仍然有奇点
+      // 使用 (1-y^2) 的经线场，加上微小扰动
+      const flow = new THREE.Vector3(0, -Math.sqrt(Math.max(0, 1 - p.y * p.y)), 0);
+      const dot4 = flow.dot(p);
+      v = flow.sub(p.clone().multiplyScalar(dot4));
+      // 加上小扰动让奇点明显
+      const perturbStrength = 0.15;
+      v.x += perturbStrength * Math.sin(p.x * 5 + t) * (1 - p.y * p.y);
+      v.z += perturbStrength * Math.cos(p.z * 5 + t) * (1 - p.y * p.y);
+      const dot5 = v.dot(p);
+      v.sub(p.clone().multiplyScalar(dot5));
+      break;
+    }
+  }
+
+  return v;
+}
+
+// ============================================================
+//  3D 场景类
+// ============================================================
+class HairyBallScene {
+  constructor(container) {
+    this.container = container;
+    this.clock = new THREE.Clock();
+    this.arrows = [];
+    this.singularityMarkers = [];
+    this.flowLines = [];
+
+    this.initScene();
+    this.buildSphere();
+    this.buildVectorField();
+    this.setupInteraction();
+    this.applyTheme();
+  }
+
+  initScene() {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(toRGB(readVar('--hb-scene-bg')) || '#0b1426');
+    this.scene.fog = new THREE.Fog(toRGB(readVar('--hb-scene-bg')) || '#0b1426', 15, 40);
+
+    const w = this.container.clientWidth || window.innerWidth;
+    const h = this.container.clientHeight || window.innerHeight;
+    this.camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
+    this.camera.position.set(5, 3, 6);
+
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    this.renderer.setSize(w, h);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.container.appendChild(this.renderer.domElement);
+
+    // 光照
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    this.scene.add(this.ambientLight);
+
+    this.dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    this.dirLight.position.set(5, 8, 5);
+    this.dirLight.castShadow = true;
+    this.dirLight.shadow.mapSize.set(1024, 1024);
+    this.dirLight.shadow.camera.near = 0.5;
+    this.dirLight.shadow.camera.far = 30;
+    this.scene.add(this.dirLight);
+
+    this.fillLight = new THREE.DirectionalLight(0x6080ff, 0.3);
+    this.fillLight.position.set(-5, -3, -5);
+    this.scene.add(this.fillLight);
+
+    // OrbitControls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.08;
+    this.controls.minDistance = 3;
+    this.controls.maxDistance = 15;
+    this.controls.autoRotate = true;
+    this.controls.autoRotateSpeed = 0.6;
+
+    // 地面网格
+    const gridColor = toRGB(readVar('--hb-grid')) || '#334155';
+    this.grid = new THREE.GridHelper(20, 20, gridColor, gridColor);
+    this.grid.position.y = -3;
+    this.grid.material.opacity = 0.15;
+    this.grid.material.transparent = true;
+    this.scene.add(this.grid);
+
+    window.addEventListener('resize', () => this.onResize());
+  }
+
+  onResize() {
+    const w = this.container.clientWidth || window.innerWidth;
+    const h = this.container.clientHeight || window.innerHeight;
+    this.camera.aspect = w / h;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(w, h);
+  }
+
+  // ---------- 球体 ----------
+  buildSphere() {
+    const sphereColor = toRGB(readVar('--hb-sphere')) || '#4ecdc4';
+    const emissiveColor = toRGB(readVar('--hb-sphere-emissive')) || '#1a5550';
+
+    // 主球体
+    const geo = new THREE.SphereGeometry(2, 64, 48);
+    this.sphereMaterial = new THREE.MeshPhongMaterial({
+      color: sphereColor,
+      emissive: emissiveColor,
+      emissiveIntensity: 0.3,
+      shininess: 80,
+      transparent: true,
+      opacity: 0.35,
+      side: THREE.DoubleSide
+    });
+    this.sphere = new THREE.Mesh(geo, this.sphereMaterial);
+    this.sphere.castShadow = true;
+    this.sphere.receiveShadow = true;
+    this.scene.add(this.sphere);
+
+    // 线框
+    const wireGeo = new THREE.SphereGeometry(2.01, 32, 24);
+    this.wireframeMaterial = new THREE.MeshBasicMaterial({
+      color: sphereColor,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.15
+    });
+    this.wireframe = new THREE.Mesh(wireGeo, this.wireframeMaterial);
+    this.scene.add(this.wireframe);
+  }
+
+  // ---------- 向量场 ----------
+  buildVectorField() {
+    this.clearArrows();
+
+    const points = fibonacciSphere(state.density);
+    const arrowColor = toRGB(readVar('--hb-arrow')) || '#ffd166';
+    const zeroColor = toRGB(readVar('--hb-arrow-zero')) || '#ef476f';
+
+    this.samplePoints = points;
+    this.arrowGroup = new THREE.Group();
+    this.scene.add(this.arrowGroup);
+
+    // 使用 InstancedMesh 提高性能
+    const shaftGeo = new THREE.CylinderGeometry(0.015, 0.015, 1, 6);
+    shaftGeo.translate(0, 0.5, 0); // 基点在原点
+    const tipGeo = new THREE.ConeGeometry(0.05, 0.15, 8);
+    tipGeo.translate(0, 1.075, 0);
+
+    this.shaftMaterial = new THREE.MeshBasicMaterial({ color: arrowColor });
+    this.tipMaterial = new THREE.MeshBasicMaterial({ color: arrowColor });
+
+    this.shaftMesh = new THREE.InstancedMesh(shaftGeo, this.shaftMaterial, points.length);
+    this.tipMesh = new THREE.InstancedMesh(tipGeo, this.tipMaterial, points.length);
+    this.arrowGroup.add(this.shaftMesh);
+    this.arrowGroup.add(this.tipMesh);
+
+    // 存储每个点的向量信息
+    this.vectors = [];
+    this.updateVectorField(0);
+  }
+
+  clearArrows() {
+    if (this.arrowGroup) {
+      this.scene.remove(this.arrowGroup);
+      if (this.shaftMesh) { this.shaftMesh.dispose(); this.shaftMesh = null; }
+      if (this.tipMesh) { this.tipMesh.dispose(); this.tipMesh = null; }
+      this.arrowGroup = null;
+    }
+    this.clearSingularityMarkers();
+    this.clearFlowLines();
+  }
+
+  clearSingularityMarkers() {
+    this.singularityMarkers.forEach(m => {
+      this.scene.remove(m);
+      if (m.geometry) m.geometry.dispose();
+      if (m.material) m.material.dispose();
+    });
+    this.singularityMarkers = [];
+  }
+
+  clearFlowLines() {
+    this.flowLines.forEach(l => {
+      this.scene.remove(l);
+      if (l.geometry) l.geometry.dispose();
+      if (l.material) l.material.dispose();
+    });
+    this.flowLines = [];
+  }
+
+  // ---------- 更新向量场 ----------
+  updateVectorField(t) {
+    if (!this.samplePoints) return;
+
+    const arrowColor = new THREE.Color(toRGB(readVar('--hb-arrow')) || '#ffd166');
+    const zeroColor = new THREE.Color(toRGB(readVar('--hb-arrow-zero')) || '#ef476f');
+    const sphereRadius = 2;
+    const baseLength = state.arrowLength;
+
+    const dummy = new THREE.Object3D();
+    const up = new THREE.Vector3(0, 1, 0);
+    const singularityThreshold = 0.05;
+    const singularityColorThreshold = 0.15;
+
+    this.vectors = [];
+    state.singularities = [];
+
+    for (let i = 0; i < this.samplePoints.length; i++) {
+      const p = this.samplePoints[i];
+      const v = vectorField(p, state.mode, t);
+      const vmag = v.length();
+
+      // 检测奇点
+      const isSingularity = vmag < singularityThreshold;
+      if (isSingularity) {
+        state.singularities.push(p.clone());
+      }
+
+      // 归一化并缩放
+      let displayLen;
+      let color;
+      if (vmag < 1e-8) {
+        displayLen = 0.01;
+        color = zeroColor.clone();
+      } else {
+        const dir = v.clone().normalize();
+        // 长度随向量强度变化但有下限
+        const normMag = Math.min(1, vmag * 2);
+        displayLen = baseLength * (0.3 + normMag * 0.7);
+        // 颜色插值：弱→红(零点色), 强→黄(箭头色)
+        if (normMag < singularityColorThreshold) {
+          color = zeroColor.clone();
+        } else {
+          const blendT = Math.min(1, (normMag - singularityColorThreshold) / (1 - singularityColorThreshold));
+          color = zeroColor.clone().lerp(arrowColor, blendT);
+        }
+      }
+
+      const startPos = p.clone().multiplyScalar(sphereRadius);
+      const endPos = startPos.clone().add(v.clone().normalize().multiplyScalar(displayLen || 0.01));
+
+      // 计算旋转：默认箭头沿Y轴，需要旋转到向量方向
+      const dir = endPos.clone().sub(startPos);
+      const dirNorm = dir.clone().normalize();
+      const totalLen = dir.length();
+
+      dummy.position.copy(startPos);
+      if (totalLen > 0.001 && dirNorm.y > 0.999) {
+        dummy.quaternion.set(0, 0, 0, 1);
+      } else if (totalLen > 0.001 && dirNorm.y < -0.999) {
+        dummy.quaternion.set(1, 0, 0, 0);
+      } else if (totalLen > 0.001) {
+        dummy.quaternion.setFromUnitVectors(up, dirNorm);
+      } else {
+        dummy.quaternion.set(0, 0, 0, 1);
+      }
+      dummy.scale.set(1, Math.max(0.01, totalLen), 1);
+      dummy.updateMatrix();
+      this.shaftMesh.setMatrixAt(i, dummy.matrix);
+      this.shaftMesh.setColorAt(i, color);
+
+      // 箭头头部
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+      this.tipMesh.setMatrixAt(i, dummy.matrix);
+      this.tipMesh.setColorAt(i, color);
+
+      this.vectors.push({ point: p.clone(), vector: v.clone(), magnitude: vmag, isSingularity });
+    }
+
+    this.shaftMesh.instanceMatrix.needsUpdate = true;
+    this.tipMesh.instanceMatrix.needsUpdate = true;
+    if (this.shaftMesh.instanceColor) this.shaftMesh.instanceColor.needsUpdate = true;
+    if (this.tipMesh.instanceColor) this.tipMesh.instanceColor.needsUpdate = true;
+
+    // 更新奇点标记
+    this.updateSingularityMarkers();
+
+    // 更新 HUD
+    document.getElementById('val-singularities').textContent = state.singularities.length;
+  }
+
+  // ---------- 奇点标记 ----------
+  updateSingularityMarkers() {
+    this.clearSingularityMarkers();
+
+    if (!state.showSingularity) return;
+
+    const glowColor = toRGB(readVar('--hb-singularity-glow')) || '#ff006e';
+    const singColor = toRGB(readVar('--hb-singularity')) || '#ef476f';
+
+    state.singularities.forEach((pos, idx) => {
+      const sphereRadius = 2;
+      const markerPos = pos.clone().multiplyScalar(sphereRadius);
+
+      // 内核
+      const coreGeo = new THREE.SphereGeometry(0.08, 16, 12);
+      const coreMat = new THREE.MeshBasicMaterial({ color: singColor });
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      core.position.copy(markerPos);
+      this.scene.add(core);
+      this.singularityMarkers.push(core);
+
+      // 外发光球
+      const glowGeo = new THREE.SphereGeometry(0.18, 16, 12);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: glowColor,
+        transparent: true,
+        opacity: 0.4,
+        depthWrite: false
+      });
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      glow.position.copy(markerPos);
+      this.scene.add(glow);
+      this.singularityMarkers.push(glow);
+
+      // 脉冲环
+      const ringGeo = new THREE.RingGeometry(0.2, 0.25, 32);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: glowColor,
+        transparent: true,
+        opacity: 0.6,
+        side: THREE.DoubleSide,
+        depthWrite: false
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.copy(markerPos);
+      ring.lookAt(this.camera.position);
+      ring.userData.isRing = true;
+      ring.userData.basePos = markerPos.clone();
+      this.scene.add(ring);
+      this.singularityMarkers.push(ring);
+    });
+  }
+
+  // ---------- 流线追踪 ----------
+  buildFlowLines() {
+    this.clearFlowLines();
+    if (!state.showFlowLines) return;
+
+    const flowColor = toRGB(readVar('--hb-flow')) || '#74b9ff';
+    const sphereRadius = 2;
+    const numLines = 24;
+    const steps = 40;
+    const dt = 0.05;
+
+    for (let i = 0; i < numLines; i++) {
+      // 随机起始点
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      let pos = new THREE.Vector3(
+        Math.sin(phi) * Math.cos(theta),
+        Math.cos(phi),
+        Math.sin(phi) * Math.sin(theta)
+      );
+
+      const linePoints = [pos.clone().multiplyScalar(sphereRadius)];
+      for (let s = 0; s < steps; s++) {
+        const v = vectorField(pos, state.mode, state.time);
+        const vmag = v.length();
+        if (vmag < 0.01) break;
+        pos = pos.add(v.normalize().multiplyScalar(dt));
+        pos.normalize(); // 保持球面上
+        linePoints.push(pos.clone().multiplyScalar(sphereRadius));
+      }
+
+      if (linePoints.length < 2) continue;
+
+      const geo = new THREE.BufferGeometry().setFromPoints(linePoints);
+      const mat = new THREE.LineBasicMaterial({
+        color: flowColor,
+        transparent: true,
+        opacity: 0.5,
+        linewidth: 1
+      });
+      const line = new THREE.Line(geo, mat);
+      this.scene.add(line);
+      this.flowLines.push(line);
+    }
+  }
+
+  // ---------- 交互 ----------
+  setupInteraction() {
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+    this.renderer.domElement.addEventListener('click', (e) => {
+      // 点击暂停自动旋转
+      this.controls.autoRotate = !this.controls.autoRotate;
+    });
+  }
+
+  // ---------- 主题适配 ----------
+  applyTheme() {
+    const bgColor = toRGB(readVar('--hb-scene-bg')) || '#0b1426';
+    this.scene.background = new THREE.Color(bgColor);
+    this.scene.fog.color = new THREE.Color(bgColor);
+
+    const gridColor = toRGB(readVar('--hb-grid')) || '#334155';
+    this.grid.material.color = new THREE.Color(gridColor);
+
+    const sphereColor = toRGB(readVar('--hb-sphere')) || '#4ecdc4';
+    const emissiveColor = toRGB(readVar('--hb-sphere-emissive')) || '#1a5550';
+    this.sphereMaterial.color = new THREE.Color(sphereColor);
+    this.sphereMaterial.emissive = new THREE.Color(emissiveColor);
+    this.wireframeMaterial.color = new THREE.Color(sphereColor);
+
+    // 更新图例颜色
+    const lgArrow = document.getElementById('lg-arrow');
+    const lgZero = document.getElementById('lg-zero');
+    const lgSphere = document.getElementById('lg-sphere');
+    if (lgArrow) lgArrow.style.background = toRGB(readVar('--hb-arrow')) || '#ffd166';
+    if (lgZero) lgZero.style.background = toRGB(readVar('--hb-arrow-zero')) || '#ef476f';
+    if (lgSphere) lgSphere.style.background = sphereColor;
+
+    // 重建向量场以更新颜色
+    if (this.samplePoints) {
+      this.shaftMaterial = new THREE.MeshBasicMaterial({ color: toRGB(readVar('--hb-arrow')) || '#ffd166' });
+      this.tipMaterial = new THREE.MeshBasicMaterial({ color: toRGB(readVar('--hb-arrow')) || '#ffd166' });
+      this.shaftMesh.material = this.shaftMaterial;
+      this.tipMesh.material = this.tipMaterial;
+      this.updateVectorField(state.time);
+    }
+
+    // 重建流线
+    if (state.showFlowLines) this.buildFlowLines();
+  }
+
+  // ---------- 渲染循环 ----------
+  update(dt) {
+    state.time += dt * state.animSpeed;
+
+    // 更新向量场
+    this.updateVectorField(state.time);
+
+    // 更新奇点环朝向相机并脉冲
+    this.singularityMarkers.forEach(m => {
+      if (m.userData.isRing) {
+        m.lookAt(this.camera.position);
+        const pulse = 1 + Math.sin(state.time * 4) * 0.3;
+        m.scale.setScalar(pulse);
+        m.material.opacity = 0.3 + Math.sin(state.time * 4) * 0.3;
+      }
+    });
+
+    // 流线（每隔一段时间重建）
+    if (state.showFlowLines && Math.floor(state.time * 2) !== this._lastFlowUpdate) {
+      this._lastFlowUpdate = Math.floor(state.time * 2);
+      this.buildFlowLines();
+    }
+
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+
+// ============================================================
+//  初始化与主循环
+// ============================================================
+let scene3D = null;
+let lastTime = performance.now();
+
+function animate(currentTime) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+  lastTime = currentTime;
+  if (scene3D) scene3D.update(dt);
+}
+
+window.addEventListener('load', () => {
+  scene3D = new HairyBallScene(document.getElementById('canvas-container'));
+  requestAnimationFrame(animate);
+
+  // 监听主题变化
+  const themeObserver = new MutationObserver(() => {
+    if (scene3D) scene3D.applyTheme();
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+});
+
+// ============================================================
+//  UI 事件绑定
+// ============================================================
+function bindUI() {
+  // 模式切换
+  const modes = ['dipole', 'vortex', 'saddle', 'random', 'comb'];
+  modes.forEach(m => {
+    const btn = document.getElementById('btn-' + m);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        state.mode = m;
+        modes.forEach(m2 => {
+          const b = document.getElementById('btn-' + m2);
+          if (b) b.classList.remove('active');
+        });
+        btn.classList.add('active');
+
+        const statusEl = document.getElementById('hud-status');
+        if (m === 'comb') {
+          statusEl.textContent = '定理验证：必有奇点';
+          statusEl.style.color = '';
+        } else if (m === 'random') {
+          statusEl.textContent = '随机场：多奇点';
+        } else {
+          statusEl.textContent = '定理验证中';
+        }
+
+        if (scene3D && scene3D.samplePoints) {
+          scene3D.updateVectorField(state.time);
+          if (state.showFlowLines) scene3D.buildFlowLines();
+        }
+      });
+    }
+  });
+
+  // 密度滑块
+  const rangeDensity = document.getElementById('range-density');
+  const valDensity = document.getElementById('val-density');
+  const valPoints = document.getElementById('val-points');
+  if (rangeDensity) {
+    rangeDensity.addEventListener('input', (e) => {
+      state.density = parseInt(e.target.value);
+      valDensity.textContent = state.density;
+      valPoints.textContent = state.density;
+      if (scene3D) {
+        scene3D.buildVectorField();
+        if (state.showFlowLines) scene3D.buildFlowLines();
+      }
+    });
+  }
+
+  // 长度滑块
+  const rangeLength = document.getElementById('range-length');
+  const valLength = document.getElementById('val-length');
+  if (rangeLength) {
+    rangeLength.addEventListener('input', (e) => {
+      state.arrowLength = parseFloat(e.target.value);
+      valLength.textContent = state.arrowLength.toFixed(1);
+    });
+  }
+
+  // 速度滑块
+  const rangeSpeed = document.getElementById('range-speed');
+  const valSpeed = document.getElementById('val-speed');
+  if (rangeSpeed) {
+    rangeSpeed.addEventListener('input', (e) => {
+      state.animSpeed = parseFloat(e.target.value);
+      valSpeed.textContent = state.animSpeed.toFixed(1);
+    });
+  }
+
+  // 复选框
+  const chkSphere = document.getElementById('chk-sphere');
+  if (chkSphere) {
+    chkSphere.addEventListener('change', (e) => {
+      state.showSphere = e.target.checked;
+      if (scene3D && scene3D.sphere) {
+        scene3D.sphere.visible = state.showSphere;
+        scene3D.wireframe.visible = state.showSphere;
+      }
+    });
+  }
+
+  const chkSingularity = document.getElementById('chk-singularity');
+  if (chkSingularity) {
+    chkSingularity.addEventListener('change', (e) => {
+      state.showSingularity = e.target.checked;
+      if (scene3D) scene3D.updateSingularityMarkers();
+    });
+  }
+
+  const chkFlowLines = document.getElementById('chk-flowlines');
+  if (chkFlowLines) {
+    chkFlowLines.addEventListener('change', (e) => {
+      state.showFlowLines = e.target.checked;
+      if (scene3D) {
+        if (state.showFlowLines) scene3D.buildFlowLines();
+        else scene3D.clearFlowLines();
+      }
+    });
+  }
+
+  // 自动寻找奇点按钮
+  const btnAutoComb = document.getElementById('btn-auto-comb');
+  if (btnAutoComb) {
+    btnAutoComb.addEventListener('click', () => {
+      // 逐个切换模式，高亮奇点
+      const modes = ['dipole', 'vortex', 'saddle', 'random', 'comb'];
+      let idx = 0;
+      const cycle = () => {
+        if (idx >= modes.length) {
+          idx = 0;
+        }
+        const m = modes[idx];
+        const btn = document.getElementById('btn-' + m);
+        if (btn) btn.click();
+        idx++;
+        setTimeout(cycle, 2500);
+      };
+      cycle();
+    });
+  }
+}
+
+// 绑定UI（在DOM加载后）
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bindUI);
+} else {
+  bindUI();
+}
+</script>
+</body>
+</html>
