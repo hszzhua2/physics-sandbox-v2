@@ -214,8 +214,8 @@
 <div id="hud">
   <div class="hud-chip" id="hud-status">定理验证中</div>
   <div class="hud-chip">
-    <div class="label">向量场点数</div>
-    <div class="value" id="val-points">256</div>
+    <div class="label">毛发点数</div>
+    <div class="value" id="val-points">512</div>
   </div>
   <div class="hud-chip">
     <div class="label">奇点数</div>
@@ -229,7 +229,7 @@
 
 <!-- 左侧控制面板 -->
 <div id="left-panel" class="glass-panel">
-  <div class="panel-header">🌀 向量场控制台</div>
+  <div class="panel-header">🌀 毛球控制台</div>
   <div class="panel-body">
     <div class="section">
       <div class="section-label">向量场模式</div>
@@ -245,16 +245,16 @@
     </div>
 
     <div class="section">
-      <div class="section-label">球面采样密度</div>
+      <div class="section-label">毛球密度</div>
       <div class="param-row">
-        <span class="pname">向量数</span>
-        <input type="range" id="range-density" min="64" max="1024" step="16" value="256">
-        <span class="val" id="val-density">256</span>
+        <span class="pname">毛发数</span>
+        <input type="range" id="range-density" min="128" max="2048" step="32" value="512">
+        <span class="val" id="val-density">512</span>
       </div>
     </div>
 
     <div class="section">
-      <div class="section-label">向量长度</div>
+      <div class="section-label">毛发长度</div>
       <div class="param-row">
         <span class="pname">长度</span>
         <input type="range" id="range-length" min="0.3" max="2.0" step="0.1" value="0.8">
@@ -371,7 +371,7 @@ function hexToInt(hex) {
 // ============================================================
 const state = {
   mode: 'dipole',
-  density: 256,
+  density: 512,
   arrowLength: 0.8,
   animSpeed: 1.0,
   showSphere: true,
@@ -468,6 +468,55 @@ function vectorField(point, mode, t) {
   }
 
   return v;
+}
+
+// ============================================================
+//  毛发几何体 — 细长锥形 + 微弯曲，模拟真实毛发
+// ============================================================
+function createHairGeometry() {
+  const segments = 5;       // 沿长度方向的分段
+  const radialSegs = 4;     // 截面边数（4 = 最少三角形，性能优先）
+  const baseRadius = 0.007; // 根部半径
+  const tipRadius = 0.0004; // 尖端半径（几乎为零）
+  const height = 1;
+  const bendStrength = 0.15;// 微弯曲强度，增加自然感
+
+  const positions = [];
+  const indices = [];
+
+  for (let s = 0; s <= segments; s++) {
+    const t = s / segments;
+    const y = t * height;
+    // 非线性锥化：根部粗，中段细，尖端极细
+    const r = baseRadius * Math.pow(1 - t, 1.8) + tipRadius;
+    // 沿 X 方向微弯，sin 曲线让弯曲更自然
+    const bend = bendStrength * Math.sin(t * Math.PI * 0.5);
+
+    for (let rr = 0; rr <= radialSegs; rr++) {
+      const angle = (rr / radialSegs) * Math.PI * 2;
+      positions.push(
+        Math.cos(angle) * r + bend,
+        y,
+        Math.sin(angle) * r
+      );
+    }
+  }
+
+  for (let s = 0; s < segments; s++) {
+    for (let rr = 0; rr < radialSegs; rr++) {
+      const a = s * (radialSegs + 1) + rr;
+      const b = a + 1;
+      const c = a + (radialSegs + 1);
+      const d = c + 1;
+      indices.push(a, c, b, b, c, d);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setIndex(indices);
+  geo.computeVertexNormals();
+  return geo;
 }
 
 // ============================================================
@@ -582,31 +631,42 @@ class HairyBallScene {
     this.scene.add(this.wireframe);
   }
 
-  // ---------- 向量场 ----------
+  // ---------- 毛发场 ----------
   buildVectorField() {
     this.clearArrows();
 
     const points = fibonacciSphere(state.density);
-    const arrowColor = toRGB(readVar('--hb-arrow')) || '#ffd166';
-    const zeroColor = toRGB(readVar('--hb-arrow-zero')) || '#ef476f';
+    const hairColor = toRGB(readVar('--hb-arrow')) || '#ffd166';
 
     this.samplePoints = points;
     this.arrowGroup = new THREE.Group();
     this.scene.add(this.arrowGroup);
 
-    // 使用 InstancedMesh 提高性能
-    const shaftGeo = new THREE.CylinderGeometry(0.015, 0.015, 1, 6);
-    shaftGeo.translate(0, 0.5, 0); // 基点在原点
-    const tipGeo = new THREE.ConeGeometry(0.05, 0.15, 8);
-    tipGeo.translate(0, 1.075, 0);
+    // 使用自定义毛发几何体 — 细长锥形 + 微弯曲
+    const hairGeo = createHairGeometry();
 
-    this.shaftMaterial = new THREE.MeshBasicMaterial({ color: arrowColor });
-    this.tipMaterial = new THREE.MeshBasicMaterial({ color: arrowColor });
+    // MeshStandardMaterial 提供更好的光照效果，模拟毛发的漫反射
+    this.hairMaterial = new THREE.MeshStandardMaterial({
+      color: hairColor,
+      roughness: 0.65,
+      metalness: 0.0,
+      flatShading: false
+    });
 
-    this.shaftMesh = new THREE.InstancedMesh(shaftGeo, this.shaftMaterial, points.length);
-    this.tipMesh = new THREE.InstancedMesh(tipGeo, this.tipMaterial, points.length);
-    this.arrowGroup.add(this.shaftMesh);
-    this.arrowGroup.add(this.tipMesh);
+    this.hairMesh = new THREE.InstancedMesh(hairGeo, this.hairMaterial, points.length);
+    this.hairMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.arrowGroup.add(this.hairMesh);
+
+    // 存储每个点的随机偏移（让毛发更自然）
+    this.hairRandom = [];
+    for (let i = 0; i < points.length; i++) {
+      this.hairRandom.push({
+        lengthMul: 0.85 + Math.random() * 0.3,   // 长度随机变化 ±15%
+        bendRot: Math.random() * Math.PI * 2,     // 弯曲方向随机
+        tiltX: (Math.random() - 0.5) * 0.15,      // 轻微倾斜
+        tiltZ: (Math.random() - 0.5) * 0.15
+      });
+    }
 
     // 存储每个点的向量信息
     this.vectors = [];
@@ -616,8 +676,7 @@ class HairyBallScene {
   clearArrows() {
     if (this.arrowGroup) {
       this.scene.remove(this.arrowGroup);
-      if (this.shaftMesh) { this.shaftMesh.dispose(); this.shaftMesh = null; }
-      if (this.tipMesh) { this.tipMesh.dispose(); this.tipMesh = null; }
+      if (this.hairMesh) { this.hairMesh.dispose(); this.hairMesh = null; }
       this.arrowGroup = null;
     }
     this.clearSingularityMarkers();
@@ -642,11 +701,11 @@ class HairyBallScene {
     this.flowLines = [];
   }
 
-  // ---------- 更新向量场 ----------
+  // ---------- 更新毛发场 ----------
   updateVectorField(t) {
-    if (!this.samplePoints) return;
+    if (!this.samplePoints || !this.hairMesh) return;
 
-    const arrowColor = new THREE.Color(toRGB(readVar('--hb-arrow')) || '#ffd166');
+    const hairColor = new THREE.Color(toRGB(readVar('--hb-arrow')) || '#ffd166');
     const zeroColor = new THREE.Color(toRGB(readVar('--hb-arrow-zero')) || '#ef476f');
     const sphereRadius = 2;
     const baseLength = state.arrowLength;
@@ -656,6 +715,11 @@ class HairyBallScene {
     const singularityThreshold = 0.05;
     const singularityColorThreshold = 0.15;
 
+    // 用于弯曲方向旋转的临时四元数
+    const bendQuat = new THREE.Quaternion();
+    const tiltQuat = new THREE.Quaternion();
+    const tmpEuler = new THREE.Euler();
+
     this.vectors = [];
     state.singularities = [];
 
@@ -663,6 +727,7 @@ class HairyBallScene {
       const p = this.samplePoints[i];
       const v = vectorField(p, state.mode, t);
       const vmag = v.length();
+      const rnd = this.hairRandom[i] || { lengthMul: 1, bendRot: 0, tiltX: 0, tiltZ: 0 };
 
       // 检测奇点
       const isSingularity = vmag < singularityThreshold;
@@ -678,27 +743,29 @@ class HairyBallScene {
         color = zeroColor.clone();
       } else {
         const dir = v.clone().normalize();
-        // 长度随向量强度变化但有下限
+        // 长度随向量强度变化但有下限，加上随机变化
         const normMag = Math.min(1, vmag * 2);
-        displayLen = baseLength * (0.3 + normMag * 0.7);
-        // 颜色插值：弱→红(零点色), 强→黄(箭头色)
+        displayLen = baseLength * (0.3 + normMag * 0.7) * rnd.lengthMul;
+        // 颜色插值：弱→红(零点色), 强→毛发色
         if (normMag < singularityColorThreshold) {
           color = zeroColor.clone();
         } else {
           const blendT = Math.min(1, (normMag - singularityColorThreshold) / (1 - singularityColorThreshold));
-          color = zeroColor.clone().lerp(arrowColor, blendT);
+          color = zeroColor.clone().lerp(hairColor, blendT);
         }
       }
 
       const startPos = p.clone().multiplyScalar(sphereRadius);
       const endPos = startPos.clone().add(v.clone().normalize().multiplyScalar(displayLen || 0.01));
 
-      // 计算旋转：默认箭头沿Y轴，需要旋转到向量方向
+      // 计算旋转：默认毛发沿Y轴，需要旋转到向量方向
       const dir = endPos.clone().sub(startPos);
       const dirNorm = dir.clone().normalize();
       const totalLen = dir.length();
 
       dummy.position.copy(startPos);
+
+      // 基础朝向旋转
       if (totalLen > 0.001 && dirNorm.y > 0.999) {
         dummy.quaternion.set(0, 0, 0, 1);
       } else if (totalLen > 0.001 && dirNorm.y < -0.999) {
@@ -708,24 +775,26 @@ class HairyBallScene {
       } else {
         dummy.quaternion.set(0, 0, 0, 1);
       }
+
+      // 叠加弯曲方向旋转（绕毛发自身轴线旋转，让弯曲朝向随机方向）
+      bendQuat.setFromAxisAngle(dirNorm, rnd.bendRot);
+      dummy.quaternion.premultiply(bendQuat);
+
+      // 轻微倾斜，增加自然感
+      tmpEuler.set(rnd.tiltX, 0, rnd.tiltZ, 'XYZ');
+      tiltQuat.setFromEuler(tmpEuler);
+      dummy.quaternion.multiply(tiltQuat);
+
       dummy.scale.set(1, Math.max(0.01, totalLen), 1);
       dummy.updateMatrix();
-      this.shaftMesh.setMatrixAt(i, dummy.matrix);
-      this.shaftMesh.setColorAt(i, color);
-
-      // 箭头头部
-      dummy.scale.set(1, 1, 1);
-      dummy.updateMatrix();
-      this.tipMesh.setMatrixAt(i, dummy.matrix);
-      this.tipMesh.setColorAt(i, color);
+      this.hairMesh.setMatrixAt(i, dummy.matrix);
+      this.hairMesh.setColorAt(i, color);
 
       this.vectors.push({ point: p.clone(), vector: v.clone(), magnitude: vmag, isSingularity });
     }
 
-    this.shaftMesh.instanceMatrix.needsUpdate = true;
-    this.tipMesh.instanceMatrix.needsUpdate = true;
-    if (this.shaftMesh.instanceColor) this.shaftMesh.instanceColor.needsUpdate = true;
-    if (this.tipMesh.instanceColor) this.tipMesh.instanceColor.needsUpdate = true;
+    this.hairMesh.instanceMatrix.needsUpdate = true;
+    if (this.hairMesh.instanceColor) this.hairMesh.instanceColor.needsUpdate = true;
 
     // 更新奇点标记
     this.updateSingularityMarkers();
@@ -866,12 +935,14 @@ class HairyBallScene {
     if (lgZero) lgZero.style.background = toRGB(readVar('--hb-arrow-zero')) || '#ef476f';
     if (lgSphere) lgSphere.style.background = sphereColor;
 
-    // 重建向量场以更新颜色
+    // 重建毛发场以更新颜色
     if (this.samplePoints) {
-      this.shaftMaterial = new THREE.MeshBasicMaterial({ color: toRGB(readVar('--hb-arrow')) || '#ffd166' });
-      this.tipMaterial = new THREE.MeshBasicMaterial({ color: toRGB(readVar('--hb-arrow')) || '#ffd166' });
-      this.shaftMesh.material = this.shaftMaterial;
-      this.tipMesh.material = this.tipMaterial;
+      this.hairMaterial = new THREE.MeshStandardMaterial({
+        color: toRGB(readVar('--hb-arrow')) || '#ffd166',
+        roughness: 0.65,
+        metalness: 0.0
+      });
+      this.hairMesh.material = this.hairMaterial;
       this.updateVectorField(state.time);
     }
 
