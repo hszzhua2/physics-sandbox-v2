@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>卡拉比-丘流形 - 物理沙盒宇宙</title>
-    <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+    <link rel="stylesheet" href="shared-theme.css?v=20260727">
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; font-family: 'Segoe UI','Microsoft YaHei',system-ui,sans-serif; }
         canvas { display: block; }
@@ -108,10 +108,17 @@
         [data-theme="academic"] #knowledge-panel .kp-header .ic { background: rgba(107,140,174,.12); }
         [data-theme="academic"] #knowledge-panel .kp-header h2 { color: var(--accent-1); }
         [data-theme="soviet"] .k-section h3 { color: var(--accent-1); }
-        [data-theme="soviet"] #cy-ui .lp-header .ic { background: rgba(196,30,30,.1); }
+        [data-theme="soviet"] #cy-ui .lp-header .ic { background: rgba(205, 32, 39,.1); }
         [data-theme="soviet"] #cy-ui .lp-header h1 { color: var(--accent-1); }
-        [data-theme="soviet"] #knowledge-panel .kp-header .ic { background: rgba(196,30,30,.1); }
+        [data-theme="soviet"] #knowledge-panel .kp-header .ic { background: rgba(205, 32, 39,.1); }
         [data-theme="soviet"] #knowledge-panel .kp-header h2 { color: var(--accent-1); }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] .k-section h3 { color: var(--accent-1); }
+    [data-theme="ins"] #cy-ui .lp-header .ic { background: rgba(255, 107, 157,.1); }
+    [data-theme="ins"] #cy-ui .lp-header h1 { color: var(--accent-1); }
+    [data-theme="ins"] #knowledge-panel .kp-header .ic { background: rgba(255, 107, 157,.1); }
+    [data-theme="ins"] #knowledge-panel .kp-header h2 { color: var(--accent-1); }
+
 
         @media (max-width: 900px) { #knowledge-panel { display: none; } #cy-ui { width: calc(100vw - 40px); max-width: 340px; } }
         @media (max-width: 600px) { #cy-ui { top: auto; bottom: 80px; left: 15px; right: 15px; width: auto; max-width: none; } .stats-top { font-size: .65rem; gap: 8px; padding: 3px 12px; } }
@@ -232,7 +239,7 @@
         <div id="morph-label">滚轮或点击切换形态 · SU(5) 经典投影</div>
     </div>
 
-    <script src="shared-theme.js?v=20260724b"></script>
+    <script src="shared-theme.js?v=20260727"></script>
     <script type="importmap">
     {
         "imports": {

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>伊辛模型 — Ising Model | 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     :root {
       --is-bg: #0f172a; --is-bg2: #1e293b; --is-panel: rgba(30,41,59,0.85);
@@ -41,12 +41,21 @@
       --is-spin-up: #ff00ea; --is-spin-down: #00f3ff;
     }
     [data-theme="soviet"] {
-      --is-bg: #f0ebe4; --is-bg2: #fffaf2; --is-panel: #fffaf2;
-      --is-border: #d4c4a8; --is-text: #1a1a1a; --is-text2: #6a5a4a;
-      --is-accent: #c41e1e; --is-accent2: #5b7a8a; --is-accent3: #b8860b;
+      --is-bg: #e0ddc5; --is-bg2: #ffffff; --is-panel: #ffffff;
+      --is-border: #8a8070; --is-text: #1a1a1a; --is-text2: #4a4a4a;
+      --is-accent: #cd2027; --is-accent2: #5b7a8a; --is-accent3: #cd2027;
       --is-grid-bg: #eae5de; --is-bar-bg: rgba(0,0,0,0.04);
-      --is-spin-up: #c41e1e; --is-spin-down: #5b7a8a;
+      --is-spin-up: #cd2027; --is-spin-down: #5b7a8a;
     }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+      --is-bg: #1a0820; --is-bg2: rgba(255,255,255,0.15); --is-panel: rgba(255,255,255,0.15);
+      --is-border: #9a8aaa; --is-text: #ffffff; --is-text2: rgba(255,255,255,0.75);
+      --is-accent: #ff6b9d; --is-accent2: #5b7a8a; --is-accent3: #ff6b9d;
+      --is-grid-bg: #eae5de; --is-bar-bg: rgba(0,0,0,0.04);
+      --is-spin-up: #ff6b9d; --is-spin-down: #5b7a8a;
+    }
+
 
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -197,7 +206,7 @@
   </style>
 </head>
 <body>
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
 
   <div class="top-bar">
     <div>

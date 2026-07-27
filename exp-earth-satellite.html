@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -10,7 +10,7 @@
 <link href="https://cdn.jsdelivr.net/npm/cesium@1.120/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/cesium@1.120/Build/Cesium/Cesium.js"></script>
 
-<link rel="stylesheet" href="shared-theme.css?v=20260724b">
+<link rel="stylesheet" href="shared-theme.css?v=20260727">
 
 <style>
 /* ===== THEME VARIABLES (--es- prefix) ===== */
@@ -58,12 +58,22 @@
 /* Soviet */
 [data-theme="soviet"]{
   --es-bg:#f0ead6;--es-bg2:#fffbe9;--es-ink:#2a1a0a;--es-ink2:#5c3d1e;--es-muted:#8a7a5a;
-  --es-rule:rgba(42,26,10,0.12);--es-accent:#c41e1e;--es-accent2:#b8860b;
-  --es-canvas-bg:#e8e0c8;--es-param-bg:rgba(196,30,30,0.04);--es-param-border:rgba(42,26,10,0.10);
+  --es-rule:rgba(42,26,10,0.12);--es-accent:#cd2027;--es-accent2:#cd2027;
+  --es-canvas-bg:#e8e0c8;--es-param-bg:rgba(205, 32, 39,0.04);--es-param-border:rgba(42,26,10,0.10);
   --es-data-bg:rgba(42,26,10,0.03);--es-data-border:rgba(42,26,10,0.08);
-  --es-formula-bg:rgba(196,30,30,0.05);--es-formula-border:rgba(196,30,30,0.20);
+  --es-formula-bg:rgba(205, 32, 39,0.05);--es-formula-border:rgba(205, 32, 39,0.20);
   --es-highlight:#2e7d32;--es-warn:#e65100;--es-danger:#b71c1c;
 }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"]{
+  --es-bg:#f0ead6;--es-bg2:#fffbe9;--es-ink:#2a1a3a;--es-ink2:#5c3d1e;--es-muted:#8a7a5a;
+  --es-rule:rgba(42,26,10,0.12);--es-accent:#ff6b9d;--es-accent2:#ff6b9d;
+  --es-canvas-bg:#e8e0c8;--es-param-bg:rgba(255, 107, 157,0.04);--es-param-border:rgba(42,26,10,0.10);
+  --es-data-bg:rgba(42,26,10,0.03);--es-data-border:rgba(42,26,10,0.08);
+  --es-formula-bg:rgba(255, 107, 157,0.05);--es-formula-border:rgba(255, 107, 157,0.20);
+  --es-highlight:#2e7d32;--es-warn:#e65100;--es-danger:#b71c1c;
+}
+
 
 /* ===== RESET & BASE ===== */
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -684,7 +694,7 @@ body{
   </div>
 </div>
 
-<script src="shared-theme.js?v=20260724b"></script>
+<script src="shared-theme.js?v=20260727"></script>
 <script>
 /* ========================================================================
    EARTH SATELLITE EXPERIMENT — Complete Logic

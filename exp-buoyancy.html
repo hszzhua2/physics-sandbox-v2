@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>浮力 — 阿基米德原理 | 物理沙盒宇宙</title>
-<link rel="stylesheet" href="shared-theme.css?v=20260724b">
+<link rel="stylesheet" href="shared-theme.css?v=20260727">
 <style>
 /* ================================================================
    THEME VARIABLES — 五种主题适配 (--bu- prefix for buoyancy)
@@ -60,14 +60,14 @@
 
 /* ---------- SOVIET (Soviet Industrial) ---------- */
 [data-theme="soviet"]{
-  --bu-bg:#f0ebe4;--bu-bg2:#e8e0d8;--bu-ink:#1a1a1a;--bu-ink2:#3d3d3d;--bu-muted:#6a5a4a;
-  --bu-rule:rgba(196,30,30,0.15);--bu-accent:#c41e1e;--bu-accent2:#8b4513;--bu-accent3:#b8860b;--bu-accent4:#556b2f;
-  --bu-canvas-bg:#faf6f0;--bu-param-bg:#f4f0ea;--bu-param-border:#d4c4a8;
-  --bu-data-bg:#f4f0ea;--bu-data-border:#d4c4a8;
-  --bu-formula-bg:rgba(196,30,30,0.04);--bu-formula-border:rgba(196,30,30,0.15);
-  --bu-card-bg:#fffaf2;--bu-card-border:#d4c4a8;
-  --bu-highlight:#556b2f;--bu-warn:#b8860b;--bu-danger:#c41e1e;
-  --bu-scrollbar-thumb:#c41e1e;--bu-glow:none;
+  --bu-bg:#e0ddc5;--bu-bg2:#e8e0d8;--bu-ink:#1a1a1a;--bu-ink2:#3d3d3d;--bu-muted:#4a4a4a;
+  --bu-rule:rgba(205, 32, 39,0.15);--bu-accent:#cd2027;--bu-accent2:#1a1a1a;--bu-accent3:#cd2027;--bu-accent4:#556b2f;
+  --bu-canvas-bg:#e8e4d8;--bu-param-bg:#e8e4d8;--bu-param-border:#8a8070;
+  --bu-data-bg:#e8e4d8;--bu-data-border:#8a8070;
+  --bu-formula-bg:rgba(205, 32, 39,0.04);--bu-formula-border:rgba(205, 32, 39,0.15);
+  --bu-card-bg:#ffffff;--bu-card-border:#8a8070;
+  --bu-highlight:#556b2f;--bu-warn:#cd2027;--bu-danger:#cd2027;
+  --bu-scrollbar-thumb:#cd2027;--bu-glow:none;
 }
 
 /* ================================================================
@@ -96,7 +96,7 @@ body{font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;background:va
 
 [data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
 [data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
-[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="soviet"] .left-panel{background:#ffffff;border-right:2px solid #cd2027}
 [data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
 [data-theme="cartoon"] .lp-header h1{color:var(--bu-accent)}
 [data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
@@ -118,7 +118,7 @@ body{font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;background:va
 
 [data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
 [data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
-[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #cd2027;color:#4a4a4a}
 
 /* ---------- RIGHT PANEL (380px) ---------- */
 .right-panel{width:380px;min-width:340px;border-left:1px solid var(--bu-rule);background:var(--bu-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
@@ -129,7 +129,7 @@ body{font-family:'Segoe UI','Microsoft YaHei',system-ui,sans-serif;background:va
 
 [data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
 [data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
-[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="soviet"] .right-panel{background:#ffffff;border-left:2px solid #cd2027}
 [data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
 [data-theme="cartoon"] .rp-header h2{color:var(--bu-accent2)}
 [data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
@@ -162,8 +162,8 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
 [data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
 [data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
 [data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
-[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
-[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#8a8070}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#cd2027;box-shadow:none}
 
 /* ---------- Button Group (Liquid Type / Shape Toggle) ---------- */
 .btn-group{display:flex;gap:6px}
@@ -173,8 +173,8 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
 
 [data-theme="academic"] .btn-toggle{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
 [data-theme="academic"] .btn-toggle.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
-[data-theme="soviet"] .btn-toggle{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
-[data-theme="soviet"] .btn-toggle.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+[data-theme="soviet"] .btn-toggle{background:#e8e4d8;border-color:#8a8070;color:#4a4a4a;border-radius:2px}
+[data-theme="soviet"] .btn-toggle.active{border-color:#cd2027;color:#cd2027;background:#ffffff}
 [data-theme="cyber"] .btn-toggle.active{border-color:#00f3ff;color:#00f3ff;background:rgba(0,243,255,0.08);text-shadow:var(--bu-glow)}
 
 /* ---------- Tip Card ---------- */
@@ -183,7 +183,7 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
 .tip-card p strong{color:var(--bu-ink)}
 
 [data-theme="academic"] .tip-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
-[data-theme="soviet"] .tip-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .tip-card{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
 
 /* ================================================================
    DATA GRID (Right Panel)
@@ -199,7 +199,7 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
 .data-direction{font-family:monospace;font-size:1.0rem;font-weight:700;line-height:1.2;transition:color .4s ease}
 
 [data-theme="academic"] .data-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
-[data-theme="soviet"] .data-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .data-card{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
 
 /* ================================================================
    FORMULA BLOCK (Right Panel)
@@ -216,8 +216,8 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
 
 [data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
 [data-theme="academic"] .formula-expr{color:#4a6a8a}
-[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
-[data-theme="soviet"] .formula-expr{color:#8b4513}
+[data-theme="soviet"] .formula-block{background:#ffffff;border-color:#8a8070;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#1a1a1a}
 
 /* ================================================================
    KNOWLEDGE CARDS (Right Panel)
@@ -230,8 +230,36 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
 
 [data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
 [data-theme="academic"] .info-card h3{color:var(--bu-accent)}
-[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
 [data-theme="soviet"] .info-card h3{color:var(--bu-accent)}
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"]{
+  --bu-bg:#1a0820;--bu-bg2:#2a1830;--bu-ink:#ffffff;--bu-ink2:rgba(255,255,255,0.6);--bu-muted:rgba(255,255,255,0.75);
+  --bu-rule:rgba(255, 107, 157,0.15);--bu-accent:#ff6b9d;--bu-accent2:#c44fd1;--bu-accent3:#ff6b9d;--bu-accent4:#c44fd1;
+  --bu-canvas-bg:#2a1830;--bu-param-bg:#2a1830;--bu-param-border:#9a8aaa;
+  --bu-data-bg:#2a1830;--bu-data-border:#9a8aaa;
+  --bu-formula-bg:rgba(255, 107, 157,0.04);--bu-formula-border:rgba(255, 107, 157,0.15);
+  --bu-card-bg:rgba(255,255,255,0.15);--bu-card-border:#9a8aaa;
+  --bu-highlight:#c44fd1;--bu-warn:#ff6b9d;--bu-danger:#ff6b9d;
+  --bu-scrollbar-thumb:#ff6b9d;--bu-glow:none;
+}
+    [data-theme="ins"] ::-webkit-scrollbar-thumb{border-radius:24px}
+    [data-theme="ins"] .left-panel{background:rgba(255,255,255,0.15);border-right:2px solid #ff6b9d}
+    [data-theme="ins"] .lp-header h1{color:var(--bu-accent)}
+    [data-theme="ins"] .overlay-badge{background:rgba(255, 255, 255,0.9);border:1px solid #ff6b9d;color:rgba(255,255,255,0.75)}
+    [data-theme="ins"] .right-panel{background:rgba(255,255,255,0.15);border-left:2px solid #ff6b9d}
+    [data-theme="ins"] .rp-header h2{color:var(--bu-accent)}
+    [data-theme="ins"] input[type="range"]{height:4px;border-radius:0;background:#9a8aaa}
+    [data-theme="ins"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#ff6b9d;box-shadow:none}
+    [data-theme="ins"] .btn-toggle{background:#2a1830;border-color:#9a8aaa;color:rgba(255,255,255,0.75);border-radius:2px}
+    [data-theme="ins"] .btn-toggle.active{border-color:#ff6b9d;color:#ff6b9d;background:rgba(255,255,255,0.15)}
+    [data-theme="ins"] .tip-card{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .data-card{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .formula-block{background:rgba(255,255,255,0.15);border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .formula-expr{color:#ff6b9d}
+    [data-theme="ins"] .info-card{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .info-card h3{color:var(--bu-accent)}
+
 [data-theme="cartoon"] .info-card h3{color:var(--bu-accent)}
 [data-theme="cyber"] .info-card h3{color:var(--bu-accent);text-shadow:var(--bu-glow)}
 
@@ -418,7 +446,7 @@ input[type="range"]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;b
 }
 </script>
 
-<script src="shared-theme.js?v=20260724b"></script>
+<script src="shared-theme.js?v=20260727"></script>
 
 <!-- ================================================================
      MAIN MODULE — Three.js + Physics
@@ -1238,6 +1266,10 @@ function updateSceneForTheme(theme) {
     case 'soviet':
       bgColor = new THREE.Color(0x2a2218);
       renderer.toneMappingExposure = 0.6;
+      break;
+    case 'ins':
+      bgColor = new THREE.Color(0x1a0820);
+      renderer.toneMappingExposure = 0.5;
       break;
     case 'academic':
     default:

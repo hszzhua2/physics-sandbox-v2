@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>忒伊亚撞击模拟 · SPH × Three.js</title>
-<link rel="stylesheet" href="shared-theme.css?v=20260724b">
+<link rel="stylesheet" href="shared-theme.css?v=20260727">
 
 <style>
 /* ========== Theia Impact CSS Variables (--ti-*) ========== */
@@ -89,20 +89,37 @@
 }
 
 [data-theme="soviet"] {
-  --ti-bg: #f0ebe4;
-  --ti-scene-bg: #f0ebe4;
-  --ti-panel-bg: #fffaf2;
-  --ti-panel-border: #c41e1e;
+  --ti-bg: #e0ddc5;
+  --ti-scene-bg: #e0ddc5;
+  --ti-panel-bg: #ffffff;
+  --ti-panel-border: #cd2027;
   --ti-text: #1a1a1a;
-  --ti-text-muted: #6a5a4a;
-  --ti-accent: #c41e1e;
-  --ti-accent-2: #8b4513;
+  --ti-text-muted: #4a4a4a;
+  --ti-accent: #cd2027;
+  --ti-accent-2: #1a1a1a;
   --ti-slider-track: rgba(0,0,0,0.12);
   --ti-radius: 2px;
   --ti-border-width: 2px;
   --ti-backdrop: none;
   --ti-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+  --ti-bg: #1a0820;
+  --ti-scene-bg: #1a0820;
+  --ti-panel-bg: rgba(255,255,255,0.15);
+  --ti-panel-border: #ff6b9d;
+  --ti-text: #ffffff;
+  --ti-text-muted: rgba(255,255,255,0.75);
+  --ti-accent: #ff6b9d;
+  --ti-accent-2: #1a0820;
+  --ti-slider-track: rgba(0,0,0,0.12);
+  --ti-radius: 2px;
+  --ti-border-width: 2px;
+  --ti-backdrop: none;
+  --ti-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1475,6 +1492,6 @@ setTimeout(() => { applyThemeToScene(); }, 100);
 animate();
 </script>
 
-<script src="shared-theme.js?v=20260724b"></script>
+<script src="shared-theme.js?v=20260727"></script>
 </body>
 </html>

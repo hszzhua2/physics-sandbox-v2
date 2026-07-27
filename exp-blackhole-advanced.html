@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>黑洞吸积盘（高级模式）— 物理沙盒宇宙</title>
-    <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+    <link rel="stylesheet" href="shared-theme.css?v=20260727">
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; }
         #info {
@@ -74,10 +74,16 @@
         [data-theme="cyber"] #controls { background: rgba(10,0,20,0.9); border: 1px solid rgba(189,0,255,0.3); color: #f0e6ff; box-shadow: 0 0 20px rgba(189,0,255,0.1); }
         [data-theme="cyber"] #controls button { background: rgba(0,0,0,0.5); color: #f0e6ff; border-color: rgba(189,0,255,0.4); }
         [data-theme="cyber"] #controls button.active { background: rgba(189,0,255,0.3); border-color: #bd00ff; color: #fff; text-shadow: 0 0 6px rgba(189,0,255,0.5); }
-        [data-theme="soviet"] #speedControl { background: #fffaf2; border: 2px solid #c41e1e; color: #1a1a1a; box-shadow: none; backdrop-filter: none; }
-        [data-theme="soviet"] #controls { background: #fffaf2; border: 2px solid #c41e1e; color: #1a1a1a; box-shadow: none; backdrop-filter: none; }
-        [data-theme="soviet"] #controls button { background: #f4f0ea; color: #1a1a1a; border-color: #d4c4a8; }
-        [data-theme="soviet"] #controls button.active { background: #c41e1e; border-color: #c41e1e; color: #fff; }
+        [data-theme="soviet"] #speedControl { background: #ffffff; border: 2px solid #cd2027; color: #1a1a1a; box-shadow: none; backdrop-filter: none; }
+        [data-theme="soviet"] #controls { background: #ffffff; border: 2px solid #cd2027; color: #1a1a1a; box-shadow: none; backdrop-filter: none; }
+        [data-theme="soviet"] #controls button { background: #e8e4d8; color: #1a1a1a; border-color: #8a8070; }
+        [data-theme="soviet"] #controls button.active { background: #cd2027; border-color: #cd2027; color: #fff; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] #speedControl { background: rgba(255,255,255,0.15); border: 2px solid #ff6b9d; color: #1a0820; box-shadow: none; backdrop-filter: none; }
+    [data-theme="ins"] #controls { background: rgba(255,255,255,0.15); border: 2px solid #ff6b9d; color: #1a0820; box-shadow: none; backdrop-filter: none; }
+    [data-theme="ins"] #controls button { background: #2a1830; color: #1a0820; border-color: #9a8aaa; }
+    [data-theme="ins"] #controls button.active { background: #ff6b9d; border-color: #ff6b9d; color: #fff; }
+
     </style>
 </head>
 <body>
@@ -98,7 +104,7 @@
         <button id="btnLensing">引力透镜模式</button>
     </div>
 
-    <script src="shared-theme.js?v=20260724b"></script>
+    <script src="shared-theme.js?v=20260727"></script>
     <script type="importmap">
         {
             "imports": {

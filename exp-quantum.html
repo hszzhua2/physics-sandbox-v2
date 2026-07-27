@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>量子双缝干涉 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
   <style>
@@ -61,18 +61,33 @@
     [data-theme="cyber"] .q-switch-thumb { background: #bd00ff; box-shadow: 0 0 10px rgba(189,0,255,0.8); }
 
     [data-theme="soviet"] body { background: var(--bg-color); color: var(--text-color); }
-    [data-theme="soviet"] .q-panel { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; }
+    [data-theme="soviet"] .q-panel { background: #ffffff; border: 2px solid #cd2027; border-radius: 2px; box-shadow: none; }
     [data-theme="soviet"] .q-text { color: #1a1a1a; }
-    [data-theme="soviet"] .q-muted { color: #6a5a4a; }
-    [data-theme="soviet"] .q-accent { color: #c41e1e; }
-    [data-theme="soviet"] .q-btn-primary { background: #f4f0ea; color: #c41e1e; border: 2px solid #c41e1e; border-radius: 2px; text-shadow: none; }
-    [data-theme="soviet"] .q-btn-secondary { background: #f4f0ea; color: #6a5a4a; border: 1px solid #d4c4a8; border-radius: 2px; }
-    [data-theme="soviet"] .q-canvas-bg { background: #f0ebe4; border: 2px solid #d4c4a8; box-shadow: none; }
-    [data-theme="soviet"] .q-switch-bg { background: #d4c4a8; }
-    [data-theme="soviet"] .q-switch-thumb { background: #c41e1e; box-shadow: none; }
-    [data-theme="soviet"] input[type="range"] { background: #d4c4a8; }
-    [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb { background: #c41e1e; }
-    [data-theme="soviet"] .grid-bg { background-image: linear-gradient(rgba(196,30,30,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(196,30,30,0.08) 1px, transparent 1px); }
+    [data-theme="soviet"] .q-muted { color: #4a4a4a; }
+    [data-theme="soviet"] .q-accent { color: #cd2027; }
+    [data-theme="soviet"] .q-btn-primary { background: #e8e4d8; color: #cd2027; border: 2px solid #cd2027; border-radius: 2px; text-shadow: none; }
+    [data-theme="soviet"] .q-btn-secondary { background: #e8e4d8; color: #4a4a4a; border: 1px solid #8a8070; border-radius: 2px; }
+    [data-theme="soviet"] .q-canvas-bg { background: #e0ddc5; border: 2px solid #8a8070; box-shadow: none; }
+    [data-theme="soviet"] .q-switch-bg { background: #8a8070; }
+    [data-theme="soviet"] .q-switch-thumb { background: #cd2027; box-shadow: none; }
+    [data-theme="soviet"] input[type="range"] { background: #8a8070; }
+    [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb { background: #cd2027; }
+    [data-theme="soviet"] .grid-bg { background-image: linear-gradient(rgba(205, 32, 39,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(205, 32, 39,0.08) 1px, transparent 1px); }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] body { background: var(--bg-color); color: var(--text-color); }
+    [data-theme="ins"] .q-panel { background: rgba(255,255,255,0.15); border: 2px solid #ff6b9d; border-radius: 2px; box-shadow: none; }
+    [data-theme="ins"] .q-text { color: #1a0820; }
+    [data-theme="ins"] .q-muted { color: rgba(255,255,255,0.75); }
+    [data-theme="ins"] .q-accent { color: #ff6b9d; }
+    [data-theme="ins"] .q-btn-primary { background: #2a1830; color: #ff6b9d; border: 2px solid #ff6b9d; border-radius: 2px; text-shadow: none; }
+    [data-theme="ins"] .q-btn-secondary { background: #2a1830; color: rgba(255,255,255,0.75); border: 1px solid #9a8aaa; border-radius: 2px; }
+    [data-theme="ins"] .q-canvas-bg { background: #1a0820; border: 2px solid #9a8aaa; box-shadow: none; }
+    [data-theme="ins"] .q-switch-bg { background: #9a8aaa; }
+    [data-theme="ins"] .q-switch-thumb { background: #ff6b9d; box-shadow: none; }
+    [data-theme="ins"] input[type="range"] { background: #9a8aaa; }
+    [data-theme="ins"] input[type="range"]::-webkit-slider-thumb { background: #ff6b9d; }
+    [data-theme="ins"] .grid-bg { background-image: linear-gradient(rgba(255, 107, 157,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 107, 157,0.08) 1px, transparent 1px); }
+
 
     .q-panel { transition: all 0.4s ease; padding: 1.25rem; }
     .q-text, .q-muted, .q-accent { transition: color 0.4s ease; }
@@ -203,7 +218,7 @@
     <p>量子实验室 | 波粒二象性与双缝干涉实验可视化</p>
   </footer>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     PSUTheme.createSwitcher();
     const canvas = document.getElementById('simCanvas');
@@ -273,9 +288,9 @@
 
     function drawScene() {
       const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
-      ctx.fillStyle = theme === 'cartoon' ? 'rgba(255,255,255,0.2)' : (theme === 'glass' ? 'rgba(15,17,23,0.2)' : (theme === 'soviet' ? 'rgba(240,235,228,0.2)' : 'rgba(2, 6, 23, 0.2)'));
+      ctx.fillStyle = theme === 'cartoon' ? 'rgba(255,255,255,0.2)' : (theme === 'glass' ? 'rgba(15,17,23,0.2)' : (theme === 'soviet' ? 'rgba(240,235,228,0.2)' : (theme === 'ins' ? 'rgba(26,8,32,0.2)' : 'rgba(2, 6, 23, 0.2)')));
       ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = theme === 'cartoon' ? '#bbb' : (theme === 'soviet' ? '#8b7d6b' : '#475569');
+      ctx.fillStyle = theme === 'cartoon' ? '#bbb' : (theme === 'soviet' ? '#8b7d6b' : (theme === 'ins' ? '#9a8aaa' : '#475569'));
       if (isDoubleSlit) {
         ctx.fillRect(wallX, 0, 5, height/2 - slitGap/2 - slitWidth/2);
         ctx.fillRect(wallX, height/2 - slitGap/2 + slitWidth/2, 5, slitGap - slitWidth);
@@ -284,7 +299,7 @@
         ctx.fillRect(wallX, 0, 5, height/2 - slitWidth/2);
         ctx.fillRect(wallX, height/2 + slitWidth/2, 5, height);
       }
-      ctx.strokeStyle = theme === 'cartoon' ? '#ccc' : (theme === 'soviet' ? '#a89880' : '#94a3b8');
+      ctx.strokeStyle = theme === 'cartoon' ? '#ccc' : (theme === 'soviet' ? '#a89880' : (theme === 'ins' ? '#c9b8d9' : '#94a3b8'));
       ctx.beginPath(); ctx.moveTo(screenX, 0); ctx.lineTo(screenX, height); ctx.stroke();
       ctx.fillStyle = isObserverOn ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.5)';
       ctx.beginPath();
@@ -303,7 +318,7 @@
     function drawIntensityGraph() {
       const graphWidth = intensityCanvas.width, graphHeight = intensityCanvas.height;
       const theme = document.documentElement.getAttribute('data-theme') || 'cyber';
-      intensityCtx.fillStyle = theme === 'cartoon' ? '#f5f5f5' : (theme === 'glass' ? '#0f172a' : (theme === 'soviet' ? '#f0ebe4' : '#0f172a'));
+      intensityCtx.fillStyle = theme === 'cartoon' ? '#f5f5f5' : (theme === 'glass' ? '#0f172a' : (theme === 'soviet' ? '#e0ddc5' : (theme === 'ins' ? '#1a0820' : '#0f172a')));
       intensityCtx.fillRect(0, 0, graphWidth, graphHeight);
       intensityCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)'; intensityCtx.lineWidth = 1;
       for (let y = 0; y <= graphHeight; y += 30) { intensityCtx.beginPath(); intensityCtx.moveTo(0, y); intensityCtx.lineTo(graphWidth, y); intensityCtx.stroke(); }

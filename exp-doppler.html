@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>多普勒效应 — 物理沙盒宇宙</title>
-<link rel="stylesheet" href="shared-theme.css?v=20260724b">
+<link rel="stylesheet" href="shared-theme.css?v=20260727">
 <style>
 /* ================================================================
    THEME VARIABLES - 五种主题适配
@@ -36,17 +36,17 @@
   --d-source:#ffb800;--d-observer:#39ff14;--d-shock:rgba(255,0,0,0.8);
 }
 [data-theme="soviet"]{
-  --d-bg:#f0ebe4;--d-bg2:#e8e0d6;--d-surface:#fffaf2;--d-surface-hover:#f4f0ea;
-  --d-ink:#1a1a1a;--d-ink2:#3d3d3d;--d-muted:#6a5a4a;--d-rule:#d4c4a8;
-  --d-accent:#c41e1e;--d-accent2:#8b4513;--d-accent3:#a0522d;--d-accent4:#cd853f;
-  --d-card-bg:#fffaf2;--d-card-border:#c41e1e;
+  --d-bg:#e0ddc5;--d-bg2:#e8e0d6;--d-surface:#ffffff;--d-surface-hover:#e8e4d8;
+  --d-ink:#1a1a1a;--d-ink2:#3d3d3d;--d-muted:#4a4a4a;--d-rule:#8a8070;
+  --d-accent:#cd2027;--d-accent2:#1a1a1a;--d-accent3:#cd2027;--d-accent4:#8b6914;
+  --d-card-bg:#ffffff;--d-card-border:#cd2027;
   --d-card-shadow:none;--d-glow:none;
-  --d-canvas-bg:#e8e0d6;--d-param-bg:#f4f0ea;--d-param-border:#d4c4a8;
-  --d-output-bg:#f4f0ea;--d-output-border:#d4c4a8;
-  --d-formula-bg:rgba(196,30,30,0.04);--d-formula-border:rgba(196,30,30,0.2);
-  --d-scrollbar-thumb:#c41e1e;
-  --d-wave-front:rgba(196,30,30,0.5);--d-wave-back:rgba(139,69,19,0.4);
-  --d-source:#c41e1e;--d-observer:#556b2f;--d-shock:rgba(196,30,30,0.8);
+  --d-canvas-bg:#e8e0d6;--d-param-bg:#e8e4d8;--d-param-border:#8a8070;
+  --d-output-bg:#e8e4d8;--d-output-border:#8a8070;
+  --d-formula-bg:rgba(205, 32, 39,0.04);--d-formula-border:rgba(205, 32, 39,0.2);
+  --d-scrollbar-thumb:#cd2027;
+  --d-wave-front:rgba(205, 32, 39,0.5);--d-wave-back:rgba(26,26,26,0.4);
+  --d-source:#cd2027;--d-observer:#556b2f;--d-shock:rgba(205, 32, 39,0.8);
 }
 [data-theme="cartoon"]{
   --d-bg:#fef6e4;--d-bg2:#fff8f0;--d-surface:rgba(255,255,255,0.7);--d-surface-hover:rgba(255,255,255,0.9);
@@ -72,7 +72,7 @@
   --d-formula-bg:rgba(107,140,174,0.04);--d-formula-border:rgba(107,140,174,0.2);
   --d-scrollbar-thumb:#d0d0d0;
   --d-wave-front:rgba(107,140,174,0.5);--d-wave-back:rgba(138,124,168,0.4);
-  --d-source:#c4956a;--d-observer:#6a9e8a;--d-shock:rgba(196,30,30,0.6);
+  --d-source:#c4956a;--d-observer:#6a9e8a;--d-shock:rgba(205, 32, 39,0.6);
 }
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -95,7 +95,7 @@ body{font-family:var(--font-main);background:var(--d-bg);color:var(--d-ink);line
 
 [data-theme="academic"] .left-panel{background:#fff;border-right:1px solid #e0e0e0}
 [data-theme="cartoon"] .left-panel{background:rgba(255,248,240,0.9);border-right:2px solid rgba(0,0,0,0.06)}
-[data-theme="soviet"] .left-panel{background:#fffaf2;border-right:2px solid #c41e1e}
+[data-theme="soviet"] .left-panel{background:#ffffff;border-right:2px solid #cd2027}
 [data-theme="cartoon"] .lp-header .lp-icon{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.15)}
 [data-theme="cartoon"] .lp-header h1{color:var(--d-accent)}
 [data-theme="cyber"] .lp-header .lp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
@@ -114,7 +114,7 @@ body{font-family:var(--font-main);background:var(--d-bg);color:var(--d-ink);line
 
 [data-theme="academic"] .overlay-badge{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;color:#7a7a8a}
 [data-theme="cartoon"] .overlay-badge{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1)}
-[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #c41e1e;color:#6a5a4a}
+[data-theme="soviet"] .overlay-badge{background:rgba(255,250,242,0.9);border:1px solid #cd2027;color:#4a4a4a}
 
 /* ===== 右侧输出+知识面板 ===== */
 .right-panel{width:380px;min-width:340px;border-left:1px solid var(--d-rule);background:var(--d-bg2);overflow-y:auto;display:flex;flex-direction:column;transition:background-color .5s ease,border-color .4s ease}
@@ -125,7 +125,7 @@ body{font-family:var(--font-main);background:var(--d-bg);color:var(--d-ink);line
 
 [data-theme="academic"] .right-panel{background:#fff;border-left:1px solid #e0e0e0}
 [data-theme="cartoon"] .right-panel{background:rgba(255,248,240,0.9);border-left:2px solid rgba(0,0,0,0.06)}
-[data-theme="soviet"] .right-panel{background:#fffaf2;border-left:2px solid #c41e1e}
+[data-theme="soviet"] .right-panel{background:#ffffff;border-left:2px solid #cd2027}
 [data-theme="cartoon"] .rp-header .rp-icon{background:rgba(78,205,196,0.12);border-color:rgba(78,205,196,0.15)}
 [data-theme="cartoon"] .rp-header h2{color:var(--d-accent2)}
 [data-theme="cyber"] .rp-header .rp-icon{background:rgba(189,0,255,0.15);border-color:rgba(0,243,255,0.2)}
@@ -151,8 +151,8 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 [data-theme="academic"] input[type="range"]{height:3px;border-radius:0;background:#e0e0e0}
 [data-theme="academic"] input[type="range"]::-webkit-slider-thumb{width:14px;height:14px;border-radius:0;background:#1a1a2e;box-shadow:none}
 [data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb{background:#ff6b6b;box-shadow:0 2px 8px rgba(255,107,107,0.4)}
-[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#d4c4a8}
-[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#c41e1e;box-shadow:none}
+[data-theme="soviet"] input[type="range"]{height:4px;border-radius:0;background:#8a8070}
+[data-theme="soviet"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#cd2027;box-shadow:none}
 
 .param-presets{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
 .preset-btn{padding:4px 10px;border:1px solid var(--d-param-border);background:var(--d-param-bg);color:var(--d-muted);border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;font-family:var(--font-main);transition:all .3s ease}
@@ -160,8 +160,8 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 
 [data-theme="academic"] .preset-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
 [data-theme="academic"] .preset-btn:hover{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
-[data-theme="soviet"] .preset-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
-[data-theme="soviet"] .preset-btn:hover{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+[data-theme="soviet"] .preset-btn{background:#e8e4d8;border-color:#8a8070;color:#4a4a4a;border-radius:2px}
+[data-theme="soviet"] .preset-btn:hover{border-color:#cd2027;color:#cd2027;background:#ffffff}
 
 /* ===== 模式按钮 ===== */
 .mode-indicator{display:flex;gap:6px}
@@ -170,8 +170,8 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 
 [data-theme="academic"] .mode-btn{background:#f4f5f7;border-color:#e0e0e0;color:#666;border-radius:4px}
 [data-theme="academic"] .mode-btn.active{border-color:#6b8cae;color:#1a1a2e;background:#e8ecf1}
-[data-theme="soviet"] .mode-btn{background:#f4f0ea;border-color:#d4c4a8;color:#6a5a4a;border-radius:2px}
-[data-theme="soviet"] .mode-btn.active{border-color:#c41e1e;color:#c41e1e;background:#fffaf2}
+[data-theme="soviet"] .mode-btn{background:#e8e4d8;border-color:#8a8070;color:#4a4a4a;border-radius:2px}
+[data-theme="soviet"] .mode-btn.active{border-color:#cd2027;color:#cd2027;background:#ffffff}
 
 /* ===== 控制按钮 ===== */
 .sim-btn{padding:8px 20px;border:1px solid var(--d-rule);background:rgba(0,0,0,0.4);color:var(--d-ink);border-radius:10px;font-family:var(--font-main);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s ease;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
@@ -182,8 +182,8 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 
 [data-theme="academic"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid #e0e0e0;border-radius:4px;color:#1a1a2e}
 [data-theme="academic"] .sim-btn.primary{background:#6b8cae;border-color:#6b8cae;color:#fff}
-[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #d4c4a8;border-radius:2px}
-[data-theme="soviet"] .sim-btn.primary{background:#c41e1e;border-color:#c41e1e;color:#fff}
+[data-theme="soviet"] .sim-btn{background:rgba(255,250,242,0.8);border:1px solid #8a8070;border-radius:2px}
+[data-theme="soviet"] .sim-btn.primary{background:#cd2027;border-color:#cd2027;color:#fff}
 [data-theme="cartoon"] .sim-btn{background:rgba(255,255,255,0.8);border:1px solid rgba(0,0,0,0.1)}
 [data-theme="cartoon"] .sim-btn.primary{background:#ff6b6b;border-color:#ff6b6b;color:#fff}
 
@@ -195,7 +195,7 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 .output-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--d-muted);margin-top:2px}
 
 [data-theme="academic"] .output-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
-[data-theme="soviet"] .output-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .output-card{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
 
 /* ===== 频率显示条 ===== */
 .freq-bar-container{background:var(--d-output-bg);border:1px solid var(--d-output-border);border-radius:12px;padding:14px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
@@ -208,7 +208,7 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 .freq-comparison{display:flex;justify-content:space-between;font-family:monospace;font-size:0.68rem;color:var(--d-muted);margin-top:6px}
 
 [data-theme="academic"] .freq-bar-container{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
-[data-theme="soviet"] .freq-bar-container{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .freq-bar-container{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
 
 /* ===== 知识卡片 ===== */
 .info-card{background:var(--d-output-bg);border:1px solid var(--d-output-border);border-radius:12px;padding:14px 16px;margin-bottom:12px;transition:background-color .5s ease,border-color .4s ease}
@@ -220,7 +220,7 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 
 [data-theme="academic"] .info-card{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
 [data-theme="academic"] .info-card h3{color:var(--d-accent)}
-[data-theme="soviet"] .info-card{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .info-card{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
 [data-theme="soviet"] .info-card h3{color:var(--d-accent)}
 [data-theme="cartoon"] .info-card h3{color:var(--d-accent)}
 [data-theme="cyber"] .info-card h3{color:var(--d-accent);text-shadow:var(--d-glow)}
@@ -236,8 +236,8 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 
 [data-theme="academic"] .formula-block{background:#f8f9fa;border-color:#e0e0e0;border-radius:4px}
 [data-theme="academic"] .formula-expr{color:#4a6a8a}
-[data-theme="soviet"] .formula-block{background:#fffaf2;border-color:#d4c4a8;border-radius:2px}
-[data-theme="soviet"] .formula-expr{color:#8b4513}
+[data-theme="soviet"] .formula-block{background:#ffffff;border-color:#8a8070;border-radius:2px}
+[data-theme="soviet"] .formula-expr{color:#1a1a1a}
 
 /* ===== 时间线 ===== */
 .timeline{position:relative;padding-left:18px}
@@ -256,7 +256,7 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 .bio-box .bio-desc{font-size:0.7rem;color:var(--d-muted);margin-top:2px;line-height:1.5}
 
 [data-theme="academic"] .bio-box{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
-[data-theme="soviet"] .bio-box{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .bio-box{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
 
 /* ===== 马赫锥指示器 ===== */
 .mach-indicator{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--d-output-bg);border:1px solid var(--d-output-border);margin-bottom:12px;transition:all .4s ease}
@@ -267,7 +267,44 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
 .mach-value{font-family:monospace;font-size:0.82rem;font-weight:700;color:var(--d-accent);margin-left:auto}
 
 [data-theme="academic"] .mach-indicator{background:#f4f5f7;border-color:#e0e0e0;border-radius:4px}
-[data-theme="soviet"] .mach-indicator{background:#f4f0ea;border-color:#d4c4a8;border-radius:2px}
+[data-theme="soviet"] .mach-indicator{background:#e8e4d8;border-color:#8a8070;border-radius:2px}
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"]{
+  --d-bg:#1a0820;--d-bg2:#2a1830;--d-surface:rgba(255,255,255,0.15);--d-surface-hover:#2a1830;
+  --d-ink:#ffffff;--d-ink2:rgba(255,255,255,0.6);--d-muted:rgba(255,255,255,0.75);--d-rule:#9a8aaa;
+  --d-accent:#ff6b9d;--d-accent2:#c44fd1;--d-accent3:#f7931e;--d-accent4:#ffd200;
+  --d-card-bg:rgba(255,255,255,0.15);--d-card-border:#ff6b9d;
+  --d-card-shadow:none;--d-glow:none;
+  --d-canvas-bg:#2a1830;--d-param-bg:#2a1830;--d-param-border:#9a8aaa;
+  --d-output-bg:#2a1830;--d-output-border:#9a8aaa;
+  --d-formula-bg:rgba(255, 107, 157,0.04);--d-formula-border:rgba(255, 107, 157,0.2);
+  --d-scrollbar-thumb:#ff6b9d;
+  --d-wave-front:rgba(255, 107, 157,0.5);--d-wave-back:rgba(196,79,209,0.4);
+  --d-source:#ff6b9d;--d-observer:#c44fd1;--d-shock:rgba(255, 107, 157,0.8);
+}
+    [data-theme="ins"] ::-webkit-scrollbar-thumb{border-radius:0}
+    [data-theme="ins"] .left-panel{background:rgba(255,255,255,0.15);border-right:2px solid #ff6b9d}
+    [data-theme="ins"] .lp-header h1{color:var(--d-accent)}
+    [data-theme="ins"] .overlay-badge{background:rgba(255, 255, 255,0.9);border:1px solid #ff6b9d;color:rgba(255,255,255,0.75)}
+    [data-theme="ins"] .right-panel{background:rgba(255,255,255,0.15);border-left:2px solid #ff6b9d}
+    [data-theme="ins"] .rp-header h2{color:var(--d-accent)}
+    [data-theme="ins"] input[type="range"]{height:4px;border-radius:0;background:#9a8aaa}
+    [data-theme="ins"] input[type="range"]::-webkit-slider-thumb{width:16px;height:16px;border-radius:0;background:#ff6b9d;box-shadow:none}
+    [data-theme="ins"] .preset-btn{background:#2a1830;border-color:#9a8aaa;color:rgba(255,255,255,0.75);border-radius:2px}
+    [data-theme="ins"] .preset-btn:hover{border-color:#ff6b9d;color:#ff6b9d;background:rgba(255,255,255,0.15)}
+    [data-theme="ins"] .mode-btn{background:#2a1830;border-color:#9a8aaa;color:rgba(255,255,255,0.75);border-radius:2px}
+    [data-theme="ins"] .mode-btn.active{border-color:#ff6b9d;color:#ff6b9d;background:rgba(255,255,255,0.15)}
+    [data-theme="ins"] .sim-btn{background:rgba(255, 255, 255,0.8);border:1px solid #9a8aaa;border-radius:2px}
+    [data-theme="ins"] .sim-btn.primary{background:#ff6b9d;border-color:#ff6b9d;color:#fff}
+    [data-theme="ins"] .output-card{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .freq-bar-container{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .info-card{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .info-card h3{color:var(--d-accent)}
+    [data-theme="ins"] .formula-block{background:rgba(255,255,255,0.15);border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .formula-expr{color:#ff6b9d}
+    [data-theme="ins"] .bio-box{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+    [data-theme="ins"] .mach-indicator{background:#2a1830;border-color:#9a8aaa;border-radius:2px}
+
 
 /* ===== 响应式 ===== */
 @media(max-width:1100px){
@@ -514,7 +551,7 @@ input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.15)}
   </aside>
 </div>
 
-<script src="shared-theme.js?v=20260724b"></script>
+<script src="shared-theme.js?v=20260727"></script>
 <script>
 (function(){
 'use strict';
@@ -603,7 +640,8 @@ function getThemeColors(){
     'glass': { bg:'#040410', waveFront:'116,185,255', waveBack:'253,121,168', source:'#fbbf24', observer:'#34d399', text:'#cbd5e1', muted:'#64748b', grid:'255,255,255', shock:'255,80,80' },
     'cyber': { bg:'#020208', waveFront:'0,243,255', waveBack:'255,0,234', source:'#ffb800', observer:'#39ff14', text:'#b2ebf2', muted:'#4dd0e1', grid:'0,243,255', shock:'255,0,0' },
     'cartoon': { bg:'#1a1a2e', waveFront:'78,205,196', waveBack:'255,107,107', source:'#ffe66d', observer:'#4ecdc4', text:'#4a4a4a', muted:'#7a7a7a', grid:'255,255,255', shock:'255,107,107' },
-    'soviet': { bg:'#e8e0d6', waveFront:'196,30,30', waveBack:'139,69,19', source:'#c41e1e', observer:'#556b2f', text:'#3d3d3d', muted:'#6a5a4a', grid:'196,30,30', shock:'196,30,30' },
+    'soviet': { bg:'#e8e0d6', waveFront:'196,30,30', waveBack:'26,26,26', source:'#cd2027', observer:'#556b2f', text:'#3d3d3d', muted:'#4a4a4a', grid:'196,30,30', shock:'196,30,30' },
+    'ins': { bg:'#1a0820', waveFront:'255,107,157', waveBack:'196,79,209', source:'#ff6b9d', observer:'#f7931e', text:'#ffffff', muted:'#b0b0b0', grid:'255,107,157', shock:'255,107,157' },
     'academic': { bg:'#ffffff', waveFront:'107,140,174', waveBack:'138,124,168', source:'#c4956a', observer:'#6a9e8a', text:'#3d3d5c', muted:'#7a7a8a', grid:'200,200,210', shock:'196,30,30' },
   };
   return colorMap[theme] || colorMap['academic'];

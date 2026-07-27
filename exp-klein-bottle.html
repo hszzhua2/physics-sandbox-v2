@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>克莱因瓶 (Klein Bottle) - 三维参数化可视化</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
 
   <!-- MathJax -->
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -132,24 +132,24 @@
     }
 
     [data-theme="soviet"] {
-      --kb-bg: #f0ebe4;
-      --kb-scene-bg: #f0ebe4;
-      --kb-panel-bg: #fffaf2;
-      --kb-panel-border: #c41e1e;
+      --kb-bg: #e0ddc5;
+      --kb-scene-bg: #e0ddc5;
+      --kb-panel-bg: #ffffff;
+      --kb-panel-border: #cd2027;
       --kb-text: #1a1a1a;
-      --kb-text-muted: #6a5a4a;
-      --kb-accent: #c41e1e;
-      --kb-accent-2: #8b4513;
+      --kb-text-muted: #4a4a4a;
+      --kb-accent: #cd2027;
+      --kb-accent-2: #1a1a1a;
       --kb-radius: 2px;
       --kb-backdrop: none;
       --kb-border-width: 2px;
       --kb-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      --kb-gui-bg: #fffaf2;
+      --kb-gui-bg: #ffffff;
       --kb-gui-text: #1a1a1a;
-      --kb-gui-border: #c41e1e;
-      --kb-gui-widget: rgba(196,30,30,0.1);
-      --kb-gui-hover: rgba(196,30,30,0.18);
-      --kb-gui-focus: rgba(196,30,30,0.4);
+      --kb-gui-border: #cd2027;
+      --kb-gui-widget: rgba(205, 32, 39,0.1);
+      --kb-gui-hover: rgba(205, 32, 39,0.18);
+      --kb-gui-focus: rgba(205, 32, 39,0.4);
       --kb-card-bg: rgba(0,0,0,0.03);
     }
 
@@ -276,13 +276,13 @@
 
     /* Soviet theme drawer overrides */
     [data-theme="soviet"] .left-drawer-inner {
-      border-right: 2px solid #c41e1e;
+      border-right: 2px solid #cd2027;
     }
     [data-theme="soviet"] .right-drawer-inner {
-      border-left: 2px solid #c41e1e;
+      border-left: 2px solid #cd2027;
     }
     [data-theme="soviet"] .drawer-toggle {
-      border-color: #c41e1e;
+      border-color: #cd2027;
     }
 
     /* Knowledge cards */
@@ -425,13 +425,47 @@
     [data-theme="academic"] input[type="range"] { height: 3px; border-radius: 0; background: #e0e0e0; }
     [data-theme="academic"] input[type="range"]::-webkit-slider-thumb { width: 14px; height: 14px; border-radius: 0; background: #1a1a2e; box-shadow: none; }
     [data-theme="cartoon"] input[type="range"]::-webkit-slider-thumb { background: #ff6b6b; box-shadow: 0 2px 8px rgba(255,107,107,0.4); }
-    [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb { background: #c41e1e; }
+    [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb { background: #cd2027; }
     [data-theme="cyber"] input[type="range"]::-webkit-slider-thumb { background: #bd00ff; box-shadow: 0 0 8px rgba(189,0,255,0.6); }
 
     [data-theme="cyber"] .lp-header h1 { color: var(--kb-accent); text-shadow: 0 0 10px rgba(189,0,255,0.4); }
     [data-theme="cyber"] .section-label { text-shadow: 0 0 6px rgba(189,0,255,0.3); }
     [data-theme="cartoon"] .lp-header h1 { color: var(--kb-accent); }
     [data-theme="soviet"] .lp-header h1 { color: var(--kb-accent); }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+      --kb-bg: #1a0820;
+      --kb-scene-bg: #1a0820;
+      --kb-panel-bg: rgba(255,255,255,0.15);
+      --kb-panel-border: #ff6b9d;
+      --kb-text: #ffffff;
+      --kb-text-muted: rgba(255,255,255,0.75);
+      --kb-accent: #ff6b9d;
+      --kb-accent-2: #1a0820;
+      --kb-radius: 2px;
+      --kb-backdrop: none;
+      --kb-border-width: 2px;
+      --kb-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      --kb-gui-bg: rgba(255,255,255,0.15);
+      --kb-gui-text: #ffffff;
+      --kb-gui-border: #ff6b9d;
+      --kb-gui-widget: rgba(255, 107, 157,0.1);
+      --kb-gui-hover: rgba(255, 107, 157,0.18);
+      --kb-gui-focus: rgba(255, 107, 157,0.4);
+      --kb-card-bg: rgba(0,0,0,0.03);
+    }
+    [data-theme="ins"] .left-drawer-inner {
+      border-right: 2px solid #ff6b9d;
+    }
+    [data-theme="ins"] .right-drawer-inner {
+      border-left: 2px solid #ff6b9d;
+    }
+    [data-theme="ins"] .drawer-toggle {
+      border-color: #ff6b9d;
+    }
+    [data-theme="ins"] input[type="range"]::-webkit-slider-thumb { background: #ff6b9d; }
+    [data-theme="ins"] .lp-header h1 { color: var(--kb-accent); }
+
     [data-theme="academic"] .lp-header h1 { color: #1a1a2e; }
 
     /* Scrollbar */
@@ -838,6 +872,6 @@
     animate();
   </script>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
 </body>
 </html>

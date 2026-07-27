@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D 元胞自动机 — Cellular Automata | 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <script type="importmap">
   {
     "imports": {
@@ -44,11 +44,19 @@
       --ca-bar-bg: rgba(0,243,255,0.05);
     }
     [data-theme="soviet"] {
-      --ca-bg: #f0ebe4; --ca-bg2: #fffaf2; --ca-panel: #fffaf2;
-      --ca-border: #d4c4a8; --ca-text: #1a1a1a; --ca-text2: #6a5a4a;
-      --ca-accent: #c41e1e; --ca-accent2: #5b7a8a; --ca-accent3: #8b6914;
+      --ca-bg: #e0ddc5; --ca-bg2: #ffffff; --ca-panel: #ffffff;
+      --ca-border: #8a8070; --ca-text: #1a1a1a; --ca-text2: #4a4a4a;
+      --ca-accent: #cd2027; --ca-accent2: #5b7a8a; --ca-accent3: #8b6914;
       --ca-bar-bg: rgba(0,0,0,0.04);
     }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+      --ca-bg: #1a0820; --ca-bg2: rgba(255,255,255,0.15); --ca-panel: rgba(255,255,255,0.15);
+      --ca-border: #9a8aaa; --ca-text: #ffffff; --ca-text2: rgba(255,255,255,0.75);
+      --ca-accent: #ff6b9d; --ca-accent2: #5b7a8a; --ca-accent3: #f7931e;
+      --ca-bar-bg: rgba(0,0,0,0.04);
+    }
+
 
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -151,7 +159,7 @@
   </style>
 </head>
 <body>
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
 
   <div class="top-bar">
     <div>

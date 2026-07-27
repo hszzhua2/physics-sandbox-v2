@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>社会力模型 - 行人流仿真</title>
-    <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+    <link rel="stylesheet" href="shared-theme.css?v=20260727">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         /* ========== Experiment-Specific Variables ========== */
@@ -123,27 +123,27 @@
         }
 
         [data-theme="soviet"] {
-            --sf-canvas-bg: #f0ebe4;
+            --sf-canvas-bg: #e0ddc5;
             --sf-grid-color: rgba(180, 160, 140, 0.4);
-            --sf-input-bg: #fffaf2;
-            --sf-input-border: #c41e1e;
-            --sf-btn-hover: rgba(196, 30, 30, 0.15);
+            --sf-input-bg: #ffffff;
+            --sf-input-border: #cd2027;
+            --sf-btn-hover: rgba(205, 32, 39, 0.15);
             --sf-chart-line: rgba(0,0,0,0.12);
             --sf-node-card-bg: rgba(0,0,0,0.03);
-            --sf-title-color: #c41e1e;
+            --sf-title-color: #cd2027;
             --sf-panel-backdrop: none;
             --sf-panel-shadow: 0 4px 12px rgba(0,0,0,0.12);
             --sf-radius: 2px;
             --sf-border-width: 2px;
-            --sf-agent-color: #8b4513;
-            --sf-source-color: #c41e1e;
-            --sf-waypoint-color: #b8860b;
+            --sf-agent-color: #1a1a1a;
+            --sf-source-color: #cd2027;
+            --sf-waypoint-color: #cd2027;
             --sf-dest-color: #556b2f;
-            --sf-gumball-x: #c41e1e;
+            --sf-gumball-x: #cd2027;
             --sf-gumball-y: #556b2f;
-            --sf-obstacle-fill: rgba(196, 30, 30, 0.12);
-            --sf-obstacle-stroke: rgba(196, 30, 30, 0.35);
-            --sf-tab-active-bg: rgba(196, 30, 30, 0.12);
+            --sf-obstacle-fill: rgba(205, 32, 39, 0.12);
+            --sf-obstacle-stroke: rgba(205, 32, 39, 0.35);
+            --sf-tab-active-bg: rgba(205, 32, 39, 0.12);
             --sf-tab-inactive-bg: transparent;
             --sf-flow-card-bg: rgba(0,0,0,0.03);
             --sf-flow-arrow: #94a3b8;
@@ -187,8 +187,8 @@
         }
 
         [data-theme="soviet"] .sf-panel {
-            background: #fffaf2;
-            border: 2px solid #c41e1e;
+            background: #ffffff;
+            border: 2px solid #cd2027;
             border-radius: 2px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
             backdrop-filter: none;
@@ -302,8 +302,8 @@
 
         [data-theme="academic"] .sf-btn { border-radius: 2px; }
         [data-theme="soviet"] .sf-btn {
-            border-radius: 0; border: 2px solid #c41e1e;
-            background: #c41e1e; color: #ffffff; font-weight: 700;
+            border-radius: 0; border: 2px solid #cd2027;
+            background: #cd2027; color: #ffffff; font-weight: 700;
         }
         [data-theme="soviet"] .sf-btn:hover { background: #a01818; }
 
@@ -443,10 +443,60 @@
         }
         [data-theme="academic"] .back-btn:hover { background: #f0f0f0; border-color: #1a1a2e; }
         [data-theme="soviet"] .back-btn {
-            background: #c41e1e; color: #ffffff; border: 2px solid #8b0000;
+            background: #cd2027; color: #ffffff; border: 2px solid #1a1a1a;
             border-radius: 2px; font-weight: 700; letter-spacing: 1px;
         }
         [data-theme="soviet"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+            --sf-canvas-bg: #1a0820;
+            --sf-grid-color: rgba(180, 160, 140, 0.4);
+            --sf-input-bg: rgba(255,255,255,0.15);
+            --sf-input-border: #ff6b9d;
+            --sf-btn-hover: rgba(255, 107, 157, 0.15);
+            --sf-chart-line: rgba(0,0,0,0.12);
+            --sf-node-card-bg: rgba(0,0,0,0.03);
+            --sf-title-color: #ff6b9d;
+            --sf-panel-backdrop: none;
+            --sf-panel-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            --sf-radius: 2px;
+            --sf-border-width: 2px;
+            --sf-agent-color: #1a0820;
+            --sf-source-color: #ff6b9d;
+            --sf-waypoint-color: #ff6b9d;
+            --sf-dest-color: #c44fd1;
+            --sf-gumball-x: #ff6b9d;
+            --sf-gumball-y: #c44fd1;
+            --sf-obstacle-fill: rgba(255, 107, 157, 0.12);
+            --sf-obstacle-stroke: rgba(255, 107, 157, 0.35);
+            --sf-tab-active-bg: rgba(255, 107, 157, 0.12);
+            --sf-tab-inactive-bg: transparent;
+            --sf-flow-card-bg: rgba(0,0,0,0.03);
+            --sf-flow-arrow: #94a3b8;
+            --sf-echarts-text: #1a1a2e;
+        }
+    [data-theme="ins"] .sf-panel {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid #ff6b9d;
+            border-radius: 2px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            backdrop-filter: none;
+        }
+    [data-theme="ins"] #top-panel { border-radius: 2px; }
+    [data-theme="ins"] .form-group input,
+        [data-theme="ins"] .form-group select { border-radius: 0; }
+    [data-theme="ins"] .sf-btn {
+            border-radius: 0; border: 2px solid #ff6b9d;
+            background: #ff6b9d; color: rgba(255,255,255,0.15); font-weight: 700;
+        }
+    [data-theme="ins"] .sf-btn:hover { background: #a01818; }
+    [data-theme="ins"] .node-card { border-radius: 2px; }
+    [data-theme="ins"] .back-btn {
+            background: #ff6b9d; color: rgba(255,255,255,0.15); border: 2px solid #1a0820;
+            border-radius: 2px; font-weight: 700; letter-spacing: 1px;
+        }
+    [data-theme="ins"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+
     </style>
 </head>
 <body>
@@ -523,7 +573,7 @@
             <div class="section-title">节点访问量</div>
             <div id="node-bar-chart" style="width:100%;height:120px;min-height:110px;"></div>
         </div>
-    </div><script src="shared-theme.js?v=20260724b"></script>
+    </div><script src="shared-theme.js?v=20260727"></script>
     <script>
         // ==========================================
         // 初始化主题 (保留 shared-theme.js 集成)

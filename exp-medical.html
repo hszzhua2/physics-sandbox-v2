@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>名医的诞生 — 医疗名望随机性实验 | 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     :root {
       --med-bg: #0f172a;
@@ -77,18 +77,33 @@
     }
 
     [data-theme="soviet"] {
-      --med-bg: #f0ebe4;
-      --med-bg2: #fffaf2;
-      --med-panel: #fffaf2;
-      --med-border: #d4c4a8;
+      --med-bg: #e0ddc5;
+      --med-bg2: #ffffff;
+      --med-panel: #ffffff;
+      --med-border: #8a8070;
       --med-text: #1a1a1a;
-      --med-text2: #6a5a4a;
-      --med-accent: #c41e1e;
-      --med-accent2: #8b0000;
+      --med-text2: #4a4a4a;
+      --med-accent: #cd2027;
+      --med-accent2: #1a1a1a;
       --med-accent3: #5a4a3a;
       --med-grid-bg: #eae5de;
       --med-bar-bg: rgba(0,0,0,0.04);
     }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+      --med-bg: #1a0820;
+      --med-bg2: rgba(255,255,255,0.15);
+      --med-panel: rgba(255,255,255,0.15);
+      --med-border: #9a8aaa;
+      --med-text: #ffffff;
+      --med-text2: rgba(255,255,255,0.75);
+      --med-accent: #ff6b9d;
+      --med-accent2: #c44fd1;
+      --med-accent3: #5a4a3a;
+      --med-grid-bg: #eae5de;
+      --med-bar-bg: rgba(0,0,0,0.04);
+    }
+
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -270,7 +285,7 @@
   </style>
 </head>
 <body>
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
 
   <div class="top-bar">
     <div>
@@ -450,6 +465,7 @@
       const theme = document.documentElement.getAttribute('data-theme') || 'academic';
       const isAcademic = theme === 'academic';
       const isSoviet = theme === 'soviet';
+      const isIns = theme === 'ins';
       const isCartoon = theme === 'cartoon';
       const isCyber = theme === 'cyber';
 
@@ -468,12 +484,24 @@
       if (isSoviet) {
         return {
           gridBg: '#eae5de', barBg: 'rgba(0,0,0,0.04)',
-          text: '#1a1a1a', text2: '#6a5a4a',
-          accent: '#c41e1e', accent2: '#8b0000', accent3: '#5a4a3a',
+          text: '#1a1a1a', text2: '#4a4a4a',
+          accent: '#cd2027', accent2: '#1a1a1a', accent3: '#5a4a3a',
           barColor: (pct) => `hsl(${5 + pct * 15}, ${60 + pct * 30}%, ${40 + pct * 20}%)`,
           scoreColor: (level, intensity) => {
             if (level > 0) return `hsl(${15 + intensity * 10}, ${60 + intensity * 30}%, ${45 + intensity * 30}%)`;
             return `hsl(${350}, ${50 + intensity * 30}%, ${30 - intensity * 10}%)`;
+          }
+        };
+      }
+      if (isIns) {
+        return {
+          gridBg: '#1a0820', barBg: 'rgba(255, 107, 157, 0.04)',
+          text: '#ffffff', text2: 'rgba(255, 255, 255, 0.75)',
+          accent: '#ff6b9d', accent2: '#c44fd1', accent3: '#f7931e',
+          barColor: (pct) => `hsl(${330 - pct * 40}, ${60 + pct * 30}%, ${45 + pct * 25}%)`,
+          scoreColor: (level, intensity) => {
+            if (level > 0) return `hsl(${330 - intensity * 40}, ${70 + intensity * 30}%, ${45 + intensity * 35}%)`;
+            return `hsl(${340}, ${60 + intensity * 20}%, ${35 - intensity * 10}%)`;
           }
         };
       }

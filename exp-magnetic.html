@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>磁场与铁粉分布 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     .exp-bg { z-index: -1; }
     #canvas-container {
@@ -276,10 +276,17 @@
     [data-theme="academic"] #right-panel .panel-header h2 { color: var(--accent-1); }
     [data-theme="academic"] .info-card h3 { color: var(--accent-1); }
     [data-theme="soviet"] .field-group .grp-title { color: var(--accent-1); }
-    [data-theme="soviet"] .panel-header .ic { background: rgba(196,30,30,.1); }
+    [data-theme="soviet"] .panel-header .ic { background: rgba(205, 32, 39,.1); }
     [data-theme="soviet"] #left-panel .panel-header h1 { color: var(--accent-1); }
     [data-theme="soviet"] #right-panel .panel-header h2 { color: var(--accent-1); }
     [data-theme="soviet"] .info-card h3 { color: var(--accent-1); }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] .field-group .grp-title { color: var(--accent-1); }
+    [data-theme="ins"] .panel-header .ic { background: rgba(255, 107, 157,.1); }
+    [data-theme="ins"] #left-panel .panel-header h1 { color: var(--accent-1); }
+    [data-theme="ins"] #right-panel .panel-header h2 { color: var(--accent-1); }
+    [data-theme="ins"] .info-card h3 { color: var(--accent-1); }
+
   </style>
 </head>
 <body>
@@ -1209,7 +1216,7 @@
   animate();
   </script>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     window.addEventListener('DOMContentLoaded', function() {
       if (window.PSUTheme) {

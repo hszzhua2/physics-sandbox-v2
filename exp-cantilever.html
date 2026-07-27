@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>悬臂梁材料力学交互分析</title>
-    <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+    <link rel="stylesheet" href="shared-theme.css?v=20260727">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
         /* ========== Cantilever Theme Variables ========== */
@@ -93,24 +93,24 @@
         }
 
         [data-theme="soviet"] {
-            --ct-canvas-bg: #f0ebe4;
-            --ct-panel-bg: #fffaf2;
-            --ct-panel-border: #c41e1e;
+            --ct-canvas-bg: #e0ddc5;
+            --ct-panel-bg: #ffffff;
+            --ct-panel-border: #cd2027;
             --ct-text: #1a1a1a;
-            --ct-text-muted: #6a5a4a;
-            --ct-accent: #c41e1e;
-            --ct-accent-2: #8b4513;
-            --ct-danger: #c41e1e;
-            --ct-beam-fill: rgba(196,30,30,0.1);
+            --ct-text-muted: #4a4a4a;
+            --ct-accent: #cd2027;
+            --ct-accent-2: #1a1a1a;
+            --ct-danger: #cd2027;
+            --ct-beam-fill: rgba(205, 32, 39,0.1);
             --ct-beam-stroke: #1a1a1a;
-            --ct-force: #c41e1e;
-            --ct-moment-line: #8b4513;
-            --ct-moment-area: rgba(139,69,19,0.15);
+            --ct-force: #cd2027;
+            --ct-moment-line: #1a1a1a;
+            --ct-moment-area: rgba(26,26,26,0.15);
             --ct-deflect-line: #556b2f;
             --ct-deflect-area: rgba(85,107,47,0.15);
-            --ct-chart-bg: #fffaf2;
-            --ct-input-track: #d4c4a8;
-            --ct-input-thumb: #c41e1e;
+            --ct-chart-bg: #ffffff;
+            --ct-input-track: #8a8070;
+            --ct-input-thumb: #cd2027;
         }
 
         /* ========== Layout ========== */
@@ -206,7 +206,7 @@
             border-radius: 0; width: 12px; height: 12px; background: #1a1a2e;
         }
         [data-theme="soviet"] input[type="range"]::-webkit-slider-thumb {
-            border-radius: 0; width: 14px; height: 14px; background: #c41e1e;
+            border-radius: 0; width: 14px; height: 14px; background: #cd2027;
         }
 
         select {
@@ -295,10 +295,46 @@
         }
         [data-theme="academic"] .back-btn:hover { background: #f0f0f0; border-color: #1a1a2e; }
         [data-theme="soviet"] .back-btn {
-            background: #c41e1e; color: #ffffff; border: 2px solid #8b0000;
+            background: #cd2027; color: #ffffff; border: 2px solid #1a1a1a;
             border-radius: 2px; font-weight: 700; letter-spacing: 1px;
         }
         [data-theme="soviet"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+            --ct-canvas-bg: #1a0820;
+            --ct-panel-bg: rgba(255,255,255,0.15);
+            --ct-panel-border: #ff6b9d;
+            --ct-text: #ffffff;
+            --ct-text-muted: rgba(255,255,255,0.75);
+            --ct-accent: #ff6b9d;
+            --ct-accent-2: #1a0820;
+            --ct-danger: #ff6b9d;
+            --ct-beam-fill: rgba(255, 107, 157,0.1);
+            --ct-beam-stroke: #1a0820;
+            --ct-force: #ff6b9d;
+            --ct-moment-line: #1a0820;
+            --ct-moment-area: rgba(196,79,209,0.15);
+            --ct-deflect-line: #c44fd1;
+            --ct-deflect-area: rgba(196,79,209,0.15);
+            --ct-chart-bg: rgba(255,255,255,0.15);
+            --ct-input-track: #9a8aaa;
+            --ct-input-thumb: #ff6b9d;
+        }
+    [data-theme="ins"] .ct-panel {
+            border-radius: 2px; border-width: 2px;
+        }
+    [data-theme="ins"] input[type="range"]::-webkit-slider-thumb {
+            border-radius: 0; width: 14px; height: 14px; background: #ff6b9d;
+        }
+    [data-theme="ins"] select { border-radius: 0; }
+    [data-theme="ins"] #fbd-canvas { border-radius: 0; }
+    [data-theme="ins"] .chart { border-radius: 0; }
+    [data-theme="ins"] .back-btn {
+            background: #ff6b9d; color: rgba(255,255,255,0.15); border: 2px solid #1a0820;
+            border-radius: 2px; font-weight: 700; letter-spacing: 1px;
+        }
+    [data-theme="ins"] .back-btn:hover { background: #a01818; border-color: #5c0000; }
+
     </style>
 </head>
 <body>
@@ -369,7 +405,7 @@
             </div>
         </div>
     </div>
-    <script src="shared-theme.js?v=20260724b"></script>
+    <script src="shared-theme.js?v=20260727"></script>
     <script>
         // Initialize theme
         const theme = PSUTheme.get();

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>物理大厦 — 知识图谱</title>
-<link rel="stylesheet" href="shared-theme.css?v=20260724b">
+<link rel="stylesheet" href="shared-theme.css?v=20260727">
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -70,19 +70,35 @@
 }
 
 [data-theme="soviet"] {
-  --pb-bg: #f0ebe4;
-  --pb-panel-bg: #fffaf2;
-  --pb-panel-border: #c41e1e;
+  --pb-bg: #e0ddc5;
+  --pb-panel-bg: #ffffff;
+  --pb-panel-border: #cd2027;
   --pb-text: #1a1a1a;
-  --pb-text-muted: #6a5a4a;
-  --pb-accent: #c41e1e;
-  --pb-accent-2: #8b4513;
-  --pb-hover: rgba(196,30,30,0.06);
-  --pb-active: rgba(196,30,30,0.12);
+  --pb-text-muted: #4a4a4a;
+  --pb-accent: #cd2027;
+  --pb-accent-2: #1a1a1a;
+  --pb-hover: rgba(205, 32, 39,0.06);
+  --pb-active: rgba(205, 32, 39,0.12);
   --pb-radius: 2px;
   --pb-backdrop: none;
   --pb-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+  --pb-bg: #1a0820;
+  --pb-panel-bg: rgba(255,255,255,0.15);
+  --pb-panel-border: #ff6b9d;
+  --pb-text: #ffffff;
+  --pb-text-muted: rgba(255,255,255,0.75);
+  --pb-accent: #ff6b9d;
+  --pb-accent-2: #1a0820;
+  --pb-hover: rgba(255, 107, 157,0.06);
+  --pb-active: rgba(255, 107, 157,0.12);
+  --pb-radius: 2px;
+  --pb-backdrop: none;
+  --pb-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
 
 body, html {
   width: 100vw; height: 100vh; overflow: hidden;
@@ -1813,6 +1829,6 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 
-<script src="shared-theme.js?v=20260724b"></script>
+<script src="shared-theme.js?v=20260727"></script>
 </body>
 </html>

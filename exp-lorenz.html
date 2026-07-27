@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>洛伦兹吸引子 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     .exp-bg { z-index: -1; }
     #container { position: fixed; inset: 0; z-index: 0; }
@@ -51,24 +51,32 @@
     [data-theme="cyber"] .section-title { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,0.3); }
     [data-theme="cyber"] .param-row span { color: #00f3ff; }
 
-    [data-theme="soviet"] h1 { color: #c41e1e; }
-    [data-theme="soviet"] .section-title { color: #8b4513; }
-    [data-theme="soviet"] .param-row span { color: #c41e1e; }
+    [data-theme="soviet"] h1 { color: #cd2027; }
+    [data-theme="soviet"] .section-title { color: #1a1a1a; }
+    [data-theme="soviet"] .param-row span { color: #cd2027; }
 
     [data-theme="academic"] h1 { color: #1a1a2e; }
     [data-theme="academic"] .section-title { color: #6b8cae; }
     [data-theme="academic"] .param-row span { color: #6b8cae; }
     [data-theme="academic"] .formula { background: #f8f9fa; border-left: 3px solid #6b8cae; }
     [data-theme="academic"] #ui-panel { background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: none; backdrop-filter: none; }
-    [data-theme="soviet"] #ui-panel { background: #fffaf2; border: 2px solid #c41e1e; border-radius: 2px; box-shadow: none; backdrop-filter: none; }
-    [data-theme="soviet"] .formula { background: #f8f5f0; border-left: 3px solid #c41e1e; }
+    [data-theme="soviet"] #ui-panel { background: #ffffff; border: 2px solid #cd2027; border-radius: 2px; box-shadow: none; backdrop-filter: none; }
+    [data-theme="soviet"] .formula { background: #e8e4d8; border-left: 3px solid #cd2027; }
 
     #ui-panel::-webkit-scrollbar { width: 5px; }
     [data-theme="cartoon"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
     [data-theme="glass"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
     [data-theme="cyber"] #ui-panel::-webkit-scrollbar-thumb { background: rgba(189,0,255,0.3); border-radius: 3px; }
     [data-theme="academic"] #ui-panel::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 0; }
-    [data-theme="soviet"] #ui-panel::-webkit-scrollbar-thumb { background: #c41e1e; border-radius: 0; }
+    [data-theme="soviet"] #ui-panel::-webkit-scrollbar-thumb { background: #cd2027; border-radius: 0; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] h1 { color: #ff6b9d; }
+    [data-theme="ins"] .section-title { color: #1a0820; }
+    [data-theme="ins"] .param-row span { color: #ff6b9d; }
+    [data-theme="ins"] #ui-panel { background: rgba(255,255,255,0.15); border: 2px solid #ff6b9d; border-radius: 2px; box-shadow: none; backdrop-filter: none; }
+    [data-theme="ins"] .formula { background: #2a1830; border-left: 3px solid #ff6b9d; }
+    [data-theme="ins"] #ui-panel::-webkit-scrollbar-thumb { background: #ff6b9d; border-radius: 0; }
+
 
     /* Entance toast */
     #entrance-toast { transition: opacity 0.8s ease; }
@@ -153,7 +161,7 @@
     </div>
   </div>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -513,7 +521,7 @@
     function applyThemeBg() {
       const theme = document.documentElement.getAttribute('data-theme') || 'academic';
       if (theme === 'academic' || theme === 'soviet') {
-        scene.background = new THREE.Color(theme === 'soviet' ? 0xf0ebe4 : 0xf8f9fa);
+        scene.background = new THREE.Color(theme === 'soviet' ? 0xe0ddc5 : 0xf8f9fa);
         stars.material.color.setHex(0x8899aa);
         stars.material.opacity = 0.6;
         if (particleSystem && particleGeometry) {
@@ -528,6 +536,28 @@
           for (let i = 0; i < PARTICLE_COUNT; i++) {
             const ratio = Math.random();
             const c = darkA.clone().lerp(darkB, ratio);
+            col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
+            if (targetColors) {
+              targetColors[i*3] = c.r; targetColors[i*3+1] = c.g; targetColors[i*3+2] = c.b;
+            }
+          }
+          particleGeometry.attributes.color.needsUpdate = true;
+        }
+      } else if (theme === 'ins') {
+        scene.background = new THREE.Color(0x1a0820);
+        stars.material.color.setHex(0x2a1830);
+        stars.material.opacity = 0.5;
+        if (particleSystem && particleGeometry) {
+          particleSystem.material.blending = THREE.AdditiveBlending;
+          particleSystem.material.opacity = 0.85;
+          particleSystem.material.depthWrite = false;
+          particleSystem.material.size = PARTICLE_SIZE;
+          const insA = new THREE.Color('#ff6b9d');
+          const insB = new THREE.Color('#c44fd1');
+          const col = particleGeometry.attributes.color.array;
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const ratio = Math.random();
+            const c = insA.clone().lerp(insB, ratio);
             col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
             if (targetColors) {
               targetColors[i*3] = c.r; targetColors[i*3+1] = c.g; targetColors[i*3+2] = c.b;

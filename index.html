@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>物理沙盒宇宙 - Physics Sandbox Universe</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     /* ========== Home Page Specific Styles ========== */
     #home-canvas {
@@ -75,13 +75,13 @@
     }
 
     [data-theme="soviet"] .header-title h1 {
-      color: #c41e1e;
+      color: #cd2027;
       font-weight: 900;
       text-shadow: none;
       letter-spacing: 6px;
     }
     [data-theme="soviet"] .header-title p {
-      color: #6a5a4a;
+      color: #4a4a4a;
       text-transform: uppercase;
     }
 
@@ -147,7 +147,7 @@
       background: radial-gradient(circle, rgba(189,0,255,0.4) 0%, transparent 70%);
     }
     [data-theme="soviet"] .bg-particle {
-      background: radial-gradient(circle, rgba(196,30,30,0.35) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(205, 32, 39,0.35) 0%, transparent 70%);
     }
 
     /* Hint text at bottom */
@@ -168,12 +168,35 @@
     [data-theme="glass"] .hint-text { color: #8b92a8; animation: hintBounce 2s ease-in-out infinite; }
     [data-theme="cyber"] .hint-text { color: #a080c0; text-shadow: 0 0 10px rgba(189,0,255,0.3); animation: hintBounce 2s ease-in-out infinite; }
     [data-theme="soviet"] .hint-text {
-      color: #6a5a4a;
+      color: #4a4a4a;
       font-size: 0.78rem;
       letter-spacing: 1px;
       animation: none;
       opacity: 1;
     }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] .header-title h1 {
+      color: #ff6b9d;
+      font-weight: 900;
+      text-shadow: none;
+      letter-spacing: 6px;
+    }
+    [data-theme="ins"] .header-title p {
+      color: rgba(255,255,255,0.75);
+      text-transform: uppercase;
+    }
+    [data-theme="ins"] #en-title { color: #8a7a6a; }
+    [data-theme="ins"] .bg-particle {
+      background: radial-gradient(circle, rgba(255, 107, 157,0.35) 0%, transparent 70%);
+    }
+    [data-theme="ins"] .hint-text {
+      color: rgba(255,255,255,0.75);
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      animation: none;
+      opacity: 1;
+    }
+
     [data-theme="academic"] .hint-text {
       color: #b0b0b8;
       font-size: 0.78rem;
@@ -244,7 +267,7 @@
   <!-- Hint -->
   <div class="hint-text" id="hint-text">点击气泡进入实验 · 拖拽鼠标吸引节点</div>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     // ==========================================
     // Dynamic title for academic theme
@@ -590,14 +613,25 @@
         };
       } else if (theme === 'soviet') {
         return {
-          bg: '#f0ebe4',
+          bg: '#e0ddc5',
           lineBase: '196, 30, 30',
           nodeFill: '#ffffff',
           textMain: '#1a1a1a',
-          textSub: '#6a5a4a',
+          textSub: '#4a4a4a',
           shadowColor: 'transparent',
           lineAlpha: 0.35,
           isAcademic: true
+        };
+      } else if (theme === 'ins') {
+        return {
+          bg: '#1a0820',
+          lineBase: '255, 107, 157',
+          nodeFill: 'rgba(255, 255, 255, 0.15)',
+          textMain: '#ffffff',
+          textSub: 'rgba(255, 255, 255, 0.75)',
+          shadowColor: 'rgba(255, 107, 157, 0.3)',
+          lineAlpha: 0.5,
+          isAcademic: false
         };
       } else if (theme === 'academic') {
         return {
@@ -736,6 +770,9 @@
           } else if (theme === 'glass') {
             ctx.shadowColor = node.color;
             ctx.shadowBlur = isHover ? 20 : 10;
+          } else if (theme === 'ins') {
+            ctx.shadowColor = node.color;
+            ctx.shadowBlur = isHover ? 25 : 12;
           } else {
             ctx.shadowColor = 'rgba(0,0,0,0.1)';
             ctx.shadowBlur = 8;

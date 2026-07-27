@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>刚体沙盒 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
   <style>
     .exp-bg { z-index: -1; }
@@ -24,7 +24,7 @@
     }
     [data-theme="academic"] textarea { background: #ffffff; color: #1a1a2e; }
     [data-theme="cartoon"] textarea { background: rgba(255,255,255,0.7); color: #2d3436; }
-    [data-theme="soviet"] textarea { background: #f4f0ea; color: #1a1a1a; border: 1px solid #d4c4a8; }
+    [data-theme="soviet"] textarea { background: #e8e4d8; color: #1a1a1a; border: 1px solid #8a8070; }
     #right {
       width: 70%; flex-grow: 1; display: flex; justify-content: center; align-items: center;
       background: transparent; z-index: 0;
@@ -38,8 +38,8 @@
     .btn-secondary:hover { background: rgba(128,128,128,0.3); }
     [data-theme="academic"] .btn-secondary { background: #f0f0f0; color: #1a1a2e; border: 1px solid #e0e0e0; }
     [data-theme="cartoon"] .btn-secondary { background: #f0f0f0; color: #555; border: 2px solid #ddd; }
-    [data-theme="soviet"] .btn-secondary { background: #f4f0ea; color: #1a1a1a; border: 2px solid #d4c4a8; }
-    [data-theme="soviet"] .btn-secondary:hover { border-color: #c41e1e; }
+    [data-theme="soviet"] .btn-secondary { background: #e8e4d8; color: #1a1a1a; border: 2px solid #8a8070; }
+    [data-theme="soviet"] .btn-secondary:hover { border-color: #cd2027; }
 
     @media (max-width: 768px) {
       body { flex-direction: column; overflow: auto; }
@@ -51,7 +51,13 @@
     [data-theme="cartoon"] #left h2 { color: var(--accent-1); text-shadow: 1px 1px 0 rgba(0,0,0,0.1); }
     [data-theme="glass"] #left h2 { color: #39ff14; text-shadow: 0 0 10px rgba(57,255,20,0.3); }
     [data-theme="cyber"] #left h2 { color: #39ff14; text-shadow: 0 0 15px rgba(57,255,20,0.5); }
-    [data-theme="soviet"] #left h2 { color: #c41e1e; text-shadow: none; }
+    [data-theme="soviet"] #left h2 { color: #cd2027; text-shadow: none; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] textarea { background: #2a1830; color: #1a0820; border: 1px solid #9a8aaa; }
+    [data-theme="ins"] .btn-secondary { background: #2a1830; color: #1a0820; border: 2px solid #9a8aaa; }
+    [data-theme="ins"] .btn-secondary:hover { border-color: #ff6b9d; }
+    [data-theme="ins"] #left h2 { color: #ff6b9d; text-shadow: none; }
+
   </style>
 </head>
 <body>
@@ -74,7 +80,7 @@
   </div>
   <div id="right"></div>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     PSUTheme.createSwitcher();
     window.addEventListener('load', () => {

@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>分形几何可视化 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <!-- KaTeX CSS & JS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
@@ -238,7 +238,7 @@
     [data-theme="academic"] .field-group .grp-title { color: var(--accent-1); }
     [data-theme="academic"] .panel-header .ic { background: rgba(107,140,174,.12); }
     [data-theme="soviet"] .field-group .grp-title { color: var(--accent-1); }
-    [data-theme="soviet"] .panel-header .ic { background: rgba(196,30,30,.1); }
+    [data-theme="soviet"] .panel-header .ic { background: rgba(205, 32, 39,.1); }
 
     [data-theme="cartoon"] #left-panel .panel-header h1 { color: var(--accent-1); }
     [data-theme="glass"] #left-panel .panel-header h1 { color: #ff6b6b; }
@@ -251,6 +251,12 @@
     [data-theme="cyber"] #right-panel .panel-header h2 { color: #00f3ff; text-shadow: 0 0 8px rgba(0,243,255,.3); }
     [data-theme="academic"] #right-panel .panel-header h2 { color: var(--accent-1); }
     [data-theme="soviet"] #right-panel .panel-header h2 { color: var(--accent-1); }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] .field-group .grp-title { color: var(--accent-1); }
+    [data-theme="ins"] .panel-header .ic { background: rgba(255, 107, 157,.1); }
+    [data-theme="ins"] #left-panel .panel-header h1 { color: var(--accent-1); }
+    [data-theme="ins"] #right-panel .panel-header h2 { color: var(--accent-1); }
+
 
     /* ===== 提示 ===== */
     .hint-bar {
@@ -428,7 +434,7 @@
     <div class="et-sub">拖动平移 · 滚轮缩放 · 调节参数探索自相似世界</div>
   </div>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     // ---- 初始化共享 UI ----
     PSUTheme.createSwitcher();

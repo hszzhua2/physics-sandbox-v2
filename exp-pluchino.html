@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>人生成功的随机性 — Pluchino 模型 | 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     :root {
       --plt-bg: #0f172a;
@@ -77,18 +77,33 @@
     }
 
     [data-theme="soviet"] {
-      --plt-bg: #f0ebe4;
-      --plt-bg2: #fffaf2;
-      --plt-panel: #fffaf2;
-      --plt-border: #d4c4a8;
+      --plt-bg: #e0ddc5;
+      --plt-bg2: #ffffff;
+      --plt-panel: #ffffff;
+      --plt-border: #8a8070;
       --plt-text: #1a1a1a;
-      --plt-text2: #6a5a4a;
-      --plt-accent: #c41e1e;
-      --plt-accent2: #8b0000;
+      --plt-text2: #4a4a4a;
+      --plt-accent: #cd2027;
+      --plt-accent2: #1a1a1a;
       --plt-accent3: #5a4a3a;
       --plt-grid-bg: #eae5de;
       --plt-bar-bg: rgba(0,0,0,0.04);
     }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+      --plt-bg: #1a0820;
+      --plt-bg2: rgba(255,255,255,0.15);
+      --plt-panel: rgba(255,255,255,0.15);
+      --plt-border: #9a8aaa;
+      --plt-text: #ffffff;
+      --plt-text2: rgba(255,255,255,0.75);
+      --plt-accent: #ff6b9d;
+      --plt-accent2: #c44fd1;
+      --plt-accent3: #5a4a3a;
+      --plt-grid-bg: #eae5de;
+      --plt-bar-bg: rgba(0,0,0,0.04);
+    }
+
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -247,7 +262,7 @@
   </style>
 </head>
 <body>
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
 
   <div class="top-bar">
     <div>
@@ -407,12 +422,21 @@
         }
       };
       if (theme === 'soviet') return {
-        gridBg: '#eae5de', text: '#1a1a1a', text2: '#6a5a4a',
-        accent: '#c41e1e', accent2: '#8b0000', accent3: '#5a4a3a',
+        gridBg: '#eae5de', text: '#1a1a1a', text2: '#4a4a4a',
+        accent: '#cd2027', accent2: '#1a1a1a', accent3: '#5a4a3a',
         barColor: (pct) => `hsl(${5 + pct * 15}, ${60 + pct * 30}%, ${40 + pct * 20}%)`,
         scoreColor: (level, intensity) => {
           if (level > 0) return `hsl(${15 + intensity * 10}, ${60 + intensity * 30}%, ${45 + intensity * 30}%)`;
           return `hsl(${350}, ${50 + intensity * 30}%, ${30 - intensity * 10}%)`;
+        }
+      };
+      if (theme === 'ins') return {
+        gridBg: '#1a0820', text: '#ffffff', text2: 'rgba(255, 255, 255, 0.75)',
+        accent: '#ff6b9d', accent2: '#c44fd1', accent3: '#f7931e',
+        barColor: (pct) => `hsl(${330 - pct * 40}, ${60 + pct * 30}%, ${45 + pct * 25}%)`,
+        scoreColor: (level, intensity) => {
+          if (level > 0) return `hsl(${330 - intensity * 40}, ${70 + intensity * 30}%, ${45 + intensity * 35}%)`;
+          return `hsl(${340}, ${60 + intensity * 20}%, ${35 - intensity * 10}%)`;
         }
       };
       if (theme === 'cartoon') return {

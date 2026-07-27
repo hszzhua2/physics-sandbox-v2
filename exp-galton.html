@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>高尔顿钉板 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     .exp-bg { z-index: -1; }
     #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
@@ -39,9 +39,14 @@
     [data-theme="cyber"] .stat span { color: #00f3ff; }
     [data-theme="cyber"] .val-display { color: #ff9d00; }
 
-    [data-theme="soviet"] h1 { color: #c41e1e; text-shadow: none; }
-    [data-theme="soviet"] .stat span { color: #c41e1e; }
-    [data-theme="soviet"] .val-display { color: #8b4513; }
+    [data-theme="soviet"] h1 { color: #cd2027; text-shadow: none; }
+    [data-theme="soviet"] .stat span { color: #cd2027; }
+    [data-theme="soviet"] .val-display { color: #1a1a1a; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] h1 { color: #ff6b9d; text-shadow: none; }
+    [data-theme="ins"] .stat span { color: #ff6b9d; }
+    [data-theme="ins"] .val-display { color: #ff6b9d; }
+
   </style>
 </head>
 <body>
@@ -63,7 +68,7 @@
     <button class="theme-btn" onclick="resetBoard()">重置沙盒</button>
   </div>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     PSUTheme.createSwitcher();
     const canvas = document.getElementById('sim-canvas'), ctx = canvas.getContext('2d');
@@ -121,7 +126,9 @@
       } else if (theme === 'glass') {
         return { fade: 'rgba(15, 17, 23, 0.3)', peg: 'rgba(116, 185, 255, 0.6)', curve: 'rgba(116, 185, 255, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
       } else if (theme === 'soviet') {
-        return { fade: 'rgba(240, 235, 228, 0.3)', peg: 'rgba(196, 30, 30, 0.6)', curve: 'rgba(196, 30, 30, 0.9)', bin: 'rgba(139, 69, 19, 0.8)' };
+        return { fade: 'rgba(240, 235, 228, 0.3)', peg: 'rgba(205, 32, 39, 0.6)', curve: 'rgba(205, 32, 39, 0.9)', bin: 'rgba(26, 26, 26, 0.8)' };
+      } else if (theme === 'ins') {
+        return { fade: 'rgba(26, 8, 32, 0.3)', peg: 'rgba(255, 107, 157, 0.6)', curve: 'rgba(255, 107, 157, 0.9)', bin: 'rgba(255, 210, 0, 0.8)' };
       } else {
         return { fade: 'rgba(5, 5, 8, 0.3)', peg: 'rgba(0, 243, 255, 0.6)', curve: 'rgba(0, 243, 255, 0.9)', bin: 'rgba(255, 157, 0, 0.8)' };
       }

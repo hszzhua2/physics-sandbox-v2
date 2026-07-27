@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>太阳系沙盘 — Solar System | 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <script type="importmap">
   {
     "imports": {
@@ -44,10 +44,17 @@
       --sol-bar-bg: rgba(0,243,255,0.05);
     }
     [data-theme="soviet"] {
-      --sol-bg: #f0ebe4; --sol-bg2: #fffaf2; --sol-panel: #fffaf2; --sol-border: #d4c4a8;
-      --sol-text: #1a1a1a; --sol-text2: #6a5a4a; --sol-accent: #c41e1e; --sol-accent2: #5b7a8a; --sol-accent3: #e8a020;
+      --sol-bg: #e0ddc5; --sol-bg2: #ffffff; --sol-panel: #ffffff; --sol-border: #8a8070;
+      --sol-text: #1a1a1a; --sol-text2: #4a4a4a; --sol-accent: #cd2027; --sol-accent2: #5b7a8a; --sol-accent3: #e8a020;
       --sol-bar-bg: rgba(0,0,0,0.04);
     }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+      --sol-bg: #1a0820; --sol-bg2: rgba(255,255,255,0.15); --sol-panel: rgba(255,255,255,0.15); --sol-border: #9a8aaa;
+      --sol-text: #ffffff; --sol-text2: rgba(255,255,255,0.75); --sol-accent: #ff6b9d; --sol-accent2: #5b7a8a; --sol-accent3: #e8a020;
+      --sol-bar-bg: rgba(0,0,0,0.04);
+    }
+
 
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -208,7 +215,7 @@
   </style>
 </head>
 <body>
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
 
   <div class="top-bar">
     <div>

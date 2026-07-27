@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>齿轮与自行车 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     /* ========== Bicycle Experiment CSS Variables ========== */
@@ -109,19 +109,19 @@
     }
 
     [data-theme="soviet"] {
-      --bc-bg: #f0ebe4;
-      --bc-panel-bg: #fffaf2;
-      --bc-panel-border: #c41e1e;
+      --bc-bg: #e0ddc5;
+      --bc-panel-bg: #ffffff;
+      --bc-panel-border: #cd2027;
       --bc-text: #1a1a1a;
-      --bc-text-muted: #6a5a4a;
-      --bc-accent: #c41e1e;
-      --bc-accent-2: #8b4513;
+      --bc-text-muted: #4a4a4a;
+      --bc-accent: #cd2027;
+      --bc-accent-2: #1a1a1a;
       --bc-chart-line: rgba(0,0,0,0.12);
       --bc-card-bg: rgba(0,0,0,0.03);
-      --bc-wheel-stroke: #c41e1e;
+      --bc-wheel-stroke: #cd2027;
       --bc-frame-stroke: #5c4033;
       --bc-chain-color: #8b7355;
-      --bc-pedal-color: #c41e1e;
+      --bc-pedal-color: #cd2027;
       --bc-radius: 2px;
       --bc-backdrop: none;
       --bc-border-width: 2px;
@@ -248,14 +248,44 @@
 
     /* Soviet theme drawer overrides */
     [data-theme="soviet"] .left-drawer-inner {
-      border-right: 2px solid #c41e1e;
+      border-right: 2px solid #cd2027;
     }
     [data-theme="soviet"] .right-drawer-inner {
-      border-left: 2px solid #c41e1e;
+      border-left: 2px solid #cd2027;
     }
     [data-theme="soviet"] .drawer-toggle {
-      border-color: #c41e1e;
+      border-color: #cd2027;
     }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] {
+      --bc-bg: #1a0820;
+      --bc-panel-bg: rgba(255,255,255,0.15);
+      --bc-panel-border: #ff6b9d;
+      --bc-text: #ffffff;
+      --bc-text-muted: rgba(255,255,255,0.75);
+      --bc-accent: #ff6b9d;
+      --bc-accent-2: #1a0820;
+      --bc-chart-line: rgba(0,0,0,0.12);
+      --bc-card-bg: rgba(0,0,0,0.03);
+      --bc-wheel-stroke: #ff6b9d;
+      --bc-frame-stroke: #5c4033;
+      --bc-chain-color: #8b7355;
+      --bc-pedal-color: #ff6b9d;
+      --bc-radius: 2px;
+      --bc-backdrop: none;
+      --bc-border-width: 2px;
+      --bc-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    [data-theme="ins"] .left-drawer-inner {
+      border-right: 2px solid #ff6b9d;
+    }
+    [data-theme="ins"] .right-drawer-inner {
+      border-left: 2px solid #ff6b9d;
+    }
+    [data-theme="ins"] .drawer-toggle {
+      border-color: #ff6b9d;
+    }
+
 
     .floating-controls {
       /* Legacy: now inside left-drawer-inner */
@@ -527,7 +557,7 @@
     </div>
   </div>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     // ======================
     // Drawer toggle functions

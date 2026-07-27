@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>特斯拉线圈物理模拟 — 物理沙盒宇宙</title>
-    <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+    <link rel="stylesheet" href="shared-theme.css?v=20260727">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { margin: 0; overflow: hidden; background-color: #050510; color: #fff; font-family: 'Courier New', Courier, monospace; }
@@ -76,14 +76,24 @@
         [data-theme="academic"] .formula-box { background: #f4f5f7; }
         [data-theme="academic"] body { background-color: #f5f5f7; color: #1a1a2e; }
         [data-theme="academic"] #viz-canvas { background: rgba(255,255,255,0.9); border-color: #e0e0e0; }
-        [data-theme="soviet"] #ui-panel { background: #fffaf2; border-color: #c41e1e; }
-        [data-theme="soviet"] .slider-container label { color: #6a5a4a; }
-        [data-theme="soviet"] .data-readout { background: #f4f0ea; color: #1a1a1a; }
-        [data-theme="soviet"] .alert-text { color: #c41e1e; border-color: #d4c4a8; }
-        [data-theme="soviet"] .formula-box { background: #f8f5f0; }
-        [data-theme="soviet"] body { background-color: #f0ebe4; color: #1a1a1a; }
-        [data-theme="soviet"] #viz-canvas { background: rgba(255,255,255,0.9); border-color: #d4c4a8; }
-        [data-theme="soviet"] .data-value { color: #c41e1e; }
+        [data-theme="soviet"] #ui-panel { background: #ffffff; border-color: #cd2027; }
+        [data-theme="soviet"] .slider-container label { color: #4a4a4a; }
+        [data-theme="soviet"] .data-readout { background: #e8e4d8; color: #1a1a1a; }
+        [data-theme="soviet"] .alert-text { color: #cd2027; border-color: #8a8070; }
+        [data-theme="soviet"] .formula-box { background: #e8e4d8; }
+        [data-theme="soviet"] body { background-color: #e0ddc5; color: #1a1a1a; }
+        [data-theme="soviet"] #viz-canvas { background: rgba(255,255,255,0.9); border-color: #8a8070; }
+        [data-theme="soviet"] .data-value { color: #cd2027; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] #ui-panel { background: rgba(255,255,255,0.15); border-color: #ff6b9d; }
+    [data-theme="ins"] .slider-container label { color: rgba(255,255,255,0.75); }
+    [data-theme="ins"] .data-readout { background: #2a1830; color: #1a0820; }
+    [data-theme="ins"] .alert-text { color: #ff6b9d; border-color: #9a8aaa; }
+    [data-theme="ins"] .formula-box { background: #2a1830; }
+    [data-theme="ins"] body { background-color: #1a0820; color: #1a0820; }
+    [data-theme="ins"] #viz-canvas { background: rgba(255,255,255,0.9); border-color: #9a8aaa; }
+    [data-theme="ins"] .data-value { color: #ff6b9d; }
+
     </style>
     <script type="importmap">
     {
@@ -182,7 +192,7 @@
         </div>
     </div>
 
-    <script src="shared-theme.js?v=20260724b"></script>
+    <script src="shared-theme.js?v=20260727"></script>
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';

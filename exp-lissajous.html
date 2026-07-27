@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>利萨茹曲线 - 物理沙盒宇宙</title>
-  <link rel="stylesheet" href="shared-theme.css?v=20260724b">
+  <link rel="stylesheet" href="shared-theme.css?v=20260727">
   <style>
     .exp-bg { z-index: -1; }
     #sim-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
@@ -33,8 +33,12 @@
     [data-theme="cyber"] h1 { color: #ff00ea; text-shadow: 0 0 15px rgba(255,0,234,0.5); }
     [data-theme="cyber"] .val-display { color: #00f3ff; }
 
-    [data-theme="soviet"] h1 { color: #c41e1e; text-shadow: none; }
-    [data-theme="soviet"] .val-display { color: #8b4513; }
+    [data-theme="soviet"] h1 { color: #cd2027; text-shadow: none; }
+    [data-theme="soviet"] .val-display { color: #1a1a1a; }
+    /* INS: Instagram gradient theme */
+    [data-theme="ins"] h1 { color: #ff6b9d; text-shadow: none; }
+    [data-theme="ins"] .val-display { color: #ff6b9d; }
+
   </style>
 </head>
 <body>
@@ -59,7 +63,7 @@
     <button class="theme-btn" onclick="randomize()">随机共振</button>
   </div>
 
-  <script src="shared-theme.js?v=20260724b"></script>
+  <script src="shared-theme.js?v=20260727"></script>
   <script>
     PSUTheme.createSwitcher();
     const canvas = document.getElementById('sim-canvas'), ctx = canvas.getContext('2d');
@@ -79,6 +83,8 @@
         return { fade: 'rgba(15, 17, 23, 0.2)', hueStart: 180, hueRange: 120 };
       } else if (theme === 'soviet') {
         return { fade: 'rgba(240, 235, 228, 0.2)', hueStart: 0, hueRange: 40 };
+      } else if (theme === 'ins') {
+        return { fade: 'rgba(26, 8, 32, 0.2)', hueStart: 280, hueRange: 80 };
       } else {
         return { fade: 'rgba(3, 3, 5, 0.2)', hueStart: 180, hueRange: 120 };
       }
