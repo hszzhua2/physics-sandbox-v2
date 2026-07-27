@@ -869,6 +869,45 @@ body, html {
   background: var(--pb-hover);
 }
 
+/* Reset view button */
+.pb-3d-reset-btn {
+  padding: 5px 12px;
+  font-size: 11px; font-weight: 600;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: transparent;
+  color: var(--pb-text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.pb-3d-reset-btn:hover {
+  color: var(--pb-accent);
+  border-color: var(--pb-accent);
+  background: var(--pb-hover);
+}
+
+/* Lock indicator */
+.pb-3d-lock-indicator {
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+  z-index: 10011;
+  padding: 4px 14px;
+  font-size: 11px; font-weight: 600;
+  color: var(--pb-accent);
+  background: var(--pb-panel-bg);
+  border: 1px solid var(--pb-accent);
+  border-radius: var(--pb-radius);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.pb-3d-lock-indicator.visible { opacity: 1; }
+
 /* Floating mode controls (left side) */
 .pb-3d-controls {
   position: fixed; top: 60px; left: 12px;
@@ -1174,8 +1213,12 @@ body, html {
   <div class="pb-3d-topbar">
     <span class="pb-3d-title">&#127756; 物理知识 3D 空间</span>
     <span class="pb-3d-stats" id="pb-3d-stats"></span>
+    <button class="pb-3d-reset-btn" id="pb-3d-reset-view" title="重置视角到空间中心">&#9851; 重置视角</button>
     <button class="pb-3d-exit-btn" id="pb-3d-exit">&#10006; 退出</button>
   </div>
+
+  <!-- Lock indicator -->
+  <div class="pb-3d-lock-indicator" id="pb-3d-lock-indicator"></div>
 
   <!-- Left controls -->
   <div class="pb-3d-controls">
@@ -1218,7 +1261,7 @@ body, html {
   </div>
 
   <!-- Hints -->
-  <div class="pb-3d-hint">拖拽旋转 · 滚轮缩放 · 右键平移 · 点击节点查看</div>
+  <div class="pb-3d-hint">左键点击节点 · 滚轮缩放 · 中键拖拽平移 · 右键旋转（绕锁定节点）</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
@@ -1799,6 +1842,7 @@ let spaceGraphData = null;
 let is3DSpaceMode = false;
 let spaceStarfield = null;
 let spaceAnimId = null;
+let lockedNode3D = null; // The node that the camera orbits around
 
 function buildSpaceGraph3D() {
   if (!MANIFEST || typeof ForceGraph3D === 'undefined') {
@@ -1837,7 +1881,7 @@ function buildSpaceGraph3D() {
   const accentColor = getThemeAccentColor();
 
   try {
-    spaceGraph = ForceGraph3D()(container)
+    spaceGraph = ForceGraph3D()(container, { controlType: 'orbit' })
       .graphData({ nodes, links })
       .backgroundColor('rgba(0,0,0,0)') // Transparent to show CSS starfield
       .nodeColor(node => {
@@ -1881,20 +1925,37 @@ function buildSpaceGraph3D() {
       })
       .cooldownTicks(300);
 
-    // Adjust forces for better 3D layout (delayed to ensure graph is ready)
+    // Adjust forces: reduce centripetal, increase separation, strengthen links
     setTimeout(() => {
       if (!spaceGraph) return;
       try {
         if (typeof spaceGraph.d3Force === 'function') {
+          // Strong repulsion → nodes spread out, only connected ones stay close
           const charge = spaceGraph.d3Force('charge');
-          if (charge) charge.strength(-18);
+          if (charge) charge.strength(-120);
+          // Keep connected nodes at moderate distance with strong attraction
           const link = spaceGraph.d3Force('link');
-          if (link) { link.distance(35); link.strength(0.08); }
+          if (link) { link.distance(35); link.strength(0.8); }
+          // Very weak center force — just enough to prevent drift off-screen
           const center = spaceGraph.d3Force('center');
-          if (center) center.strength(0.05);
+          if (center) center.strength(0.008);
+          // Reheat so new forces take effect
+          if (typeof spaceGraph.d3ReheatSimulation === 'function') {
+            spaceGraph.d3ReheatSimulation();
+          }
+        }
+        // Configure OrbitControls: remap mouse buttons
+        const controls = getSpaceControls();
+        if (controls) {
+          // LEFT: null (reserved for node clicking)
+          // MIDDLE: PAN (2 = THREE.MOUSE.PAN) — fixed-viewpoint drag
+          // RIGHT: ROTATE (0 = THREE.MOUSE.ROTATE) — orbit around target
+          controls.mouseButtons = { LEFT: null, MIDDLE: 2, RIGHT: 0 };
+          controls.enableDamping = false;
+          controls.update();
         }
       } catch(e) {
-        console.warn('[3D Space] Force config error:', e);
+        console.warn('[3D Space] Force/control config error:', e);
       }
     }, 100);
 
@@ -1926,19 +1987,64 @@ function addStarfield() {
   }
 }
 
+function getSpaceControls() {
+  if (!spaceGraph) return null;
+  try {
+    if (typeof spaceGraph.orbitControls === 'function') return spaceGraph.orbitControls();
+    if (typeof spaceGraph.controls === 'function') return spaceGraph.controls();
+  } catch(e) {}
+  return null;
+}
+
 function focusOnNode3D(node) {
   if (!spaceGraph || !node) return;
   try {
-    // Node might not have position yet if simulation hasn't run
     if (node.x === undefined || node.y === undefined || node.z === undefined) return;
+
+    // Lock this node as the rotation center
+    lockedNode3D = node;
+    updateLockIndicator();
+
     const distance = 120;
     spaceGraph.cameraPosition(
       { x: node.x + distance * 0.5, y: node.y + distance * 0.5, z: node.z + distance },
       { x: node.x, y: node.y, z: node.z },
       1000
     );
+
+    // Set OrbitControls target so right-drag rotates around this node
+    const controls = getSpaceControls();
+    if (controls) {
+      controls.target.set(node.x, node.y, node.z);
+      controls.update();
+    }
   } catch(err) {
     console.error('[3D Space] Camera focus error:', err);
+  }
+}
+
+function resetView3D() {
+  if (!spaceGraph) return;
+  lockedNode3D = null;
+  updateLockIndicator();
+  // Reset camera to default position looking at origin
+  spaceGraph.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, 800);
+  const controls = getSpaceControls();
+  if (controls) {
+    controls.target.set(0, 0, 0);
+    controls.update();
+  }
+}
+
+function updateLockIndicator() {
+  const el = document.getElementById('pb-3d-lock-indicator');
+  if (!el) return;
+  if (lockedNode3D) {
+    const name = lockedNode3D.name || lockedNode3D.fullName || '';
+    el.textContent = '🎯 锁定: ' + name;
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
   }
 }
 
@@ -2263,6 +2369,7 @@ function clearSpacePath() {
 // ===== 3D Space Event Handlers =====
 document.getElementById('pb-view-3d-space').addEventListener('click', enter3DSpace);
 document.getElementById('pb-3d-exit').addEventListener('click', exit3DSpace);
+document.getElementById('pb-3d-reset-view').addEventListener('click', resetView3D);
 
 document.querySelectorAll('.pb-3d-mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
