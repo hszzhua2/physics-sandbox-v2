@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>物理大厦 — 知识图谱</title>
-<link rel="stylesheet" href="shared-theme.css?v=20260727">
+<link rel="stylesheet" href="shared-theme.css?v=20260727c">
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -87,16 +87,16 @@
     [data-theme="ins"] {
   --pb-bg: #1a0820;
   --pb-panel-bg: rgba(255,255,255,0.15);
-  --pb-panel-border: #ff6b9d;
+  --pb-panel-border: rgba(255,107,157,0.4);
   --pb-text: #ffffff;
   --pb-text-muted: rgba(255,255,255,0.75);
   --pb-accent: #ff6b9d;
-  --pb-accent-2: #1a0820;
-  --pb-hover: rgba(255, 107, 157,0.06);
-  --pb-active: rgba(255, 107, 157,0.12);
-  --pb-radius: 2px;
-  --pb-backdrop: none;
-  --pb-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  --pb-accent-2: #f7931e;
+  --pb-hover: rgba(255, 107, 157,0.08);
+  --pb-active: rgba(255, 107, 157,0.15);
+  --pb-radius: 24px;
+  --pb-backdrop: blur(20px);
+  --pb-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
 
@@ -465,6 +465,67 @@ body, html {
 }
 #graph-svg:active { cursor: grabbing; }
 
+/* 3D Graph container */
+#graph-3d {
+  flex: 1; width: 100%;
+  position: relative;
+  display: none;
+}
+#graph-3d canvas { display: block; }
+
+/* 2D/3D toggle */
+.pb-view-toggle {
+  margin-left: auto;
+  display: flex;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  overflow: hidden;
+}
+.pb-view-toggle button {
+  padding: 3px 8px;
+  font-size: 10px;
+  border: none;
+  background: transparent;
+  color: var(--pb-text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.pb-view-toggle button.active {
+  background: var(--pb-accent);
+  color: #fff;
+}
+
+/* 3D graph tooltip */
+.pb-3d-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--pb-panel-bg);
+  border: 1px solid var(--pb-accent);
+  border-radius: var(--pb-radius);
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--pb-text);
+  z-index: 100;
+  white-space: nowrap;
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.pb-3d-tooltip.visible { opacity: 1; }
+
+/* 3D control hints */
+.pb-3d-hints {
+  position: absolute;
+  bottom: 8px; left: 8px;
+  font-size: 9px;
+  color: var(--pb-text-muted);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 5;
+}
+
 .pb-graph-info {
   border-top: 1px solid var(--pb-panel-border);
   transition: all 0.4s;
@@ -695,6 +756,333 @@ body, html {
   .pb-resizer-right { display: none; }
   .pb-sidebar { flex-basis: 180px; }
 }
+
+/* ============================================
+   3D Space Mode — Full-screen immersive graph
+   ============================================ */
+#pb-3d-space {
+  position: fixed; inset: 0; z-index: 9999;
+  display: none;
+  background: #050510;
+  overflow: hidden;
+}
+#pb-3d-space.active { display: block; }
+
+/* Theme-specific 3D space backgrounds */
+[data-theme="glass"] #pb-3d-space { background: #0a0e1a; }
+[data-theme="cyber"] #pb-3d-space { background: #050008; }
+[data-theme="cartoon"] #pb-3d-space { background: #1a0a2e; }
+[data-theme="soviet"] #pb-3d-space { background: #1a0808; }
+[data-theme="ins"] #pb-3d-space {
+  background: linear-gradient(135deg, #1a0820 0%, #2d0a3d 25%, #3d1a08 50%, #1a0820 75%, #2d0a3d 100%);
+  background-size: 400% 400%;
+  animation: pb3dInsShift 20s ease infinite;
+}
+@keyframes pb3dInsShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+#pb-3d-space .pb-3d-canvas-wrap {
+  position: absolute; inset: 0;
+  z-index: 1;
+}
+#pb-3d-space .pb-3d-canvas-wrap canvas {
+  background: transparent !important;
+}
+
+/* CSS Starfield background */
+.pb-3d-starfield {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.pb-3d-starfield::before,
+.pb-3d-starfield::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background-image:
+    radial-gradient(1px 1px at 25% 30%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 75% 20%, rgba(180,200,255,0.7), transparent),
+    radial-gradient(1px 1px at 15% 80%, rgba(255,240,200,0.5), transparent),
+    radial-gradient(1px 1px at 90% 50%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 40% 10%, rgba(200,220,255,0.6), transparent),
+    radial-gradient(1px 1px at 60% 90%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 20% 50%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 80% 40%, rgba(220,200,255,0.4), transparent),
+    radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,0.3), transparent);
+  background-size: 300px 300px;
+  animation: pbStarDrift 120s linear infinite;
+}
+.pb-3d-starfield::after {
+  background-size: 500px 500px;
+  animation-duration: 200s;
+  animation-direction: reverse;
+  opacity: 0.5;
+}
+@keyframes pbStarDrift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-300px, -300px); }
+}
+
+/* Floating top bar */
+.pb-3d-topbar {
+  position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 10010;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  background: var(--pb-panel-bg);
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  transition: all 0.4s;
+}
+.pb-3d-topbar .pb-3d-title {
+  font-size: 13px; font-weight: 700; color: var(--pb-accent);
+  letter-spacing: 1px; white-space: nowrap;
+}
+.pb-3d-topbar .pb-3d-stats {
+  font-size: 11px; color: var(--pb-text-muted);
+  white-space: nowrap;
+}
+.pb-3d-exit-btn {
+  padding: 5px 14px;
+  font-size: 11px; font-weight: 600;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: transparent;
+  color: var(--pb-text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.pb-3d-exit-btn:hover {
+  color: var(--pb-accent);
+  border-color: var(--pb-accent);
+  background: var(--pb-hover);
+}
+
+/* Floating mode controls (left side) */
+.pb-3d-controls {
+  position: fixed; top: 60px; left: 12px;
+  z-index: 10010;
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px;
+  background: var(--pb-panel-bg);
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  transition: all 0.4s;
+  min-width: 140px;
+}
+.pb-3d-controls .pb-3d-ctrl-label {
+  font-size: 9px; font-weight: 600; letter-spacing: 1px;
+  color: var(--pb-text-muted); text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.pb-3d-mode-row {
+  display: flex; gap: 4px; flex-wrap: wrap;
+}
+.pb-3d-mode-btn {
+  padding: 4px 10px;
+  font-size: 10px;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: transparent;
+  color: var(--pb-text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+}
+.pb-3d-mode-btn:hover {
+  color: var(--pb-text);
+  border-color: var(--pb-accent);
+}
+.pb-3d-mode-btn.active {
+  background: var(--pb-accent);
+  color: #fff;
+  border-color: var(--pb-accent);
+}
+.pb-3d-path-btn {
+  padding: 4px 10px;
+  font-size: 10px;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: transparent;
+  color: var(--pb-text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: inherit;
+  text-align: center;
+}
+.pb-3d-path-btn:hover { color: var(--pb-accent); border-color: var(--pb-accent); }
+.pb-3d-path-btn.active { background: var(--pb-accent-2); color: #fff; border-color: var(--pb-accent-2); }
+
+/* Floating legend (bottom-left) */
+.pb-3d-legend {
+  position: fixed; bottom: 12px; left: 12px;
+  z-index: 10010;
+  padding: 10px 12px;
+  background: var(--pb-panel-bg);
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  transition: all 0.4s;
+  max-width: 180px;
+}
+.pb-3d-legend .pb-3d-legend-title {
+  font-size: 9px; font-weight: 600; letter-spacing: 1px;
+  color: var(--pb-text-muted); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.pb-3d-legend-items {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.pb-3d-legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; color: var(--pb-text);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.pb-3d-legend-item:hover { opacity: 0.7; }
+.pb-3d-legend-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.pb-3d-legend-count {
+  font-size: 9px; color: var(--pb-text-muted);
+  margin-left: auto;
+}
+
+/* Floating node info (right side) */
+.pb-3d-info {
+  position: fixed; top: 60px; right: 12px;
+  z-index: 10010;
+  width: 280px; max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  padding: 14px;
+  background: var(--pb-panel-bg);
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  box-shadow: var(--pb-shadow);
+  transition: all 0.4s;
+  display: none;
+}
+.pb-3d-info.visible { display: block; }
+.pb-3d-info::-webkit-scrollbar { width: 3px; }
+.pb-3d-info::-webkit-scrollbar-thumb { background: var(--pb-panel-border); border-radius: 2px; }
+
+.pb-3d-info-header {
+  font-size: 14px; font-weight: 700; color: var(--pb-accent);
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+.pb-3d-info-meta {
+  font-size: 10px; color: var(--pb-text-muted);
+  margin-bottom: 10px;
+}
+.pb-3d-info-neighbors {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.pb-3d-info-neighbor {
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  color: var(--pb-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pb-3d-info-neighbor:hover {
+  border-color: var(--pb-accent);
+  color: var(--pb-accent);
+  background: var(--pb-hover);
+}
+.pb-3d-info-neighbor .nb-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  margin-right: 5px; vertical-align: middle;
+}
+
+/* Path search in 3D space */
+.pb-3d-path-panel {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--pb-panel-border);
+  display: none;
+}
+.pb-3d-path-panel.visible { display: block; }
+.pb-3d-path-field {
+  margin-bottom: 6px;
+}
+.pb-3d-path-field label {
+  font-size: 9px; font-weight: 600; color: var(--pb-accent);
+  display: block; margin-bottom: 2px;
+}
+.pb-3d-path-field input {
+  width: 100%; padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: var(--pb-bg);
+  color: var(--pb-text);
+  font-family: inherit;
+  outline: none;
+}
+.pb-3d-path-field input:focus { border-color: var(--pb-accent); }
+.pb-3d-path-actions {
+  display: flex; gap: 4px; margin-top: 6px;
+}
+.pb-3d-path-actions button {
+  flex: 1; padding: 4px;
+  font-size: 10px;
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  background: transparent;
+  color: var(--pb-text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.pb-3d-path-actions button:hover { border-color: var(--pb-accent); color: var(--pb-accent); }
+.pb-3d-path-result {
+  font-size: 10px; color: var(--pb-text-muted);
+  margin-top: 6px; line-height: 1.5;
+}
+
+/* Hints */
+.pb-3d-hint {
+  position: fixed; bottom: 12px; right: 12px;
+  z-index: 10010;
+  padding: 6px 12px;
+  font-size: 10px; color: var(--pb-text-muted);
+  background: var(--pb-panel-bg);
+  border: 1px solid var(--pb-panel-border);
+  border-radius: var(--pb-radius);
+  backdrop-filter: var(--pb-backdrop);
+  -webkit-backdrop-filter: var(--pb-backdrop);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .pb-3d-controls { min-width: 120px; padding: 8px; }
+  .pb-3d-info { width: calc(100vw - 24px); right: 12px; left: 12px; }
+  .pb-3d-legend { display: none; }
+}
 </style>
 </head>
 <body>
@@ -733,6 +1121,11 @@ body, html {
       <button class="pb-graph-btn" data-mode="branch">同分支</button>
       <button class="pb-graph-btn" data-mode="links">关联</button>
       <button class="pb-graph-btn" id="pb-path-toggle">&#128269; 路径搜索</button>
+      <div class="pb-view-toggle">
+        <button class="active" id="pb-view-2d">2D</button>
+        <button id="pb-view-3d">3D</button>
+        <button id="pb-view-3d-space" title="全屏3D空间">&#127756; 3D空间</button>
+      </div>
     </div>
     
     <!-- Path Search Panel -->
@@ -764,14 +1157,75 @@ body, html {
     </div>
     
     <svg id="graph-svg"></svg>
+    <div id="graph-3d">
+      <div class="pb-3d-tooltip" id="pb-3d-tooltip"></div>
+      <div class="pb-3d-hints">拖拽旋转 · 滚轮缩放 · 右键平移 · 点击节点查看</div>
+    </div>
     <div class="pb-graph-info" id="pb-graph-info">点击节点查看详情 · 拖拽节点重排</div>
   </div>
+</div>
+
+<!-- ===== 3D Space Overlay ===== -->
+<div id="pb-3d-space">
+  <div class="pb-3d-starfield"></div>
+  <div class="pb-3d-canvas-wrap" id="pb-3d-canvas-wrap"></div>
+
+  <!-- Top bar -->
+  <div class="pb-3d-topbar">
+    <span class="pb-3d-title">&#127756; 物理知识 3D 空间</span>
+    <span class="pb-3d-stats" id="pb-3d-stats"></span>
+    <button class="pb-3d-exit-btn" id="pb-3d-exit">&#10006; 退出</button>
+  </div>
+
+  <!-- Left controls -->
+  <div class="pb-3d-controls">
+    <div class="pb-3d-ctrl-label">显示模式</div>
+    <div class="pb-3d-mode-row">
+      <button class="pb-3d-mode-btn active" data-mode="all">全部</button>
+      <button class="pb-3d-mode-btn" data-mode="branch">同分支</button>
+      <button class="pb-3d-mode-btn" data-mode="links">关联</button>
+    </div>
+    <div class="pb-3d-ctrl-label" style="margin-top:4px;">路径搜索</div>
+    <button class="pb-3d-path-btn" id="pb-3d-path-toggle">&#128269; 开启路径搜索</button>
+    <div class="pb-3d-path-panel" id="pb-3d-path-panel">
+      <div class="pb-3d-path-field">
+        <label>起点</label>
+        <input type="text" id="pb-3d-path-start" placeholder="搜索或点击节点..." autocomplete="off" />
+      </div>
+      <div class="pb-3d-path-field">
+        <label>终点</label>
+        <input type="text" id="pb-3d-path-end" placeholder="搜索或点击节点..." autocomplete="off" />
+      </div>
+      <div class="pb-3d-path-actions">
+        <button id="pb-3d-path-search">搜索</button>
+        <button id="pb-3d-path-clear">清除</button>
+      </div>
+      <div class="pb-3d-path-result" id="pb-3d-path-result"></div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="pb-3d-legend" id="pb-3d-legend">
+    <div class="pb-3d-legend-title">学科分支</div>
+    <div class="pb-3d-legend-items" id="pb-3d-legend-items"></div>
+  </div>
+
+  <!-- Node info panel -->
+  <div class="pb-3d-info" id="pb-3d-info">
+    <div class="pb-3d-info-header" id="pb-3d-info-header"></div>
+    <div class="pb-3d-info-meta" id="pb-3d-info-meta"></div>
+    <div class="pb-3d-info-neighbors" id="pb-3d-info-neighbors"></div>
+  </div>
+
+  <!-- Hints -->
+  <div class="pb-3d-hint">拖拽旋转 · 滚轮缩放 · 右键平移 · 点击节点查看</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/3d-force-graph/dist/3d-force-graph.min.js"></script>
 
 <script>
 let MANIFEST = null;
@@ -813,6 +1267,9 @@ async function loadManifest() {
   renderStats();
   buildAdjacencyList();
   initGraph();
+  // Setup 3D space path autocomplete
+  setupSpacePathAutocomplete('pb-3d-path-start', 'start');
+  setupSpacePathAutocomplete('pb-3d-path-end', 'end');
 }
 
 // ===== Render file tree =====
@@ -1030,6 +1487,863 @@ let svg, g, simulation, linkSel, nodeSel, labelSel;
 let graphMode = 'all';
 let nodesById = {};
 
+// ===== 3D Knowledge Graph =====
+let graph3D = null;
+let is3DMode = false;
+let graph3DData = null;
+let hoverNode3D = null;
+
+function getThemeBgColor() {
+  const styles = getComputedStyle(document.documentElement);
+  const v = styles.getPropertyValue('--pb-bg').trim();
+  return v || '#0a0a14';
+}
+
+function getThemeAccentColor() {
+  const styles = getComputedStyle(document.documentElement);
+  const v = styles.getPropertyValue('--pb-accent').trim();
+  return v || '#6b8cae';
+}
+
+function getThemePanelBorderColor() {
+  const styles = getComputedStyle(document.documentElement);
+  const v = styles.getPropertyValue('--pb-panel-border').trim();
+  // Convert to rgba for line opacity
+  if (v.startsWith('#')) {
+    const r = parseInt(v.slice(1,3),16);
+    const g = parseInt(v.slice(3,5),16);
+    const b = parseInt(v.slice(5,7),16);
+    return `rgba(${r},${g},${b},0.3)`;
+  }
+  return v || 'rgba(128,128,128,0.3)';
+}
+
+function buildGraph3D() {
+  if (!MANIFEST || typeof ForceGraph3D === 'undefined') {
+    console.error('[3D Graph] ForceGraph3D library not loaded or MANIFEST not ready');
+    return;
+  }
+
+  const container = document.getElementById('graph-3d');
+
+  // Build data
+  const nodes = MANIFEST.nodes.map(n => ({
+    id: n.path,
+    name: n.name.includes('_') ? n.name.split('_')[0] : n.name,
+    fullName: n.name,
+    category: n.category,
+    color: CAT_COLORS[n.category] || '#999999',
+    type: n.type,
+    linkCount: n.linkCount,
+    val: Math.max(1, Math.min(5, 1 + n.linkCount * 0.1))
+  }));
+
+  const links = MANIFEST.edges.map(e => ({
+    source: e.source,
+    target: e.target
+  }));
+
+  graph3DData = { nodes, links };
+
+  // Destroy existing
+  if (graph3D) {
+    try { graph3D._destructor(); } catch(e) {}
+    graph3D = null;
+    // Clear container
+    container.innerHTML = '<div class="pb-3d-hints">拖拽旋转 · 滚轮缩放 · 右键平移 · 点击节点查看</div>';
+  }
+
+  const bgColor = 'rgba(0,0,0,0)'; // Transparent to show CSS starfield
+  const accentColor = getThemeAccentColor();
+
+  try {
+    graph3D = ForceGraph3D()(container)
+      .graphData({ nodes, links })
+      .backgroundColor(bgColor)
+      .nodeColor(node => {
+        if (node.id === (currentNode ? currentNode.path : '')) return accentColor;
+        return node.color;
+      })
+      .nodeVal(node => node.val)
+      .nodeOpacity(0.9)
+      .nodeResolution(8)
+      .linkColor(() => getThemePanelBorderColor())
+      .linkWidth(0.3)
+      .linkOpacity(0.4)
+      .linkDirectionalParticles(0)
+      .nodeLabel(node => {
+        const lc = node.linkCount || 0;
+        return `<div style="background:rgba(0,0,0,0.85);color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;white-space:nowrap;">${node.name} · ${node.category} · ${lc}链接</div>`;
+      })
+      .onNodeClick(node => {
+        if (pathPanelOpen) {
+          if (pathClickTarget === 'start') {
+            setStartNode(node.id, node.name);
+          } else {
+            setEndNode(node.id, node.name);
+          }
+          return;
+        }
+        loadArticle(node.id);
+      })
+      .onNodeHover(node => {
+        hoverNode3D = node;
+        container.style.cursor = node ? 'pointer' : 'default';
+      })
+      .nodeThreeObjectExtend(false)
+      .cooldownTicks(200);
+
+    // Adjust forces for 3D layout
+    if (graph3D && typeof graph3D.d3Force === 'function') {
+      const charge = graph3D.d3Force('charge');
+      if (charge) charge.strength(-12);
+      const link = graph3D.d3Force('link');
+      if (link) { link.distance(25); link.strength(0.1); }
+    }
+
+    // Set dimensions
+    const w = container.clientWidth || 360;
+    const h = container.clientHeight || 500;
+    graph3D.width(w).height(h);
+
+    // Camera position
+    graph3D.cameraPosition({ z: 300 });
+
+    console.log('[3D Graph] Successfully initialized with', nodes.length, 'nodes and', links.length, 'links');
+  } catch(err) {
+    console.error('[3D Graph] Initialization error:', err);
+  }
+}
+
+function getNodeLabelColor() {
+  const styles = getComputedStyle(document.documentElement);
+  return styles.getPropertyValue('--pb-text-muted').trim() || '#999999';
+}
+
+function update3DTheme() {
+  if (!graph3D) return;
+  try {
+    graph3D.backgroundColor('rgba(0,0,0,0)');
+    graph3D.linkColor(() => getThemePanelBorderColor());
+    graph3D.nodeColor(node => {
+      if (node.id === (currentNode ? currentNode.path : '')) return getThemeAccentColor();
+      return node.color;
+    });
+    graph3D.refresh();
+  } catch(e) {
+    console.warn('[3D Graph] Theme update error:', e);
+  }
+}
+
+function update3DHighlight() {
+  if (!graph3D || !graph3DData) return;
+
+  const accentColor = getThemeAccentColor();
+  const borderColor = getThemePanelBorderColor();
+  const currentPath = currentNode ? currentNode.path : '';
+
+  if (graphMode === 'all') {
+    graph3D.nodeColor(node => {
+      if (node.id === currentPath) return accentColor;
+      return node.color;
+    }).nodeOpacity(0.9).linkColor(() => borderColor).linkOpacity(0.4);
+
+    if (!currentNode) {
+      renderInfoBar(null, [], '');
+    } else {
+      const neighborPaths = new Set();
+      MANIFEST.edges.forEach(e => {
+        if (e.source === currentPath) neighborPaths.add(e.target);
+        if (e.target === currentPath) neighborPaths.add(e.source);
+      });
+      const neighbors = MANIFEST.nodes
+        .filter(n => neighborPaths.has(n.path))
+        .sort((a, b) => b.linkCount - a.linkCount);
+      renderInfoBar(currentNode, neighbors, `${neighbors.length}个关联节点 · ${currentNode.category}`);
+    }
+  } else if (graphMode === 'branch') {
+    if (!currentNode) {
+      graph3D.nodeOpacity(0.2).linkOpacity(0.05);
+      renderInfoBar(null, [], '<strong style="opacity:0.7;">请点击一个节点以过滤</strong>');
+      return;
+    }
+    const currentCat = currentNode.category;
+    graph3D.nodeColor(node => {
+      if (node.id === currentPath) return accentColor;
+      if (node.category === currentCat) return node.color;
+      return 'rgba(50,50,50,0.1)';
+    }).nodeOpacity(0.9)
+      .linkColor(link => {
+        const s = typeof link.source === 'object' ? link.source : graph3DData.nodes.find(n => n.id === link.source);
+        const t = typeof link.target === 'object' ? link.target : graph3DData.nodes.find(n => n.id === link.target);
+        if (s && t && s.category === currentCat && t.category === currentCat) return borderColor;
+        return 'rgba(0,0,0,0.02)';
+      }).linkOpacity(0.3);
+
+    const sameBranchNodes = MANIFEST.nodes
+      .filter(n => n.category === currentCat && n.path !== currentPath)
+      .sort((a, b) => b.linkCount - a.linkCount)
+      .slice(0, 30);
+    renderInfoBar(currentNode, sameBranchNodes, `分支: ${currentCat} · 共${MANIFEST.nodes.filter(n => n.category === currentCat).length}个节点 · 显示前${sameBranchNodes.length}个`);
+  } else if (graphMode === 'links') {
+    if (!currentNode) {
+      graph3D.nodeOpacity(0.2).linkOpacity(0.05);
+      renderInfoBar(null, [], '<strong style="opacity:0.7;">请点击一个节点以过滤</strong>');
+      return;
+    }
+    const linkedPaths = new Set([currentPath]);
+    MANIFEST.edges.forEach(e => {
+      if (e.source === currentPath) linkedPaths.add(e.target);
+      if (e.target === currentPath) linkedPaths.add(e.source);
+    });
+    graph3D.nodeColor(node => {
+      if (node.id === currentPath) return accentColor;
+      if (linkedPaths.has(node.id)) return node.color;
+      return 'rgba(50,50,50,0.05)';
+    }).nodeOpacity(0.9)
+      .linkColor(link => {
+        const sId = typeof link.source === 'object' ? link.source.id : link.source;
+        const tId = typeof link.target === 'object' ? link.target.id : link.target;
+        return (sId === currentPath || tId === currentPath) ? accentColor : 'rgba(0,0,0,0.02)';
+      }).linkOpacity(0.8);
+
+    const neighbors = MANIFEST.nodes
+      .filter(n => linkedPaths.has(n.path) && n.path !== currentPath)
+      .sort((a, b) => b.linkCount - a.linkCount);
+    renderInfoBar(currentNode, neighbors, `${neighbors.length}个直接关联节点`);
+  }
+
+  graph3D.refresh();
+}
+
+function update3DPathHighlight() {
+  if (!graph3D || !graph3DData) return;
+  const accentColor = getThemeAccentColor();
+  const dimBorderColor = getThemePanelBorderColor().replace(/[\d.]+\)$/, '0.1)');
+
+  graph3D.nodeColor(node => {
+    if (node.id === pathStartId) return '#00ff00';
+    if (node.id === pathEndId) return '#ff4400';
+    if (activePathNodes.has(node.id)) return '#ffff00';
+    if (node.id === (currentNode ? currentNode.path : '')) return accentColor;
+    return node.color;
+  }).linkColor(link => {
+    const sId = typeof link.source === 'object' ? link.source.id : link.source;
+    const tId = typeof link.target === 'object' ? link.target.id : link.target;
+    const k = edgeKey(sId, tId);
+    return activePathEdges.has(k) ? '#ffff00' : dimBorderColor;
+  }).linkOpacity(0.8);
+
+  graph3D.refresh();
+}
+
+function switchTo3D() {
+  is3DMode = true;
+  document.getElementById('graph-svg').style.display = 'none';
+  document.getElementById('graph-3d').style.display = 'block';
+  document.getElementById('pb-view-2d').classList.remove('active');
+  document.getElementById('pb-view-3d').classList.add('active');
+
+  // Build 3D graph if not yet built
+  if (!graph3D) {
+    buildGraph3D();
+  } else {
+    // Rebuild on theme changes
+    update3DTheme();
+  }
+
+  // Apply current highlight state
+  if (activePathNodes.size > 0) {
+    update3DPathHighlight();
+  } else {
+    update3DHighlight();
+  }
+
+  // Handle resize
+  setTimeout(() => {
+    if (graph3D) {
+      try { graph3D.width(document.getElementById('graph-3d').clientWidth).height(document.getElementById('graph-3d').clientHeight); } catch(e) {}
+    }
+  }, 50);
+}
+
+function switchTo2D() {
+  is3DMode = false;
+  document.getElementById('graph-svg').style.display = '';
+  document.getElementById('graph-3d').style.display = 'none';
+  document.getElementById('pb-view-2d').classList.add('active');
+  document.getElementById('pb-view-3d').classList.remove('active');
+
+  // Restart 2D simulation
+  if (simulation) {
+    const svgEl = document.getElementById('graph-svg');
+    const w = svgEl.clientWidth || 360;
+    const h = svgEl.clientHeight || 500;
+    d3.select('#graph-svg').attr('viewBox', `0 0 ${w} ${h}`);
+    simulation.force('center', d3.forceCenter(w / 2, h / 2));
+    simulation.alpha(0.3).restart();
+  }
+
+  // Reapply highlight
+  updateGraphHighlight();
+  if (activePathNodes.size > 0) applyPathHighlight();
+}
+
+// View toggle buttons
+document.getElementById('pb-view-2d').addEventListener('click', switchTo2D);
+document.getElementById('pb-view-3d').addEventListener('click', switchTo3D);
+
+// ===== 3D Space Mode (Full-screen immersive graph) =====
+let spaceGraph = null;
+let spaceGraphData = null;
+let is3DSpaceMode = false;
+let spaceStarfield = null;
+let spaceAnimId = null;
+
+function buildSpaceGraph3D() {
+  if (!MANIFEST || typeof ForceGraph3D === 'undefined') {
+    console.error('[3D Space] ForceGraph3D library not loaded or MANIFEST not ready');
+    return;
+  }
+
+  const container = document.getElementById('pb-3d-canvas-wrap');
+
+  // Build data
+  const nodes = MANIFEST.nodes.map(n => ({
+    id: n.path,
+    name: n.name.includes('_') ? n.name.split('_')[0] : n.name,
+    fullName: n.name,
+    category: n.category,
+    color: CAT_COLORS[n.category] || '#999999',
+    type: n.type,
+    linkCount: n.linkCount,
+    val: Math.max(1.5, Math.min(8, 1.5 + n.linkCount * 0.12))
+  }));
+
+  const links = MANIFEST.edges.map(e => ({
+    source: e.source,
+    target: e.target
+  }));
+
+  spaceGraphData = { nodes, links };
+
+  // Destroy existing
+  if (spaceGraph) {
+    try { spaceGraph._destructor(); } catch(e) {}
+    spaceGraph = null;
+    container.innerHTML = '';
+  }
+
+  const accentColor = getThemeAccentColor();
+
+  try {
+    spaceGraph = ForceGraph3D()(container)
+      .graphData({ nodes, links })
+      .backgroundColor('rgba(0,0,0,0)') // Transparent to show CSS starfield
+      .nodeColor(node => {
+        if (node.id === (currentNode ? currentNode.path : '')) return accentColor;
+        return node.color;
+      })
+      .nodeVal(node => node.val)
+      .nodeOpacity(0.92)
+      .nodeResolution(12)
+      .linkColor(() => getThemePanelBorderColor())
+      .linkWidth(0.4)
+      .linkOpacity(0.35)
+      .linkDirectionalParticles(2)
+      .linkDirectionalParticleWidth(0.3)
+      .linkDirectionalParticleSpeed(0.004)
+      .nodeLabel(node => {
+        const lc = node.linkCount || 0;
+        return `<div style="background:rgba(0,0,0,0.85);color:#fff;padding:5px 10px;border-radius:6px;font-size:12px;white-space:nowrap;border:1px solid ${node.color};">${node.name}<br><span style="font-size:10px;opacity:0.7">${node.category} · ${lc}链接</span></div>`;
+      })
+      .onNodeClick(node => {
+        if (spacePathPanelOpen) {
+          if (spacePathClickTarget === 'start') {
+            setSpaceStartNode(node.id, node.name);
+          } else {
+            setSpaceEndNode(node.id, node.name);
+          }
+          return;
+        }
+        // Find the MANIFEST node to get full data
+        const manifestNode = MANIFEST.nodes.find(n => n.path === node.id);
+        if (manifestNode) {
+          currentNode = manifestNode;
+          renderSpaceNodeInfo(manifestNode);
+          updateSpaceHighlight();
+        }
+        loadArticle(node.id);
+        focusOnNode3D(node);
+      })
+      .onNodeHover(node => {
+        container.style.cursor = node ? 'pointer' : 'default';
+      })
+      .cooldownTicks(300);
+
+    // Adjust forces for better 3D layout (delayed to ensure graph is ready)
+    setTimeout(() => {
+      if (!spaceGraph) return;
+      try {
+        if (typeof spaceGraph.d3Force === 'function') {
+          const charge = spaceGraph.d3Force('charge');
+          if (charge) charge.strength(-18);
+          const link = spaceGraph.d3Force('link');
+          if (link) { link.distance(35); link.strength(0.08); }
+          const center = spaceGraph.d3Force('center');
+          if (center) center.strength(0.05);
+        }
+      } catch(e) {
+        console.warn('[3D Space] Force config error:', e);
+      }
+    }, 100);
+
+    // Set dimensions to full screen
+    spaceGraph.width(window.innerWidth).height(window.innerHeight);
+
+    // Camera position
+    spaceGraph.cameraPosition({ z: 400 });
+
+    // Add starfield background
+    addStarfield();
+
+    // Update stats
+    document.getElementById('pb-3d-stats').textContent =
+      `${nodes.length}节点 · ${links.length}链接 · ${MANIFEST.categories.length}分支`;
+
+    console.log('[3D Space] Initialized with', nodes.length, 'nodes');
+  } catch(err) {
+    console.error('[3D Space] Initialization error:', err);
+  }
+}
+
+function addStarfield() {
+  // Starfield is now CSS-based (see .pb-3d-starfield in CSS)
+  // No Three.js objects needed
+  if (spaceAnimId) {
+    cancelAnimationFrame(spaceAnimId);
+    spaceAnimId = null;
+  }
+}
+
+function focusOnNode3D(node) {
+  if (!spaceGraph || !node) return;
+  try {
+    // Node might not have position yet if simulation hasn't run
+    if (node.x === undefined || node.y === undefined || node.z === undefined) return;
+    const distance = 120;
+    spaceGraph.cameraPosition(
+      { x: node.x + distance * 0.5, y: node.y + distance * 0.5, z: node.z + distance },
+      { x: node.x, y: node.y, z: node.z },
+      1000
+    );
+  } catch(err) {
+    console.error('[3D Space] Camera focus error:', err);
+  }
+}
+
+function enter3DSpace() {
+  is3DSpaceMode = true;
+  document.getElementById('pb-3d-space').classList.add('active');
+
+  // Sync graph mode from main panel
+  const activeBtn = document.querySelector('.pb-graph-btn.active[data-mode]');
+  if (activeBtn) {
+    spaceGraphMode = activeBtn.dataset.mode;
+    document.querySelectorAll('.pb-3d-mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === spaceGraphMode);
+    });
+  }
+
+  // Build 3D graph
+  if (!spaceGraph) {
+    buildSpaceGraph3D();
+  } else {
+    updateSpaceTheme();
+  }
+
+  // Render legend
+  renderSpaceLegend();
+
+  // Apply current highlight state
+  if (activePathNodes.size > 0) {
+    updateSpacePathHighlight();
+  } else {
+    updateSpaceHighlight();
+  }
+
+  // Show node info if a node is selected
+  if (currentNode) {
+    renderSpaceNodeInfo(currentNode);
+  }
+
+  // Handle resize
+  setTimeout(() => {
+    if (spaceGraph) spaceGraph.width(window.innerWidth).height(window.innerHeight);
+  }, 50);
+}
+
+function exit3DSpace() {
+  is3DSpaceMode = false;
+  document.getElementById('pb-3d-space').classList.remove('active');
+
+  // Stop starfield animation
+  if (spaceAnimId) {
+    cancelAnimationFrame(spaceAnimId);
+    spaceAnimId = null;
+  }
+
+  // Hide info panel
+  document.getElementById('pb-3d-info').classList.remove('visible');
+
+  // Close path panel if open
+  if (spacePathPanelOpen) {
+    toggleSpacePathPanel();
+  }
+}
+
+function updateSpaceTheme() {
+  if (!spaceGraph) return;
+  // Keep transparent background to show CSS starfield
+  spaceGraph.backgroundColor('rgba(0,0,0,0)');
+  spaceGraph.linkColor(() => getThemePanelBorderColor());
+  spaceGraph.nodeColor(node => {
+    if (node.id === (currentNode ? currentNode.path : '')) return getThemeAccentColor();
+    return node.color;
+  });
+
+  spaceGraph.refresh();
+}
+
+function updateSpaceHighlight() {
+  if (!spaceGraph || !spaceGraphData) return;
+
+  const accentColor = getThemeAccentColor();
+  const borderColor = getThemePanelBorderColor();
+  const currentPath = currentNode ? currentNode.path : '';
+
+  if (spaceGraphMode === 'all') {
+    spaceGraph.nodeColor(node => {
+      if (node.id === currentPath) return accentColor;
+      return node.color;
+    }).nodeOpacity(0.92).linkColor(() => borderColor).linkOpacity(0.35);
+  } else if (spaceGraphMode === 'branch') {
+    if (!currentNode) {
+      spaceGraph.nodeOpacity(0.15).linkOpacity(0.03);
+      return;
+    }
+    const currentCat = currentNode.category;
+    spaceGraph.nodeColor(node => {
+      if (node.id === currentPath) return accentColor;
+      if (node.category === currentCat) return node.color;
+      return 'rgba(50,50,50,0.1)';
+    }).nodeOpacity(0.92)
+      .linkColor(link => {
+        const s = typeof link.source === 'object' ? link.source : spaceGraphData.nodes.find(n => n.id === link.source);
+        const t = typeof link.target === 'object' ? link.target : spaceGraphData.nodes.find(n => n.id === link.target);
+        if (s && t && s.category === currentCat && t.category === currentCat) return borderColor;
+        return 'rgba(0,0,0,0.02)';
+      }).linkOpacity(0.3);
+  } else if (spaceGraphMode === 'links') {
+    if (!currentNode) {
+      spaceGraph.nodeOpacity(0.15).linkOpacity(0.03);
+      return;
+    }
+    const linkedPaths = new Set([currentPath]);
+    MANIFEST.edges.forEach(e => {
+      if (e.source === currentPath) linkedPaths.add(e.target);
+      if (e.target === currentPath) linkedPaths.add(e.source);
+    });
+    spaceGraph.nodeColor(node => {
+      if (node.id === currentPath) return accentColor;
+      if (linkedPaths.has(node.id)) return node.color;
+      return 'rgba(50,50,50,0.05)';
+    }).nodeOpacity(0.92)
+      .linkColor(link => {
+        const sId = typeof link.source === 'object' ? link.source.id : link.source;
+        const tId = typeof link.target === 'object' ? link.target.id : link.target;
+        return (sId === currentPath || tId === currentPath) ? accentColor : 'rgba(0,0,0,0.02)';
+      }).linkOpacity(0.8);
+  }
+
+  spaceGraph.refresh();
+}
+
+function updateSpacePathHighlight() {
+  if (!spaceGraph || !spaceGraphData) return;
+  const accentColor = getThemeAccentColor();
+  const dimBorderColor = getThemePanelBorderColor().replace(/[\d.]+\)$/, '0.1)');
+
+  spaceGraph.nodeColor(node => {
+    if (node.id === pathStartId) return '#00ff00';
+    if (node.id === pathEndId) return '#ff4400';
+    if (activePathNodes.has(node.id)) return '#ffff00';
+    if (node.id === (currentNode ? currentNode.path : '')) return accentColor;
+    return node.color;
+  }).linkColor(link => {
+    const sId = typeof link.source === 'object' ? link.source.id : link.source;
+    const tId = typeof link.target === 'object' ? link.target.id : link.target;
+    const k = edgeKey(sId, tId);
+    return activePathEdges.has(k) ? '#ffff00' : dimBorderColor;
+  }).linkOpacity(0.8);
+
+  spaceGraph.refresh();
+}
+
+function renderSpaceLegend() {
+  const container = document.getElementById('pb-3d-legend-items');
+  if (!container || !MANIFEST) return;
+
+  const catCounts = {};
+  MANIFEST.nodes.forEach(n => {
+    catCounts[n.category] = (catCounts[n.category] || 0) + 1;
+  });
+
+  container.innerHTML = '';
+  MANIFEST.categories.forEach(cat => {
+    const color = CAT_COLORS[cat.name] || '#999';
+    const count = catCounts[cat.name] || 0;
+    const item = document.createElement('div');
+    item.className = 'pb-3d-legend-item';
+    item.innerHTML = `
+      <span class="pb-3d-legend-dot" style="background:${color}"></span>
+      <span>${cat.name}</span>
+      <span class="pb-3d-legend-count">${count}</span>
+    `;
+    item.onclick = () => {
+      // Find a node in this category and focus
+      const node = MANIFEST.nodes.find(n => n.category === cat.name);
+      if (node) {
+        loadArticle(node.path);
+        const gNode = spaceGraphData ? spaceGraphData.nodes.find(n => n.id === node.path) : null;
+        if (gNode) focusOnNode3D(gNode);
+      }
+    };
+    container.appendChild(item);
+  });
+}
+
+function renderSpaceNodeInfo(node) {
+  const infoEl = document.getElementById('pb-3d-info');
+  const headerEl = document.getElementById('pb-3d-info-header');
+  const metaEl = document.getElementById('pb-3d-info-meta');
+  const neighborsEl = document.getElementById('pb-3d-info-neighbors');
+
+  if (!node) {
+    infoEl.classList.remove('visible');
+    return;
+  }
+
+  const name = node.name.includes('_') ? node.name.split('_')[0] : node.name;
+  const color = CAT_COLORS[node.category] || '#999';
+
+  // Find neighbors
+  const neighborPaths = new Set();
+  MANIFEST.edges.forEach(e => {
+    if (e.source === node.path) neighborPaths.add(e.target);
+    if (e.target === node.path) neighborPaths.add(e.source);
+  });
+  const neighbors = MANIFEST.nodes
+    .filter(n => neighborPaths.has(n.path))
+    .sort((a, b) => b.linkCount - a.linkCount);
+
+  headerEl.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:6px;vertical-align:middle;"></span>${name}`;
+  metaEl.textContent = `${node.category} · ${node.linkCount}链接 · ${neighbors.length}个关联节点`;
+
+  neighborsEl.innerHTML = '';
+  neighbors.forEach(n => {
+    const nbName = n.name.includes('_') ? n.name.split('_')[0] : n.name;
+    const nbColor = CAT_COLORS[n.category] || '#999';
+    const el = document.createElement('div');
+    el.className = 'pb-3d-info-neighbor';
+    el.innerHTML = `<span class="nb-dot" style="background:${nbColor}"></span>${nbName}`;
+    el.title = n.name;
+    el.onclick = () => {
+      loadArticle(n.path);
+      const gNode = spaceGraphData ? spaceGraphData.nodes.find(gn => gn.id === n.path) : null;
+      if (gNode) focusOnNode3D(gNode);
+    };
+    neighborsEl.appendChild(el);
+  });
+
+  infoEl.classList.add('visible');
+}
+
+// ===== 3D Space Path Search =====
+let spacePathPanelOpen = false;
+let spacePathClickTarget = 'start';
+let spaceGraphMode = 'all';
+
+function toggleSpacePathPanel() {
+  spacePathPanelOpen = !spacePathPanelOpen;
+  const panel = document.getElementById('pb-3d-path-panel');
+  const btn = document.getElementById('pb-3d-path-toggle');
+  panel.classList.toggle('visible', spacePathPanelOpen);
+  btn.classList.toggle('active', spacePathPanelOpen);
+  btn.innerHTML = spacePathPanelOpen ? '&#128269; 关闭路径搜索' : '&#128269; 开启路径搜索';
+
+  if (spacePathPanelOpen) {
+    spacePathClickTarget = 'start';
+    document.getElementById('pb-3d-path-start').focus();
+  }
+}
+
+function setSpaceStartNode(nodePath, nodeName) {
+  const name = nodeName.includes('_') ? nodeName.split('_')[0] : nodeName;
+  document.getElementById('pb-3d-path-start').value = name;
+  pathStartId = nodePath;
+  spacePathClickTarget = 'end';
+  document.getElementById('pb-3d-path-end').focus();
+}
+
+function setSpaceEndNode(nodePath, nodeName) {
+  const name = nodeName.includes('_') ? nodeName.split('_')[0] : nodeName;
+  document.getElementById('pb-3d-path-end').value = name;
+  pathEndId = nodePath;
+  spacePathClickTarget = 'start';
+}
+
+function executeSpacePathSearch() {
+  if (!pathStartId || !pathEndId) {
+    document.getElementById('pb-3d-path-result').innerHTML = '<span style="color:#ff6b6b">请选择起点和终点</span>';
+    return;
+  }
+  if (!adjacencyList) buildAdjacencyList();
+  if (pathStartId === pathEndId) {
+    document.getElementById('pb-3d-path-result').innerHTML = '起点和终点相同';
+    return;
+  }
+
+  const pathModeBtn = document.querySelector('.pb-3d-path-mode-btn.active');
+  const useShortest = !pathModeBtn || pathModeBtn.dataset.pathMode === 'shortest';
+
+  if (useShortest) {
+    const path = findShortestPath(pathStartId, pathEndId);
+    if (path) {
+      highlightPath(path);
+      updateSpacePathHighlight();
+      const names = path.map(id => {
+        const n = MANIFEST.nodes.find(nn => nn.path === id);
+        return n ? (n.name.includes('_') ? n.name.split('_')[0] : n.name) : id;
+      });
+      document.getElementById('pb-3d-path-result').innerHTML =
+        `<strong style="color:var(--pb-accent)">最短路径 (${path.length}步)</strong><br>${names.join(' → ')}`;
+      // Focus camera on path center
+      if (spaceGraphData) {
+        const midNode = spaceGraphData.nodes.find(n => n.id === path[Math.floor(path.length / 2)]);
+        if (midNode) focusOnNode3D(midNode);
+      }
+    } else {
+      document.getElementById('pb-3d-path-result').innerHTML = '<span style="color:#ff6b6b">未找到路径</span>';
+    }
+  } else {
+    const allPaths = findAllPaths(pathStartId, pathEndId, 15, 7);
+    if (allPaths.length > 0) {
+      highlightPath(allPaths[0]);
+      updateSpacePathHighlight();
+      document.getElementById('pb-3d-path-result').innerHTML =
+        `<strong style="color:var(--pb-accent)">找到 ${allPaths.length} 条路径，已高亮最短</strong>`;
+    } else {
+      document.getElementById('pb-3d-path-result').innerHTML = '<span style="color:#ff6b6b">未找到路径</span>';
+    }
+  }
+}
+
+function clearSpacePath() {
+  clearPath();
+  document.getElementById('pb-3d-path-start').value = '';
+  document.getElementById('pb-3d-path-end').value = '';
+  document.getElementById('pb-3d-path-result').innerHTML = '';
+  pathStartId = null;
+  pathEndId = null;
+  spacePathClickTarget = 'start';
+  updateSpaceHighlight();
+}
+
+// ===== 3D Space Event Handlers =====
+document.getElementById('pb-view-3d-space').addEventListener('click', enter3DSpace);
+document.getElementById('pb-3d-exit').addEventListener('click', exit3DSpace);
+
+document.querySelectorAll('.pb-3d-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pb-3d-mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    spaceGraphMode = btn.dataset.mode;
+    // Sync with main panel
+    document.querySelectorAll('.pb-graph-btn[data-mode]').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === spaceGraphMode);
+    });
+    graphMode = spaceGraphMode;
+    if (activePathNodes.size > 0) {
+      updateSpacePathHighlight();
+    } else {
+      updateSpaceHighlight();
+    }
+    if (currentNode) renderSpaceNodeInfo(currentNode);
+  });
+});
+
+document.getElementById('pb-3d-path-toggle').addEventListener('click', toggleSpacePathPanel);
+
+document.getElementById('pb-3d-path-search').addEventListener('click', executeSpacePathSearch);
+document.getElementById('pb-3d-path-clear').addEventListener('click', clearSpacePath);
+
+// Autocomplete for 3D space path inputs
+function setupSpacePathAutocomplete(inputId, which) {
+  const input = document.getElementById(inputId);
+  input.addEventListener('input', () => {
+    const val = input.value.trim().toLowerCase();
+    if (!val) return;
+    const matches = MANIFEST.nodes
+      .filter(n => n.name.toLowerCase().includes(val))
+      .slice(0, 8);
+    if (matches.length === 0) return;
+    // Simple: fill on Enter with first match
+    input.dataset.suggestions = JSON.stringify(matches.map(m => ({ path: m.path, name: m.name })));
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const val = input.value.trim().toLowerCase();
+      const match = MANIFEST.nodes.find(n => n.name.toLowerCase().includes(val));
+      if (match) {
+        const name = match.name.includes('_') ? match.name.split('_')[0] : match.name;
+        input.value = name;
+        if (which === 'start') {
+          pathStartId = match.path;
+          spacePathClickTarget = 'end';
+          document.getElementById('pb-3d-path-end').focus();
+        } else {
+          pathEndId = match.path;
+        }
+      }
+    }
+  });
+}
+
+// Keyboard: ESC to exit 3D space
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && is3DSpaceMode) {
+    exit3DSpace();
+    e.stopPropagation();
+  }
+});
+
+// Handle resize for 3D space
+window.addEventListener('resize', () => {
+  if (spaceGraph && is3DSpaceMode) {
+    spaceGraph.width(window.innerWidth).height(window.innerHeight);
+  }
+});
+
+// Theme change listener for 3D space
+window.addEventListener('theme-change', () => {
+  if (spaceGraph && is3DSpaceMode) updateSpaceTheme();
+});
+const spaceThemeObserver = new MutationObserver(() => {
+  if (spaceGraph && is3DSpaceMode) updateSpaceTheme();
+});
+spaceThemeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
 function initGraph() {
   const svgEl = document.getElementById('graph-svg');
   const width = svgEl.clientWidth || 360;
@@ -1064,7 +2378,24 @@ function initGraph() {
       simulation.force('center', d3.forceCenter(w / 2, h / 2));
       simulation.alpha(0.3).restart();
     }
+    // Resize 3D graph
+    if (graph3D && is3DMode) {
+      try {
+        const c3d = document.getElementById('graph-3d');
+        graph3D.width(c3d.clientWidth).height(c3d.clientHeight);
+      } catch(e) {}
+    }
   });
+
+  // Theme change listener for 3D graph
+  window.addEventListener('theme-change', () => {
+    if (graph3D) update3DTheme();
+  });
+  // Also listen for direct data-theme attribute changes
+  const themeObserver = new MutationObserver(() => {
+    if (graph3D) update3DTheme();
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 }
 
 function buildGraphData() {
@@ -1227,6 +2558,15 @@ function renderInfoBar(selectedNode, relatedNodes, metaText) {
 function updateGraphHighlight() {
   if (!nodeSel) return;
 
+  // Also update 3D graph if in 3D mode
+  if (is3DMode && graph3D) update3DHighlight();
+  // Also update 3D space if active
+  if (is3DSpaceMode && spaceGraph) {
+    if (activePathNodes.size > 0) updateSpacePathHighlight();
+    else updateSpaceHighlight();
+    if (currentNode) renderSpaceNodeInfo(currentNode);
+  }
+
   // 全部 mode: show selected node + its direct neighbors
   if (graphMode === 'all') {
     nodeSel
@@ -1332,6 +2672,11 @@ document.querySelectorAll('.pb-graph-btn[data-mode]').forEach(btn => {
     document.querySelectorAll('.pb-graph-btn[data-mode]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     graphMode = btn.dataset.mode;
+    // Sync 3D space mode buttons
+    spaceGraphMode = graphMode;
+    document.querySelectorAll('.pb-3d-mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === spaceGraphMode);
+    });
     updateGraphHighlight();
   });
 });
@@ -1436,6 +2781,10 @@ function applyPathHighlight() {
     const k = edgeKey(d.source.id || d.source, d.target.id || d.target);
     return activePathEdges.has(k) ? 'link-in-path' : '';
   });
+  // Also update 3D graph
+  if (is3DMode && graph3D) update3DPathHighlight();
+  // Also update 3D space
+  if (is3DSpaceMode && spaceGraph) updateSpacePathHighlight();
 }
 
 function clearPathHighlight() {
@@ -1445,6 +2794,10 @@ function clearPathHighlight() {
   pathEndId = null;
   if (nodeSel) nodeSel.attr('class', '');
   if (linkSel) linkSel.attr('class', '');
+  // Also clear 3D path highlight
+  if (is3DMode && graph3D) update3DHighlight();
+  // Also clear 3D space path highlight
+  if (is3DSpaceMode && spaceGraph) updateSpaceHighlight();
   const startInput = document.getElementById('pb-path-start');
   const endInput = document.getElementById('pb-path-end');
   if (startInput) startInput.value = '';
@@ -1754,6 +3107,13 @@ function initResizer(resizerEl, leftEl, rightEl, opts) {
         simulation.force('center', d3.forceCenter(w / 2, h / 2));
         simulation.alpha(0.3).restart();
       }
+      // Resize 3D graph if in 3D mode
+      if (graph3D && is3DMode) {
+        try {
+          const c3d = document.getElementById('graph-3d');
+          graph3D.width(c3d.clientWidth).height(c3d.clientHeight);
+        } catch(e) {}
+      }
     }
   });
 
@@ -1820,7 +3180,7 @@ loadManifest().then(() => {
 
 // Keyboard shortcut: Escape to go back to welcome
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
+  if (e.key === 'Escape' && !is3DSpaceMode) {
     document.getElementById('pb-welcome').style.display = '';
     document.getElementById('pb-article').style.display = 'none';
     document.querySelectorAll('.pb-file-item').forEach(el => el.classList.remove('active'));
@@ -1829,6 +3189,6 @@ document.addEventListener('keydown', (e) => {
 });
 </script>
 
-<script src="shared-theme.js?v=20260727"></script>
+<script src="shared-theme.js?v=20260727c"></script>
 </body>
 </html>
